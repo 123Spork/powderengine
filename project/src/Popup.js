@@ -1702,6 +1702,12 @@ MapEditor = Popup.extend({
 
 
 ItemEditor = Popup.extend({
+	map:null,
+	editMode:"tiles",
+	lastTile:null,
+	currentLayer:"ground1",
+	currentTexture:tileTextureList[0]["name"],
+	currentTextureNumber:0,
 	
 	getLayoutObject:function(){
 		return { "panels":{
@@ -1710,106 +1716,319 @@ ItemEditor = Popup.extend({
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,0),
-						size: cc.size(420,352),
+						size: cc.size(420,396),
 						bg: cc.c4b(0,0,100,120),
 						children: {
-							"items" : {
-								anchorPoint:cc.p(0,1),
-								position:cc.p(16,336),
-								texture:"items1.png",
+							"tab1":{
+								children:{
+									"tiles" : {
+										anchorPoint:cc.p(0,1),
+										position:cc.p(16,336),
+										texture:tileTextureList[0]["name"],
+									},
+									
+									"textureleftbtn" : {
+										position:cc.p(208,358),
+										size:cc.size(16,32),
+										bg: cc.c4b(255,255,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"<<",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(8,16),
+												color:cc.c3b(0,0,0),
+											}
+										}
+									},
+									"texturerightbtn" : {
+										position:cc.p(320,358),
+										size:cc.size(16,32),
+										bg: cc.c4b(255,255,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:">>",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(8,16),
+												color:cc.c3b(0,0,0),
+											}
+										}
+									},
+									"textureName" : {
+										position:cc.p(224,358),
+										size:cc.size(96,32),
+										bg: cc.c4b(255,255,255,170),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:tileTextureList[0]["name"],
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(48,16),
+												color:cc.c3b(0,0,0),
+											}
+										}
+									},
+									"leftbtn" : {
+										position:cc.p(0,16),
+										size:cc.size(16,320),
+										bg: cc.c4b(0,0,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"<",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(8,160),
+												color:cc.c3b(255,255,255),
+											}
+										}
+									},
+									"rightbtn" : {
+										position:cc.p(336,16),
+										size:cc.size(16,320),
+										bg: cc.c4b(0,0,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:">",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(8,160),
+												color:cc.c3b(255,255,255),
+											}
+										}
+									},
+									"upbtn" : {
+										position:cc.p(16,336),
+										size:cc.size(320,16),
+										bg: cc.c4b(0,0,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"^",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(160,8),
+												color:cc.c3b(255,255,255),
+											}
+										}
+									},
+									"downbtn" : {
+										position:cc.p(16,0),
+										size:cc.size(320,16),
+										bg: cc.c4b(0,0,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"v",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(160,8),
+												color:cc.c3b(255,255,255),
+											}
+										}
+									},
+									
+									"highlightnode" : {
+										anchorPoint:cc.p(0,0),
+										position:cc.p(0,0),
+										size:cc.size(32,32),
+										bg:cc.c4b(255,100,100,255),
+									},
+									"selectednode" : {
+										anchorPoint:cc.p(0,0),
+										position:cc.p(0,0),
+										size:cc.size(32,32),
+										bg:cc.c4b(100,255,100,255),
+									},
+								}
 							},
-							"deletebtn" : {
-								position:cc.p(356,316),
-								size:cc.size(60,32),
+							"tab2":{
+								children:{
+									"itemdetailsback":{
+										position:cc.p(144,0),
+										size:cc.size(210,366),
+										bg: cc.c4b(0,0,255,100),
+										anchorPoint:cc.p(0,0),
+									},
+									"name_text":{
+										label:"Item Name",
+										fontSize:10,
+										anchorPoint:cc.p(0,0),
+										position: cc.p(8,344),
+									},
+									"name_entry":{
+										size: cc.size(136,32),
+										position: cc.p(4,312),
+									},
+									"currencybtn" : {
+										position:cc.p(8,278),
+										size:cc.size(128,26),
+										bg: cc.c4b(0,255,0,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"Currency",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(64,13),
+												color:cc.c3b(0,0,0),
+											}
+										}
+									},
+									"resourcebtn" : {
+										position:cc.p(8,248),
+										size:cc.size(128,26),
+										bg: cc.c4b(255,255,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"Resource",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(64,13),
+												color:cc.c3b(0,0,0),
+											}
+										}
+									},
+									"consumablebtn" : {
+										position:cc.p(8,218),
+										size:cc.size(128,26),
+										bg: cc.c4b(255,255,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"Consumable",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(64,13),
+												color:cc.c3b(0,0,0),
+											}
+										}
+									},
+									"bookbtn" : {
+										position:cc.p(8,188),
+										size:cc.size(128,26),
+										bg: cc.c4b(255,255,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"Book",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(64,13),
+												color:cc.c3b(0,0,0),
+											}
+										}
+									},
+									"armourbtn" : {
+										position:cc.p(8,158),
+										size:cc.size(128,26),
+										bg: cc.c4b(255,255,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"Armour",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(64,13),
+												color:cc.c3b(0,0,0),
+											}
+										}
+									},
+									"weaponbtn" : {
+										position:cc.p(8,128),
+										size:cc.size(128,26),
+										bg: cc.c4b(255,255,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"Weapon",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(64,13),
+												color:cc.c3b(0,0,0),
+											}
+										}
+									},
+								}
+							},
+							"tab3":{
+								children:{
+									"saveBack":{
+										position:cc.p(0,78),
+										size:cc.size(200,60),
+										bg: cc.c4b(0,255,0,100),
+										anchorPoint:cc.p(0,0),
+									},
+									"deleteback":{
+										position:cc.p(0,138),
+										size:cc.size(200,60),
+										bg: cc.c4b(255,0,0,100),
+										anchorPoint:cc.p(0,0),
+									},
+									"mapnumsback":{
+										position:cc.p(0,198),
+										size:cc.size(200,162),
+										bg: cc.c4b(0,0,0,170),
+										anchorPoint:cc.p(0,0),
+									},
+								}
+							},
+							"tab1Clickable":{
+								position:cc.p(0,376),
+								size:cc.size(60,20),
 								bg: cc.c4b(255,255,255,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
-										label:"Erase",
+										label:"Sprite",
 										fontSize:12,
 										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(32,16),
+										position:cc.p(32,10),
 										color:cc.c3b(0,0,0),
 									}
 								}
 							},
-							"leftbtn" : {
-								position:cc.p(0,16),
-								size:cc.size(16,320),
-								bg: cc.c4b(0,0,255,255),
+							"tab2Clickable":{
+								position:cc.p(64,376),
+								size:cc.size(60,20),
+								bg: cc.c4b(255,255,255,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
-										label:"<",
+										label:"Details",
 										fontSize:12,
 										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(8,160),
-										color:cc.c3b(255,255,255),
+										position:cc.p(32,10),
+										color:cc.c3b(0,0,0),
 									}
 								}
 							},
-							"rightbtn" : {
-								position:cc.p(336,16),
-								size:cc.size(16,320),
-								bg: cc.c4b(0,0,255,255),
+							"tab3Clickable":{
+								position:cc.p(128,376),
+								size:cc.size(60,20),
+								bg: cc.c4b(255,255,255,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
-										label:">",
+										label:"Modifier",
 										fontSize:12,
 										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(8,160),
-										color:cc.c3b(255,255,255),
+										position:cc.p(32,10),
+										color:cc.c3b(0,0,0),
 									}
 								}
-							},
-							"upbtn" : {
-								position:cc.p(16,336),
-								size:cc.size(320,16),
-								bg: cc.c4b(0,0,255,255),
-								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"^",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(160,8),
-										color:cc.c3b(255,255,255),
-									}
-								}
-							},
-							"downbtn" : {
-								position:cc.p(16,0),
-								size:cc.size(320,16),
-								bg: cc.c4b(0,0,255,255),
-								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"v",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(160,8),
-										color:cc.c3b(255,255,255),
-									}
-								}
-							},
-							"highlightnode" : {
-								anchorPoint:cc.p(0,0),
-								position:cc.p(0,0),
-								size:cc.size(32,32),
-								bg:cc.c4b(255,100,100,255),
-							},
-							"selectednode" : {
-								anchorPoint:cc.p(0,0),
-								position:cc.p(0,0),
-								size:cc.size(32,32),
-								bg:cc.c4b(100,255,100,255),
 							}
 						}
 					},
 					"control_panel":{
 						anchorPoint:cc.p(0,0),
-						position: cc.p(0,352),
+						position: cc.p(0,396),
 						size: cc.size(420,32),
 						bg: cc.c4b(255,0,0,200),
 						children:{	
@@ -1839,54 +2058,113 @@ ItemEditor = Popup.extend({
 				}
 			}
 		};
-
 	},
 	
 	getIdentifier:function(){
-		return "ItemEditor";
+		return "itemEditor";
 	},
 	mapOffset:null,
+	mapUpBox:null,
+	mapDownBox:null,
+	mapLeftBox:null,
+	mapRightBox:null,
+	tabWidths:null,
+	currentTab:0,
+	typeData:null,
 	
 	init:function(_map){
 		this._super();
 		this.map =_map;
 		this.mapOffset=cc.p(0,0);
+		this.tabWidths=[null,352,352,200];
 	},
 	
 	didBecomeActive:function(){
 		this._super();
-		this.panels["main_panel"]["highlightnode"].setOpacity(0);
-		this.panels["main_panel"]["selectednode"].setOpacity(0);
+		this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
+		this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(0);
+		this.nameBox = new EntryBox(this.panels["main_panel"]["tab2"]["name_entry"],cc.size(this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), "", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.nameBox.setDefaultFineFlag(true);;
+		this.setTab(1);
 		this.updateMapOffset();
+		GameMap.setStringsVisible(true);
+	},
+	
+	setTypeData:function(value){
+		if(Warpeditor){
+			Warpeditor.willTerminate();
+			this.scheduleOnce(function(){Warpeditor.removeFromParent(); Warpeditor=null;});
+			this.typeData=value;
+			this.setTouchEnabled(true);
+		}
 	},
 	
 	willTerminate:function(){
-		GameMap.updateServer();
+		if(this.saveOnExit==true){
+			GameMap.setMapInfo({"up": this.mapUpBox.getText(),"down":this.mapDownBox.getText(),"left":this.mapLeftBox.getText(),"right":this.mapRightBox.getText()});
+			GameMap.updateServer();
+		}
 		GameMap.setStringsVisible(false);
 	},
 	
 	onMouseMoved:function(pos){
-		this.panels["main_panel"]["highlightnode"].setOpacity(0);
-		var truePos = this.panels["main_panel"]["items"].convertToNodeSpace(pos);
-		if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["items"].getContentSize().width && truePos.y<=this.panels["main_panel"]["items"].getContentSize().height){
-			truePos.x = truePos.x-(truePos.x%32)+16;
-			truePos.y = truePos.y-(truePos.y%32)+16;
-			
-			this.panels["main_panel"]["highlightnode"].setOpacity(127);
-			this.panels["main_panel"]["highlightnode"].setPosition(truePos);
-			return true;
-		} 
+		if(this.currentTab==1){
+			this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
+			var truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);
+			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().height){
+				truePos.x = truePos.x-(truePos.x%32)+16;
+				truePos.y = truePos.y-(truePos.y%32)+16;
+				
+				this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(127);
+				this.panels["main_panel"]["tab1"]["highlightnode"].setPosition(truePos);
+				return true;
+			}
+		}		
+	},
+	
+	setTab:function(value){
+		if(value!=this.currentTab){
+			this.panels["main_panel"].setContentSize(this.tabWidths[value],this.panels["main_panel"].getContentSize().height);
+			this.panels["control_panel"].setContentSize(this.tabWidths[value],this.panels["control_panel"].getContentSize().height);
+			if(this.currentTab==3 || this.currentTab==0){
+				this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(this.panels["main_panel"]["tab2"]["name_entry"].getPositionX()-1000);
+			}
+			this.currentTab=value;
+			this.panels["main_panel"]["tab1"].setVisible(false);
+			this.panels["main_panel"]["tab2"].setVisible(false)
+			this.panels["main_panel"]["tab3"].setVisible(false);
+			this.panels["main_panel"]["tab1Clickable"].setColor(cc.c4b(255,255,255,255));
+			this.panels["main_panel"]["tab2Clickable"].setColor(cc.c4b(255,255,255,255));
+			this.panels["main_panel"]["tab3Clickable"].setColor(cc.c4b(255,255,255,255));
+			this.panels["main_panel"]["tab"+value].setVisible(true);
+			this.panels["main_panel"]["tab"+value+"Clickable"].setColor(cc.c4b(255,255,0,255));
+			if(value==2){
+				this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(this.panels["main_panel"]["tab2"]["name_entry"].getPositionX()+1000);
+			}
+			this.panels["control_panel"]["exitBtn"].setPositionX(this.tabWidths[value]-29);
+		}
+	},
+	
+	setSaveMapOnExit:function(value){
+		LocalStorage.setMapSaveOnExit(value);
+		this.saveOnExit=value;
+		if(value=="true" || value==true){
+			this.panels["main_panel"]["tab3"]["saveOnExit"].setColor(cc.c3b(0,255,0));
+			this.panels["main_panel"]["tab3"]["saveOnExit"]["content"].setString("Save on exit: YES");
+		} else{
+			this.panels["main_panel"]["tab3"]["saveOnExit"].setColor(cc.c3b(255,0,0));
+			this.panels["main_panel"]["tab3"]["saveOnExit"]["content"].setString("Save on exit: NO");
+		}
 	},
 	
 	updateMapOffset:function(){
-		if(this.panels["main_panel"]["items"].getTexture() && this.panels["main_panel"]["items"].getTexture()._isLoaded==true){
+		if(this.panels["main_panel"]["tab1"]["tiles"].getTexture() && this.panels["main_panel"]["tab1"]["tiles"].getTexture()._isLoaded==true){
 			this.unschedule(this.updateMapOffset);
-			this.panels["main_panel"]["items"].setTextureRect(cc.rect(Math.floor(32*this.mapOffset.x),Math.floor(32*this.mapOffset.y),this.panels["main_panel"]["items"].getContentSize().width<320?this.panels["main_panel"]["items"].getContentSize().width:320,this.panels["main_panel"]["items"].getContentSize().height<320?this.panels["main_panel"]["items"].getContentSize().height:320));
+			this.panels["main_panel"]["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(32*this.mapOffset.x),Math.floor(32*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:320,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:320));
 		} else{
 			this.schedule(this.updateMapOffset);
 		}
 	},
-	
 	
 	onTouchBegan:function(touch){
 		if(this._super(touch)){
@@ -1895,130 +2173,306 @@ ItemEditor = Popup.extend({
 		this.prevMovPos=null;
 		var pos = touch._point;
 		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
-		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["leftbtn"].getPositionX(),this.panels["main_panel"]["leftbtn"].getPositionY(),this.panels["main_panel"]["leftbtn"].getContentSize().width,this.panels["main_panel"]["leftbtn"].getContentSize().height),truePos)){
-			this.mapOffset.x--;
-			this.updateMapOffset();
-			cc.log("UPDATE");
+
+		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab1Clickable"].getPositionX(),this.panels["main_panel"]["tab1Clickable"].getPositionY(),this.panels["main_panel"]["tab1Clickable"].getContentSize().width,this.panels["main_panel"]["tab1Clickable"].getContentSize().height),truePos)){
+			this.setTab(1);
+			return true;
+		}		
+		
+		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2Clickable"].getPositionX(),this.panels["main_panel"]["tab2Clickable"].getPositionY(),this.panels["main_panel"]["tab2Clickable"].getContentSize().width,this.panels["main_panel"]["tab2Clickable"].getContentSize().height),truePos)){
+			this.setTab(2);
 			return true;
 		}
-		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["rightbtn"].getPositionX(),this.panels["main_panel"]["rightbtn"].getPositionY(),this.panels["main_panel"]["rightbtn"].getContentSize().width,this.panels["main_panel"]["rightbtn"].getContentSize().height),truePos)){
-			this.mapOffset.x++;
-			this.updateMapOffset();
+	
+		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab3Clickable"].getPositionX(),this.panels["main_panel"]["tab3Clickable"].getPositionY(),this.panels["main_panel"]["tab3Clickable"].getContentSize().width,this.panels["main_panel"]["tab3Clickable"].getContentSize().height),truePos)){
+			this.setTab(3);
 			return true;
 		}
-		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["upbtn"].getPositionX(),this.panels["main_panel"]["upbtn"].getPositionY(),this.panels["main_panel"]["upbtn"].getContentSize().width,this.panels["main_panel"]["upbtn"].getContentSize().height),truePos)){
-			this.mapOffset.y--;
-			this.updateMapOffset();
-			return true;
-		}
-		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["downbtn"].getPositionX(),this.panels["main_panel"]["downbtn"].getPositionY(),this.panels["main_panel"]["downbtn"].getContentSize().width,this.panels["main_panel"]["downbtn"].getContentSize().height),truePos)){
-			this.mapOffset.y++;
-			this.updateMapOffset();
-			return true;
-		}
-		SceneManager.setActiveScene(this);
-		truePos = this.panels["main_panel"]["tiles"].convertToNodeSpace(pos);
-		if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tiles"].getContentSize().height){
-			truePos.x = truePos.x-(truePos.x%32)+16;
-			truePos.y = truePos.y-(truePos.y%32)+16;
+		
+		if(this.currentTab==1){
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab1"]["leftbtn"].getPositionX(),this.panels["main_panel"]["tab1"]["leftbtn"].getPositionY(),this.panels["main_panel"]["tab1"]["leftbtn"].getContentSize().width,this.panels["main_panel"]["tab1"]["leftbtn"].getContentSize().height),truePos)){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>320 && this.mapOffset.x>0){
+					this.mapOffset.x--;
+					this.updateMapOffset();
+				}
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab1"]["rightbtn"].getPositionX(),this.panels["main_panel"]["tab1"]["rightbtn"].getPositionY(),this.panels["main_panel"]["tab1"]["rightbtn"].getContentSize().width,this.panels["main_panel"]["tab1"]["rightbtn"].getContentSize().height),truePos)){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>320 && this.mapOffset.x<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width-320)/32)){
+					this.mapOffset.x++;
+					this.updateMapOffset();
+				}
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab1"]["upbtn"].getPositionX(),this.panels["main_panel"]["tab1"]["upbtn"].getPositionY(),this.panels["main_panel"]["tab1"]["upbtn"].getContentSize().width,this.panels["main_panel"]["tab1"]["upbtn"].getContentSize().height),truePos)){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>320 && this.mapOffset.y>0){
+					this.mapOffset.y--;
+					this.updateMapOffset();
+				}
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab1"]["downbtn"].getPositionX(),this.panels["main_panel"]["tab1"]["downbtn"].getPositionY(),this.panels["main_panel"]["tab1"]["downbtn"].getContentSize().width,this.panels["main_panel"]["tab1"]["downbtn"].getContentSize().height),truePos)){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>320 && this.mapOffset.y<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height-320)/32)){
+					this.mapOffset.y++;
+					this.updateMapOffset();
+				}
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab1"]["texturerightbtn"].getPositionX(),this.panels["main_panel"]["tab1"]["texturerightbtn"].getPositionY(),this.panels["main_panel"]["tab1"]["texturerightbtn"].getContentSize().width,this.panels["main_panel"]["tab1"]["texturerightbtn"].getContentSize().height),truePos)){
+				this.useNextTexture();
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab1"]["textureleftbtn"].getPositionX(),this.panels["main_panel"]["tab1"]["textureleftbtn"].getPositionY(),this.panels["main_panel"]["tab1"]["textureleftbtn"].getContentSize().width,this.panels["main_panel"]["tab1"]["textureleftbtn"].getContentSize().height),truePos)){
+				this.usePrevTexture();
+				return true;
+			}
 			
-			if(this.panels["main_panel"]["selectednode"].getPositionX()!=truePos.x || this.panels["main_panel"]["selectednode"].getPositionY()!=truePos.y){
-				this.panels["main_panel"]["selectednode"].setOpacity(127);
-				this.panels["main_panel"]["selectednode"].setPosition(truePos);
-			} else{
-				this.panels["main_panel"]["selectednode"].setOpacity(0);
+			SceneManager.setActiveScene(this);
+			truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);
+			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().height){
+				truePos.x = truePos.x-(truePos.x%32)+16;
+				truePos.y = truePos.y-(truePos.y%32)+16;
+				
+				if(this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()!=truePos.x || this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()!=truePos.y){
+					this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(127);
+					this.panels["main_panel"]["tab1"]["selectednode"].setPosition(truePos);
+				} else{
+					this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(0);
+				}
+				return true;
+			} 
+
+		}
+		if(this.currentTab==2){	
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["ground1btn"].getPositionX(),this.panels["main_panel"]["tab2"]["ground1btn"].getPositionY(),this.panels["main_panel"]["tab2"]["ground1btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["ground1btn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("ground1");
+				return true;
 			}
-			return true;
-		} 
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["ground2btn"].getPositionX(),this.panels["main_panel"]["tab2"]["ground2btn"].getPositionY(),this.panels["main_panel"]["tab2"]["ground2btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["ground2btn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("ground2");
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["groundShadowbtn"].getPositionX(),this.panels["main_panel"]["tab2"]["groundShadowbtn"].getPositionY(),this.panels["main_panel"]["tab2"]["groundShadowbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["groundShadowbtn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("groundShadow");
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["mask1btn"].getPositionX(),this.panels["main_panel"]["tab2"]["mask1btn"].getPositionY(),this.panels["main_panel"]["tab2"]["mask1btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["mask1btn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("mask1");
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["mask2btn"].getPositionX(),this.panels["main_panel"]["tab2"]["mask2btn"].getPositionY(),this.panels["main_panel"]["tab2"]["mask2btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["mask2btn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("mask2");
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["mask3btn"].getPositionX(),this.panels["main_panel"]["tab2"]["mask3btn"].getPositionY(),this.panels["main_panel"]["tab2"]["mask3btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["mask3btn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("mask3");
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["fringe1btn"].getPositionX(),this.panels["main_panel"]["tab2"]["fringe1btn"].getPositionY(),this.panels["main_panel"]["tab2"]["fringe1btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["fringe1btn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("fringe1");
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["fringe2btn"].getPositionX(),this.panels["main_panel"]["tab2"]["fringe2btn"].getPositionY(),this.panels["main_panel"]["tab2"]["fringe2btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["fringe2btn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("fringe2");
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["fringeShadowbtn"].getPositionX(),this.panels["main_panel"]["tab2"]["fringeShadowbtn"].getPositionY(),this.panels["main_panel"]["tab2"]["fringeShadowbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["fringeShadowbtn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("fringeShadow");
+				return true;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["fringe3btn"].getPositionX(),this.panels["main_panel"]["tab2"]["fringe3btn"].getPositionY(),this.panels["main_panel"]["tab2"]["fringe3btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["fringe3btn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("fringe3");
+				return true;
+			}
+
+
+			var globalErasePos = this.panels["main_panel"]["tab2"]["deletebtn"].convertToWorldSpace(cc.p(0,0));
+			if(cc.rectContainsPoint(cc.rect(globalErasePos.x,globalErasePos.y,this.panels["main_panel"]["tab2"]["deletebtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["deletebtn"].getContentSize().height),touch._point)){
+				this.editMode=this.editMode=="erasing" ? "tiles" : "erasing";
+				if(this.editMode=="erasing"){
+					this.panels["main_panel"]["tab2"]["fillbtn"].setColor(cc.c4b(255,255,255,255));
+					this.panels["main_panel"]["tab2"]["deletebtn"].setColor(cc.c4b(255,0,0,255));
+				} else{
+					this.panels["main_panel"]["tab2"]["deletebtn"].setColor(cc.c4b(255,255,255,255));
+				}
+				return true;
+			}
+			
+			var globalFillPos = this.panels["main_panel"]["tab2"]["fillbtn"].convertToWorldSpace(cc.p(0,0));
+			if(cc.rectContainsPoint(cc.rect(globalFillPos.x,globalFillPos.y,this.panels["main_panel"]["tab2"]["fillbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["fillbtn"].getContentSize().height),touch._point)){
+				if(this.panels["main_panel"]["tab2"]["selectednode"].getOpacity()!=0){
+					GameMap.fillMap(tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab2"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,(9-((this.panels["main_panel"]["tab2"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y),this.currentLayer);
+					GameMap.updateMap();
+				}
+				return true;
+			}
+
+			var globalBlockPos = this.panels["main_panel"]["tab2"]["blockbtn"].convertToWorldSpace(cc.p(0,0));
+			if(cc.rectContainsPoint(cc.rect(globalBlockPos.x,globalBlockPos.y,this.panels["main_panel"]["tab2"]["blockbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["blockbtn"].getContentSize().height),touch._point)){
+				this.editMode = this.editMode=="blocking" ? "tiles" : "blocking";
+				if(this.editMode=="blocking"){
+					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,0,0,255));
+					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,255,255,255));
+				} else{
+					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
+				}
+				return true;
+			}
+			var globalWarpPos = this.panels["main_panel"]["tab2"]["warpbtn"].convertToWorldSpace(cc.p(0,0));
+			if(cc.rectContainsPoint(cc.rect(globalWarpPos.x,globalWarpPos.y,this.panels["main_panel"]["tab2"]["warpbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["warpbtn"].getContentSize().height),touch._point)){
+				this.editMode = this.editMode=="warping" ? "tiles" : "warping";
+				if(this.editMode=="warping"){
+					if(Warpeditor){
+						Warpeditor.willTerminate();
+						Warpeditor.removeFromParent();
+						Warpeditor=null;
+					}
+					Warpeditor = new ObjectList();
+					Warpeditor.init({delegate:this,editor:new WarpEditorPopup(),list:ObjectLists.getWarpList(),name:"Warp List"});
+					Warpeditor.didBecomeActive();
+					this._parent.addChild(Warpeditor);
+					this.setTouchEnabled(false);
+					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,0,0,255));
+					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
+				} else{
+					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,255,255,255));
+				}
+				return true;
+			}
+		}
 		
-		var globalErasePos = this.panels["main_panel"]["deletebtn"].convertToWorldSpace(cc.p(0,0));
-		if(cc.rectContainsPoint(cc.rect(globalErasePos.x,globalErasePos.y,this.panels["main_panel"]["deletebtn"].getContentSize().width,this.panels["main_panel"]["deletebtn"].getContentSize().height),touch._point)){
-			this.editMode=this.editMode=="erasing" ? "tiles" : "erasing";
-			if(this.editMode=="erasing"){
-				this.panels["main_panel"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
-				this.panels["main_panel"]["fillbtn"].setColor(cc.c4b(255,255,255,255));
-				this.panels["main_panel"]["deletebtn"].setColor(cc.c4b(255,0,0,255));
-			} else{
-				this.panels["main_panel"]["deletebtn"].setColor(cc.c4b(255,255,255,255));
+		if(this.currentTab==3){
+			var globalClearPos = this.panels["main_panel"]["tab3"]["clearbtn"].convertToWorldSpace(cc.p(0,0));
+			if(this.panels["main_panel"]["tab3"]["clearbtn"].isVisible() && cc.rectContainsPoint(cc.rect(globalClearPos.x,globalClearPos.y,this.panels["main_panel"]["tab3"]["clearbtn"].getContentSize().width,this.panels["main_panel"]["tab3"]["clearbtn"].getContentSize().height),touch._point)){
+				this.showAreYouSureClear(true);
+				return true;
 			}
-			return true;
-		}
-		var globalBlockPos = this.panels["main_panel"]["blockbtn"].convertToWorldSpace(cc.p(0,0));
-		if(cc.rectContainsPoint(cc.rect(globalBlockPos.x,globalBlockPos.y,this.panels["main_panel"]["blockbtn"].getContentSize().width,this.panels["main_panel"]["blockbtn"].getContentSize().height),touch._point)){
-			this.editMode = this.editMode=="blocking" ? "tiles" : "blocking";
-			if(this.editMode=="blocking"){
-				this.panels["main_panel"]["deletebtn"].setColor(cc.c4b(255,255,255,255));
-				this.panels["main_panel"]["fillbtn"].setColor(cc.c4b(255,255,255,255));
-				this.panels["main_panel"]["blockbtn"].setColor(cc.c4b(255,0,0,255));
-			} else{
-				this.panels["main_panel"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
+			var globalClearPos = this.panels["main_panel"]["tab3"]["clearbtnNo"].convertToWorldSpace(cc.p(0,0));
+			if(this.panels["main_panel"]["tab3"]["clearbtnNo"].isVisible() && cc.rectContainsPoint(cc.rect(globalClearPos.x,globalClearPos.y,this.panels["main_panel"]["tab3"]["clearbtnNo"].getContentSize().width,this.panels["main_panel"]["tab3"]["clearbtnNo"].getContentSize().height),touch._point)){
+				console.log("Closin");
+				this.showAreYouSureClear(false);
+				return true;
 			}
-			return true;
-		}
-		var globalFillPos = this.panels["main_panel"]["fillbtn"].convertToWorldSpace(cc.p(0,0));
-		if(cc.rectContainsPoint(cc.rect(globalFillPos.x,globalFillPos.y,this.panels["main_panel"]["fillbtn"].getContentSize().width,this.panels["main_panel"]["fillbtn"].getContentSize().height),touch._point)){
-			this.editMode = this.editMode=="filling" ? "tiles" : "filling";
-			if(this.editMode=="filling"){
-				this.panels["main_panel"]["deletebtn"].setColor(cc.c4b(255,255,255,255));
-				this.panels["main_panel"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
-				this.panels["main_panel"]["fillbtn"].setColor(cc.c4b(255,0,0,255));
-			} else{
-				this.panels["main_panel"]["fillbtn"].setColor(cc.c4b(255,255,255,255));
+			var globalClearPos = this.panels["main_panel"]["tab3"]["clearbtnYes"].convertToWorldSpace(cc.p(0,0));
+			if(this.panels["main_panel"]["tab3"]["clearbtnYes"].isVisible() && cc.rectContainsPoint(cc.rect(globalClearPos.x,globalClearPos.y,this.panels["main_panel"]["tab3"]["clearbtnYes"].getContentSize().width,this.panels["main_panel"]["tab3"]["clearbtnYes"].getContentSize().height),touch._point)){
+				GameMap.destroy();
+				this.showAreYouSureClear(false);
+				return true;
 			}
-			return true;
-		}
-		var globalClearPos = this.panels["main_panel"]["clearbtn"].convertToWorldSpace(cc.p(0,0));
-		if(cc.rectContainsPoint(cc.rect(globalClearPos.x,globalClearPos.y,this.panels["main_panel"]["clearbtn"].getContentSize().width,this.panels["main_panel"]["clearbtn"].getContentSize().height),touch._point)){
-			GameMap.destroy();
+			var globalSavePos = this.panels["main_panel"]["tab3"]["savebtn"].convertToWorldSpace(cc.p(0,0));
+			if(this.panels["main_panel"]["tab3"]["savebtn"].isVisible() && cc.rectContainsPoint(cc.rect(globalSavePos.x,globalSavePos.y,this.panels["main_panel"]["tab3"]["savebtn"].getContentSize().width,this.panels["main_panel"]["tab3"]["savebtn"].getContentSize().height),touch._point)){
+				this.showAreYouSureSave(true);
+				return true;
+			}
+			var globalSavePos = this.panels["main_panel"]["tab3"]["savebtnNo"].convertToWorldSpace(cc.p(0,0));
+			if(this.panels["main_panel"]["tab3"]["savebtnNo"].isVisible() && cc.rectContainsPoint(cc.rect(globalSavePos.x,globalSavePos.y,this.panels["main_panel"]["tab3"]["savebtnNo"].getContentSize().width,this.panels["main_panel"]["tab3"]["savebtnNo"].getContentSize().height),touch._point)){
+				console.log("Closin");
+				this.showAreYouSureSave(false);
+				return true;
+			}
+			var globalSavePos = this.panels["main_panel"]["tab3"]["savebtnYes"].convertToWorldSpace(cc.p(0,0));
+			if(this.panels["main_panel"]["tab3"]["savebtnYes"].isVisible() && cc.rectContainsPoint(cc.rect(globalSavePos.x,globalSavePos.y,this.panels["main_panel"]["tab3"]["savebtnYes"].getContentSize().width,this.panels["main_panel"]["tab3"]["savebtnYes"].getContentSize().height),touch._point)){
+				GameMap.setMapInfo({"up": this.mapUpBox.getText(),"down":this.mapDownBox.getText(),"left":this.mapLeftBox.getText(),"right":this.mapRightBox.getText()});
+				GameMap.updateServer();
+				this.showAreYouSureSave(false);
+				return true;
+			}
+			
+			var globalSavePos = this.panels["main_panel"]["tab3"]["saveOnExit"].convertToWorldSpace(cc.p(0,0));
+			if(this.panels["main_panel"]["tab3"]["saveOnExit"].isVisible() && cc.rectContainsPoint(cc.rect(globalSavePos.x,globalSavePos.y,this.panels["main_panel"]["tab3"]["saveOnExit"].getContentSize().width,this.panels["main_panel"]["tab3"]["saveOnExit"].getContentSize().height),touch._point)){
+				this.setSaveMapOnExit(!this.saveOnExit);
+				return true;
+			}
+			
 		}
 		
-		
-		/*var globalErasePos = this.panels["main_panel"]["deletebtn"].convertToWorldSpace(cc.p(0,0));
-		if(cc.rectContainsPoint(cc.rect(globalErasePos.x,globalErasePos.y,this.panels["main_panel"]["deletebtn"].getContentSize().width,this.panels["main_panel"]["deletebtn"].getContentSize().height),touch._point)){
-			this.isDelete=!this.isDelete;
-			if(this.isDelete){
-				this.panels["main_panel"]["deletebtn"].setColor(cc.c4b(255,0,0,255));
-			} else{
-				this.panels["main_panel"]["deletebtn"].setColor(cc.c4b(255,255,255,255));
-			}
-			return true;
-		}*/
 		return false;
 	},	
 	
-	tilePressed:function(tile,tilenum,touchtype){
-		if(this.editMode=="filling" && touchtype=="moved"){
+	updateCurrentLayer:function(layerName){
+		this.panels["main_panel"]["tab1"]["ground1btn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab1"]["ground2btn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab1"]["groundShadowbtn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab1"]["mask1btn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab1"]["mask2btn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab1"]["mask3btn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab1"]["fringe1btn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab1"]["fringe2btn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab1"]["fringeShadowbtn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab1"]["fringe3btn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab1"][layerName+"btn"].setColor(cc.c4b(0,255,0,255));
+		this.currentLayer=layerName;
+	},
+	
+	useNextTexture:function(){
+		if(this.currentTextureNumber>=tileTextureList.length-1){
+			this.currentTextureNumber=-1;
+		}
+		this.currentTextureNumber++;
+		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
+		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
+		this.mapOffset=cc.p(0,0);
+		this.updateMapOffset();
+	},
+	
+	usePrevTexture:function(){
+		if(this.currentTextureNumber<=0){
+			this.currentTextureNumber=tileTextureList.length;
+		}
+		this.currentTextureNumber--;
+		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
+		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
+		this.mapOffset=cc.p(0,0);
+		this.updateMapOffset();
+	},
+	
+	showAreYouSureClear:function(visible){
+		this.panels["main_panel"]["tab3"]["clearbtnYes"].setVisible(visible);
+		this.panels["main_panel"]["tab3"]["clearbtnNo"].setVisible(visible);	
+		this.panels["main_panel"]["tab3"]["clear_text"].setVisible(visible);	
+		this.panels["main_panel"]["tab3"]["clearbtn"].setVisible(!visible);
+	},
+	
+	showAreYouSureSave:function(visible){
+		this.panels["main_panel"]["tab3"]["savebtnYes"].setVisible(visible);
+		this.panels["main_panel"]["tab3"]["savebtnNo"].setVisible(visible);	
+		this.panels["main_panel"]["tab3"]["save_text"].setVisible(visible);	
+		this.panels["main_panel"]["tab3"]["savebtn"].setVisible(!visible);
+	},
+	
+	tilePressed:function(tiles,tilenum,touchtype){
+		if(tiles[tilenum]==this.lastTile && touchtype=="moved"){
 			return false;
 		}
-		if(tile==this.lastTile && touchtype=="moved"){
-			return false;
-		}
-		this.lastTile=tile;
+		this.lastTile=tiles[tilenum];
 		switch(this.editMode){
 			case "tiles":
-				if(this.panels["main_panel"]["selectednode"].getOpacity()!=0){
-					GameMap.pushLayer(tilenum,tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,(9-((this.panels["main_panel"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y),this.currentLayer);
+				if(this.panels["main_panel"]["tab1"]["selectednode"].getOpacity()!=0){
+					GameMap.setLayer(tilenum,tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,(9-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y),this.currentLayer);
 				}
 			break;
 			case "blocking":
-				if(tile.getType()!=1){
+				if(tiles[tilenum].getType()!=1){
 					GameMap.setTileInfo(tilenum,1);
 				} else{
 					GameMap.setTileInfo(tilenum,0);
 				}
 			break;
-			case "erasing":
-				GameMap.popLayer(tilenum);
-			break;
-			case "filling":
-				if(this.panels["main_panel"]["selectednode"].getOpacity()!=0){
-					GameMap.fillMap(tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,(9-((this.panels["main_panel"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y),this.currentLayer);
+			case "warping":
+				if(Warpeditor==null || !Warpeditor._parent){
+					if(tiles[tilenum].getType()!=3){
+						GameMap.setTileInfo(tilenum,3,this.typeData);
+					} else{
+						GameMap.setTileInfo(tilenum,0,null);
+					}
 				}
+			break;
+			case "erasing":
+				GameMap.destroyLayer(tilenum,this.currentLayer);
 			break;
 		}
 		
 	}
 });
-
-
-

@@ -52,6 +52,9 @@ reactToSocketMessage=function(data){
 		if(data["warpdata"]){
 			LocalStorage.updateWarpData(data["warpdata"],data["warptime"]);
 		}
+		if(data["itemdata"]){
+			LocalStorage.updateItemData(data["itemdata"],data["itemtime"]);
+		}
 		return;
 	}
 	
@@ -119,6 +122,14 @@ reactToSocketMessage=function(data){
 			else if(data["savewarpswhole"]){
 				LocalStorage.refreshWarp(data["savewarpswhole"],data["updatetime"]);
 				ObjectLists.setWarpList(data["savewarpswhole"]);
+			}
+			else if(data["saveitems"]){
+				LocalStorage.changeWarp(parseInt(data["savewarps"]),data["warpdata"],data["updatetime"]);
+				ObjectLists.getWarpList()[parseInt(data["savewarps"])]=data["warpdata"];
+			}
+			else if(data["saveitemswhole"]){
+				LocalStorage.refreshItems(data["saveitemswhole"],data["updatetime"]);
+				ObjectLists.setItemList(data["saveitemswhole"]);
 			}
 		} else if(screen.getIdentifier()=="Login"){
 			if(data["login_success"]){

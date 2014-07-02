@@ -39,6 +39,15 @@ LocalStorage.updateMapData=function(data,updatetime){
 	this.instance.setLastUpdate("maps",updatetime);
 	sys.localStorage.setItem("map_data",JSON.stringify(data));
 };
+LocalStorage.changeMap=function(mapNumber,data,updatetime){
+	if(!this.instance.getLastUpdate("maps")){
+		var maparray = [];
+	} else{
+		var maparray = JSON.parse(sys.localStorage.getItem("map_data"));
+	}
+	maparray[mapNumber]=data;
+	LocalStorage.updateMapData(maparray,updatetime);
+};
 
 
 LocalStorage.getWarpData=function(){
@@ -55,18 +64,6 @@ LocalStorage.updateWarpData=function(data,updatetime){
 	sys.localStorage.setItem("warps_data",JSON.stringify(data));
 };
 
-
-LocalStorage.changeMap=function(mapNumber,data,updatetime){
-	if(!this.instance.getLastUpdate("maps")){
-		var maparray = [];
-	} else{
-		var maparray = JSON.parse(sys.localStorage.getItem("map_data"));
-	}
-	maparray[mapNumber]=data;
-	LocalStorage.updateMapData(maparray,updatetime);
-};
-
-
 LocalStorage.changeWarp=function(warpNumber,data,updatetime){
 	if(!this.instance.getLastUpdate("warps")){
 		var warparray = [];
@@ -77,22 +74,52 @@ LocalStorage.changeWarp=function(warpNumber,data,updatetime){
 	LocalStorage.updateWarpData(warparray,updatetime);
 };
 
-
-
 LocalStorage.refreshWarp=function(data,updatetime){
 	warparray=data;
 	LocalStorage.updateWarpData(warparray,updatetime);
 };
+
+LocalStorage.getItemData=function(){
+	if(this.instance.getLastUpdate("items")){
+		var data = JSON.parse(sys.localStorage.getItem("items_data"));
+		return data? data :null;
+	} else{
+		sendMessageToServer({"requestitems":true});
+	}
+};
+
+LocalStorage.updateItemData=function(data,updatetime){
+	this.instance.setLastUpdate("items",updatetime);
+	sys.localStorage.setItem("items_data",JSON.stringify(data));
+};
+
+LocalStorage.changeItems=function(itemNumber,data,updatetime){
+	if(!this.instance.getLastUpdate("items")){
+		var itemarray = [];
+	} else{
+		var itemarray = JSON.parse(sys.localStorage.getItem("items_data"));
+	}
+	itemarray[itemNumber]=data;
+	LocalStorage.updateItemData(itemarray,updatetime);
+};
+
+LocalStorage.refreshItems=function(data,updatetime){
+	itemsarray=data;
+	LocalStorage.updateItemData(itemsarray,updatetime);
+};
+
 
 LocalStorage.Clear=function(){
 	sys.localStorage.setItem("map_data",[]);
 	sys.localStorage.setItem("last_maps",0);
 	sys.localStorage.setItem("warps_data",[]);
 	sys.localStorage.setItem("last_warps",0);	
+	sys.localStorage.setItem("items_data",[]);
+	sys.localStorage.setItem("last_items",0);	
 };
 
 LocalStorage.Sync=function(){
-	sendMessageToServer({"sync":true, "mapupdate":(this.instance.getLastUpdate("maps")!=null ? this.instance.getLastUpdate("maps"):2),"warpupdate":(this.instance.getLastUpdate("warps")!=null ? this.instance.getLastUpdate("warps"):2)});
+	sendMessageToServer({"sync":true, "mapupdate":(this.instance.getLastUpdate("maps")!=null ? this.instance.getLastUpdate("maps"):2),"warpupdate":(this.instance.getLastUpdate("warps")!=null ? this.instance.getLastUpdate("warps"):2),"itemupdate":(this.instance.getLastUpdate("items")!=null ? this.instance.getLastUpdate("items"):2)});
 };
 
 LocalStorage.setMapSaveOnExit=function(value){

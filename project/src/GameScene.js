@@ -383,8 +383,8 @@ var GameScene = Scene.extend({
 					Itemeditor=null;
 					GameMap.setInteractionDelegate(null);
 				} else{
-					Itemeditor = new ItemEditor();
-					Itemeditor.init();
+					Itemeditor = new ObjectList();
+					Itemeditor.init({delegate:null,editor:new ItemEditor(),list:ObjectLists.getItemList(),name:"Item List"});
 					Itemeditor.didBecomeActive();
 					this.addChild(Itemeditor);
 				}

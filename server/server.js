@@ -15,8 +15,10 @@ var names=[];
 var maps=[];
 var last=[];
 var warps=[];
+var items=[];
 var updateMapIndex=0;
 var updateWarpIndex=1;
+var updateItemIndex=2;
 
 fs.readdirSync("./maps").forEach(function(file) {
   maps[parseInt(file.split('.')[0])] =require("./maps/" + file);
@@ -24,6 +26,9 @@ fs.readdirSync("./maps").forEach(function(file) {
 fs.readdirSync("./additionals").forEach(function(file) {
   if(file=="warps.json"){
 	warps =require("./additionals/warps.json");
+  }  
+  if(file=="items.json"){
+	items =require("./additionals/items.json");
   }
 });
 
@@ -57,6 +62,10 @@ var setWarpData = function(data){
 	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
 };
 
+var setItemData = function(data){
+	var outputFilename = './additionals/items.json';
+	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+};
 
 var saveLastAccessData = function(){
 	var outputFilename = 'tools/updatedata.json';
@@ -111,6 +120,14 @@ socket.on('connection', function(client){
 				returner["warptime"] = last[updateMapIndex];
 				returner["warpdata"] = warps;
 			}
+			if(!last[updateMapIndex] || event["itemupdate"]<last[updateItemIndex]){
+				if(!last[updateItemIndex]){
+					last[updateItemIndex]=Date.now();
+					saveLastAccessData();
+				}
+				returner["itemtime"] = last[updateMapIndex];
+				returner["itemdata"] = items;
+			}
 			client.send(JSON.stringify(returner));
 		}
 		
@@ -142,6 +159,24 @@ socket.on('connection', function(client){
 			warps=event["savewarpswhole"];
 			setWarpData(warps);
 			event["updatetime"]=last[updateWarpIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+        if(event["saveitems"]){
+			last[updateItemIndex]=Date.now();
+			saveLastAccessData();
+			items[parseInt(event["saveitems"])]=event["itemdata"];
+			setItemData(items);
+			event["updatetime"]=last[updateItemIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+		if(event["saveitemswhole"]){
+			last[updateItemIndex]=Date.now();
+			saveLastAccessData();
+			items=event["saveitemswhole"];
+			setItemData(items);
+			event["updatetime"]=last[updateItemIndex];
 			client.broadcast.send(JSON.stringify(event));
 			client.send(JSON.stringify(event));
 		}

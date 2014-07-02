@@ -6,10 +6,9 @@ var PLAYMODE = LIVE;
 var keyMap = {};
 
 
-
-        var fileUtils = cc.FileUtils.getInstance();
-        var platform = cc.Application.getInstance().getTargetPlatform();
-        fileUtils.setSearchPaths(["res/Graphics"]);
+var fileUtils = cc.FileUtils.getInstance();
+var platform = cc.Application.getInstance().getTargetPlatform();
+fileUtils.setSearchPaths(["res/Graphics"]);
 var request = new XMLHttpRequest();
 request.open("GET", "res/Graphics/tile_graphics.txt", false);
 request.send(null);

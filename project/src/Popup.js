@@ -72,7 +72,9 @@ ObjectList = Popup.extend({
 	init:function(withData){
 		this._super();
 		this.childEditor=withData.editor;
-		this.editList=withData.list;
+		if(withData.list){
+			this.editList=withData.list;
+		}
 		this.listName=withData.name;
 		this.delegate=withData.delegate;
 	},

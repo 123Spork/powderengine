@@ -1723,7 +1723,7 @@ ItemEditor = Popup.extend({
 								children:{
 									"tiles" : {
 										anchorPoint:cc.p(0,1),
-										position:cc.p(16,336),
+										position:cc.p(16,320),
 										texture:tileTextureList[0]["name"],
 									},
 									
@@ -1773,8 +1773,8 @@ ItemEditor = Popup.extend({
 										}
 									},
 									"leftbtn" : {
-										position:cc.p(0,16),
-										size:cc.size(16,320),
+										position:cc.p(0,64),
+										size:cc.size(16,272),
 										bg: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
@@ -1788,8 +1788,8 @@ ItemEditor = Popup.extend({
 										}
 									},
 									"rightbtn" : {
-										position:cc.p(336,16),
-										size:cc.size(16,320),
+										position:cc.p(336,64),
+										size:cc.size(16,272),
 										bg: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
@@ -1818,7 +1818,7 @@ ItemEditor = Popup.extend({
 										}
 									},
 									"downbtn" : {
-										position:cc.p(16,0),
+										position:cc.p(16,48),
 										size:cc.size(320,16),
 										bg: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
@@ -2023,7 +2023,37 @@ ItemEditor = Popup.extend({
 										color:cc.c3b(0,0,0),
 									}
 								}
-							}
+							},
+							"okbtn" : {
+								position:cc.p(76,8),
+								size:cc.size(60,32),
+								bg: cc.c4b(255,255,255,255),
+								anchorPoint:cc.p(0,0),
+								children:{
+									"text":{
+										label:"OK",
+										fontSize:12,
+										anchorPoint:cc.p(0.5,0.5),
+										position:cc.p(30,16),
+										color:cc.c3b(0,0,0),
+									}
+								}
+							},
+							"cancelbtn" : {
+								position:cc.p(8,8),
+								size:cc.size(60,32),
+								bg: cc.c4b(255,255,255,255),
+								anchorPoint:cc.p(0,0),
+								children:{
+									"text":{
+										label:"Cancel",
+										fontSize:12,
+										anchorPoint:cc.p(0.5,0.5),
+										position:cc.p(30,16),
+										color:cc.c3b(0,0,0),
+									}
+								}
+							},
 						}
 					},
 					"control_panel":{
@@ -2071,13 +2101,28 @@ ItemEditor = Popup.extend({
 	tabWidths:null,
 	currentTab:0,
 	typeData:null,
+
+	delegate:null,
+	name:null,
+	data:null,
 	
-	init:function(_map){
-		this._super();
-		this.map =_map;
+	init:function(withData){
+		this._super();	
 		this.mapOffset=cc.p(0,0);
 		this.tabWidths=[null,352,352,200];
+		this.delegate=withData.delegate;
+		this.data=withData.data;
+		this.name=withData.name;
 	},
+	
+	runSaveNewData:function(num){
+		sendMessageToServer({"savewarps":num+"","warpdata":{name:this.name,data:this.data}});
+	},
+	
+	deleteSave:function(num,list){
+		sendMessageToServer({"savewarpswhole":list});
+	},
+	
 	
 	didBecomeActive:function(){
 		this._super();
@@ -2105,6 +2150,10 @@ ItemEditor = Popup.extend({
 			GameMap.updateServer();
 		}
 		GameMap.setStringsVisible(false);
+		if(this.delegate){
+			var self= this.delegate;
+			this.delegate.scheduleOnce(function(){self.endedEdit(null)});
+		}
 	},
 	
 	onMouseMoved:function(pos){
@@ -2113,7 +2162,7 @@ ItemEditor = Popup.extend({
 			var truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);
 			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().height){
 				truePos.x = truePos.x-(truePos.x%32)+16;
-				truePos.y = truePos.y-(truePos.y%32)+16;
+				truePos.y = truePos.y-(truePos.y%32)+64;
 				
 				this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(127);
 				this.panels["main_panel"]["tab1"]["highlightnode"].setPosition(truePos);
@@ -2160,7 +2209,7 @@ ItemEditor = Popup.extend({
 	updateMapOffset:function(){
 		if(this.panels["main_panel"]["tab1"]["tiles"].getTexture() && this.panels["main_panel"]["tab1"]["tiles"].getTexture()._isLoaded==true){
 			this.unschedule(this.updateMapOffset);
-			this.panels["main_panel"]["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(32*this.mapOffset.x),Math.floor(32*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:320,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:320));
+			this.panels["main_panel"]["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(32*this.mapOffset.x),Math.floor(32*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:320,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<256?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:256));
 		} else{
 			this.schedule(this.updateMapOffset);
 		}
@@ -2189,9 +2238,27 @@ ItemEditor = Popup.extend({
 			return true;
 		}
 		
+		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["okbtn"].getPositionX(),this.panels["main_panel"]["okbtn"].getPositionY(),this.panels["main_panel"]["okbtn"].getContentSize().width,this.panels["main_panel"]["okbtn"].getContentSize().height),truePos)){
+			if(this.nameBox.getText()==null || this.nameBox.getText()=="" || this.mapNumBox.getText()==null  || this.mapNumBox.getText()=="" || this.mapXBox.getText()==null || this.mapXBox.getText()=="" || this.mapYBox.getText()==null || this.mapYBox.getText()==""){
+				return true;
+			}
+			this.ignoreTerminate=true;
+			this.data["position"]=indexFromPos(parseInt(this.mapXBox.getText()),(gridHeight)-parseInt(this.mapYBox.getText()));
+			this.data["mapTo"]=parseInt(this.mapNumBox.getText());
+			this.name=this.nameBox.getText();
+			this.delegate.endedEdit({name:this.name,data:this.data});
+			return true;
+		}
+		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["cancelbtn"].getPositionX(),this.panels["main_panel"]["cancelbtn"].getPositionY(),this.panels["main_panel"]["cancelbtn"].getContentSize().width,this.panels["main_panel"]["cancelbtn"].getContentSize().height),truePos)){
+			this.ignoreTerminate=true;
+			var self= this.delegate;
+			this.delegate.scheduleOnce(function(){self.endedEdit(null)});
+			return true;
+		}
+
 		if(this.currentTab==1){
 			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab1"]["leftbtn"].getPositionX(),this.panels["main_panel"]["tab1"]["leftbtn"].getPositionY(),this.panels["main_panel"]["tab1"]["leftbtn"].getContentSize().width,this.panels["main_panel"]["tab1"]["leftbtn"].getContentSize().height),truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>320 && this.mapOffset.x>0){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>264 && this.mapOffset.x>0){
 					this.mapOffset.x--;
 					this.updateMapOffset();
 				}
@@ -2231,7 +2298,7 @@ ItemEditor = Popup.extend({
 			truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);
 			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().height){
 				truePos.x = truePos.x-(truePos.x%32)+16;
-				truePos.y = truePos.y-(truePos.y%32)+16;
+				truePos.y = truePos.y-(truePos.y%32)+64;
 				
 				if(this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()!=truePos.x || this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()!=truePos.y){
 					this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(127);
@@ -2244,102 +2311,31 @@ ItemEditor = Popup.extend({
 
 		}
 		if(this.currentTab==2){	
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["ground1btn"].getPositionX(),this.panels["main_panel"]["tab2"]["ground1btn"].getPositionY(),this.panels["main_panel"]["tab2"]["ground1btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["ground1btn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("ground1");
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["currencybtn"].getPositionX(),this.panels["main_panel"]["tab2"]["currencybtn"].getPositionY(),this.panels["main_panel"]["tab2"]["currencybtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["currencybtn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("currencybtn");
 				return true;
 			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["ground2btn"].getPositionX(),this.panels["main_panel"]["tab2"]["ground2btn"].getPositionY(),this.panels["main_panel"]["tab2"]["ground2btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["ground2btn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("ground2");
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["resourcebtn"].getPositionX(),this.panels["main_panel"]["tab2"]["resourcebtn"].getPositionY(),this.panels["main_panel"]["tab2"]["resourcebtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["resourcebtn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("resource");
 				return true;
 			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["groundShadowbtn"].getPositionX(),this.panels["main_panel"]["tab2"]["groundShadowbtn"].getPositionY(),this.panels["main_panel"]["tab2"]["groundShadowbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["groundShadowbtn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("groundShadow");
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["consumablebtn"].getPositionX(),this.panels["main_panel"]["tab2"]["consumablebtn"].getPositionY(),this.panels["main_panel"]["tab2"]["consumablebtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["consumablebtn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("consumable");
 				return true;
 			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["mask1btn"].getPositionX(),this.panels["main_panel"]["tab2"]["mask1btn"].getPositionY(),this.panels["main_panel"]["tab2"]["mask1btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["mask1btn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("mask1");
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["bookbtn"].getPositionX(),this.panels["main_panel"]["tab2"]["bookbtn"].getPositionY(),this.panels["main_panel"]["tab2"]["bookbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["bookbtn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("book");
 				return true;
 			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["mask2btn"].getPositionX(),this.panels["main_panel"]["tab2"]["mask2btn"].getPositionY(),this.panels["main_panel"]["tab2"]["mask2btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["mask2btn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("mask2");
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["armourbtn"].getPositionX(),this.panels["main_panel"]["tab2"]["armourbtn"].getPositionY(),this.panels["main_panel"]["tab2"]["armourbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["armourbtn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("armour");
 				return true;
 			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["mask3btn"].getPositionX(),this.panels["main_panel"]["tab2"]["mask3btn"].getPositionY(),this.panels["main_panel"]["tab2"]["mask3btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["mask3btn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("mask3");
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["weaponbtn"].getPositionX(),this.panels["main_panel"]["tab2"]["weaponbtn"].getPositionY(),this.panels["main_panel"]["tab2"]["weaponbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["weaponbtn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("weapon");
 				return true;
 			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["fringe1btn"].getPositionX(),this.panels["main_panel"]["tab2"]["fringe1btn"].getPositionY(),this.panels["main_panel"]["tab2"]["fringe1btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["fringe1btn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("fringe1");
-				return true;
-			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["fringe2btn"].getPositionX(),this.panels["main_panel"]["tab2"]["fringe2btn"].getPositionY(),this.panels["main_panel"]["tab2"]["fringe2btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["fringe2btn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("fringe2");
-				return true;
-			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["fringeShadowbtn"].getPositionX(),this.panels["main_panel"]["tab2"]["fringeShadowbtn"].getPositionY(),this.panels["main_panel"]["tab2"]["fringeShadowbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["fringeShadowbtn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("fringeShadow");
-				return true;
-			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["fringe3btn"].getPositionX(),this.panels["main_panel"]["tab2"]["fringe3btn"].getPositionY(),this.panels["main_panel"]["tab2"]["fringe3btn"].getContentSize().width,this.panels["main_panel"]["tab2"]["fringe3btn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("fringe3");
-				return true;
-			}
-
-
-			var globalErasePos = this.panels["main_panel"]["tab2"]["deletebtn"].convertToWorldSpace(cc.p(0,0));
-			if(cc.rectContainsPoint(cc.rect(globalErasePos.x,globalErasePos.y,this.panels["main_panel"]["tab2"]["deletebtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["deletebtn"].getContentSize().height),touch._point)){
-				this.editMode=this.editMode=="erasing" ? "tiles" : "erasing";
-				if(this.editMode=="erasing"){
-					this.panels["main_panel"]["tab2"]["fillbtn"].setColor(cc.c4b(255,255,255,255));
-					this.panels["main_panel"]["tab2"]["deletebtn"].setColor(cc.c4b(255,0,0,255));
-				} else{
-					this.panels["main_panel"]["tab2"]["deletebtn"].setColor(cc.c4b(255,255,255,255));
-				}
-				return true;
-			}
-			
-			var globalFillPos = this.panels["main_panel"]["tab2"]["fillbtn"].convertToWorldSpace(cc.p(0,0));
-			if(cc.rectContainsPoint(cc.rect(globalFillPos.x,globalFillPos.y,this.panels["main_panel"]["tab2"]["fillbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["fillbtn"].getContentSize().height),touch._point)){
-				if(this.panels["main_panel"]["tab2"]["selectednode"].getOpacity()!=0){
-					GameMap.fillMap(tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab2"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,(9-((this.panels["main_panel"]["tab2"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y),this.currentLayer);
-					GameMap.updateMap();
-				}
-				return true;
-			}
-
-			var globalBlockPos = this.panels["main_panel"]["tab2"]["blockbtn"].convertToWorldSpace(cc.p(0,0));
-			if(cc.rectContainsPoint(cc.rect(globalBlockPos.x,globalBlockPos.y,this.panels["main_panel"]["tab2"]["blockbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["blockbtn"].getContentSize().height),touch._point)){
-				this.editMode = this.editMode=="blocking" ? "tiles" : "blocking";
-				if(this.editMode=="blocking"){
-					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,0,0,255));
-					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,255,255,255));
-				} else{
-					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
-				}
-				return true;
-			}
-			var globalWarpPos = this.panels["main_panel"]["tab2"]["warpbtn"].convertToWorldSpace(cc.p(0,0));
-			if(cc.rectContainsPoint(cc.rect(globalWarpPos.x,globalWarpPos.y,this.panels["main_panel"]["tab2"]["warpbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["warpbtn"].getContentSize().height),touch._point)){
-				this.editMode = this.editMode=="warping" ? "tiles" : "warping";
-				if(this.editMode=="warping"){
-					if(Warpeditor){
-						Warpeditor.willTerminate();
-						Warpeditor.removeFromParent();
-						Warpeditor=null;
-					}
-					Warpeditor = new ObjectList();
-					Warpeditor.init({delegate:this,editor:new WarpEditorPopup(),list:ObjectLists.getWarpList(),name:"Warp List"});
-					Warpeditor.didBecomeActive();
-					this._parent.addChild(Warpeditor);
-					this.setTouchEnabled(false);
-					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,0,0,255));
-					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
-				} else{
-					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,255,255,255));
-				}
-				return true;
-			}
-		}
+		}	
 		
 		if(this.currentTab==3){
 			var globalClearPos = this.panels["main_panel"]["tab3"]["clearbtn"].convertToWorldSpace(cc.p(0,0));
@@ -2390,17 +2386,13 @@ ItemEditor = Popup.extend({
 	},	
 	
 	updateCurrentLayer:function(layerName){
-		this.panels["main_panel"]["tab1"]["ground1btn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab1"]["ground2btn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab1"]["groundShadowbtn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab1"]["mask1btn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab1"]["mask2btn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab1"]["mask3btn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab1"]["fringe1btn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab1"]["fringe2btn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab1"]["fringeShadowbtn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab1"]["fringe3btn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab1"][layerName+"btn"].setColor(cc.c4b(0,255,0,255));
+		this.panels["main_panel"]["tab2"]["currencybtn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["resourcebtn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["consumablebtn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["bookbtn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["armourbtn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["weaponbtn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"][layerName+"btn"].setColor(cc.c4b(0,255,0,255));
 		this.currentLayer=layerName;
 	},
 	

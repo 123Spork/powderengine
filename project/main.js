@@ -25,7 +25,6 @@ var cocos2dApp = cc.Application.extend({
         if(cc.AudioEngine) cc.AudioEngine.getInstance().setResPath("res/Audio");
         director.setContentScaleFactor(1);
 
-	//added a change
         // turn on display FPS
        // director.setDisplayStats(config['showFPS']);
 

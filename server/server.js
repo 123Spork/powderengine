@@ -1,4 +1,5 @@
 // Require HTTP module (to start server) and Socket.IO
+//Server file
 var http = require('http');
 var fs = require('fs');
 var io = require('socket.io');

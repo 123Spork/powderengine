@@ -135,6 +135,14 @@ socket.on('connection', function(client){
 			client.broadcast.send(JSON.stringify({"moveTo":event["moveTo"],"id":names[client.id]}));
 			positions[client.id]= event["moveTo"];
 		}
+		if(event["droppeditem"]){
+			client.send(JSON.stringify({"droppeditem":event["droppeditem"],"index":event["index"]}));
+			client.broadcast.send(JSON.stringify({"droppeditem":event["droppeditem"],"index":event["index"]}));
+		}
+		if(event["pickupitem"]){
+			client.send(JSON.stringify({"pickupitem":event["pickupitem"]}));
+			client.broadcast.send(JSON.stringify({"pickupitem":event["pickupitem"]}));
+		}
 		if(event["savemap"]){
 			last[updateMapIndex]=Date.now();
 			saveLastAccessData();

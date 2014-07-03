@@ -557,23 +557,41 @@ InventoryPopup = Popup.extend({
 	updateTileGrid:function(){
 		var inventoryList = PlayersController.getYou().getInventory();
 
-		for(var i=0;i<inventoryList.length;i++){
-			for(var j in tileTextureList){
-				if(tileTextureList[j]["name"]==inventoryList[i]["sprite"]["texture"]){
-					var texture=tileTextureList[j]["texture"];
+		for(var i=0;i<40;i++){
+			if(inventoryList[i]){
+				for(var j in tileTextureList){
+					if(tileTextureList[j]["name"]==inventoryList[i]["data"]["sprite"]["texture"]){
+						var texture=tileTextureList[j]["texture"];
+					}
 				}
+				this.panels["main_panel"][(i+"")].setAnchorPoint(0,1);
+				this.panels["main_panel"][(i+"")].setTexture(texture);
+				this.panels["main_panel"][(i+"")].setTextureRect(cc.rect(inventoryList[i]["data"]["sprite"]["position"].x*32, (inventoryList[i]["data"]["sprite"]["position"].y*32),32,32));
+			} else{
+				this.panels["main_panel"][(i+"")].setTexture(null);
 			}
-			if(!this.panels["main_panel"][(i+"")].getTexture()){
-				this.panels["main_panel"][(i+"")].setPositionY(this.panels["main_panel"][(i+"")].getPositionY()-32);
-			}
-			this.panels["main_panel"][(i+"")].setTexture(texture);
-			this.panels["main_panel"][(i+"")].setTextureRect(cc.rect(inventoryList[i]["sprite"]["position"].x*32, (inventoryList[i]["sprite"]["position"].y*32),32,32));
 		}
 	},
 
 	didBecomeActive:function(){
 		this._super();
 		this.updateTileGrid();
+	},
+
+	onTouchBegan:function(touch){
+		var pos = touch._point;
+		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
+
+		for(var i=0;i<40;i++){
+			var reducer=0;
+			if(this.panels["main_panel"][(i+"")].getAnchorPoint().y==1){
+				reducer=32;
+			}
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"][(i+"")].getPositionX(),this.panels["main_panel"][(i+"")].getPositionY()-reducer,this.panels["main_panel"][(i+"")].getContentSize().width,this.panels["main_panel"][(i+"")].getContentSize().height),truePos)){
+				PlayersController.getYou().dropItem(i);
+				return true;
+			}	
+		}
 	}
 
 

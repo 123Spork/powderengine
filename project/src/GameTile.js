@@ -27,11 +27,34 @@ var GameTile = cc.Node.extend({
 		this.string.setOpacity(0);
 		this.string.setColor(cc.c3b(0,0,0));
 		this.addChild(this.string,900);
-		
+		this.item=[];
+		this.script=[];
 
 		this.setType(0);
 	},
 	
+	addDroppedItem:function(data){
+		var texture = data["data"]["sprite"]["texture"];
+		var pos = data["data"]["sprite"]["position"];
+		this.setLayer(texture,pos,"item");
+		for(var i=0;i<ObjectLists.getItemList().length;i++){
+			if(data["name"]==ObjectLists.getItemList()[i]["name"]){
+				this.setScript(i,true);
+				break;
+			}
+		}
+		this.setType(4);
+	},	
+
+	pickupItem:function(){
+		if(this.script[this.script.length-1]["temp"]){
+			this.item[this.item.length-1].removeFromParent();
+			this.item.splice(this.item.length-1,1);
+			this.popScript();
+		}
+	},
+
+
 	setLayer:function(_texture,_tilePos,_type){
 		var sprite = cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage(_texture));
 		sprite.setTextureRect(cc.rect(Math.floor(32*_tilePos.x),Math.floor(32*_tilePos.y),32,32));
@@ -81,11 +104,8 @@ var GameTile = cc.Node.extend({
 				this.addChild(this.mask3,5);
 			break;
 			case "item": 
-				if(this.item!=null){
-					this.item.removeFromParent();
-				}
-				this.item = sprite;
-				this.addChild(this.item,6);
+				this.item.push(sprite);
+				this.addChild(this.item[this.item.length-1],6);
 			break;
 			case "fringe1":
 				if(this.fringe1!=null){
@@ -132,8 +152,12 @@ var GameTile = cc.Node.extend({
 			loaded=false;
 		}else if(this.mask3!=null && this.mask3.getTexture() && this.mask3.getTexture()._isLoaded==false){
 			loaded=false;
-		}else if(this.item!=null && this.item.getTexture() && this.item.getTexture()._isLoaded==false){
-			loaded=false;
+		}else if(this.item.length>0){
+			for(var i in this.item){
+				if(this.item[i].getTexture() && this.item[i].getTexture()._isLoaded==false){
+					loaded=false;
+				}
+			}
 		}else if(this.fringe1!=null && this.fringe1.getTexture() && this.fringe1.getTexture()._isLoaded==false){
 			loaded=false;
 		}else if(this.fringe2!=null && this.fringe2.getTexture() && this.fringe2.getTexture()._isLoaded==false){
@@ -171,9 +195,12 @@ var GameTile = cc.Node.extend({
 			this.mask3.removeFromParent();
 		}
 		this.mask3 = null;
-		if(this.item!=null){
-			this.item.removeFromParent();
+
+		for(var i=0;i<this.item.length;i++){
+			this.item[i].removeFromParent();
 		}
+		this.item=[];
+			
 		this.mask3 = null;
 		if(this.fringe1!=null){
 			this.fringe1.removeFromParent();
@@ -192,6 +219,8 @@ var GameTile = cc.Node.extend({
 		}
 		this.fringe3 = null;
 		this.setType(0);
+		this.script=[];
+		this.item=[];
 	},
 	
 	destroyLayer:function(_type){
@@ -233,10 +262,12 @@ var GameTile = cc.Node.extend({
 				this.mask3 = null;
 			break;
 			case "item": 
-				if(this.item!=null){
-					this.item.removeFromParent();
+				for(var i=0;i<this.item.length;i++){
+					this.item[i].removeFromParent();
+					this.item[i].splice(i,1);
+					i--;
 				}
-				this.item = null;
+				this.item = [];
 			break;
 			case "fringe1":
 				if(this.fringe1!=null){
@@ -278,14 +309,28 @@ var GameTile = cc.Node.extend({
 		}
 	},
 	
-	setScript:function(_in){
-		this.script=_in;
+	setScript:function(_in,isTemp){
+		if(!isTemp){
+			var isTemp=false;
+		}
+		this.script.push({"num":_in,"temp":isTemp});
+	},
+
+	popScript:function(_){
+		this.script.splice(this.script.length-1,1);
+	},
+
+	getScript:function(){
+		switch(this.type){
+			case 3: return ObjectLists.getWarpList()[this.script[this.script.length-1]["num"]];
+			case 4: return ObjectLists.getItemList()[this.script[this.script.length-1]["num"]];
+		}
 	},
 	
 	getScriptData:function(){
 		switch(this.type){
-			case 3: return ObjectLists.getWarpList()[this.script].data;
-			case 4: return ObjectLists.getItemList()[this.script].data;
+			case 3: return ObjectLists.getWarpList()[this.script[this.script.length-1]["num"]].data;
+			case 4: return ObjectLists.getItemList()[this.script[this.script.length-1]["num"]].data;
 		}
 	},
 	

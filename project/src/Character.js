@@ -101,7 +101,7 @@ Character = cc.Sprite.extend({
 		var gp = this.getGridPosition();
 		var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 		switch(tile.getType()){
-			case 4: this.pickupItem(tile.getScriptData()); return;
+			case 4: this.pickupItem(tile.getScript()); return;
 		}
 	},
 	
@@ -258,14 +258,28 @@ PlayerCharacter = Character.extend({
 	},
 	
 	pickupItem:function(item){
-		//item.removeFromParent();
-		this.items["stored"].push(item);
+		var gp = this.getGridPosition();
+		sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y)});
+		var added=false;
+		for(var i=0;i<this.items["stored"].length;i++){
+			if(this.items["stored"][i]==null){
+				this.items["stored"][i]=item;
+				var added=true;
+				break;
+			}
+		}
+		if(added==false){
+			this.items["stored"].push(item);
+		}
 	},
 	
-	dropItem:function(tile,itemnumber){
-		this.items[stored][itemnumber].removeFromParent();
-		tile.spawnObject = this.items[stored][itemnumber];
-		this.items[stored].splice(itemnumber,1);
+	dropItem:function(itemnumber){
+		var gp = this.getGridPosition();
+		sendMessageToServer({"droppeditem":this.items["stored"][itemnumber],"index":indexFromPos(gp.x,gp.y)});
+		this.items["stored"][itemnumber]=null;
+		if(Inventory){
+			Inventory.updateTileGrid();
+		}
 	},
 	
 	equipItem:function(itemnumber){

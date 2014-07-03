@@ -124,9 +124,19 @@ reactToSocketMessage=function(data){
 				ObjectLists.setWarpList(data["savewarpswhole"]);
 			}
 			else if(data["saveitems"]){
-				LocalStorage.changeWarp(parseInt(data["savewarps"]),data["warpdata"],data["updatetime"]);
-				ObjectLists.getWarpList()[parseInt(data["savewarps"])]=data["warpdata"];
+				LocalStorage.changeItem(parseInt(data["saveitems"]),data["itemdata"],data["updatetime"]);
+				ObjectLists.getItemList()[parseInt(data["savewarps"])]=data["itemdata"];
 				GameMap.goToMap(GameMap.getMapNumber());
+			}
+			else if(data["droppeditem"]){
+				var tile = GameMap.getTileNodeForIndex(data["index"]);
+				tile.addDroppedItem(data["droppeditem"]);
+				GameMap.updateMap();
+			}
+			else if(data["pickupitem"]){
+				var tile = GameMap.getTileNodeForIndex(data["pickupitem"]);
+				tile.pickupItem();
+				GameMap.updateMap();
 			}
 			else if(data["saveitemswhole"]){
 				LocalStorage.refreshItems(data["saveitemswhole"],data["updatetime"]);

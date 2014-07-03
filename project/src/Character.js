@@ -95,6 +95,15 @@ Character = cc.Sprite.extend({
 		sendMessageToServer({"changemap":data["mapTo"], "setTo":data["position"]});
 		GameMap.goToMap(data["mapTo"]);
 	},
+
+
+	interactWithTile:function(){
+		var gp = this.getGridPosition();
+		var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
+		switch(tile.getType()){
+			case 4: this.pickupItem(tile.getScriptData()); return;
+		}
+	},
 	
 	walk:function(dt){
 		this.animationCounter+=dt;
@@ -245,12 +254,12 @@ PlayerCharacter = Character.extend({
 	items:null,
 	init:function(withData){
 		this._super(withData);
-		this.items = {stored:[], equipped:{}};
+		this.items = {"stored":[], "equipped":{}};
 	},
 	
 	pickupItem:function(item){
-		item.removeFromParent();
-		this.items[stored].push(item);
+		//item.removeFromParent();
+		this.items["stored"].push(item);
 	},
 	
 	dropItem:function(tile,itemnumber){
@@ -270,6 +279,10 @@ PlayerCharacter = Character.extend({
 		this.items[stored].push(this.items[equipped][itemtype])
 		this.items[equipped][itemtype]=null;
 	},	
+
+	getInventory:function(){
+		return this.items["stored"];
+	},
 });
 PlayerCharacter.create = function(withData){
 	var playerCharacter = new PlayerCharacter();

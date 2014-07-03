@@ -503,8 +503,9 @@ InventoryPopup = Popup.extend({
 			for(var y=0;y<8;y++){
 				inventory_panel[(5 * y + x)+""]={
 					size: cc.size(32,32),
-					bg: cc.c4b(140,140,140,200),
-					position: cc.p((x*40)+8,(((8-1)-y)*40)+8)
+					position: cc.p((x*40)+8,(((8-1)-y)*40)+40),
+					isSprite:true,
+					anchorPoint:cc.p(0,0)
 				};
 			}
 		}
@@ -515,9 +516,9 @@ InventoryPopup = Popup.extend({
 				children:{	
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
-						size: cc.size(208,328),
 						bg: cc.c4b(255,255,255,200),
-						children: inventory_panel,
+						size: cc.size(208,328),
+						children: inventory_panel
 					},
 					"control_panel":{
 						anchorPoint:cc.p(0,0),
@@ -552,6 +553,30 @@ InventoryPopup = Popup.extend({
 			}
 		};
 	},
+
+	updateTileGrid:function(){
+		var inventoryList = PlayersController.getYou().getInventory();
+
+		for(var i=0;i<inventoryList.length;i++){
+			for(var j in tileTextureList){
+				if(tileTextureList[j]["name"]==inventoryList[i]["sprite"]["texture"]){
+					var texture=tileTextureList[j]["texture"];
+				}
+			}
+			if(!this.panels["main_panel"][(i+"")].getTexture()){
+				this.panels["main_panel"][(i+"")].setPositionY(this.panels["main_panel"][(i+"")].getPositionY()-32);
+			}
+			this.panels["main_panel"][(i+"")].setTexture(texture);
+			this.panels["main_panel"][(i+"")].setTextureRect(cc.rect(inventoryList[i]["sprite"]["position"].x*32, (inventoryList[i]["sprite"]["position"].y*32),32,32));
+		}
+	},
+
+	didBecomeActive:function(){
+		this._super();
+		this.updateTileGrid();
+	}
+
+
 });
 
 EquipmentPopup = Popup.extend({

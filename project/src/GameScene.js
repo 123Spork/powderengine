@@ -284,6 +284,12 @@ var GameScene = Scene.extend({
 			case "ENTER":
 				if(!GameChat.isFocused()) GameChat.setFocused(true);
 			break;
+			case "SPACE":
+				PlayersController.getYou().interactWithTile();
+				if(Inventory){
+					Inventory.updateTileGrid();
+				}
+			break;
 			case "ESC": this.destroyGame(); SceneManager.getInstance().goToScene("Login",{logout:true,serverConnected:true}); break;
 			case "I":
 				if(Inventory!=null && !Inventory._parent) Inventory=null;

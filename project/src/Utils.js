@@ -128,6 +128,8 @@ function getLayoutNodes(nodes,request,parent){
 		}else if(typeof(data.bg)!='undefined'){
 			var layerSize = data.size ? data.size : cc.size(100,100);
 			var node = cc.LayerColor.create(data.bg,layerSize.width,layerSize.height);
+		}else if(typeof(data.isSprite)!='undefined'){
+			var node = cc.Sprite.create();
 		} else if(typeof(data.texture)!='undefined'){
 			var node = cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage(data.texture));
 		} else if(typeof(data.label)!='undefined'){

@@ -1,10 +1,12 @@
+(3rd July 2014) - Version 0.53
+-Implemented more sophisticated item editor.
+-Items can now be created, edited and placed into the map.
+-Items can be edited later on and updates are changed in real time.
+-Implemented base for multiple item types which will be extended into the mapeditor for additional options.
+
 (22nd June 2014) - Version 0.52
 -Implemented start of object list code
 -Used object list code to implement warp script
 -Warp points can now be applied in map editor
 -Warp editor can modify warps after they are added to map.
 -Added exit buttons to popups.
-
-(22nd June 2014) - Version 0.5
--Map editor now allows multiple tile sets. Simply switch between them with the arrows in editor.
--Game now includes a user defined optional system to determine which textures can be used in editor.

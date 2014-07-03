@@ -5,6 +5,7 @@ var GameTile = cc.Node.extend({
 	mask1:null,
 	mask2:null,
 	mask3:null,
+	item:null,
 	fringe1:null,
 	fringe2:null,
 	fringeShadow:null,
@@ -79,33 +80,40 @@ var GameTile = cc.Node.extend({
 				this.mask3 = sprite;
 				this.addChild(this.mask3,5);
 			break;
+			case "item": 
+				if(this.item!=null){
+					this.item.removeFromParent();
+				}
+				this.item = sprite;
+				this.addChild(this.item,6);
+			break;
 			case "fringe1":
 				if(this.fringe1!=null){
 					this.fringe1.removeFromParent();
 				}
 				this.fringe1 = sprite;
-				this.addChild(this.fringe1,6);
+				this.addChild(this.fringe1,7);
 			break;
 			case "fringe2":
 				if(this.fringe2!=null){
 					this.fringe2.removeFromParent();
 				}
 				this.fringe2 = sprite;
-				this.addChild(this.fringe2,7);
+				this.addChild(this.fringe2,8);
 			break;
 			case "fringeShadow": 
 				if(this.fringeShadow!=null){
 					this.fringeShadow.removeFromParent();
 				}
 				this.fringeShadow = sprite;
-				this.addChild(this.fringeShadow,8);
+				this.addChild(this.fringeShadow,9);
 			break;
 			case "fringe3":
 				if(this.fringe3!=null){
 					this.fringe3.removeFromParent();
 				}
 				this.fringe3 = sprite;
-				this.addChild(this.fringe3,9);
+				this.addChild(this.fringe3,10);
 			break;
 		}
 	},
@@ -123,6 +131,8 @@ var GameTile = cc.Node.extend({
 		}else if(this.mask2!=null && this.mask2.getTexture() && this.mask2.getTexture()._isLoaded==false){
 			loaded=false;
 		}else if(this.mask3!=null && this.mask3.getTexture() && this.mask3.getTexture()._isLoaded==false){
+			loaded=false;
+		}else if(this.item!=null && this.item.getTexture() && this.item.getTexture()._isLoaded==false){
 			loaded=false;
 		}else if(this.fringe1!=null && this.fringe1.getTexture() && this.fringe1.getTexture()._isLoaded==false){
 			loaded=false;
@@ -159,6 +169,10 @@ var GameTile = cc.Node.extend({
 		this.mask2 = null;
 		if(this.mask3!=null){
 			this.mask3.removeFromParent();
+		}
+		this.mask3 = null;
+		if(this.item!=null){
+			this.item.removeFromParent();
 		}
 		this.mask3 = null;
 		if(this.fringe1!=null){
@@ -218,6 +232,12 @@ var GameTile = cc.Node.extend({
 				}
 				this.mask3 = null;
 			break;
+			case "item": 
+				if(this.item!=null){
+					this.item.removeFromParent();
+				}
+				this.item = null;
+			break;
 			case "fringe1":
 				if(this.fringe1!=null){
 					this.fringe1.removeFromParent();
@@ -252,7 +272,7 @@ var GameTile = cc.Node.extend({
 			case 1: this.string.setString("BLK"); break;
 			case 2: this.string.setString("SPW"); break;	
 			case 3: this.string.setString("WRP"); break;	
-			case 4: this.string.setString("SGN"); break;	
+			case 4: this.string.setString("ITM"); break;	
 			case 5: this.string.setString("SCR"); break;	
 			case 6: this.string.setString("SKL"); break;
 		}
@@ -263,9 +283,9 @@ var GameTile = cc.Node.extend({
 	},
 	
 	getScriptData:function(){
-		console.log(this.script);
 		switch(this.type){
 			case 3: return ObjectLists.getWarpList()[this.script].data;
+			case 4: return ObjectLists.getItemList()[this.script].data;
 		}
 	},
 	

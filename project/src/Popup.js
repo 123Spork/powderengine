@@ -980,6 +980,21 @@ MapEditor = Popup.extend({
 											}
 										}
 									},
+									"itembtn" : {
+										position:cc.p(8,240),
+										size:cc.size(60,32),
+										bg: cc.c4b(255,255,255,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"Item",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(32,16),
+												color:cc.c3b(0,0,0),
+											}
+										}
+									},
 								}
 							},
 							"tab3":{
@@ -1308,6 +1323,12 @@ MapEditor = Popup.extend({
 			this.typeData=value;
 			this.setTouchEnabled(true);
 		}
+		if(Itemeditor){
+			Itemeditor.willTerminate();
+			this.scheduleOnce(function(){Itemeditor.removeFromParent(); Itemeditor=null;});
+			this.typeData=value;
+			this.setTouchEnabled(true);
+		}
 	},
 	
 	willTerminate:function(){
@@ -1536,6 +1557,7 @@ MapEditor = Popup.extend({
 				if(this.editMode=="blocking"){
 					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,0,0,255));
 					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,255,255,255));
+					this.panels["main_panel"]["tab2"]["itembtn"].setColor(cc.c4b(255,255,255,255));
 				} else{
 					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
 				}
@@ -1557,8 +1579,31 @@ MapEditor = Popup.extend({
 					this.setTouchEnabled(false);
 					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,0,0,255));
 					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
+					this.panels["main_panel"]["tab2"]["itembtn"].setColor(cc.c4b(255,255,255,255));
 				} else{
 					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,255,255,255));
+				}
+				return true;
+			}
+			var globalWarpPos = this.panels["main_panel"]["tab2"]["itembtn"].convertToWorldSpace(cc.p(0,0));
+			if(cc.rectContainsPoint(cc.rect(globalWarpPos.x,globalWarpPos.y,this.panels["main_panel"]["tab2"]["itembtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["warpbtn"].getContentSize().height),touch._point)){
+				this.editMode = this.editMode=="items" ? "tiles" : "items";
+				if(this.editMode=="items"){
+					if(Itemeditor){
+						Itemeditor.willTerminate();
+						Itemeditor.removeFromParent();
+						Itemeditor=null;
+					}
+					Itemeditor = new ObjectList();
+					Itemeditor.init({delegate:this,editor:new ItemEditor(),list:ObjectLists.getItemList(),name:"Item List"});
+					Itemeditor.didBecomeActive();
+					this._parent.addChild(Itemeditor);
+					this.setTouchEnabled(false);
+					this.panels["main_panel"]["tab2"]["itembtn"].setColor(cc.c4b(255,0,0,255));
+					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,255,255,255));
+					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
+				} else{
+					this.panels["main_panel"]["tab2"]["itembtn"].setColor(cc.c4b(255,255,255,255));
 				}
 				return true;
 			}
@@ -1692,6 +1737,15 @@ MapEditor = Popup.extend({
 					}
 				}
 			break;
+			case "items":
+				if(Itemeditor==null || !Itemeditor._parent){
+					if(tiles[tilenum].getType()!=4){
+						GameMap.setTileInfo(tilenum,4,this.typeData);
+					} else{
+						GameMap.setTileInfo(tilenum,0,null);
+					}
+				}
+			break;
 			case "erasing":
 				GameMap.destroyLayer(tilenum,this.currentLayer);
 			break;
@@ -1701,11 +1755,87 @@ MapEditor = Popup.extend({
 });
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ItemEditor = Popup.extend({
-	map:null,
-	editMode:"tiles",
-	lastTile:null,
-	currentLayer:"ground1",
+	currentLayer:"currency",
+	subType:"",
+	sprite:{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},
+	additionalData:{},
 	currentTexture:tileTextureList[0]["name"],
 	currentTextureNumber:0,
 	
@@ -1728,7 +1858,7 @@ ItemEditor = Popup.extend({
 									},
 									
 									"textureleftbtn" : {
-										position:cc.p(208,358),
+										position:cc.p(208,340),
 										size:cc.size(16,32),
 										bg: cc.c4b(255,255,255,255),
 										anchorPoint:cc.p(0,0),
@@ -1743,7 +1873,7 @@ ItemEditor = Popup.extend({
 										}
 									},
 									"texturerightbtn" : {
-										position:cc.p(320,358),
+										position:cc.p(320,340),
 										size:cc.size(16,32),
 										bg: cc.c4b(255,255,255,255),
 										anchorPoint:cc.p(0,0),
@@ -1758,7 +1888,7 @@ ItemEditor = Popup.extend({
 										}
 									},
 									"textureName" : {
-										position:cc.p(224,358),
+										position:cc.p(224,340),
 										size:cc.size(96,32),
 										bg: cc.c4b(255,255,255,170),
 										anchorPoint:cc.p(0,0),
@@ -1774,7 +1904,7 @@ ItemEditor = Popup.extend({
 									},
 									"leftbtn" : {
 										position:cc.p(0,64),
-										size:cc.size(16,272),
+										size:cc.size(16,252),
 										bg: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
@@ -1789,7 +1919,7 @@ ItemEditor = Popup.extend({
 									},
 									"rightbtn" : {
 										position:cc.p(336,64),
-										size:cc.size(16,272),
+										size:cc.size(16,252),
 										bg: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
@@ -1803,7 +1933,7 @@ ItemEditor = Popup.extend({
 										}
 									},
 									"upbtn" : {
-										position:cc.p(16,336),
+										position:cc.p(16,320),
 										size:cc.size(320,16),
 										bg: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
@@ -1955,6 +2085,11 @@ ItemEditor = Popup.extend({
 											}
 										}
 									},
+									"tile" : {
+										anchorPoint:cc.p(0,1),
+										position:cc.p(8,96),
+										texture:tileTextureList[0]["name"],
+									},
 								}
 							},
 							"tab3":{
@@ -2093,14 +2228,9 @@ ItemEditor = Popup.extend({
 	getIdentifier:function(){
 		return "itemEditor";
 	},
-	mapOffset:null,
-	mapUpBox:null,
-	mapDownBox:null,
-	mapLeftBox:null,
-	mapRightBox:null,
+	nameBox:null,
 	tabWidths:null,
 	currentTab:0,
-	typeData:null,
 
 	delegate:null,
 	name:null,
@@ -2116,40 +2246,44 @@ ItemEditor = Popup.extend({
 	},
 	
 	runSaveNewData:function(num){
-		sendMessageToServer({"savewarps":num+"","warpdata":{name:this.name,data:this.data}});
+		sendMessageToServer({"saveitems":num+"","itemdata":{name:this.name,data:this.data}});
 	},
 	
 	deleteSave:function(num,list){
-		sendMessageToServer({"savewarpswhole":list});
+		sendMessageToServer({"saveitemswhole":list});
 	},
 	
 	
 	didBecomeActive:function(){
 		this._super();
+		if(this.data==null){
+			this.data={};
+		}
 		this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
 		this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(0);
-		this.nameBox = new EntryBox(this.panels["main_panel"]["tab2"]["name_entry"],cc.size(this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), "", cc.c4b(100,100,100), cc.c3b(255,255,255));
-		this.nameBox.setDefaultFineFlag(true);;
+
+		for(var i in tileTextureList){
+			if(tileTextureList[i]["name"]==this.sprite["texture"]){
+				this.currentTextureNumber=i;
+				this.currentTexture=tileTextureList[i]["name"];
+			}
+		}
+		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
+
+		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["main_panel"]["tab2"]["tile"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["main_panel"]["tab2"]["tile"].setTextureRect(cc.rect(Math.floor(32*this.sprite["position"].x),Math.floor(32*this.sprite["position"].y),32,32));
+		this.nameBox = new EntryBox(this.panels["main_panel"]["tab2"]["name_entry"],cc.size(this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), this.name?this.name:"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.nameBox.setDefaultFineFlag(true);
 		this.setTab(1);
 		this.updateMapOffset();
-		GameMap.setStringsVisible(true);
 	},
-	
-	setTypeData:function(value){
-		if(Warpeditor){
-			Warpeditor.willTerminate();
-			this.scheduleOnce(function(){Warpeditor.removeFromParent(); Warpeditor=null;});
-			this.typeData=value;
-			this.setTouchEnabled(true);
-		}
+
+	setTextureFromStart:function(){
+
 	},
 	
 	willTerminate:function(){
-		if(this.saveOnExit==true){
-			GameMap.setMapInfo({"up": this.mapUpBox.getText(),"down":this.mapDownBox.getText(),"left":this.mapLeftBox.getText(),"right":this.mapRightBox.getText()});
-			GameMap.updateServer();
-		}
-		GameMap.setStringsVisible(false);
 		if(this.delegate){
 			var self= this.delegate;
 			this.delegate.scheduleOnce(function(){self.endedEdit(null)});
@@ -2175,9 +2309,7 @@ ItemEditor = Popup.extend({
 		if(value!=this.currentTab){
 			this.panels["main_panel"].setContentSize(this.tabWidths[value],this.panels["main_panel"].getContentSize().height);
 			this.panels["control_panel"].setContentSize(this.tabWidths[value],this.panels["control_panel"].getContentSize().height);
-			if(this.currentTab==3 || this.currentTab==0){
-				this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(this.panels["main_panel"]["tab2"]["name_entry"].getPositionX()-1000);
-			}
+			this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(this.panels["main_panel"]["tab2"]["name_entry"].getPositionX()-1000);
 			this.currentTab=value;
 			this.panels["main_panel"]["tab1"].setVisible(false);
 			this.panels["main_panel"]["tab2"].setVisible(false)
@@ -2188,21 +2320,9 @@ ItemEditor = Popup.extend({
 			this.panels["main_panel"]["tab"+value].setVisible(true);
 			this.panels["main_panel"]["tab"+value+"Clickable"].setColor(cc.c4b(255,255,0,255));
 			if(value==2){
-				this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(this.panels["main_panel"]["tab2"]["name_entry"].getPositionX()+1000);
+				this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(8);
 			}
 			this.panels["control_panel"]["exitBtn"].setPositionX(this.tabWidths[value]-29);
-		}
-	},
-	
-	setSaveMapOnExit:function(value){
-		LocalStorage.setMapSaveOnExit(value);
-		this.saveOnExit=value;
-		if(value=="true" || value==true){
-			this.panels["main_panel"]["tab3"]["saveOnExit"].setColor(cc.c3b(0,255,0));
-			this.panels["main_panel"]["tab3"]["saveOnExit"]["content"].setString("Save on exit: YES");
-		} else{
-			this.panels["main_panel"]["tab3"]["saveOnExit"].setColor(cc.c3b(255,0,0));
-			this.panels["main_panel"]["tab3"]["saveOnExit"]["content"].setString("Save on exit: NO");
 		}
 	},
 	
@@ -2239,12 +2359,14 @@ ItemEditor = Popup.extend({
 		}
 		
 		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["okbtn"].getPositionX(),this.panels["main_panel"]["okbtn"].getPositionY(),this.panels["main_panel"]["okbtn"].getContentSize().width,this.panels["main_panel"]["okbtn"].getContentSize().height),truePos)){
-			if(this.nameBox.getText()==null || this.nameBox.getText()=="" || this.mapNumBox.getText()==null  || this.mapNumBox.getText()=="" || this.mapXBox.getText()==null || this.mapXBox.getText()=="" || this.mapYBox.getText()==null || this.mapYBox.getText()==""){
+			if(this.nameBox.getText()==null || this.nameBox.getText()==""){
 				return true;
 			}
 			this.ignoreTerminate=true;
-			this.data["position"]=indexFromPos(parseInt(this.mapXBox.getText()),(gridHeight)-parseInt(this.mapYBox.getText()));
-			this.data["mapTo"]=parseInt(this.mapNumBox.getText());
+			this.data["itemtype"]=this.currentLayer;
+			this.data["sprite"]=this.sprite;
+			this.data["subType"]=this.subType;
+			this.data["additionalData"]=this.additionalData;
 			this.name=this.nameBox.getText();
 			this.delegate.endedEdit({name:this.name,data:this.data});
 			return true;
@@ -2306,13 +2428,19 @@ ItemEditor = Popup.extend({
 				} else{
 					this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(0);
 				}
+
+
+				var pos = cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,((8-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-64)/32))+this.mapOffset.y)-1);
+				this.panels["main_panel"]["tab2"]["tile"].setTextureRect(cc.rect(pos.x*32,pos.y*32,32,32));
+				this.sprite["position"]=pos;
+
 				return true;
 			} 
 
 		}
 		if(this.currentTab==2){	
 			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["currencybtn"].getPositionX(),this.panels["main_panel"]["tab2"]["currencybtn"].getPositionY(),this.panels["main_panel"]["tab2"]["currencybtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["currencybtn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("currencybtn");
+				this.updateCurrentLayer("currency");
 				return true;
 			}
 			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["resourcebtn"].getPositionX(),this.panels["main_panel"]["tab2"]["resourcebtn"].getPositionY(),this.panels["main_panel"]["tab2"]["resourcebtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["resourcebtn"].getContentSize().height),truePos)){
@@ -2338,48 +2466,6 @@ ItemEditor = Popup.extend({
 		}	
 		
 		if(this.currentTab==3){
-			var globalClearPos = this.panels["main_panel"]["tab3"]["clearbtn"].convertToWorldSpace(cc.p(0,0));
-			if(this.panels["main_panel"]["tab3"]["clearbtn"].isVisible() && cc.rectContainsPoint(cc.rect(globalClearPos.x,globalClearPos.y,this.panels["main_panel"]["tab3"]["clearbtn"].getContentSize().width,this.panels["main_panel"]["tab3"]["clearbtn"].getContentSize().height),touch._point)){
-				this.showAreYouSureClear(true);
-				return true;
-			}
-			var globalClearPos = this.panels["main_panel"]["tab3"]["clearbtnNo"].convertToWorldSpace(cc.p(0,0));
-			if(this.panels["main_panel"]["tab3"]["clearbtnNo"].isVisible() && cc.rectContainsPoint(cc.rect(globalClearPos.x,globalClearPos.y,this.panels["main_panel"]["tab3"]["clearbtnNo"].getContentSize().width,this.panels["main_panel"]["tab3"]["clearbtnNo"].getContentSize().height),touch._point)){
-				console.log("Closin");
-				this.showAreYouSureClear(false);
-				return true;
-			}
-			var globalClearPos = this.panels["main_panel"]["tab3"]["clearbtnYes"].convertToWorldSpace(cc.p(0,0));
-			if(this.panels["main_panel"]["tab3"]["clearbtnYes"].isVisible() && cc.rectContainsPoint(cc.rect(globalClearPos.x,globalClearPos.y,this.panels["main_panel"]["tab3"]["clearbtnYes"].getContentSize().width,this.panels["main_panel"]["tab3"]["clearbtnYes"].getContentSize().height),touch._point)){
-				GameMap.destroy();
-				this.showAreYouSureClear(false);
-				return true;
-			}
-			var globalSavePos = this.panels["main_panel"]["tab3"]["savebtn"].convertToWorldSpace(cc.p(0,0));
-			if(this.panels["main_panel"]["tab3"]["savebtn"].isVisible() && cc.rectContainsPoint(cc.rect(globalSavePos.x,globalSavePos.y,this.panels["main_panel"]["tab3"]["savebtn"].getContentSize().width,this.panels["main_panel"]["tab3"]["savebtn"].getContentSize().height),touch._point)){
-				this.showAreYouSureSave(true);
-				return true;
-			}
-			var globalSavePos = this.panels["main_panel"]["tab3"]["savebtnNo"].convertToWorldSpace(cc.p(0,0));
-			if(this.panels["main_panel"]["tab3"]["savebtnNo"].isVisible() && cc.rectContainsPoint(cc.rect(globalSavePos.x,globalSavePos.y,this.panels["main_panel"]["tab3"]["savebtnNo"].getContentSize().width,this.panels["main_panel"]["tab3"]["savebtnNo"].getContentSize().height),touch._point)){
-				console.log("Closin");
-				this.showAreYouSureSave(false);
-				return true;
-			}
-			var globalSavePos = this.panels["main_panel"]["tab3"]["savebtnYes"].convertToWorldSpace(cc.p(0,0));
-			if(this.panels["main_panel"]["tab3"]["savebtnYes"].isVisible() && cc.rectContainsPoint(cc.rect(globalSavePos.x,globalSavePos.y,this.panels["main_panel"]["tab3"]["savebtnYes"].getContentSize().width,this.panels["main_panel"]["tab3"]["savebtnYes"].getContentSize().height),touch._point)){
-				GameMap.setMapInfo({"up": this.mapUpBox.getText(),"down":this.mapDownBox.getText(),"left":this.mapLeftBox.getText(),"right":this.mapRightBox.getText()});
-				GameMap.updateServer();
-				this.showAreYouSureSave(false);
-				return true;
-			}
-			
-			var globalSavePos = this.panels["main_panel"]["tab3"]["saveOnExit"].convertToWorldSpace(cc.p(0,0));
-			if(this.panels["main_panel"]["tab3"]["saveOnExit"].isVisible() && cc.rectContainsPoint(cc.rect(globalSavePos.x,globalSavePos.y,this.panels["main_panel"]["tab3"]["saveOnExit"].getContentSize().width,this.panels["main_panel"]["tab3"]["saveOnExit"].getContentSize().height),touch._point)){
-				this.setSaveMapOnExit(!this.saveOnExit);
-				return true;
-			}
-			
 		}
 		
 		return false;
@@ -2402,8 +2488,10 @@ ItemEditor = Popup.extend({
 		}
 		this.currentTextureNumber++;
 		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["main_panel"]["tab2"]["tile"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
 		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
 		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
+		this.sprite["texture"]=this.currentTexture;
 		this.mapOffset=cc.p(0,0);
 		this.updateMapOffset();
 	},
@@ -2414,57 +2502,10 @@ ItemEditor = Popup.extend({
 		}
 		this.currentTextureNumber--;
 		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["main_panel"]["tab2"]["tile"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
 		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
 		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
 		this.mapOffset=cc.p(0,0);
 		this.updateMapOffset();
 	},
-	
-	showAreYouSureClear:function(visible){
-		this.panels["main_panel"]["tab3"]["clearbtnYes"].setVisible(visible);
-		this.panels["main_panel"]["tab3"]["clearbtnNo"].setVisible(visible);	
-		this.panels["main_panel"]["tab3"]["clear_text"].setVisible(visible);	
-		this.panels["main_panel"]["tab3"]["clearbtn"].setVisible(!visible);
-	},
-	
-	showAreYouSureSave:function(visible){
-		this.panels["main_panel"]["tab3"]["savebtnYes"].setVisible(visible);
-		this.panels["main_panel"]["tab3"]["savebtnNo"].setVisible(visible);	
-		this.panels["main_panel"]["tab3"]["save_text"].setVisible(visible);	
-		this.panels["main_panel"]["tab3"]["savebtn"].setVisible(!visible);
-	},
-	
-	tilePressed:function(tiles,tilenum,touchtype){
-		if(tiles[tilenum]==this.lastTile && touchtype=="moved"){
-			return false;
-		}
-		this.lastTile=tiles[tilenum];
-		switch(this.editMode){
-			case "tiles":
-				if(this.panels["main_panel"]["tab1"]["selectednode"].getOpacity()!=0){
-					GameMap.setLayer(tilenum,tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,(9-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y),this.currentLayer);
-				}
-			break;
-			case "blocking":
-				if(tiles[tilenum].getType()!=1){
-					GameMap.setTileInfo(tilenum,1);
-				} else{
-					GameMap.setTileInfo(tilenum,0);
-				}
-			break;
-			case "warping":
-				if(Warpeditor==null || !Warpeditor._parent){
-					if(tiles[tilenum].getType()!=3){
-						GameMap.setTileInfo(tilenum,3,this.typeData);
-					} else{
-						GameMap.setTileInfo(tilenum,0,null);
-					}
-				}
-			break;
-			case "erasing":
-				GameMap.destroyLayer(tilenum,this.currentLayer);
-			break;
-		}
-		
-	}
 });

@@ -126,6 +126,7 @@ reactToSocketMessage=function(data){
 			else if(data["saveitems"]){
 				LocalStorage.changeWarp(parseInt(data["savewarps"]),data["warpdata"],data["updatetime"]);
 				ObjectLists.getWarpList()[parseInt(data["savewarps"])]=data["warpdata"];
+				GameMap.goToMap(GameMap.getMapNumber());
 			}
 			else if(data["saveitemswhole"]){
 				LocalStorage.refreshItems(data["saveitemswhole"],data["updatetime"]);

@@ -276,6 +276,7 @@ PlayerCharacter = Character.extend({
 		} else{
 			sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 		}
+		GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
 		var added=false;
 		for(var i=0;i<this.items["stored"].length;i++){
 			if(this.items["stored"][i]==null){
@@ -291,6 +292,7 @@ PlayerCharacter = Character.extend({
 	
 	dropItem:function(itemnumber){
 		var gp = this.getGridPosition();
+		GameChat.addMessage(strings.gameChat.droppedItem + this.items["stored"][itemnumber]["name"]);
 		sendMessageToServer({"droppeditem":this.items["stored"][itemnumber],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y)});
 		this.items["stored"][itemnumber]=null;
 		if(Inventory){

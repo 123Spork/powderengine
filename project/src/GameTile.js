@@ -318,6 +318,9 @@ var GameTile = cc.Node.extend({
 
 	popScript:function(_){
 		this.script.splice(this.script.length-1,1);
+		if(this.script.length==0){
+			this.setType(1);
+		}
 	},
 
 	getScriptObject:function(){

@@ -1,8 +1,10 @@
-(4th July 2014) - Version 0.54
+(4th July 2014) - Version 0.55
 -Added item picking up and dropping to player character
 -Added drup/use submenu to inventory menu.
 -Inventory now populates with picked up items
 -Dropped items are "temp" and map items are "fixed" (drop by clicking on item in inventory).
+-Fixed some item and warp editing bugs.
+-Added mouse over highlight on items.
 
 (3rd July 2014) - Version 0.53
 -Implemented more sophisticated item editor.

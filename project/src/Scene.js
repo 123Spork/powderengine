@@ -14,6 +14,9 @@ var Scene = cc.Layer.extend({
 	},
 	
 	didBecomeActive:function(){
+		if(this.panels){
+			this.panels.removeFromParent();
+		}
 		this.panels = requestLayout(this);
 		this.addChild(this.panels);
 	},

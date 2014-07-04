@@ -258,6 +258,15 @@ PlayerCharacter = Character.extend({
 		this._super(withData);
 		this.items = {"stored":[], "equipped":{}};
 	},
+
+	updateItemData:function(name,item){
+		for(var i=0;i<this.items["stored"].length;i++){
+			if(this.items["stored"][i]["name"]==name){
+				this.items["stored"][i]["name"]=item["name"];
+				this.items["stored"][i]["data"]=item["data"];
+			}
+		}
+	},
 	
 	pickupItem:function(item){
 		var gp = this.getGridPosition();

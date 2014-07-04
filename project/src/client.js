@@ -118,15 +118,28 @@ reactToSocketMessage=function(data){
 			else if(data["savewarps"]){
 				LocalStorage.changeWarp(parseInt(data["savewarps"]),data["warpdata"],data["updatetime"]);
 				ObjectLists.getWarpList()[parseInt(data["savewarps"])]=data["warpdata"];
+				if(Warpeditor){
+					Warpeditor.editList = ObjectLists.getWarpList();
+					Warpeditor.didBecomeActive();	
+				}	
 			}
 			else if(data["savewarpswhole"]){
 				LocalStorage.refreshWarp(data["savewarpswhole"],data["updatetime"]);
 				ObjectLists.setWarpList(data["savewarpswhole"]);
 			}
 			else if(data["saveitems"]){
-				LocalStorage.changeItem(parseInt(data["saveitems"]),data["itemdata"],data["updatetime"]);
-				ObjectLists.getItemList()[parseInt(data["savewarps"])]=data["itemdata"];
+				LocalStorage.changeItems(parseInt(data["saveitems"]),data["itemdata"],data["updatetime"]);
+				var oldItemName = ObjectLists.getItemList()[parseInt(data["saveitems"])]["name"];
+				ObjectLists.getItemList()[parseInt(data["saveitems"])]=data["itemdata"];
 				GameMap.goToMap(GameMap.getMapNumber());
+				if(Itemeditor){
+					Itemeditor.editList = ObjectLists.getItemList();
+					Itemeditor.didBecomeActive();	
+				}			
+				if(Inventory){
+					Inventory.updateTileGrid();
+				}
+				PlayersController.getYou().updateItemData(oldItemName,data["itemdata"])
 			}
 			else if(data["droppeditem"]){
 				if(data["mapnumber"] == GameMap.getMapNumber()){

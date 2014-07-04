@@ -71,6 +71,11 @@ ObjectList = Popup.extend({
 
 	init:function(withData){
 		this._super();
+		this.childEditor=null;
+		this.editList=[],
+		this.listName=null;
+		this.showingEditor=false;
+		this.saveNewDataID=-1;
 		this.childEditor=withData.editor;
 		if(withData.list){
 			this.editList=withData.list;
@@ -227,7 +232,7 @@ ObjectList = Popup.extend({
 					this._parent.addChild(this.childEditor);
 					this.setTouchEnabled(false);
 					this.childEditor.didBecomeActive();
-					this.saveNewDataID=i;
+					this.saveNewDataID=i+"";
 					return true;
 				}
 				
@@ -271,8 +276,7 @@ ObjectList = Popup.extend({
 		this.showingEditor=false;
 		var self=this;
 		this.scheduleOnce(function(){
-		self.childEditor.willTerminate();
-		self.childEditor.panels.removeFromParent();
+		self.childEditor.willTerminate(true);
 		self.childEditor.removeFromParent();
 		})
 	},
@@ -432,6 +436,14 @@ WarpEditorPopup = Popup.extend({
 	
 	init:function(withData){
 		this._super();	
+		this.nameBox=null;
+		this.mapNumBox=null;
+		this.mapXBox=null;
+		this.mapYBox=null;
+		this.delegate=null;
+		this.name=null;
+		this.data=null;
+
 		this.delegate=withData.delegate;
 		this.data=withData.data;
 		this.name=withData.name;
@@ -484,8 +496,11 @@ WarpEditorPopup = Popup.extend({
 		}
 	},
 	
-	willTerminate:function(){
+	willTerminate:function(ignoreTerminate){
 		var self= this.delegate;
+		if(ignoreTerminate){
+			return;
+		}
 		this.delegate.scheduleOnce(function(){self.endedEdit(null)});
 	},
 	
@@ -547,6 +562,21 @@ InventoryPopup = Popup.extend({
 									position:cc.p(13,13),
 									}
 								}
+							}
+						}
+					},
+					"item_name":{
+						position:cc.p(0,0),
+						bg:cc.c4b(200,200,200,200),
+						size:cc.size(64,16),
+						visible:false,
+						children:{
+							"content":{
+								label:"",
+								fontSize:14,
+								color:cc.c3b(0,0,0),
+								anchorPoint:cc.p(0.5,0.5),
+								position:cc.p(32,8),
 							}
 						}
 					},
@@ -629,9 +659,8 @@ InventoryPopup = Popup.extend({
 		if(this.itemContext!=null){
 			if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["dropbtn"].getPositionX(),this.panels["control_menu"]["dropbtn"].getPositionY(),this.panels["control_menu"]["dropbtn"].getContentSize().width,this.panels["control_menu"]["dropbtn"].getContentSize().height),menuPos)){
 				PlayersController.getYou().dropItem(this.itemContext);
-				console.log("droppin");
 			}else if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["usebtn"].getPositionX(),this.panels["control_menu"]["usebtn"].getPositionY(),this.panels["control_menu"]["usebtn"].getContentSize().width,this.panels["control_menu"]["usebtn"].getContentSize().height),menuPos)){
-				//PlayersController.getYou().useItem(this.itemContext);
+				PlayersController.getYou().useItem(this.itemContext);
 			}
 			this.itemContext=null;
 			this.panels["control_menu"].setVisible(false);
@@ -657,8 +686,10 @@ InventoryPopup = Popup.extend({
 
 	onMouseMoved:function(pos){
 		var menuPos = this.panels["control_menu"].convertToNodeSpace(pos);
+		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
 		this.panels["control_menu"]["dropbtn"].setColor(cc.c4b(200,200,200,200));
 		this.panels["control_menu"]["usebtn"].setColor(cc.c4b(200,200,200,200));
+		this.panels["item_name"].setVisible(false);
 		if(this.itemContext!=null){
 			if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["dropbtn"].getPositionX(),this.panels["control_menu"]["dropbtn"].getPositionY(),this.panels["control_menu"]["dropbtn"].getContentSize().width,this.panels["control_menu"]["dropbtn"].getContentSize().height),menuPos)){
 				this.panels["control_menu"]["dropbtn"].setColor(cc.c4b(255,0,0,255));
@@ -667,7 +698,24 @@ InventoryPopup = Popup.extend({
 				this.panels["control_menu"]["usebtn"].setColor(cc.c4b(255,0,0,255));
 				this.panels["control_menu"]["dropbtn"].setColor(cc.c4b(200,200,200,200));
 			}
+		} else{
+			for(var i=0;i<40;i++){
+				var reducer=0;
+				if(this.panels["main_panel"][(i+"")].getAnchorPoint().y==1){
+					reducer=32;
+				}
+				if(PlayersController.getYou().getInventory()[i] && cc.rectContainsPoint(cc.rect(this.panels["main_panel"][(i+"")].getPositionX(),this.panels["main_panel"][(i+"")].getPositionY()-reducer,this.panels["main_panel"][(i+"")].getContentSize().width,this.panels["main_panel"][(i+"")].getContentSize().height),truePos)){
+					this.panels["item_name"]["content"].setString(PlayersController.getYou().getInventory()[i]["name"]);
+					this.panels["item_name"].setVisible(true);
+					this.panels["item_name"].setContentSize(this.panels["item_name"]["content"].getContentSize());
+					this.panels["item_name"]["content"].setPositionX(this.panels["item_name"]["content"].getContentSize().width/2);
+					this.panels["item_name"].setPosition(cc.p(this.panels["main_panel"][(i+"")].getPositionX()-(this.panels["item_name"]["content"].getContentSize().width/2)+16,this.panels["main_panel"][(i+"")].getPositionY()));
+					return true;
+				}
+			}
 		}
+
+
 	},
 
 
@@ -1687,6 +1735,7 @@ MapEditor = Popup.extend({
 			if(cc.rectContainsPoint(cc.rect(globalWarpPos.x,globalWarpPos.y,this.panels["main_panel"]["tab2"]["warpbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["warpbtn"].getContentSize().height),touch._point)){
 				this.editMode = this.editMode=="warping" ? "tiles" : "warping";
 				if(this.editMode=="warping"){
+					if(Warpeditor!=null && !Warpeditor._parent) Warpeditor=null;
 					if(Warpeditor){
 						Warpeditor.willTerminate();
 						Warpeditor.removeFromParent();
@@ -1709,6 +1758,7 @@ MapEditor = Popup.extend({
 			if(cc.rectContainsPoint(cc.rect(globalWarpPos.x,globalWarpPos.y,this.panels["main_panel"]["tab2"]["itembtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["warpbtn"].getContentSize().height),touch._point)){
 				this.editMode = this.editMode=="items" ? "tiles" : "items";
 				if(this.editMode=="items"){
+					if(Itemeditor!=null && !Itemeditor._parent) Itemeditor=null;
 					if(Itemeditor){
 						Itemeditor.willTerminate();
 						Itemeditor.removeFromParent();
@@ -2358,6 +2408,21 @@ ItemEditor = Popup.extend({
 	
 	init:function(withData){
 		this._super();	
+		this.currentLayer="currency",
+		this.subType="",
+		this.sprite={"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},
+		this.additionalData={},
+		this.currentTexture=tileTextureList[0]["name"],
+		this.currentTextureNumber=0,
+		this.nameBox=null,
+		this.tabWidths=null,
+		this.currentTab=0,
+		this.delegate=null,
+		this.name=null,
+		this.data=null,
+		
+
+
 		this.mapOffset=cc.p(0,0);
 		this.tabWidths=[null,352,352,200];
 		this.delegate=withData.delegate;
@@ -2403,9 +2468,12 @@ ItemEditor = Popup.extend({
 
 	},
 	
-	willTerminate:function(){
+	willTerminate:function(ignoreTerminate){
 		if(this.delegate){
 			var self= this.delegate;
+			if(ignoreTerminate==true){
+				return;
+			}
 			this.delegate.scheduleOnce(function(){self.endedEdit(null)});
 		}
 	},

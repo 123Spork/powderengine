@@ -320,6 +320,10 @@ var GameTile = cc.Node.extend({
 		this.script.splice(this.script.length-1,1);
 	},
 
+	getScriptObject:function(){
+		return this.script[this.script.length-1];
+	},
+
 	getScript:function(){
 		switch(this.type){
 			case 3: return ObjectLists.getWarpList()[this.script[this.script.length-1]["num"]];

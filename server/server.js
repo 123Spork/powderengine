@@ -20,6 +20,9 @@ var updateMapIndex=0;
 var updateWarpIndex=1;
 var updateItemIndex=2;
 
+
+var droppedItems={};
+
 fs.readdirSync("./maps").forEach(function(file) {
   maps[parseInt(file.split('.')[0])] =require("./maps/" + file);
 });
@@ -136,12 +139,25 @@ socket.on('connection', function(client){
 			positions[client.id]= event["moveTo"];
 		}
 		if(event["droppeditem"]){
-			client.send(JSON.stringify({"droppeditem":event["droppeditem"],"index":event["index"]}));
-			client.broadcast.send(JSON.stringify({"droppeditem":event["droppeditem"],"index":event["index"]}));
+			client.send(JSON.stringify({"droppeditem":event["droppeditem"], "mapnumber":event["mapnumber"], "index":event["index"]}));
+			client.broadcast.send(JSON.stringify({"droppeditem":event["droppeditem"],"mapnumber":event["mapnumber"],"index":event["index"]}));
+			if(!droppedItems[event["mapnumber"]]){
+				droppedItems[event["mapnumber"]]=[];
+			}
+			droppedItems[event["mapnumber"]].push({"droppeditem":event["droppeditem"],"mapnumber":event["mapnumber"],"index":event["index"]});
 		}
 		if(event["pickupitem"]){
-			client.send(JSON.stringify({"pickupitem":event["pickupitem"]}));
-			client.broadcast.send(JSON.stringify({"pickupitem":event["pickupitem"]}));
+			client.send(JSON.stringify({"pickupitem":event["pickupitem"],"mapnumber":event["mapnumber"]}));
+			client.broadcast.send(JSON.stringify({"pickupitem":event["pickupitem"],"mapnumber":event["mapnumber"]}));
+			if(event["temp"]){
+				var droppedarr = droppedItems[event["mapnumber"]];
+				for(var i=droppedarr.length-1;i>=0;i--){
+					if(droppedarr[i]["index"]==event["pickupitem"]){
+						droppedItems[event["mapnumber"]].splice(i,1);
+						break;
+					}
+				}
+			}
 		}
 		if(event["savemap"]){
 			last[updateMapIndex]=Date.now();
@@ -204,6 +220,9 @@ socket.on('connection', function(client){
 		}
 		if(event["changemap"]){
 			client.broadcast.send(JSON.stringify({"id":names[client.id],"changemap":event["changemap"],"setTo":event["setTo"]}));
+			for(var i in droppedItems[event["changemap"]]){
+				client.send(JSON.stringify({"droppeditem":droppedItems[event["changemap"]][i]["droppeditem"],"mapnumber":event["changemap"],"index":droppedItems[event["changemap"]][i]["index"]}));
+			}
 		}
 		if(event["diceroll"]){
 			client.broadcast.send(JSON.stringify({"diceroll":event["diceroll"]}));

@@ -129,14 +129,18 @@ reactToSocketMessage=function(data){
 				GameMap.goToMap(GameMap.getMapNumber());
 			}
 			else if(data["droppeditem"]){
-				var tile = GameMap.getTileNodeForIndex(data["index"]);
-				tile.addDroppedItem(data["droppeditem"]);
-				GameMap.updateMap();
+				if(data["mapnumber"] == GameMap.getMapNumber()){
+					var tile = GameMap.getTileNodeForIndex(data["index"]);
+					tile.addDroppedItem(data["droppeditem"]);
+					GameMap.updateMap();
+				}
 			}
 			else if(data["pickupitem"]){
-				var tile = GameMap.getTileNodeForIndex(data["pickupitem"]);
-				tile.pickupItem();
-				GameMap.updateMap();
+				if(data["mapnumber"] == GameMap.getMapNumber()){
+					var tile = GameMap.getTileNodeForIndex(data["pickupitem"]);
+					tile.pickupItem();
+					GameMap.updateMap();
+				}
 			}
 			else if(data["saveitemswhole"]){
 				LocalStorage.refreshItems(data["saveitemswhole"],data["updatetime"]);

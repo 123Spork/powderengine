@@ -492,6 +492,7 @@ WarpEditorPopup = Popup.extend({
 });
 
 InventoryPopup = Popup.extend({
+	itemContext:null,
 
 	getIdentifier:function(){
 		return "Inventory";
@@ -525,7 +526,7 @@ InventoryPopup = Popup.extend({
 						position: cc.p(0,328),
 						size: cc.size(208,32),
 						bg: cc.c4b(255,0,0,200),
-						children:{	
+						children:{
 							"header":{
 								label:"Inventory",
 								fontSize:20,
@@ -549,6 +550,44 @@ InventoryPopup = Popup.extend({
 							}
 						}
 					},
+					"control_menu":{
+						position:cc.p(0,0),
+						bg:cc.c4b(200,200,200,200),
+						size:cc.size(96,48),
+						visible:false,
+						children:{
+							"dropbtn":{
+								position: cc.p(0,0),
+								size: cc.size(96,24),
+								anchorPoint:cc.p(0,0),
+								bg: cc.c4b(200,200,200,200),
+								children:{	
+								"content":{
+									label:"Drop",
+									fontSize:20,
+									color:cc.c3b(0,0,0),
+									anchorPoint:cc.p(0,0.5),
+									position:cc.p(4,12),
+									}
+								}
+							},
+							"usebtn":{
+								position: cc.p(0,24),
+								size: cc.size(96,24),
+								anchorPoint:cc.p(0,0),
+								bg: cc.c4b(200,200,200,200),
+								children:{	
+								"content":{
+									label:"Use",
+									fontSize:20,
+									color:cc.c3b(0,0,0),
+									anchorPoint:cc.p(0,0.5),
+									position:cc.p(4,12),
+									}
+								}
+							}
+						}
+					}
 				}	
 			}
 		};
@@ -582,20 +621,54 @@ InventoryPopup = Popup.extend({
 		if(this._super(touch)){
 			return true;
 		}
+		this.prevMovPos=null;
 		var pos = touch._point;
 		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
+		var menuPos = this.panels["control_menu"].convertToNodeSpace(pos);
+
+		if(this.itemContext!=null){
+			if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["dropbtn"].getPositionX(),this.panels["control_menu"]["dropbtn"].getPositionY(),this.panels["control_menu"]["dropbtn"].getContentSize().width,this.panels["control_menu"]["dropbtn"].getContentSize().height),menuPos)){
+				PlayersController.getYou().dropItem(this.itemContext);
+				console.log("droppin");
+			}else if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["usebtn"].getPositionX(),this.panels["control_menu"]["usebtn"].getPositionY(),this.panels["control_menu"]["usebtn"].getContentSize().width,this.panels["control_menu"]["usebtn"].getContentSize().height),menuPos)){
+				//PlayersController.getYou().useItem(this.itemContext);
+			}
+			this.itemContext=null;
+			this.panels["control_menu"].setVisible(false);
+			return true;
+		} 
 
 		for(var i=0;i<40;i++){
 			var reducer=0;
 			if(this.panels["main_panel"][(i+"")].getAnchorPoint().y==1){
 				reducer=32;
 			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"][(i+"")].getPositionX(),this.panels["main_panel"][(i+"")].getPositionY()-reducer,this.panels["main_panel"][(i+"")].getContentSize().width,this.panels["main_panel"][(i+"")].getContentSize().height),truePos)){
-				PlayersController.getYou().dropItem(i);
+			if(PlayersController.getYou().getInventory()[i] && cc.rectContainsPoint(cc.rect(this.panels["main_panel"][(i+"")].getPositionX(),this.panels["main_panel"][(i+"")].getPositionY()-reducer,this.panels["main_panel"][(i+"")].getContentSize().width,this.panels["main_panel"][(i+"")].getContentSize().height),truePos)){
+				this.panels["control_menu"].setVisible(true);
+				this.panels["control_menu"].setPosition(cc.p(this.panels["main_panel"][(i+"")].getPositionX()+28,this.panels["main_panel"][(i+"")].getPositionY()-(reducer!=0?40:0)-8));
+				this.itemContext=i;
+				return true;
+			} else if(!PlayersController.getYou().getInventory()[i] && cc.rectContainsPoint(cc.rect(this.panels["main_panel"][(i+"")].getPositionX(),this.panels["main_panel"][(i+"")].getPositionY()-reducer,this.panels["main_panel"][(i+"")].getContentSize().width,this.panels["main_panel"][(i+"")].getContentSize().height),truePos)) {
+				this.itemContext=null;
 				return true;
 			}	
 		}
-	}
+	},
+
+	onMouseMoved:function(pos){
+		var menuPos = this.panels["control_menu"].convertToNodeSpace(pos);
+		this.panels["control_menu"]["dropbtn"].setColor(cc.c4b(200,200,200,200));
+		this.panels["control_menu"]["usebtn"].setColor(cc.c4b(200,200,200,200));
+		if(this.itemContext!=null){
+			if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["dropbtn"].getPositionX(),this.panels["control_menu"]["dropbtn"].getPositionY(),this.panels["control_menu"]["dropbtn"].getContentSize().width,this.panels["control_menu"]["dropbtn"].getContentSize().height),menuPos)){
+				this.panels["control_menu"]["dropbtn"].setColor(cc.c4b(255,0,0,255));
+				this.panels["control_menu"]["usebtn"].setColor(cc.c4b(200,200,200,200));
+			}else if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["usebtn"].getPositionX(),this.panels["control_menu"]["usebtn"].getPositionY(),this.panels["control_menu"]["usebtn"].getContentSize().width,this.panels["control_menu"]["usebtn"].getContentSize().height),menuPos)){
+				this.panels["control_menu"]["usebtn"].setColor(cc.c4b(255,0,0,255));
+				this.panels["control_menu"]["dropbtn"].setColor(cc.c4b(200,200,200,200));
+			}
+		}
+	},
 
 
 });
@@ -637,6 +710,7 @@ EquipmentPopup = Popup.extend({
 						size: cc.size(168,32),
 						bg: cc.c4b(255,0,0,200),
 						children:{	
+
 							"header":{
 								label:"Equipment",
 								fontSize:20,

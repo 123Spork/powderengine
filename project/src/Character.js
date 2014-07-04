@@ -98,10 +98,12 @@ Character = cc.Sprite.extend({
 
 
 	interactWithTile:function(){
-		var gp = this.getGridPosition();
-		var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
-		switch(tile.getType()){
-			case 4: this.pickupItem(tile.getScript()); return;
+		if(!this.isWalking){
+			var gp = this.getGridPosition();
+			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
+			switch(tile.getType()){
+				case 4: this.pickupItem(tile.getScript()); return;
+			}
 		}
 	},
 	
@@ -259,7 +261,12 @@ PlayerCharacter = Character.extend({
 	
 	pickupItem:function(item){
 		var gp = this.getGridPosition();
-		sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y)});
+		var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
+		if(tile.getScriptObject()["temp"]){
+			sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+		} else{
+			sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+		}
 		var added=false;
 		for(var i=0;i<this.items["stored"].length;i++){
 			if(this.items["stored"][i]==null){
@@ -275,7 +282,7 @@ PlayerCharacter = Character.extend({
 	
 	dropItem:function(itemnumber){
 		var gp = this.getGridPosition();
-		sendMessageToServer({"droppeditem":this.items["stored"][itemnumber],"index":indexFromPos(gp.x,gp.y)});
+		sendMessageToServer({"droppeditem":this.items["stored"][itemnumber],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y)});
 		this.items["stored"][itemnumber]=null;
 		if(Inventory){
 			Inventory.updateTileGrid();

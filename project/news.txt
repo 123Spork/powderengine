@@ -1,12 +1,10 @@
+(4th July 2014) - Version 0.54
+-Added item picking up and dropping to player character
+-Inventory now populates with picked up items
+-Dropped items are "temp" and map items are "fixed" (drop by clicking on item in inventory).
+
 (3rd July 2014) - Version 0.53
 -Implemented more sophisticated item editor.
 -Items can now be created, edited and placed into the map.
 -Items can be edited later on and updates are changed in real time.
 -Implemented base for multiple item types which will be extended into the mapeditor for additional options.
-
-(22nd June 2014) - Version 0.52
--Implemented start of object list code
--Used object list code to implement warp script
--Warp points can now be applied in map editor
--Warp editor can modify warps after they are added to map.
--Added exit buttons to popups.

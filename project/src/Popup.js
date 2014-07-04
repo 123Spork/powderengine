@@ -579,6 +579,9 @@ InventoryPopup = Popup.extend({
 	},
 
 	onTouchBegan:function(touch){
+		if(this._super(touch)){
+			return true;
+		}
 		var pos = touch._point;
 		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
 

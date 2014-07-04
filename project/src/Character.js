@@ -276,17 +276,31 @@ PlayerCharacter = Character.extend({
 		} else{
 			sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 		}
-		GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+
+		if(item["data"]["additionalData"]["stackable"]==true){
+			for(var i=0;i<40;i++){
+				if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
+					this.items["stored"][i]["data"]["additionalData"]["amount"]++;
+					if(Inventory){
+						Inventory.setStackableLabel(i,this.items["stored"][i]["data"]["additionalData"]["amount"]);
+					}
+					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+					return;
+				}
+			}
+		}
+		
 		var added=false;
-		for(var i=0;i<this.items["stored"].length;i++){
+		for(var i=0;i<40;i++){
 			if(this.items["stored"][i]==null){
 				this.items["stored"][i]=item;
+				GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
 				var added=true;
 				break;
 			}
 		}
 		if(added==false){
-			this.items["stored"].push(item);
+			GameChat.addMessage(strings.gameChat.inventoryFull);
 		}
 	},
 	
@@ -294,6 +308,14 @@ PlayerCharacter = Character.extend({
 		var gp = this.getGridPosition();
 		GameChat.addMessage(strings.gameChat.droppedItem + this.items["stored"][itemnumber]["name"]);
 		sendMessageToServer({"droppeditem":this.items["stored"][itemnumber],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y)});
+		
+
+		if(this.items["stored"][itemnumber]["data"]["additionalData"]["stackable"]==true && this.items["stored"][itemnumber]["data"]["additionalData"]["amount"]>1){
+			this.items["stored"][itemnumber]["data"]["additionalData"]["amount"]--;
+			Inventory.setStackableLabel(itemnumber,this.items["stored"][itemnumber]["data"]["additionalData"]["amount"]);
+			return;
+		}
+	
 		this.items["stored"][itemnumber]=null;
 		if(Inventory){
 			Inventory.updateTileGrid();

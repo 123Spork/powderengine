@@ -36,6 +36,23 @@ var GameTile = cc.Node.extend({
 	addDroppedItem:function(data){
 		var texture = data["data"]["sprite"]["texture"];
 		var pos = data["data"]["sprite"]["position"];
+		
+/*
+		if(data["additionalData"]["stackable"]==true){
+			for(var i=0;i<40;i++){
+				if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
+					this.items["stored"][i]["data"]["additionalData"]["amount"]++;
+					if(Inventory){
+						Inventory.setStackableLabel(i,this.items["stored"][i]["data"]["additionalData"]["amount"]);
+					}
+					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+					return;
+				}
+			}
+		}*/
+		
+
+
 		this.setLayer(texture,pos,"item");
 		for(var i=0;i<ObjectLists.getItemList().length;i++){
 			if(data["name"]==ObjectLists.getItemList()[i]["name"]){

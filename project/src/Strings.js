@@ -15,6 +15,7 @@ var strings = Object.freeze({
 		playerLeave: " has left the game!",
 		pickedUpItem: "Picked up ",
 		droppedItem: "Dropped ",
+		inventoryFull: "Your inventory is full",
 	},
 
 });

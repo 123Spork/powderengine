@@ -521,7 +521,24 @@ InventoryPopup = Popup.extend({
 					size: cc.size(32,32),
 					position: cc.p((x*40)+8,(((8-1)-y)*40)+40),
 					isSprite:true,
-					anchorPoint:cc.p(0,0)
+					anchorPoint:cc.p(0,0),
+					children:{	
+						"stacklabelbg":{
+							position: cc.p(1,1),
+							size: cc.size(10,6),
+							anchorPoint:cc.p(0,0),
+							bg: cc.c4b(255,255,255,200),
+							children:{
+								"stacklabel":{
+									label:"",
+									fontSize:10,
+									color:cc.c3b(0,0,0),
+									anchorPoint:cc.p(0,0),
+									position:cc.p(0,0),
+								}
+							}
+						}
+					}
 				};
 			}
 		}
@@ -623,6 +640,16 @@ InventoryPopup = Popup.extend({
 		};
 	},
 
+	setStackableLabel:function(itemNum,amount){
+		if(amount>1){
+			this.panels["main_panel"][(itemNum+"")]["stacklabelbg"].setVisible(true);
+			this.panels["main_panel"][(itemNum+"")]["stacklabelbg"]["stacklabel"].setString(amount);
+			this.panels["main_panel"][(itemNum+"")]["stacklabelbg"].setContentSize(this.panels["main_panel"][(itemNum+"")]["stacklabelbg"]["stacklabel"].getContentSize());
+		} else{
+			this.panels["main_panel"][(itemNum+"")]["stacklabelbg"].setVisible(false);
+		}
+	},
+
 	updateTileGrid:function(){
 		var inventoryList = PlayersController.getYou().getInventory();
 
@@ -636,8 +663,10 @@ InventoryPopup = Popup.extend({
 				this.panels["main_panel"][(i+"")].setAnchorPoint(0,1);
 				this.panels["main_panel"][(i+"")].setTexture(texture);
 				this.panels["main_panel"][(i+"")].setTextureRect(cc.rect(inventoryList[i]["data"]["sprite"]["position"].x*32, (inventoryList[i]["data"]["sprite"]["position"].y*32),32,32));
+				this.setStackableLabel(i,inventoryList[i]["data"]["additionalData"]["amount"]);
 			} else{
 				this.panels["main_panel"][(i+"")].setTexture(null);
+				this.setStackableLabel(i,0);
 			}
 		}
 	},
@@ -2005,7 +2034,7 @@ ItemEditor = Popup.extend({
 	currentLayer:"currency",
 	subType:"",
 	sprite:{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},
-	additionalData:{},
+	additionalData:{"amount":1,"stackable":true},
 	currentTexture:tileTextureList[0]["name"],
 	currentTextureNumber:0,
 	
@@ -2411,7 +2440,7 @@ ItemEditor = Popup.extend({
 		this.currentLayer="currency",
 		this.subType="",
 		this.sprite={"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},
-		this.additionalData={},
+		this.additionalData={"amount":1,"stackable":true},
 		this.currentTexture=tileTextureList[0]["name"],
 		this.currentTextureNumber=0,
 		this.nameBox=null,
@@ -2427,6 +2456,7 @@ ItemEditor = Popup.extend({
 		this.tabWidths=[null,352,352,200];
 		this.delegate=withData.delegate;
 		this.data=withData.data;
+		this.additionalData=withData["data"]["additionalData"];
 		this.name=withData.name;
 	},
 	
@@ -2660,6 +2690,11 @@ ItemEditor = Popup.extend({
 	},	
 	
 	updateCurrentLayer:function(layerName){
+		switch(layerName){
+			case "currency": this.additionalData["stackable"]=true; break;
+			case "resource": this.additionalData["stackable"]=false; break;
+		}
+
 		this.panels["main_panel"]["tab2"]["currencybtn"].setColor(cc.c4b(255,255,255,255));
 		this.panels["main_panel"]["tab2"]["resourcebtn"].setColor(cc.c4b(255,255,255,255));
 		this.panels["main_panel"]["tab2"]["consumablebtn"].setColor(cc.c4b(255,255,255,255));

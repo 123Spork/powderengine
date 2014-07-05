@@ -5,6 +5,7 @@
 -Dropped items are "temp" and map items are "fixed" (drop by clicking on item in inventory).
 -Fixed some item and warp editing bugs.
 -Added mouse over highlight on items.
+-Added stackable item pickup/dropping.
 
 (3rd July 2014) - Version 0.53
 -Implemented more sophisticated item editor.

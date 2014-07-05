@@ -2455,8 +2455,10 @@ ItemEditor = Popup.extend({
 		this.mapOffset=cc.p(0,0);
 		this.tabWidths=[null,352,352,200];
 		this.delegate=withData.delegate;
-		this.data=withData.data;
-		this.additionalData=withData["data"]["additionalData"];
+		if(withData["data"]){
+			this.data=withData.data;
+			this.additionalData=withData["data"]["additionalData"];
+		}
 		this.name=withData.name;
 	},
 	

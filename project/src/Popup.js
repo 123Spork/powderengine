@@ -243,7 +243,7 @@ ObjectList = Popup.extend({
 				
 				if(this.delegate){
 					if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["list"]["useElement"+i].getPositionX(),this.panels["main_panel"]["list"]["useElement"+i].getPositionY(),this.panels["main_panel"]["list"]["useElement"+i].getContentSize().width,this.panels["main_panel"]["list"]["useElement"+i].getContentSize().height),truePos)){
-						this.delegate.setTypeData(i);
+						this.delegate.setTypeData(i,this.editList[i]);
 						return true;
 					}
 				}
@@ -1185,6 +1185,17 @@ MapEditor = Popup.extend({
 											}
 										}
 									},
+									"amountLabelHead":{
+										visible:false,
+										label:"Item Amount",
+										fontSize:12,
+										anchorPoint:cc.p(0,0),
+										position: cc.p(100,342),
+									},
+									"amountLabel":{
+										size: cc.size(60,32),
+										position: cc.p(98,-1000000),
+									},
 								}
 							},
 							"tab3":{
@@ -1470,6 +1481,7 @@ MapEditor = Popup.extend({
 	mapDownBox:null,
 	mapLeftBox:null,
 	mapRightBox:null,
+	itemAmountBox:null,
 	tabWidths:null,
 	currentTab:0,
 	typeData:null,
@@ -1497,6 +1509,9 @@ MapEditor = Popup.extend({
 		this.mapRightBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapRight_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapRight_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapRight_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapRight_entry"].getContentSize().height), GameMap.hasMapRight() ? GameMap.getMapRight():"" , cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapRightBox.setDefaultFineFlag(true);
 		this.mapRightBox.setNullAllowed(true);
+		this.itemAmountBox = new EntryBox(this.panels["main_panel"]["tab2"]["amountLabel"],cc.size(this.panels["main_panel"]["tab2"]["amountLabel"].getContentSize().width,this.panels["main_panel"]["tab2"]["amountLabel"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["amountLabel"].getContentSize().height), GameMap.hasMapRight() ? GameMap.getMapRight():"1" , cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.itemAmountBox.setDefaultFineFlag(true);
+		this.itemAmountBox.setNullAllowed(true);
 		this.showAreYouSureClear(false);
 		this.showAreYouSureSave(false);
 		this.saveOnExit=LocalStorage.getMapSaveOnExit();
@@ -1506,7 +1521,7 @@ MapEditor = Popup.extend({
 		GameMap.setStringsVisible(true);
 	},
 	
-	setTypeData:function(value){
+	setTypeData:function(value,data){
 		if(Warpeditor){
 			Warpeditor.willTerminate();
 			this.scheduleOnce(function(){Warpeditor.removeFromParent(); Warpeditor=null;});
@@ -1518,6 +1533,11 @@ MapEditor = Popup.extend({
 			this.scheduleOnce(function(){Itemeditor.removeFromParent(); Itemeditor=null;});
 			this.typeData=value;
 			this.setTouchEnabled(true);
+			this.itemAmountBox.inputBox.setText("1");
+			if(data["stackable"]==true){
+				this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(true);
+				this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(98,308);
+			}
 		}
 	},
 	
@@ -1748,6 +1768,8 @@ MapEditor = Popup.extend({
 					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,0,0,255));
 					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,255,255,255));
 					this.panels["main_panel"]["tab2"]["itembtn"].setColor(cc.c4b(255,255,255,255));
+					this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
+					this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-100000);
 				} else{
 					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
 				}
@@ -1771,6 +1793,8 @@ MapEditor = Popup.extend({
 					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,0,0,255));
 					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
 					this.panels["main_panel"]["tab2"]["itembtn"].setColor(cc.c4b(255,255,255,255));
+					this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
+					this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-100000);
 				} else{
 					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(cc.c4b(255,255,255,255));
 				}
@@ -1796,6 +1820,8 @@ MapEditor = Popup.extend({
 					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(cc.c4b(255,255,255,255));
 				} else{
 					this.panels["main_panel"]["tab2"]["itembtn"].setColor(cc.c4b(255,255,255,255));
+					this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
+					this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-1000000);
 				}
 				return true;
 			}
@@ -1932,7 +1958,7 @@ MapEditor = Popup.extend({
 			case "items":
 				if(Itemeditor==null || !Itemeditor._parent){
 					if(tiles[tilenum].getType()!=4){
-						GameMap.setTileInfo(tilenum,4,this.typeData);
+						GameMap.setTileInfo(tilenum,4,this.typeData,{"amount":this.itemAmountBox.getText()});
 					} else{
 						GameMap.setTileInfo(tilenum,0,null);
 					}
@@ -2424,7 +2450,7 @@ ItemEditor = Popup.extend({
 	
 	init:function(withData){
 		this._super();	
-		this.data={"itemType":"currency","subType":"","sprite":{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},"additionalData":{},"amount":1,"stackable":true, "name":""};
+		this.data={"itemType":"currency","subType":"","sprite":{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},"additionalData":{},"stackable":true, "name":""};
 		this.currentTexture=tileTextureList[0]["name"],
 		this.currentTextureNumber=0,
 		this.nameBox=null,
@@ -2514,6 +2540,8 @@ ItemEditor = Popup.extend({
 	},
 	
 	setTab:function(value){
+		this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
+		this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-100000);
 		if(value!=this.currentTab){
 			this.panels["main_panel"].setContentSize(this.tabWidths[value],this.panels["main_panel"].getContentSize().height);
 			this.panels["control_panel"].setContentSize(this.tabWidths[value],this.panels["control_panel"].getContentSize().height);

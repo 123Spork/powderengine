@@ -279,9 +279,9 @@ PlayerCharacter = Character.extend({
 		if(item["stackable"]==true){
 			for(var i=0;i<40;i++){
 				if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
-					this.items["stored"][i]["amount"]++;
 					if(Inventory){
-						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);
+						this.items["stored"][i]["amount"] +=item["amount"];
+						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
 					}
 					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
 					return;
@@ -292,7 +292,10 @@ PlayerCharacter = Character.extend({
 		var added=false;
 		for(var i=0;i<40;i++){
 			if(this.items["stored"][i]==null){
-				this.items["stored"][i]=item;
+				this.items["stored"][i]=cloneObj(item);
+				if(Inventory){
+					Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
+				}
 				GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
 				var added=true;
 				break;
@@ -310,9 +313,7 @@ PlayerCharacter = Character.extend({
 		
 
 		if(this.items["stored"][itemnumber]["stackable"]==true && this.items["stored"][itemnumber]["amount"]>1){
-			this.items["stored"][itemnumber]["amount"]--;
-			Inventory.setStackableLabel(itemnumber,this.items["stored"][itemnumber]["amount"]);
-			return;
+			Inventory.setStackableLabel(itemnumber,0);
 		}
 	
 		this.items["stored"][itemnumber]=null;

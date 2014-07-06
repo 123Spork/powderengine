@@ -36,27 +36,10 @@ var GameTile = cc.Node.extend({
 	addDroppedItem:function(data){
 		var texture = data["sprite"]["texture"];
 		var pos = data["sprite"]["position"];
-		
-/*
-		if(data["additionalData"]["stackable"]==true){
-			for(var i=0;i<40;i++){
-				if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
-					this.items["stored"][i]["data"]["additionalData"]["amount"]++;
-					if(Inventory){
-						Inventory.setStackableLabel(i,this.items["stored"][i]["data"]["additionalData"]["amount"]);
-					}
-					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
-					return;
-				}
-			}
-		}*/
-		
-
-
 		this.setLayer(texture,pos,"item");
 		for(var i=0;i<ObjectLists.getItemList().length;i++){
 			if(data["name"]==ObjectLists.getItemList()[i]["name"]){
-				this.setScript(i,true);
+				this.setScript({"id":i,"data":{"amount":data["amount"]}},true);
 				break;
 			}
 		}
@@ -330,7 +313,7 @@ var GameTile = cc.Node.extend({
 		if(!isTemp){
 			var isTemp=false;
 		}
-		this.script.push({"num":_in,"temp":isTemp});
+		this.script.push({"num":_in["id"],"data":_in["data"],"temp":isTemp});
 	},
 
 	popScript:function(_){
@@ -347,7 +330,9 @@ var GameTile = cc.Node.extend({
 	getScript:function(){
 		switch(this.type){
 			case 3: return ObjectLists.getWarpList()[this.script[this.script.length-1]["num"]];
-			case 4: return ObjectLists.getItemList()[this.script[this.script.length-1]["num"]];
+			case 4: var itemData = ObjectLists.getItemList()[this.script[this.script.length-1]["num"]];
+					itemData["amount"]=parseInt(this.script[this.script.length-1]["data"]["amount"]);
+					return itemData;
 		}
 	},
 	

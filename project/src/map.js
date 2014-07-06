@@ -396,11 +396,11 @@ GameMap.destroyLayer=function(id,type){
 	this.instance.tileNodes[id].destroyLayer(type);
 };
 
-GameMap.setTileInfo=function(id,type,script){
+GameMap.setTileInfo=function(id,type,scriptID,scriptData){
 	this.instance.tileNodes[id].setType(type);
-	if(script){
-		this.instance.tileNodes[id].setScript(script);
-		this.instance.tileData[id]["info"]={"type":type, "script":script};
+	if(scriptID){
+		this.instance.tileNodes[id].setScript(scriptID,scriptData);
+		this.instance.tileData[id]["info"]={"type":type, "script":{"id":scriptID,"data":scriptData?scriptData:null}};
 		return;
 	}
 	this.instance.tileData[id]["info"]={"type":type};

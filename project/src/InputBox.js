@@ -26,8 +26,8 @@ var InputBox = cc.Class.extend({
 		cc.log("Ovveride inputbox init call if necessary");
 	},
 	
-	ctor:function(parent, size, position, defaultText, bgColor, fontColor){
-		this.inputBox = cc.EditBox.create(cc.size(size.width, size.height),cc.Scale9Sprite.create());
+	ctor:function(parent, size, position, defaultText, bgColor, fontColor, type){
+		this.inputBox = cc.EditBox.create(cc.size(size.width, size.height),cc.Scale9Sprite.create(),type);
 		this.inputBox.setText(defaultText);
 		this.inputBox.defaultText=defaultText;
 		this.inputBox.setFontColor(cc.c3b(fontColor.r,fontColor.g,fontColor.b));

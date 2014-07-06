@@ -1,9 +1,12 @@
 var EntryBox = InputBox.extend({
 	hasEntry:false,
 	nullAllowed:false,
+	dontClear:false,
 	
     editBoxEditingDidBegin: function (editBox) {
-		editBox.setText("");
+    	if(this.dontClear==false){
+			editBox.setText("");
+		}
     },
 
     editBoxEditingDidEnd: function (editBox) {
@@ -41,6 +44,10 @@ var EntryBox = InputBox.extend({
 	
 	setNullAllowed:function(value){
 		this.nullAllowed=value;
+	},
+
+	setDontClear:function(value){
+		this.dontClear=value;
 	},
 	
 

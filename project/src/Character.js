@@ -331,7 +331,7 @@ PlayerCharacter = Character.extend({
 					Book=null;
 				}
 				Book = new BookPopup();
-				Book.init(this.items["stored"][itemnumber]["additionalData"]);
+				Book.init(this.items["stored"][itemnumber]);
 				Book.didBecomeActive();
 				this._parent._parent._parent.addChild(Book);
 		}

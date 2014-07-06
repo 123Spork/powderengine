@@ -4,6 +4,7 @@
 -Added script manipulation so that stackable items can be added in amounts to map.
 -Fixed stackable picking up and dropping.
 -Fixed issues caused by above 2 features.
+-Added book template. Use the book item to get a book popup.
 
 (4th July 2014) - Version 0.55
 -Added item picking up and dropping to player character

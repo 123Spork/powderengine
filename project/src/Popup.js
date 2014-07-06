@@ -746,6 +746,9 @@ InventoryPopup = Popup.extend({
 
 BookPopup = Popup.extend({
 
+	data:null,
+	pages:null,
+
 	getIdentifier:function(){
 		return "Book";
 	},
@@ -799,10 +802,15 @@ BookPopup = Popup.extend({
 								anchorPoint:cc.p(0,0),
 							},
 							"leftPage":{
-								label:"Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla ",
-								fontSize:18,
+								label:this.pages.length>0 ? this.pages[0] : this.pages,
 								anchorPoint:cc.p(0,1),
 								position:cc.p(4,316),
+								color:cc.c3b(255,255,255),
+							},
+							"rightPage":{
+								label:this.pages.length>0 ? this.pages[1] : "",
+								anchorPoint:cc.p(0,1),
+								position:cc.p(260,316),
 								color:cc.c3b(255,255,255),
 							}
 						}
@@ -814,7 +822,7 @@ BookPopup = Popup.extend({
 						bg: cc.c4b(255,0,0,200),
 						children:{	
 							"header":{
-								label:"Book Title",
+								label:this.data["name"],
 								fontSize:20,
 								anchorPoint:cc.p(0,0.5),
 								position:cc.p(8,16),
@@ -841,10 +849,80 @@ BookPopup = Popup.extend({
 		};
 	},
 
+	init:function(withData){
+		this._super();
+		this.data=withData;
+		this.pages = [];
+		var chunkSize = 490;
+		var str =withData["additionalData"]["Contents"]
+		while (str) {
+		    if (str.length < chunkSize) {
+		       this.pages.push(str);
+		        break;
+		    }
+		    else {
+		        this.pages.push(str.substr(0, chunkSize)+"...");
+		        str = str.substr(chunkSize);
+		    }
+		}
+		this.pageCount = Math.floor(this.pages.length/2);
+		this.currentPage=0;
+	},
+
 	didBecomeActive:function(){
 		this._super();
 		this.panels["main_panel"]["leftPage"].setDimensions(cc.size(248,0));
+		this.panels["main_panel"]["rightPage"].setDimensions(cc.size(248,0));
+		this.panels["main_panel"]["pageBackbtn"].setVisible(false);
+		if(this.pages.length<2){
+			this.panels["main_panel"]["pageForwardbtn"].setVisible(false);
+		}
 	},
+
+	gotoNextPage:function(){
+		this.currentPage++;
+		this.panels["main_panel"]["pageBackbtn"].setVisible(true);
+		if(this.currentPage==this.pageCount){
+			this.panels["main_panel"]["pageForwardbtn"].setVisible(false);
+		}
+		this.panels["main_panel"]["leftPage"].setString(this.pages[this.currentPage*2]);
+		if(this.pages[(this.currentPage*2)+1]){
+			this.panels["main_panel"]["rightPage"].setString(this.pages[(this.currentPage*2)+1]);
+		} else{
+			this.panels["main_panel"]["rightPage"].setString("");
+		}
+	},
+
+	gotoPreviousPage:function(){
+		this.currentPage--;
+		this.panels["main_panel"]["pageForwardbtn"].setVisible(true);
+		if(this.currentPage==0){
+			this.panels["main_panel"]["pageBackbtn"].setVisible(false);
+		}
+		this.panels["main_panel"]["leftPage"].setString(this.pages[this.currentPage*2]);
+		if(this.pages[(this.currentPage*2)+1]){
+			this.panels["main_panel"]["rightPage"].setString(this.pages[(this.currentPage*2)+1]);
+		}
+	},
+
+	onTouchBegan:function(touch){
+		if(this._super(touch)){
+			return true;
+		}
+		this.prevMovPos=null;
+		var pos = touch._point;
+		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
+
+		if(this.panels["main_panel"]["pageForwardbtn"].isVisible()==true && cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["pageForwardbtn"].getPositionX(),this.panels["main_panel"]["pageForwardbtn"].getPositionY(),this.panels["main_panel"]["pageForwardbtn"].getContentSize().width,this.panels["main_panel"]["pageForwardbtn"].getContentSize().height),truePos)){
+			this.gotoNextPage();
+			return true;
+		}		
+		if(this.panels["main_panel"]["pageBackbtn"].isVisible()==true && cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["pageBackbtn"].getPositionX(),this.panels["main_panel"]["pageBackbtn"].getPositionY(),this.panels["main_panel"]["pageBackbtn"].getContentSize().width,this.panels["main_panel"]["pageBackbtn"].getContentSize().height),truePos)){
+			this.gotoPreviousPage();
+			return true;
+		}		
+	},
+
 
 });
 
@@ -2316,6 +2394,16 @@ ItemEditor = Popup.extend({
 										size: cc.size(136,32),
 										position: cc.p(4,312),
 									},
+									"book_text":{
+										label:"Book Contents",
+										fontSize:10,
+										anchorPoint:cc.p(0,0),
+										position: cc.p(152,348),
+									},
+									"book_entry":{
+										size: cc.size(240,340),
+										position: cc.p(-100000,8),
+									},
 									"currencybtn" : {
 										position:cc.p(8,278),
 										size:cc.size(128,26),
@@ -2565,7 +2653,7 @@ ItemEditor = Popup.extend({
 		this.currentTab=0,
 		this.delegate=null,
 		this.mapOffset=cc.p(0,0);
-		this.tabWidths=[null,352,352,200];
+		this.tabWidths=[null,352,400,200];
 		this.delegate=withData.delegate;
 
 		if(withData && withData.data){
@@ -2610,9 +2698,12 @@ ItemEditor = Popup.extend({
 		this.panels["main_panel"]["tab1"]["selectednode"].setPosition(this.panels["main_panel"]["tab1"]["tiles"].getPosition().x+tilePos.x,this.panels["main_panel"]["tab1"]["tiles"].getPosition().y-(tilePos.y+32)) ;
 		this.panels["main_panel"]["tab2"]["tile"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
 		this.panels["main_panel"]["tab2"]["tile"].setTextureRect(cc.rect(Math.floor(32*this.data["sprite"]["position"].x),Math.floor(32*this.data["sprite"]["position"].y),32,32));
-		this.updateCurrentLayer(this.data["itemType"]);
 		this.nameBox = new EntryBox(this.panels["main_panel"]["tab2"]["name_entry"],cc.size(this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.nameBox.setDefaultFineFlag(true);
+		this.bookEntryBox = new EntryBox(this.panels["main_panel"]["tab2"]["book_entry"],cc.size(this.panels["main_panel"]["tab2"]["book_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["book_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["book_entry"].getContentSize().height), this.data["additionalData"]["Contents"]? this.data["additionalData"]["Contents"]:"", cc.c4b(100,100,100), cc.c3b(255,255,255),true);
+		this.bookEntryBox.setDefaultFineFlag(true);
+		this.bookEntryBox.setDontClear(true);
+				this.updateCurrentLayer(this.data["itemType"]);
 		this.setTab(1);
 		this.updateMapOffset();
 	},
@@ -2661,7 +2752,8 @@ ItemEditor = Popup.extend({
 			this.panels["main_panel"]["tab"+value].setVisible(true);
 			this.panels["main_panel"]["tab"+value+"Clickable"].setColor(cc.c4b(255,255,0,255));
 			if(value==2){
-				this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(8);
+				this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(4);
+				if(this.data["itemType"]=="book"){this.panels["main_panel"]["tab2"]["book_entry"].setPositionX(150); this.panels["main_panel"]["tab2"]["book_text"].setVisible(true);} else{this.panels["main_panel"]["tab2"]["book_entry"].setPositionX(-1000000000); this.panels["main_panel"]["tab2"]["book_text"].setVisible(false);}
 			}
 			this.panels["control_panel"]["exitBtn"].setPositionX(this.tabWidths[value]-29);
 		}
@@ -2705,6 +2797,9 @@ ItemEditor = Popup.extend({
 			}
 			this.ignoreTerminate=true;
 			this.data["name"]=this.nameBox.getText();
+			switch(this.data["itemType"]){
+				case "book": this.data["additionalData"] = {"Contents":this.bookEntryBox.getText()};
+			}
 			this.delegate.endedEdit(this.data);
 			return true;
 		}
@@ -2809,11 +2904,16 @@ ItemEditor = Popup.extend({
 	},	
 	
 	updateCurrentLayer:function(layerName){
+		this.panels["main_panel"]["tab2"]["book_entry"].setPositionX(-10000000);
+		this.panels["main_panel"]["tab2"]["book_text"].setVisible(false);
 		switch(layerName){
 			case "currency": this.data["stackable"]=true; break;
 			case "resource": this.data["stackable"]=false; break;
 			case "consumable": this.data["stackable"]=false; break;
-			case "book": this.data["stackable"]=false; break;
+			case "book": this.data["stackable"]=false;
+						 this.panels["main_panel"]["tab2"]["book_entry"].setPositionX(150);
+						 this.panels["main_panel"]["tab2"]["book_text"].setVisible(true);
+						 break;
 			case "armour": this.data["stackable"]=false; break;
 			case "weapon": this.data["stackable"]=false; break;
 		}

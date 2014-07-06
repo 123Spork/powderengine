@@ -212,8 +212,8 @@ var GameMap=cc.Layer.extend({
 	},
 	
 	onTouchBegan:function(touch){
-		if(this.interactionDelegate && (!MapEditor || !MapEditor._parent)){
-			MapEditor=null;
+		if(this.interactionDelegate && (!Mapeditor || !Mapeditor._parent)){
+			Mapeditor=null;
 			this.interactionDelegate=null;
 		}
 		if(this.interactionDelegate){

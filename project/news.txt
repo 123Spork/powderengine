@@ -1,3 +1,7 @@
+(6th July 2014) - Version 0.55
+-Reduced server storage load by fixing up saving and loading a bit.
+-Fixed from map editor touch movement issue.
+
 (4th July 2014) - Version 0.55
 -Added item picking up and dropping to player character
 -Added drup/use submenu to inventory menu.
@@ -6,9 +10,3 @@
 -Fixed some item and warp editing bugs.
 -Added mouse over highlight on items.
 -Added stackable item pickup/dropping.
-
-(3rd July 2014) - Version 0.53
--Implemented more sophisticated item editor.
--Items can now be created, edited and placed into the map.
--Items can be edited later on and updates are changed in real time.
--Implemented base for multiple item types which will be extended into the mapeditor for additional options.

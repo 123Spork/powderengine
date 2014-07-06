@@ -1,1 +1,1 @@
-[{"name":"totavern","data":{"position":160,"mapTo":3}},{"name":"fromtavern","data":{"position":360,"mapTo":1}},{"name":"New Warp!","data":{"position":0,"mapTo":0}}]
+[{"mapTo":3,"position":160,"name":"To Tavern"},{"mapTo":1,"position":360,"name":"From Tavern"}]

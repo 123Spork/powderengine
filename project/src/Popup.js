@@ -228,7 +228,7 @@ ObjectList = Popup.extend({
 			for(var i in this.editList){
 				if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["list"]["element"+i].getPositionX(),this.panels["main_panel"]["list"]["element"+i].getPositionY(),this.panels["main_panel"]["list"]["element"+i].getContentSize().width,this.panels["main_panel"]["list"]["element"+i].getContentSize().height),truePos)){
 					this.showingEditor=true;
-					this.childEditor.init({delegate:this, data:this.editList[i].data, name:this.editList[i].name});
+					this.childEditor.init({delegate:this, data:this.editList[i]});
 					this._parent.addChild(this.childEditor);
 					this.setTouchEnabled(false);
 					this.childEditor.didBecomeActive();
@@ -252,7 +252,7 @@ ObjectList = Popup.extend({
 				this.addingNew=true;
 				this.showingEditor=true;
 				this.saveNewDataID=this.editList.length;
-				this.childEditor.init({delegate:this, data:null, name:""});
+				this.childEditor.init({delegate:this, data:null});
 				this.setTouchEnabled(false);
 				this._parent.addChild(this.childEditor);
 				this.childEditor.didBecomeActive();
@@ -265,7 +265,7 @@ ObjectList = Popup.extend({
 		if(addData){
 			this.childEditor.runSaveNewData(this.saveNewDataID);
 			if(this.addingNew){
-				this.editList.push({name:addData.name,data:addData.data});
+				this.editList.push(addData);
 				this.panels.removeFromParent();
 				this.panels=requestLayout(this);
 				this.addChild(this.panels);
@@ -297,7 +297,7 @@ WarpEditorPopup = Popup.extend({
 	},
 	
 	runSaveNewData:function(num){
-		sendMessageToServer({"savewarps":num+"","warpdata":{name:this.name,data:this.data}});
+		sendMessageToServer({"savewarps":num+"","warpdata":this.data});
 	},
 	
 	deleteSave:function(num,list){
@@ -431,7 +431,6 @@ WarpEditorPopup = Popup.extend({
 	mapXBox:null,
 	mapYBox:null,
 	delegate:null,
-	name:null,
 	data:null,
 	
 	init:function(withData){
@@ -441,24 +440,18 @@ WarpEditorPopup = Popup.extend({
 		this.mapXBox=null;
 		this.mapYBox=null;
 		this.delegate=null;
-		this.name=null;
-		this.data=null;
-
+		this.data={"mapTo":0,"position":0,"name":""};
+		if(withData.data){
+			this.data=withData.data;
+		}
 		this.delegate=withData.delegate;
-		this.data=withData.data;
-		this.name=withData.name;
 	},
 	
 	didBecomeActive:function(){
 	this._super();
-		if(this.data==null){
-			this.data={};
-			this.data["position"]=0;
-			this.data["mapTo"]=0;
-		}
 		var x=this.data["position"] % gridWidth;
 		var y=(Math.floor(this.data["position"]/gridWidth)); 
-		this.nameBox = new EntryBox(this.panels["main_panel"]["nameEntry"],cc.size(this.panels["main_panel"]["nameEntry"].getContentSize().width,this.panels["main_panel"]["nameEntry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["nameEntry"].getContentSize().height), this.name, cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.nameBox = new EntryBox(this.panels["main_panel"]["nameEntry"],cc.size(this.panels["main_panel"]["nameEntry"].getContentSize().width,this.panels["main_panel"]["nameEntry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["nameEntry"].getContentSize().height), this.data["name"], cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.nameBox.setDefaultFineFlag(true);
 		this.mapNumBox = new EntryBox(this.panels["main_panel"]["mapNumEntry"],cc.size(this.panels["main_panel"]["mapNumEntry"].getContentSize().width,this.panels["main_panel"]["mapNumEntry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["mapNumEntry"].getContentSize().height), ""+this.data["mapTo"], cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapNumBox.setDefaultFineFlag(true);
@@ -484,8 +477,8 @@ WarpEditorPopup = Popup.extend({
 			this.ignoreTerminate=true;
 			this.data["position"]=indexFromPos(parseInt(this.mapXBox.getText()),(gridHeight)-parseInt(this.mapYBox.getText()));
 			this.data["mapTo"]=parseInt(this.mapNumBox.getText());
-			this.name=this.nameBox.getText();
-			this.delegate.endedEdit({name:this.name,data:this.data});
+			this.data["name"]=this.nameBox.getText();
+			this.delegate.endedEdit(this.data);
 			return true;
 		}
 		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["cancelbtn"].getPositionX(),this.panels["main_panel"]["cancelbtn"].getPositionY(),this.panels["main_panel"]["cancelbtn"].getContentSize().width,this.panels["main_panel"]["cancelbtn"].getContentSize().height),truePos)){
@@ -656,14 +649,14 @@ InventoryPopup = Popup.extend({
 		for(var i=0;i<40;i++){
 			if(inventoryList[i]){
 				for(var j in tileTextureList){
-					if(tileTextureList[j]["name"]==inventoryList[i]["data"]["sprite"]["texture"]){
+					if(tileTextureList[j]["name"]==inventoryList[i]["sprite"]["texture"]){
 						var texture=tileTextureList[j]["texture"];
 					}
 				}
 				this.panels["main_panel"][(i+"")].setAnchorPoint(0,1);
 				this.panels["main_panel"][(i+"")].setTexture(texture);
-				this.panels["main_panel"][(i+"")].setTextureRect(cc.rect(inventoryList[i]["data"]["sprite"]["position"].x*32, (inventoryList[i]["data"]["sprite"]["position"].y*32),32,32));
-				this.setStackableLabel(i,inventoryList[i]["data"]["additionalData"]["amount"]);
+				this.panels["main_panel"][(i+"")].setTextureRect(cc.rect(inventoryList[i]["sprite"]["position"].x*32, (inventoryList[i]["sprite"]["position"].y*32),32,32));
+				this.setStackableLabel(i,inventoryList[i]["amount"]);
 			} else{
 				this.panels["main_panel"][(i+"")].setTexture(null);
 				this.setStackableLabel(i,0);
@@ -1741,7 +1734,7 @@ MapEditor = Popup.extend({
 			var globalFillPos = this.panels["main_panel"]["tab1"]["fillbtn"].convertToWorldSpace(cc.p(0,0));
 			if(cc.rectContainsPoint(cc.rect(globalFillPos.x,globalFillPos.y,this.panels["main_panel"]["tab1"]["fillbtn"].getContentSize().width,this.panels["main_panel"]["tab1"]["fillbtn"].getContentSize().height),touch._point)){
 				if(this.panels["main_panel"]["tab1"]["selectednode"].getOpacity()!=0){
-					GameMap.fillMap(tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,(9-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y),this.currentLayer);
+					GameMap.fillMap(tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,(9-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y),this.data["currentLayer"]);
 					GameMap.updateMap();
 				}
 				return true;
@@ -1868,7 +1861,7 @@ MapEditor = Popup.extend({
 		this.panels["main_panel"]["tab1"]["fringeShadowbtn"].setColor(cc.c4b(255,255,255,255));
 		this.panels["main_panel"]["tab1"]["fringe3btn"].setColor(cc.c4b(255,255,255,255));
 		this.panels["main_panel"]["tab1"][layerName+"btn"].setColor(cc.c4b(0,255,0,255));
-		this.currentLayer=layerName;
+		this.data["currentLayer"]=layerName;
 	},
 	
 	useNextTexture:function(){
@@ -1917,7 +1910,7 @@ MapEditor = Popup.extend({
 		switch(this.editMode){
 			case "tiles":
 				if(this.panels["main_panel"]["tab1"]["selectednode"].getOpacity()!=0){
-					GameMap.setLayer(tilenum,tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,(9-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y),this.currentLayer);
+					GameMap.setLayer(tilenum,tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,(9-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y),this.data["currentLayer"]);
 				}
 			break;
 			case "blocking":
@@ -1946,7 +1939,7 @@ MapEditor = Popup.extend({
 				}
 			break;
 			case "erasing":
-				GameMap.destroyLayer(tilenum,this.currentLayer);
+				GameMap.destroyLayer(tilenum,this.data["currentLayer"]);
 			break;
 		}
 		
@@ -2031,10 +2024,6 @@ MapEditor = Popup.extend({
 
 
 ItemEditor = Popup.extend({
-	currentLayer:"currency",
-	subType:"",
-	sprite:{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},
-	additionalData:{"amount":1,"stackable":true},
 	currentTexture:tileTextureList[0]["name"],
 	currentTextureNumber:0,
 	
@@ -2430,40 +2419,29 @@ ItemEditor = Popup.extend({
 	nameBox:null,
 	tabWidths:null,
 	currentTab:0,
-
 	delegate:null,
-	name:null,
 	data:null,
 	
 	init:function(withData){
 		this._super();	
-		this.currentLayer="currency",
-		this.subType="",
-		this.sprite={"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},
-		this.additionalData={"amount":1,"stackable":true},
+		this.data={"itemType":"currency","subType":"","sprite":{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},"additionalData":{},"amount":1,"stackable":true, "name":""};
 		this.currentTexture=tileTextureList[0]["name"],
 		this.currentTextureNumber=0,
 		this.nameBox=null,
 		this.tabWidths=null,
 		this.currentTab=0,
 		this.delegate=null,
-		this.name=null,
-		this.data=null,
-		
-
-
 		this.mapOffset=cc.p(0,0);
 		this.tabWidths=[null,352,352,200];
 		this.delegate=withData.delegate;
-		if(withData["data"]){
+
+		if(withData && withData.data){
 			this.data=withData.data;
-			this.additionalData=withData["data"]["additionalData"];
 		}
-		this.name=withData.name;
 	},
 	
 	runSaveNewData:function(num){
-		sendMessageToServer({"saveitems":num+"","itemdata":{name:this.name,data:this.data}});
+		sendMessageToServer({"saveitems":num+"","itemdata":this.data});
 	},
 	
 	deleteSave:function(num,list){
@@ -2473,24 +2451,34 @@ ItemEditor = Popup.extend({
 	
 	didBecomeActive:function(){
 		this._super();
-		if(this.data==null){
-			this.data={};
-		}
 		this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
-		this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(0);
+		this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(127);
 
 		for(var i in tileTextureList){
-			if(tileTextureList[i]["name"]==this.sprite["texture"]){
+			if(tileTextureList[i]["name"]==this.data["sprite"]["texture"]){
 				this.currentTextureNumber=i;
 				this.currentTexture=tileTextureList[i]["name"];
 			}
 		}
 		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
-
 		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		
+		var posX = this.data["sprite"]["position"].x;
+		while(posX>=10){
+			posX--;
+			this.mapOffset.x++;
+		}
+		var posY = this.data["sprite"]["position"].y;
+		while(posY>=8){
+			posY--;
+			this.mapOffset.y++;
+		}
+		var tilePos = cc.p((this.data["sprite"]["position"].x-this.mapOffset.x)*32,(this.data["sprite"]["position"].y-this.mapOffset.y)*32);
+		this.panels["main_panel"]["tab1"]["selectednode"].setPosition(this.panels["main_panel"]["tab1"]["tiles"].getPosition().x+tilePos.x,this.panels["main_panel"]["tab1"]["tiles"].getPosition().y-(tilePos.y+32)) ;
 		this.panels["main_panel"]["tab2"]["tile"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
-		this.panels["main_panel"]["tab2"]["tile"].setTextureRect(cc.rect(Math.floor(32*this.sprite["position"].x),Math.floor(32*this.sprite["position"].y),32,32));
-		this.nameBox = new EntryBox(this.panels["main_panel"]["tab2"]["name_entry"],cc.size(this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), this.name?this.name:"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.panels["main_panel"]["tab2"]["tile"].setTextureRect(cc.rect(Math.floor(32*this.data["sprite"]["position"].x),Math.floor(32*this.data["sprite"]["position"].y),32,32));
+		this.updateCurrentLayer(this.data["itemType"]);
+		this.nameBox = new EntryBox(this.panels["main_panel"]["tab2"]["name_entry"],cc.size(this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.nameBox.setDefaultFineFlag(true);
 		this.setTab(1);
 		this.updateMapOffset();
@@ -2583,12 +2571,8 @@ ItemEditor = Popup.extend({
 				return true;
 			}
 			this.ignoreTerminate=true;
-			this.data["itemtype"]=this.currentLayer;
-			this.data["sprite"]=this.sprite;
-			this.data["subType"]=this.subType;
-			this.data["additionalData"]=this.additionalData;
-			this.name=this.nameBox.getText();
-			this.delegate.endedEdit({name:this.name,data:this.data});
+			this.data["name"]=this.nameBox.getText();
+			this.delegate.endedEdit(this.data);
 			return true;
 		}
 		if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["cancelbtn"].getPositionX(),this.panels["main_panel"]["cancelbtn"].getPositionY(),this.panels["main_panel"]["cancelbtn"].getContentSize().width,this.panels["main_panel"]["cancelbtn"].getContentSize().height),truePos)){
@@ -2652,7 +2636,7 @@ ItemEditor = Popup.extend({
 
 				var pos = cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,((8-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-64)/32))+this.mapOffset.y)-1);
 				this.panels["main_panel"]["tab2"]["tile"].setTextureRect(cc.rect(pos.x*32,pos.y*32,32,32));
-				this.sprite["position"]=pos;
+				this.data["sprite"]["position"]=pos;
 
 				return true;
 			} 
@@ -2693,8 +2677,12 @@ ItemEditor = Popup.extend({
 	
 	updateCurrentLayer:function(layerName){
 		switch(layerName){
-			case "currency": this.additionalData["stackable"]=true; break;
-			case "resource": this.additionalData["stackable"]=false; break;
+			case "currency": this.data["stackable"]=true; break;
+			case "resource": this.data["stackable"]=false; break;
+			case "consumable": this.data["stackable"]=false; break;
+			case "book": this.data["stackable"]=false; break;
+			case "armour": this.data["stackable"]=false; break;
+			case "weapon": this.data["stackable"]=false; break;
 		}
 
 		this.panels["main_panel"]["tab2"]["currencybtn"].setColor(cc.c4b(255,255,255,255));
@@ -2704,7 +2692,7 @@ ItemEditor = Popup.extend({
 		this.panels["main_panel"]["tab2"]["armourbtn"].setColor(cc.c4b(255,255,255,255));
 		this.panels["main_panel"]["tab2"]["weaponbtn"].setColor(cc.c4b(255,255,255,255));
 		this.panels["main_panel"]["tab2"][layerName+"btn"].setColor(cc.c4b(0,255,0,255));
-		this.currentLayer=layerName;
+		this.data["itemType"]=layerName;
 	},
 	
 	useNextTexture:function(){
@@ -2716,7 +2704,7 @@ ItemEditor = Popup.extend({
 		this.panels["main_panel"]["tab2"]["tile"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
 		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
 		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
-		this.sprite["texture"]=this.currentTexture;
+		this.data["sprite"]["texture"]=this.currentTexture;
 		this.mapOffset=cc.p(0,0);
 		this.updateMapOffset();
 	},

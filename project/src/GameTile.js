@@ -34,8 +34,8 @@ var GameTile = cc.Node.extend({
 	},
 	
 	addDroppedItem:function(data){
-		var texture = data["data"]["sprite"]["texture"];
-		var pos = data["data"]["sprite"]["position"];
+		var texture = data["sprite"]["texture"];
+		var pos = data["sprite"]["position"];
 		
 /*
 		if(data["additionalData"]["stackable"]==true){
@@ -353,8 +353,8 @@ var GameTile = cc.Node.extend({
 	
 	getScriptData:function(){
 		switch(this.type){
-			case 3: return ObjectLists.getWarpList()[this.script[this.script.length-1]["num"]].data;
-			case 4: return ObjectLists.getItemList()[this.script[this.script.length-1]["num"]].data;
+			case 3: return ObjectLists.getWarpList()[this.script[this.script.length-1]["num"]] ? ObjectLists.getWarpList()[this.script[this.script.length-1]["num"]] : null;
+			case 4: return ObjectLists.getItemList()[this.script[this.script.length-1]["num"]] ? ObjectLists.getItemList()[this.script[this.script.length-1]["num"]] : null;
 		}
 	},
 	

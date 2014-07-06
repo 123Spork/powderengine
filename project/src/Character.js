@@ -262,8 +262,7 @@ PlayerCharacter = Character.extend({
 	updateItemData:function(name,item){
 		for(var i=0;i<this.items["stored"].length;i++){
 			if(this.items["stored"][i]["name"]==name){
-				this.items["stored"][i]["name"]=item["name"];
-				this.items["stored"][i]["data"]=item["data"];
+				this.items["stored"][i]=item;
 			}
 		}
 	},
@@ -277,12 +276,12 @@ PlayerCharacter = Character.extend({
 			sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 		}
 
-		if(item["data"]["additionalData"]["stackable"]==true){
+		if(item["stackable"]==true){
 			for(var i=0;i<40;i++){
 				if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
-					this.items["stored"][i]["data"]["additionalData"]["amount"]++;
+					this.items["stored"][i]["amount"]++;
 					if(Inventory){
-						Inventory.setStackableLabel(i,this.items["stored"][i]["data"]["additionalData"]["amount"]);
+						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);
 					}
 					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
 					return;
@@ -310,9 +309,9 @@ PlayerCharacter = Character.extend({
 		sendMessageToServer({"droppeditem":this.items["stored"][itemnumber],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y)});
 		
 
-		if(this.items["stored"][itemnumber]["data"]["additionalData"]["stackable"]==true && this.items["stored"][itemnumber]["data"]["additionalData"]["amount"]>1){
-			this.items["stored"][itemnumber]["data"]["additionalData"]["amount"]--;
-			Inventory.setStackableLabel(itemnumber,this.items["stored"][itemnumber]["data"]["additionalData"]["amount"]);
+		if(this.items["stored"][itemnumber]["stackable"]==true && this.items["stored"][itemnumber]["amount"]>1){
+			this.items["stored"][itemnumber]["amount"]--;
+			Inventory.setStackableLabel(itemnumber,this.items["stored"][itemnumber]["amount"]);
 			return;
 		}
 	

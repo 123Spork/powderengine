@@ -112,7 +112,7 @@ var GameMap=cc.Layer.extend({
 							if(data[i][j]["script"]){
 								this.tileNodes[i].setScript(data[i][j]["script"]);
 							}
-							if(data[i][j]["type"]==4){
+							if(data[i][j]["type"]==4 && this.tileNodes[i].getScriptData()){
 								this.tileNodes[i].setLayer(this.tileNodes[i].getScriptData()["sprite"]["texture"],this.tileNodes[i].getScriptData()["sprite"]["position"],"item");
 							}
 						}
@@ -155,7 +155,7 @@ var GameMap=cc.Layer.extend({
 							if(data[i][j]["script"]){
 								this.tileNodes[i].setScript(data[i][j]["script"]);
 							}
-							if(data[i][j]["type"]==4){
+							if(data[i][j]["type"]==4 && this.tileNodes[i].getScriptData()){
 								this.tileNodes[i].setLayer(this.tileNodes[i].getScriptData()["sprite"]["texture"],this.tileNodes[i].getScriptData()["sprite"]["position"],"item");
 							}
 						}
@@ -212,6 +212,10 @@ var GameMap=cc.Layer.extend({
 	},
 	
 	onTouchBegan:function(touch){
+		if(this.interactionDelegate && (!MapEditor || !MapEditor._parent)){
+			MapEditor=null;
+			this.interactionDelegate=null;
+		}
 		if(this.interactionDelegate){
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){

@@ -743,6 +743,113 @@ InventoryPopup = Popup.extend({
 
 });
 
+
+BookPopup = Popup.extend({
+
+	getIdentifier:function(){
+		return "Book";
+	},
+	
+	getLayoutObject:function(){
+		
+		return {
+			"panels":{
+				position:cc.p(100,20),
+				children:{	
+					"main_panel":{
+						anchorPoint:cc.p(0,0),
+						position: cc.p(0,0),
+						size: cc.size(512,320),
+						bg: cc.c4b(0,0,100,200),
+						children:{
+							"pageBackbtn" : {
+								position:cc.p(4,4),
+								size:cc.size(96,32),
+								bg: cc.c4b(255,255,255,255),
+								anchorPoint:cc.p(0,0),
+								children:{
+									"text":{
+										label:"Previous Page",
+										fontSize:12,
+										anchorPoint:cc.p(0.5,0.5),
+										position:cc.p(48,16),
+										color:cc.c3b(0,0,0),
+									}
+								}
+							},
+							"pageForwardbtn" : {
+								position:cc.p(412,4),
+								size:cc.size(96,32),
+								bg: cc.c4b(255,255,255,255),
+								anchorPoint:cc.p(0,0),
+								children:{
+									"text":{
+										label:"Next Page",
+										fontSize:12,
+										anchorPoint:cc.p(0.5,0.5),
+										position:cc.p(48,16),
+										color:cc.c3b(0,0,0),
+									}
+								}
+							},
+							"pageSplitter" : {
+								position:cc.p(254,0),
+								size:cc.size(4,320),
+								bg: cc.c4b(255,255,255,255),
+								anchorPoint:cc.p(0,0),
+							},
+							"leftPage":{
+								label:"Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla ",
+								fontSize:18,
+								anchorPoint:cc.p(0,1),
+								position:cc.p(4,316),
+								color:cc.c3b(255,255,255),
+							}
+						}
+					},
+					"control_panel":{
+						anchorPoint:cc.p(0,0),
+						position: cc.p(0,320),
+						size: cc.size(512,32),
+						bg: cc.c4b(255,0,0,200),
+						children:{	
+							"header":{
+								label:"Book Title",
+								fontSize:20,
+								anchorPoint:cc.p(0,0.5),
+								position:cc.p(8,16),
+							},
+							"exitBtn":{
+								position: cc.p(482,3),
+								size: cc.size(26,26),
+								anchorPoint:cc.p(0,0),
+								bg: cc.c4b(255,255,255,200),
+								children:{	
+								"content":{
+									label:"X",
+									fontSize:20,
+									color:cc.c3b(0,0,0),
+									anchorPoint:cc.p(0.5,0.5),
+									position:cc.p(13,13),
+									}
+								}
+							}
+						}
+					},
+				}	
+			}
+		};
+	},
+
+	didBecomeActive:function(){
+		this._super();
+		this.panels["main_panel"]["leftPage"].setDimensions(cc.size(248,0));
+	},
+
+});
+
+
+
 EquipmentPopup = Popup.extend({
 
 	getIdentifier:function(){
@@ -2540,8 +2647,6 @@ ItemEditor = Popup.extend({
 	},
 	
 	setTab:function(value){
-		this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
-		this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-100000);
 		if(value!=this.currentTab){
 			this.panels["main_panel"].setContentSize(this.tabWidths[value],this.panels["main_panel"].getContentSize().height);
 			this.panels["control_panel"].setContentSize(this.tabWidths[value],this.panels["control_panel"].getContentSize().height);

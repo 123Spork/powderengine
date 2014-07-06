@@ -2,6 +2,7 @@ var Inventory=null,
 Equipment=null,
 Mapeditor=null,
 Itemeditor=null,
+Book=null,
 Warpeditor=null;
 
 var GameScene = Scene.extend({

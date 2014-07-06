@@ -321,6 +321,21 @@ PlayerCharacter = Character.extend({
 			Inventory.updateTileGrid();
 		}
 	},
+
+	useItem:function(itemnumber){
+		switch(this.items["stored"][itemnumber]["itemType"]){
+			case "book": if(Book!=null && !Book._parent) Itemeditor=null;
+				if(Book){
+					Book.willTerminate();
+					Book.removeFromParent();
+					Book=null;
+				}
+				Book = new BookPopup();
+				Book.init(this.items["stored"][itemnumber]["additionalData"]);
+				Book.didBecomeActive();
+				this._parent._parent._parent.addChild(Book);
+		}
+	},
 	
 	equipItem:function(itemnumber){
 		this.items[stored][itemnumber].removeFromParent();

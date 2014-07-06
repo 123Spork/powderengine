@@ -1,6 +1,9 @@
 (6th July 2014) - Version 0.55
 -Reduced server storage load by fixing up saving and loading a bit.
 -Fixed from map editor touch movement issue.
+-Added script manipulation so that stackable items can be added in amounts to map.
+-Fixed stackable picking up and dropping.
+-Fixed issues caused by above 2 features.
 
 (4th July 2014) - Version 0.55
 -Added item picking up and dropping to player character

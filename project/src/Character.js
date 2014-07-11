@@ -270,11 +270,6 @@ PlayerCharacter = Character.extend({
 	pickupItem:function(item){
 		var gp = this.getGridPosition();
 		var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
-		if(tile.getScriptObject()["temp"]){
-			sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-		} else{
-			sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-		}
 
 		if(item["stackable"]==true){
 			for(var i=0;i<40;i++){
@@ -284,6 +279,11 @@ PlayerCharacter = Character.extend({
 						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
 					}
 					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+					if(tile.getScriptObject()["temp"]){
+						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+					} else{
+						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+					}
 					return;
 				}
 			}
@@ -297,6 +297,11 @@ PlayerCharacter = Character.extend({
 					Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
 				}
 				GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+				if(tile.getScriptObject()["temp"]){
+					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+				} else{
+					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+				}
 				var added=true;
 				break;
 			}
@@ -306,19 +311,22 @@ PlayerCharacter = Character.extend({
 		}
 	},
 	
-	dropItem:function(itemnumber){
+	dropItem:function(itemnumber,itembox){
 		var gp = this.getGridPosition();
-		GameChat.addMessage(strings.gameChat.droppedItem + this.items["stored"][itemnumber]["name"]);
-		sendMessageToServer({"droppeditem":this.items["stored"][itemnumber],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y)});
+		GameChat.addMessage(strings.gameChat.droppedItem + this.items[itembox][itemnumber]["name"]);
+		sendMessageToServer({"droppeditem":this.items[itembox][itemnumber],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y)});
 		
 
-		if(this.items["stored"][itemnumber]["stackable"]==true && this.items["stored"][itemnumber]["amount"]>1){
+		if(this.items[itembox][itemnumber]["stackable"]==true && this.items[itembox][itemnumber]["amount"]>1){
 			Inventory.setStackableLabel(itemnumber,0);
 		}
 	
-		this.items["stored"][itemnumber]=null;
+		this.items[itembox][itemnumber]=null;
 		if(Inventory){
 			Inventory.updateTileGrid();
+		}
+		if(Equipment){
+			Equipment.updateTileGrid();
 		}
 	},
 
@@ -334,23 +342,51 @@ PlayerCharacter = Character.extend({
 				Book.init(this.items["stored"][itemnumber]);
 				Book.didBecomeActive();
 				this._parent._parent._parent.addChild(Book);
+			break;
+			case "wearable":
+				this.equipItem(itemnumber)
+			break;
 		}
 	},
 	
 	equipItem:function(itemnumber){
-		this.items[stored][itemnumber].removeFromParent();
-		this.items[equipped][this.items[stored][itemnumber].getType()]=this.items[stored][itemnumber];
-		this.items[stored].splice(itemnumber,1);
+		var temp=null;
+		if(this.items["equipped"][this.items["stored"][itemnumber]["subType"]]){
+			var temp = cloneObj(this.items["equipped"][this.items["stored"][itemnumber]["subType"]]);
+		}
+		this.items["equipped"][this.items["stored"][itemnumber]["subType"]]=cloneObj(this.items["stored"][itemnumber]);
+		this.items["stored"][itemnumber]=temp;
+		if(Inventory){
+			Inventory.updateTileGrid();
+		}
+		if(Equipment){
+			Equipment.updateTileGrid();
+		}
 	},
 	
 	dequipItem:function(itemtype){
-		this.items[stored][itemtype].removeFromParent();
-		this.items[stored].push(this.items[equipped][itemtype])
-		this.items[equipped][itemtype]=null;
+		for(var i=0;i<40;i++){
+			if(this.items["stored"][i]==null){
+				this.items["stored"][i] = cloneObj(this.items["equipped"][itemtype]);
+				this.items["equipped"][itemtype]=null;
+				if(Inventory){
+					Inventory.updateTileGrid();
+				}
+				if(Equipment){
+					Equipment.updateTileGrid();
+				}
+				return;
+			}
+		}
+		GameChat.addMessage("No space in inventory to dequip this item.");
 	},	
 
 	getInventory:function(){
 		return this.items["stored"];
+	},
+
+	getEquipment:function(){
+		return this.items["equipped"];
 	},
 });
 PlayerCharacter.create = function(withData){

@@ -680,7 +680,7 @@ InventoryPopup = Popup.extend({
 
 		if(this.itemContext!=null){
 			if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["dropbtn"].getPositionX(),this.panels["control_menu"]["dropbtn"].getPositionY(),this.panels["control_menu"]["dropbtn"].getContentSize().width,this.panels["control_menu"]["dropbtn"].getContentSize().height),menuPos)){
-				PlayersController.getYou().dropItem(this.itemContext);
+				PlayersController.getYou().dropItem(this.itemContext,"stored");
 			}else if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["usebtn"].getPositionX(),this.panels["control_menu"]["usebtn"].getPositionY(),this.panels["control_menu"]["usebtn"].getContentSize().width,this.panels["control_menu"]["usebtn"].getContentSize().height),menuPos)){
 				PlayersController.getYou().useItem(this.itemContext);
 			}
@@ -696,6 +696,12 @@ InventoryPopup = Popup.extend({
 			}
 			if(PlayersController.getYou().getInventory()[i] && cc.rectContainsPoint(cc.rect(this.panels["main_panel"][(i+"")].getPositionX(),this.panels["main_panel"][(i+"")].getPositionY()-reducer,this.panels["main_panel"][(i+"")].getContentSize().width,this.panels["main_panel"][(i+"")].getContentSize().height),truePos)){
 				this.panels["control_menu"].setVisible(true);
+				switch(PlayersController.getYou().getInventory()[i]["itemType"]){
+					case "wearable": this.panels["control_menu"]["usebtn"]["content"].setString("Equip"); break;
+					case "resource": this.panels["control_menu"]["usebtn"]["content"].setString("Use"); break;
+					case "consumable": this.panels["control_menu"]["usebtn"]["content"].setString("Consume"); break;
+					case "book": this.panels["control_menu"]["usebtn"]["content"].setString("Read"); break;
+				}
 				this.panels["control_menu"].setPosition(cc.p(this.panels["main_panel"][(i+"")].getPositionX()+28,this.panels["main_panel"][(i+"")].getPositionY()-(reducer!=0?40:0)-8));
 				this.itemContext=i;
 				return true;
@@ -934,19 +940,21 @@ EquipmentPopup = Popup.extend({
 		return "Equipment";
 	},
 	
+
 	getLayoutObject:function(){
 		var itemBox = {
+			isSprite:true,
 			size: cc.size(32,32),
-			bg: cc.c4b(140,140,140,200),
+			anchorPoint:cc.p(0,0),
 		};
 		var equipment_panel = {
-			"head": merge_objects(itemBox,{ position:cc.p(88,128)}),
-			"body": merge_objects(itemBox,{ position: cc.p(88,88)}),
-			"legs": merge_objects(itemBox,{ position: cc.p(88,48)}),
-			"feet": merge_objects(itemBox,{ position: cc.p(88,8)}),
-			"weapon": merge_objects(itemBox,{ position: cc.p(48,88)}),
-			"shield": merge_objects(itemBox,{ position: cc.p(128,88)}),
-			"ammo": merge_objects(itemBox,{ position: cc.p(8,128)}),
+			"head": merge_objects(itemBox,{ position:cc.p(88,162)}),
+			"body": merge_objects(itemBox,{ position: cc.p(88,122)}),
+			"legs": merge_objects(itemBox,{ position: cc.p(88,82)}),
+			"feet": merge_objects(itemBox,{ position: cc.p(88,40)}),
+			"rarm": merge_objects(itemBox,{ position: cc.p(128,122)}),
+			"larm": merge_objects(itemBox,{ position: cc.p(48,122)}),
+			"mod": merge_objects(itemBox,{ position: cc.p(8,162)}),
 		}
 		
 		return {
@@ -989,10 +997,165 @@ EquipmentPopup = Popup.extend({
 							}
 						}
 					},
+					"item_name":{
+						position:cc.p(0,0),
+						bg:cc.c4b(200,200,200,200),
+						size:cc.size(64,16),
+						visible:false,
+						children:{
+							"content":{
+								label:"",
+								fontSize:14,
+								color:cc.c3b(0,0,0),
+								anchorPoint:cc.p(0.5,0.5),
+								position:cc.p(32,8),
+							}
+						}
+					},
+					"control_menu":{
+						position:cc.p(0,0),
+						bg:cc.c4b(200,200,200,200),
+						size:cc.size(96,48),
+						visible:false,
+						children:{
+							"dropbtn":{
+								position: cc.p(0,0),
+								size: cc.size(96,24),
+								anchorPoint:cc.p(0,0),
+								bg: cc.c4b(200,200,200,200),
+								children:{	
+								"content":{
+									label:"Drop",
+									fontSize:20,
+									color:cc.c3b(0,0,0),
+									anchorPoint:cc.p(0,0.5),
+									position:cc.p(4,12),
+									}
+								}
+							},
+							"unequipbtn":{
+								position: cc.p(0,24),
+								size: cc.size(96,24),
+								anchorPoint:cc.p(0,0),
+								bg: cc.c4b(200,200,200,200),
+								children:{	
+								"content":{
+									label:"Unequip",
+									fontSize:20,
+									color:cc.c3b(0,0,0),
+									anchorPoint:cc.p(0,0.5),
+									position:cc.p(4,12),
+									}
+								}
+							},
+
+						}
+					}	
 				}	
 			}
 		};
 	},
+
+	updateTileGrid:function(){
+		var equipmentList = PlayersController.getYou().getEquipment();
+		this.panels["main_panel"]["head"].setTexture(null);
+		this.panels["main_panel"]["body"].setTexture(null);
+		this.panels["main_panel"]["legs"].setTexture(null);
+		this.panels["main_panel"]["feet"].setTexture(null);
+		this.panels["main_panel"]["larm"].setTexture(null);
+		this.panels["main_panel"]["rarm"].setTexture(null);
+		this.panels["main_panel"]["mod"].setTexture(null);
+		for(var i in equipmentList){
+			if(equipmentList[i]){
+				for(var j in tileTextureList){
+					if(tileTextureList[j]["name"]==equipmentList[i]["sprite"]["texture"]){
+						var texture=tileTextureList[j]["texture"];
+					}
+				}
+				this.panels["main_panel"][equipmentList[i]["subType"]].setAnchorPoint(0,1);
+				this.panels["main_panel"][equipmentList[i]["subType"]].setTexture(texture);
+				this.panels["main_panel"][equipmentList[i]["subType"]].setTextureRect(cc.rect(equipmentList[i]["sprite"]["position"].x*32, (equipmentList[i]["sprite"]["position"].y*32),32,32));
+			}
+		}
+	},
+
+	onTouchBegan:function(touch){
+		if(this._super(touch)){
+			return true;
+		}
+		this.prevMovPos=null;
+		var pos = touch._point;
+		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
+		var menuPos = this.panels["control_menu"].convertToNodeSpace(pos);
+
+		if(this.itemContext!=null){
+			if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["dropbtn"].getPositionX(),this.panels["control_menu"]["dropbtn"].getPositionY(),this.panels["control_menu"]["dropbtn"].getContentSize().width,this.panels["control_menu"]["dropbtn"].getContentSize().height),menuPos)){
+				PlayersController.getYou().dropItem(this.itemContext,"equipped");
+			}else if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["unequipbtn"].getPositionX(),this.panels["control_menu"]["unequipbtn"].getPositionY(),this.panels["control_menu"]["unequipbtn"].getContentSize().width,this.panels["control_menu"]["unequipbtn"].getContentSize().height),menuPos)){
+				PlayersController.getYou().dequipItem(this.itemContext);
+			}
+			this.itemContext=null;
+			this.panels["control_menu"].setVisible(false);
+			return true;
+		} 
+
+		var equipmentList = PlayersController.getYou().getEquipment();
+		for(var i in equipmentList){
+			if(equipmentList[i]){
+				var reducer=0;
+				if(this.panels["main_panel"][equipmentList[i]["subType"]].getAnchorPoint().y==1) {
+					reducer=32;
+				}
+				if(equipmentList[i] && cc.rectContainsPoint(cc.rect(this.panels["main_panel"][equipmentList[i]["subType"]].getPositionX(),this.panels["main_panel"][equipmentList[i]["subType"]].getPositionY()-reducer,this.panels["main_panel"][equipmentList[i]["subType"]].getContentSize().width,this.panels["main_panel"][equipmentList[i]["subType"]].getContentSize().height),truePos)){
+					this.panels["control_menu"].setVisible(true);
+					this.panels["control_menu"].setPosition(cc.p(this.panels["main_panel"][equipmentList[i]["subType"]].getPositionX()+28,this.panels["main_panel"][equipmentList[i]["subType"]].getPositionY()-(reducer!=0?40:0)-8));
+					this.itemContext=i;
+					return true;
+				} else if(!equipmentList[i] && cc.rectContainsPoint(cc.rect(this.panels["main_panel"][equipmentList[i]["subType"]].getPositionX(),this.panels["main_panel"][equipmentList[i]["subType"]].getPositionY()-reducer,this.panels["main_panel"][equipmentList[i]["subType"]].getContentSize().width,this.panels["main_panel"][equipmentList[i]["subType"]].getContentSize().height),truePos)) {
+					this.itemContext=null;
+					return true;
+				}	
+			}
+		}
+	},
+
+	onMouseMoved:function(pos){
+		var menuPos = this.panels["control_menu"].convertToNodeSpace(pos);
+		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
+		this.panels["control_menu"]["unequipbtn"].setColor(cc.c4b(200,200,200,200));
+		this.panels["item_name"].setVisible(false);
+		if(this.itemContext!=null){
+			if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"]["unequipbtn"].getPositionX(),this.panels["control_menu"]["unequipbtn"].getPositionY(),this.panels["control_menu"]["unequipbtn"].getContentSize().width,this.panels["control_menu"]["unequipbtn"].getContentSize().height),menuPos)){
+				this.panels["control_menu"]["unequipbtn"].setColor(cc.c4b(255,0,0,255));
+			}
+		} else{
+		  var equipmentList = PlayersController.getYou().getEquipment();
+			for(var i in equipmentList){
+				if(equipmentList[i]){
+					var reducer=0;
+					if(this.panels["main_panel"][equipmentList[i]["subType"]].getAnchorPoint().y==1){
+						reducer=32;
+					}
+					if(equipmentList[i] && cc.rectContainsPoint(cc.rect(this.panels["main_panel"][equipmentList[i]["subType"]].getPositionX(),this.panels["main_panel"][equipmentList[i]["subType"]].getPositionY()-reducer,this.panels["main_panel"][equipmentList[i]["subType"]].getContentSize().width,this.panels["main_panel"][equipmentList[i]["subType"]].getContentSize().height),truePos)){
+						this.panels["item_name"]["content"].setString(equipmentList[i]["name"]);
+						this.panels["item_name"].setVisible(true);
+						this.panels["item_name"].setContentSize(this.panels["item_name"]["content"].getContentSize());
+						this.panels["item_name"]["content"].setPositionX(this.panels["item_name"]["content"].getContentSize().width/2);
+						this.panels["item_name"].setPosition(cc.p(this.panels["main_panel"][(i+"")].getPositionX()-(this.panels["item_name"]["content"].getContentSize().width/2)+16,this.panels["main_panel"][(i+"")].getPositionY()));
+						return true;
+					}
+				}
+			}
+		}
+
+
+	},
+
+	didBecomeActive:function(){
+		this._super();
+		this.updateTileGrid();
+	},
+
 
 });
 
@@ -2380,7 +2543,7 @@ ItemEditor = Popup.extend({
 								children:{
 									"itemdetailsback":{
 										position:cc.p(144,0),
-										size:cc.size(210,366),
+										size:cc.size(250,366),
 										bg: cc.c4b(0,0,255,100),
 										anchorPoint:cc.p(0,0),
 									},
@@ -2394,30 +2557,136 @@ ItemEditor = Popup.extend({
 										size: cc.size(136,32),
 										position: cc.p(4,312),
 									},
-									"book_text":{
-										label:"Book Contents",
-										fontSize:10,
-										anchorPoint:cc.p(0,0),
-										position: cc.p(152,348),
+									"resourcetab":{
+										visible:false,
 									},
-									"book_entry":{
-										size: cc.size(240,340),
-										position: cc.p(-100000,8),
+									"consumabletab":{
+										visible:false,
 									},
-									"currencybtn" : {
-										position:cc.p(8,278),
-										size:cc.size(128,26),
-										bg: cc.c4b(0,255,0,255),
-										anchorPoint:cc.p(0,0),
+									"booktab":{
+										visible:false,
 										children:{
-											"text":{
-												label:"Currency",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
+											"book_text":{
+												label:"Book Contents",
+												fontSize:10,
+												anchorPoint:cc.p(0,0),
+												position: cc.p(152,348),
+											},
+											"book_entry":{
+												size: cc.size(240,340),
+												position: cc.p(-100000,8),
+											},
 										}
+									},
+									"wearabletab":{
+										visible:false,
+										children:{
+											"head" : {
+												position:cc.p(250,230),
+												size:cc.size(64,26),
+												bg: cc.c4b(0,255,0,255),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"text":{
+														label:"Head",
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0.5),
+														position:cc.p(32,13),
+														color:cc.c3b(0,0,0),
+													}
+												}
+											},
+											"body" : {
+												position:cc.p(250,200),
+												size:cc.size(64,26),
+												bg: cc.c4b(0,255,0,255),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"text":{
+														label:"Body",
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0.5),
+														position:cc.p(32,13),
+														color:cc.c3b(0,0,0),
+													}
+												}
+											},
+											"legs" : {
+												position:cc.p(250,170),
+												size:cc.size(64,26),
+												bg: cc.c4b(0,255,0,255),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"text":{
+														label:"Legs",
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0.5),
+														position:cc.p(32,13),
+														color:cc.c3b(0,0,0),
+													}
+												}
+											},
+											"feet" : {
+												position:cc.p(250,140),
+												size:cc.size(64,26),
+												bg: cc.c4b(0,255,0,255),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"text":{
+														label:"Feet",
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0.5),
+														position:cc.p(32,13),
+														color:cc.c3b(0,0,0),
+													}
+												}
+											},
+											"larm" : {
+												position:cc.p(180,200),
+												size:cc.size(64,26),
+												bg: cc.c4b(0,255,0,255),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"text":{
+														label:"L Arm",
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0.5),
+														position:cc.p(32,13),
+														color:cc.c3b(0,0,0),
+													}
+												}
+											},
+											"rarm" : {
+												position:cc.p(320,200),
+												size:cc.size(64,26),
+												bg: cc.c4b(0,255,0,255),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"text":{
+														label:"R Arm",
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0.5),
+														position:cc.p(32,13),
+														color:cc.c3b(0,0,0),
+													}
+												}
+											},
+											"mod" : {
+												position:cc.p(150,230),
+												size:cc.size(64,26),
+												bg: cc.c4b(0,255,0,255),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"text":{
+														label:"Mod",
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0.5),
+														position:cc.p(32,13),
+														color:cc.c3b(0,0,0),
+													}
+												}
+											},
+										}	
 									},
 									"resourcebtn" : {
 										position:cc.p(8,248),
@@ -2464,29 +2733,14 @@ ItemEditor = Popup.extend({
 											}
 										}
 									},
-									"armourbtn" : {
+									"wearablebtn" : {
 										position:cc.p(8,158),
 										size:cc.size(128,26),
 										bg: cc.c4b(255,255,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
-												label:"Armour",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"weaponbtn" : {
-										position:cc.p(8,128),
-										size:cc.size(128,26),
-										bg: cc.c4b(255,255,255,255),
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Weapon",
+												label:"wearable",
 												fontSize:12,
 												anchorPoint:cc.p(0.5,0.5),
 												position:cc.p(64,13),
@@ -2496,8 +2750,23 @@ ItemEditor = Popup.extend({
 									},
 									"tile" : {
 										anchorPoint:cc.p(0,1),
-										position:cc.p(8,96),
+										position:cc.p(55,130),
 										texture:tileTextureList[0]["name"],
+									},
+									"stackbtn" : {
+										position:cc.p(8,48),
+										size:cc.size(128,26),
+										bg: cc.c4b(255,0,0,255),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"text":{
+												label:"NOT STACKABLE",
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0.5),
+												position:cc.p(64,13),
+												color:cc.c3b(0,0,0),
+											}
+										}
 									},
 								}
 							},
@@ -2645,7 +2914,7 @@ ItemEditor = Popup.extend({
 	
 	init:function(withData){
 		this._super();	
-		this.data={"itemType":"currency","subType":"","sprite":{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},"additionalData":{},"stackable":true, "name":""};
+		this.data={"itemType":"resource","subType":"","sprite":{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},"additionalData":{},"stackable":false, "name":""};
 		this.currentTexture=tileTextureList[0]["name"],
 		this.currentTextureNumber=0,
 		this.nameBox=null,
@@ -2700,10 +2969,23 @@ ItemEditor = Popup.extend({
 		this.panels["main_panel"]["tab2"]["tile"].setTextureRect(cc.rect(Math.floor(32*this.data["sprite"]["position"].x),Math.floor(32*this.data["sprite"]["position"].y),32,32));
 		this.nameBox = new EntryBox(this.panels["main_panel"]["tab2"]["name_entry"],cc.size(this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.nameBox.setDefaultFineFlag(true);
-		this.bookEntryBox = new EntryBox(this.panels["main_panel"]["tab2"]["book_entry"],cc.size(this.panels["main_panel"]["tab2"]["book_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["book_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["book_entry"].getContentSize().height), this.data["additionalData"]["Contents"]? this.data["additionalData"]["Contents"]:"", cc.c4b(100,100,100), cc.c3b(255,255,255),true);
+		this.bookEntryBox = new EntryBox(this.panels["main_panel"]["tab2"]["booktab"]["book_entry"],cc.size(this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].getContentSize().height), this.data["additionalData"]["Contents"]? this.data["additionalData"]["Contents"]:"", cc.c4b(100,100,100), cc.c3b(255,255,255),true);
 		this.bookEntryBox.setDefaultFineFlag(true);
 		this.bookEntryBox.setDontClear(true);
-				this.updateCurrentLayer(this.data["itemType"]);
+		this.updateCurrentLayer(this.data["itemType"]);
+		
+		if(this.data["subType"]!=""){
+			this.selectSubType(this.data["subType"]);
+		}
+
+		if(this.data["stackable"]==true){
+			this.panels["main_panel"]["tab2"]["stackbtn"].setColor(cc.c4b(0,255,0,255));
+			this.panels["main_panel"]["tab2"]["stackbtn"]["text"].setString("IS STACKABLE");
+		} else{
+			this.panels["main_panel"]["tab2"]["stackbtn"].setColor(cc.c4b(255,0,0,255));
+			this.panels["main_panel"]["tab2"]["stackbtn"]["text"].setString("NOT STACKABLE");
+		}
+
 		this.setTab(1);
 		this.updateMapOffset();
 	},
@@ -2753,7 +3035,7 @@ ItemEditor = Popup.extend({
 			this.panels["main_panel"]["tab"+value+"Clickable"].setColor(cc.c4b(255,255,0,255));
 			if(value==2){
 				this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(4);
-				if(this.data["itemType"]=="book"){this.panels["main_panel"]["tab2"]["book_entry"].setPositionX(150); this.panels["main_panel"]["tab2"]["book_text"].setVisible(true);} else{this.panels["main_panel"]["tab2"]["book_entry"].setPositionX(-1000000000); this.panels["main_panel"]["tab2"]["book_text"].setVisible(false);}
+				if(this.data["itemType"]=="book"){this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].setPositionX(150); this.panels["main_panel"]["tab2"]["booktab"]["book_text"].setVisible(true);} else{this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].setPositionX(-1000000000); this.panels["main_panel"]["tab2"]["booktab"]["book_text"].setVisible(false);}
 			}
 			this.panels["control_panel"]["exitBtn"].setPositionX(this.tabWidths[value]-29);
 		}
@@ -2871,10 +3153,11 @@ ItemEditor = Popup.extend({
 
 		}
 		if(this.currentTab==2){	
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["currencybtn"].getPositionX(),this.panels["main_panel"]["tab2"]["currencybtn"].getPositionY(),this.panels["main_panel"]["tab2"]["currencybtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["currencybtn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("currency");
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["stackbtn"].getPositionX(),this.panels["main_panel"]["tab2"]["stackbtn"].getPositionY(),this.panels["main_panel"]["tab2"]["stackbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["stackbtn"].getContentSize().height),truePos)){
+				this.swapStackable();
 				return true;
 			}
+			
 			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["resourcebtn"].getPositionX(),this.panels["main_panel"]["tab2"]["resourcebtn"].getPositionY(),this.panels["main_panel"]["tab2"]["resourcebtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["resourcebtn"].getContentSize().height),truePos)){
 				this.updateCurrentLayer("resource");
 				return true;
@@ -2887,45 +3170,109 @@ ItemEditor = Popup.extend({
 				this.updateCurrentLayer("book");
 				return true;
 			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["armourbtn"].getPositionX(),this.panels["main_panel"]["tab2"]["armourbtn"].getPositionY(),this.panels["main_panel"]["tab2"]["armourbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["armourbtn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("armour");
+			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["wearablebtn"].getPositionX(),this.panels["main_panel"]["tab2"]["wearablebtn"].getPositionY(),this.panels["main_panel"]["tab2"]["wearablebtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["wearablebtn"].getContentSize().height),truePos)){
+				this.updateCurrentLayer("wearable");
+				this.selectSubType("body");
 				return true;
 			}
-			if(cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["weaponbtn"].getPositionX(),this.panels["main_panel"]["tab2"]["weaponbtn"].getPositionY(),this.panels["main_panel"]["tab2"]["weaponbtn"].getContentSize().width,this.panels["main_panel"]["tab2"]["weaponbtn"].getContentSize().height),truePos)){
-				this.updateCurrentLayer("weapon");
+
+			if(this.panels["main_panel"]["tab2"]["wearabletab"]["body"].isVisible()==true && cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["wearabletab"]["body"].getPositionX(),this.panels["main_panel"]["tab2"]["wearabletab"]["body"].getPositionY(),this.panels["main_panel"]["tab2"]["wearabletab"]["body"].getContentSize().width,this.panels["main_panel"]["tab2"]["wearabletab"]["body"].getContentSize().height),truePos)){
+				this.selectSubType("body");
 				return true;
 			}
+
+			if(this.panels["main_panel"]["tab2"]["wearabletab"]["head"].isVisible()==true && cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["wearabletab"]["head"].getPositionX(),this.panels["main_panel"]["tab2"]["wearabletab"]["head"].getPositionY(),this.panels["main_panel"]["tab2"]["wearabletab"]["head"].getContentSize().width,this.panels["main_panel"]["tab2"]["wearabletab"]["head"].getContentSize().height),truePos)){
+				this.selectSubType("head");
+				return true;
+			}
+
+			if(this.panels["main_panel"]["tab2"]["wearabletab"]["legs"].isVisible()==true && cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["wearabletab"]["legs"].getPositionX(),this.panels["main_panel"]["tab2"]["wearabletab"]["legs"].getPositionY(),this.panels["main_panel"]["tab2"]["wearabletab"]["legs"].getContentSize().width,this.panels["main_panel"]["tab2"]["wearabletab"]["legs"].getContentSize().height),truePos)){
+				this.selectSubType("legs");
+				return true;
+			}
+
+
+			if(this.panels["main_panel"]["tab2"]["wearabletab"]["feet"].isVisible()==true && cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["wearabletab"]["feet"].getPositionX(),this.panels["main_panel"]["tab2"]["wearabletab"]["feet"].getPositionY(),this.panels["main_panel"]["tab2"]["wearabletab"]["feet"].getContentSize().width,this.panels["main_panel"]["tab2"]["wearabletab"]["feet"].getContentSize().height),truePos)){
+				this.selectSubType("feet");
+				return true;
+			}
+
+			if(this.panels["main_panel"]["tab2"]["wearabletab"]["larm"].isVisible()==true && cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["wearabletab"]["larm"].getPositionX(),this.panels["main_panel"]["tab2"]["wearabletab"]["larm"].getPositionY(),this.panels["main_panel"]["tab2"]["wearabletab"]["larm"].getContentSize().width,this.panels["main_panel"]["tab2"]["wearabletab"]["larm"].getContentSize().height),truePos)){
+				this.selectSubType("larm");
+				return true;
+			}
+
+			if(this.panels["main_panel"]["tab2"]["wearabletab"]["rarm"].isVisible()==true && cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["wearabletab"]["rarm"].getPositionX(),this.panels["main_panel"]["tab2"]["wearabletab"]["rarm"].getPositionY(),this.panels["main_panel"]["tab2"]["wearabletab"]["rarm"].getContentSize().width,this.panels["main_panel"]["tab2"]["wearabletab"]["rarm"].getContentSize().height),truePos)){
+				this.selectSubType("rarm");
+				return true;
+			}
+
+			if(this.panels["main_panel"]["tab2"]["wearabletab"]["mod"].isVisible()==true && cc.rectContainsPoint(cc.rect(this.panels["main_panel"]["tab2"]["wearabletab"]["mod"].getPositionX(),this.panels["main_panel"]["tab2"]["wearabletab"]["mod"].getPositionY(),this.panels["main_panel"]["tab2"]["wearabletab"]["mod"].getContentSize().width,this.panels["main_panel"]["tab2"]["wearabletab"]["mod"].getContentSize().height),truePos)){
+				this.selectSubType("mod");
+				return true;
+			}
+
 		}	
 		
 		if(this.currentTab==3){
+			this.panels["main_panel"]["tab2"]["stackbtn"][""]
 		}
 		
 		return false;
 	},	
+
+	swapStackable:function(){
+		this.data["stackable"]=!this.data["stackable"];
+		if(this.data["stackable"]==true){
+			this.panels["main_panel"]["tab2"]["stackbtn"].setColor(cc.c4b(0,255,0,255));
+			this.panels["main_panel"]["tab2"]["stackbtn"]["text"].setString("IS STACKABLE");
+		} else{
+			this.panels["main_panel"]["tab2"]["stackbtn"].setColor(cc.c4b(255,0,0,255));
+			this.panels["main_panel"]["tab2"]["stackbtn"]["text"].setString("NOT STACKABLE");
+		}
+	},
 	
 	updateCurrentLayer:function(layerName){
-		this.panels["main_panel"]["tab2"]["book_entry"].setPositionX(-10000000);
-		this.panels["main_panel"]["tab2"]["book_text"].setVisible(false);
+		this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].setPositionX(-10000000);
+		this.panels["main_panel"]["tab2"]["booktab"]["book_text"].setVisible(false);
 		switch(layerName){
-			case "currency": this.data["stackable"]=true; break;
-			case "resource": this.data["stackable"]=false; break;
-			case "consumable": this.data["stackable"]=false; break;
-			case "book": this.data["stackable"]=false;
-						 this.panels["main_panel"]["tab2"]["book_entry"].setPositionX(150);
-						 this.panels["main_panel"]["tab2"]["book_text"].setVisible(true);
+			case "resource": break;
+			case "consumable": break;
+			case "book": this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].setPositionX(150);
+						 this.panels["main_panel"]["tab2"]["booktab"]["book_text"].setVisible(true);
 						 break;
-			case "armour": this.data["stackable"]=false; break;
-			case "weapon": this.data["stackable"]=false; break;
+			case "wearable": break;
 		}
 
-		this.panels["main_panel"]["tab2"]["currencybtn"].setColor(cc.c4b(255,255,255,255));
 		this.panels["main_panel"]["tab2"]["resourcebtn"].setColor(cc.c4b(255,255,255,255));
 		this.panels["main_panel"]["tab2"]["consumablebtn"].setColor(cc.c4b(255,255,255,255));
 		this.panels["main_panel"]["tab2"]["bookbtn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab2"]["armourbtn"].setColor(cc.c4b(255,255,255,255));
-		this.panels["main_panel"]["tab2"]["weaponbtn"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["wearablebtn"].setColor(cc.c4b(255,255,255,255));
 		this.panels["main_panel"]["tab2"][layerName+"btn"].setColor(cc.c4b(0,255,0,255));
 		this.data["itemType"]=layerName;
+
+		this.panels["main_panel"]["tab2"]["resourcetab"].setVisible(false);
+		this.panels["main_panel"]["tab2"]["consumabletab"].setVisible(false);		
+		this.panels["main_panel"]["tab2"]["booktab"].setVisible(false);
+		this.panels["main_panel"]["tab2"]["wearabletab"].setVisible(false);
+
+		this.panels["main_panel"]["tab2"][layerName+"tab"].setVisible(true);
+	},
+
+	selectSubType:function(type){
+		this.panels["main_panel"]["tab2"]["wearabletab"]["head"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["wearabletab"]["body"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["wearabletab"]["legs"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["wearabletab"]["feet"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["wearabletab"]["rarm"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["wearabletab"]["larm"].setColor(cc.c4b(255,255,255,255));
+		this.panels["main_panel"]["tab2"]["wearabletab"]["mod"].setColor(cc.c4b(255,255,255,255));
+
+		if(this.data["itemType"]=="wearable" && this.panels["main_panel"]["tab2"]["wearabletab"][type]){
+			this.panels["main_panel"]["tab2"]["wearabletab"][type].setColor(cc.c4b(255,0,0,255));
+		}
+
+		this.data["subType"]=type;
 	},
 	
 	useNextTexture:function(){

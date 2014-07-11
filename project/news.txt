@@ -1,10 +1,10 @@
-(6th July 2014) - Version 0.55
+(6th July 2014) - Version 0.56
 -Reduced server storage load by fixing up saving and loading a bit.
 -Fixed from map editor touch movement issue.
 -Added script manipulation so that stackable items can be added in amounts to map.
 -Fixed stackable picking up and dropping.
 -Fixed issues caused by above 2 features.
--Added book template. Use the book item to get a book popup.
+-Fully implemented v1 book item type. Use the in game book to read.
 
 (4th July 2014) - Version 0.55
 -Added item picking up and dropping to player character

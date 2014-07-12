@@ -53,7 +53,7 @@ LocalStorage.changeMap=function(mapNumber,data,updatetime){
 LocalStorage.getWarpData=function(){
 	if(this.instance.getLastUpdate("warps")){
 		var data = JSON.parse(sys.localStorage.getItem("warps_data"));
-		return data? data :null;
+		return data? data :[];
 	} else{
 		sendMessageToServer({"requestwarps":true});
 	}
@@ -82,7 +82,7 @@ LocalStorage.refreshWarp=function(data,updatetime){
 LocalStorage.getItemData=function(){
 	if(this.instance.getLastUpdate("items")){
 		var data = JSON.parse(sys.localStorage.getItem("items_data"));
-		return data? data :null;
+		return data? data :[];
 	} else{
 		sendMessageToServer({"requestitems":true});
 	}
@@ -108,6 +108,35 @@ LocalStorage.refreshItems=function(data,updatetime){
 	LocalStorage.updateItemData(itemsarray,updatetime);
 };
 
+LocalStorage.getSkillsData=function(){
+	if(this.instance.getLastUpdate("skills")){
+		var data = JSON.parse(sys.localStorage.getItem("skills_data"));
+		return data? data :[];
+	} else{
+		sendMessageToServer({"requestskills":true});
+	}
+};
+
+LocalStorage.updateSkillsData=function(data,updatetime){
+	this.instance.setLastUpdate("skills",updatetime);
+	sys.localStorage.setItem("skills_data",JSON.stringify(data));
+};
+
+LocalStorage.changeSkills=function(skillNumber,data,updatetime){
+	if(!this.instance.getLastUpdate("skills")){
+		var skillarray = [];
+	} else{
+		var skillarray = JSON.parse(sys.localStorage.getItem("skills_data"));
+	}
+	skillarray[skillNumber]=data;
+	LocalStorage.updateSkillsData(skillarray,updatetime);
+};
+
+LocalStorage.refreshSkills=function(data,updatetime){
+	skillarray=data;
+	LocalStorage.updateSkillsData(skillarray,updatetime);
+};
+
 
 LocalStorage.Clear=function(){
 	sys.localStorage.setItem("map_data",[]);
@@ -116,10 +145,12 @@ LocalStorage.Clear=function(){
 	sys.localStorage.setItem("last_warps",0);	
 	sys.localStorage.setItem("items_data",[]);
 	sys.localStorage.setItem("last_items",0);	
+	sys.localStorage.setItem("skills_data",[]);
+	sys.localStorage.setItem("last_skills",0);	
 };
 
 LocalStorage.Sync=function(){
-	sendMessageToServer({"sync":true, "mapupdate":(this.instance.getLastUpdate("maps")!=null ? this.instance.getLastUpdate("maps"):2),"warpupdate":(this.instance.getLastUpdate("warps")!=null ? this.instance.getLastUpdate("warps"):2),"itemupdate":(this.instance.getLastUpdate("items")!=null ? this.instance.getLastUpdate("items"):2)});
+	sendMessageToServer({"sync":true, "mapupdate":(this.instance.getLastUpdate("maps")!=null ? this.instance.getLastUpdate("maps"):2),"warpupdate":(this.instance.getLastUpdate("warps")!=null ? this.instance.getLastUpdate("warps"):2),"itemupdate":(this.instance.getLastUpdate("items")!=null ? this.instance.getLastUpdate("items"):2),"skillsupdate":(this.instance.getLastUpdate("skills")!=null ? this.instance.getLastUpdate("skills"):2)});
 };
 
 LocalStorage.setMapSaveOnExit=function(value){

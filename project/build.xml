@@ -112,8 +112,10 @@
                 <file name="./src/Book.js"></file>
                 <file name="./src/Equipment.js"></file>
                 <file name="./src/Inventory.js"></file>
+                <file name="./src/Skills.js"></file>
                 <file name="./src/ItemEditor.js"></file>
                 <file name="./src/MapEditor.js"></file>
+                <file name="./src/SkillsEditor.js"></file>
                 <file name="./src/PopupList.js"></file>
                 <file name="./src/WarpEditor.js"></file>
                 <file name="./src/MainScene.js"></file>

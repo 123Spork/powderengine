@@ -23,9 +23,13 @@ socket.on('connect',function() {
    LocalStorage.Sync();
    
    console.log('Client has connected to the server!');
-   var gameScreen = SceneManager.getInstance().currentScene;
-   if(gameScreen){
+    if(SceneManager){
+    var gameScreen = SceneManager.getInstance().currentScene;
+    if(gameScreen){
 		gameScreen.setServerConnected(true);
+	}else{
+		storedClientMessages.push(JSON.stringify({"connect":true}));
+	}
 	}else{
 		storedClientMessages.push(JSON.stringify({"connect":true}));
 	}
@@ -126,6 +130,26 @@ reactToSocketMessage=function(data){
 			else if(data["savewarpswhole"]){
 				LocalStorage.refreshWarp(data["savewarpswhole"],data["updatetime"]);
 				ObjectLists.setWarpList(data["savewarpswhole"]);
+			}
+			else if(data["saveskills"]){
+				LocalStorage.changeSkills(parseInt(data["saveskills"]),data["skillsdata"],data["updatetime"]);
+				ObjectLists.getSkillsList()[parseInt(data["saveskills"])]=data["skillsdata"];
+				if(Skillseditor){
+					Skillseditor.editList = ObjectLists.getSkillsList();
+					Skillseditor.didBecomeActive();	
+				}	
+				SkillBars.update();
+				if(Skills){
+					Skills.updateTileGrid();
+				}
+			}
+			else if(data["saveskillswhole"]){
+				LocalStorage.refreshSkills(data["saveskillswhole"],data["updatetime"]);
+				ObjectLists.setSkillsList(data["saveskillswhole"]);
+				SkillBars.update();
+				if(Skills){
+					Skills.updateTileGrid();
+				}
 			}
 			else if(data["saveitems"]){
 				LocalStorage.changeItems(parseInt(data["saveitems"]),data["itemdata"],data["updatetime"]);

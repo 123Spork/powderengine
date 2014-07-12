@@ -38,6 +38,10 @@ var EntryBox = InputBox.extend({
 		return null;
 	},
 	
+	setText:function(_in){
+		this.inputBox.setText(_in);
+	},
+
 	setDefaultFineFlag:function(value){
 		this.defaultFine=value;
 	},

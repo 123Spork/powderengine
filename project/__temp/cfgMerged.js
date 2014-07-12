@@ -591,6 +591,8 @@ js.project = {
     PopupList_js : './src/PopupList.js',
     Scene_js : './src/Scene.js',
     SceneManager_js : './src/SceneManager.js',
+    Skills_js : './src/Skills.js',
+    SkillsEditor_js : './src/SkillsEditor.js',
     StatsController_js : './src/StatsController.js',
     Strings_js : './src/Strings.js',
     Utils_js : './src/Utils.js',
@@ -608,7 +610,7 @@ resCfg["project"] = {
 cc.gameModules = [jsRes.SceneManager_js];//Game modules
 
 resCfg[jsRes.SceneManager_js] = {
-    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js,jsRes.Popup_js, jsRes.Book_js, jsRes.Equipment_js, jsRes.Inventory_js, jsRes.ItemEditor_js, jsRes.MapEditor_js, jsRes.PopupList_js, jsRes.WarpEditor_js, jsRes.MainScene_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
+    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js,jsRes.Popup_js, jsRes.Book_js, jsRes.Equipment_js, jsRes.Inventory_js, jsRes.Skills_js, jsRes.ItemEditor_js, jsRes.MapEditor_js, jsRes.SkillsEditor_js, jsRes.PopupList_js, jsRes.WarpEditor_js, jsRes.MainScene_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
 };
 exports.res = res;
 exports.resCfg = resCfg;

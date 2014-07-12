@@ -1,6 +1,7 @@
 ObjectLists=cc.Class.extend({
 	warplist:null,
-	itemlist:null
+	itemlist:null,
+	skillslist:null
 });
 
 ObjectLists.getInstance=function(){
@@ -8,6 +9,7 @@ ObjectLists.getInstance=function(){
 		this.instance = new ObjectLists();
 		this.instance.warplist=LocalStorage.getWarpData();
 		this.instance.itemlist=LocalStorage.getItemData();
+		this.instance.skillslist = LocalStorage.getSkillsData();
 	} 
 	return this.instance;
 };
@@ -26,4 +28,12 @@ ObjectLists.getItemList=function(){
 
 ObjectLists.setItemList=function(data){
 	this.instance.itemlist=data;
+};
+
+ObjectLists.getSkillsList=function(){
+	return this.instance.skillslist;
+};
+
+ObjectLists.setSkillsList=function(data){
+	this.instance.skillslist=data;
 };

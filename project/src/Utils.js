@@ -124,6 +124,15 @@ function requestLayout(delegate,isLayoutObject){
 	return getLayoutNodes(layoutObject,"panels");
 };
 
+function hex2rgba(h) {
+  var alpha = 255;
+  h = h.replace('#','');
+  if(h.length==8) {
+   alpha = h.substr(6,8);
+  }
+  return {r:parseInt(h.substring(0,2),16),g:parseInt(h.substring(2,4),16),b:parseInt(h.substring(4,6),16),a:parseInt(alpha,16)};
+}
+
 function getLayoutNodes(nodes,request,parent){
 		if(parent){
 			var data = parent[request];

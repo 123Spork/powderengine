@@ -17,9 +17,11 @@ var maps=[];
 var last=[];
 var warps=[];
 var items=[];
+var skills=[];
 var updateMapIndex=0;
 var updateWarpIndex=1;
 var updateItemIndex=2;
+var updateSkillsIndex=3;
 
 
 var droppedItems={};
@@ -33,6 +35,9 @@ fs.readdirSync("./additionals").forEach(function(file) {
   }  
   if(file=="items.json"){
 	items =require("./additionals/items.json");
+  }
+  if(file=="skills.json"){
+	skills =require("./additionals/skills.json");
   }
 });
 
@@ -70,6 +75,12 @@ var setItemData = function(data){
 	var outputFilename = './additionals/items.json';
 	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
 };
+
+var setSkillsData = function(data){
+	var outputFilename = './additionals/skills.json';
+	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+};
+
 
 var saveLastAccessData = function(){
 	var outputFilename = 'tools/updatedata.json';
@@ -121,21 +132,29 @@ socket.on('connection', function(client){
 				returner["maptime"] = last[updateMapIndex];
 				returner["mapdata"] = maps;
 			}
-			if(!last[updateMapIndex] || event["warpupdate"]<last[updateWarpIndex]){
+			if(!last[updateWarpIndex] || event["warpupdate"]<last[updateWarpIndex]){
 				if(!last[updateWarpIndex]){
 					last[updateWarpIndex]=Date.now();
 					saveLastAccessData();
 				}
-				returner["warptime"] = last[updateMapIndex];
+				returner["warptime"] = last[updateWarpIndex];
 				returner["warpdata"] = warps;
 			}
-			if(!last[updateMapIndex] || event["itemupdate"]<last[updateItemIndex]){
+			if(!last[updateItemIndex] || event["itemupdate"]<last[updateItemIndex]){
 				if(!last[updateItemIndex]){
 					last[updateItemIndex]=Date.now();
 					saveLastAccessData();
 				}
-				returner["itemtime"] = last[updateMapIndex];
+				returner["itemtime"] = last[updateItemIndex];
 				returner["itemdata"] = items;
+			}
+			if(!last[updateSkillsIndex] || event["skillsupdate"]<last[updateSkillsIndex]){
+				if(!last[updateSkillsIndex]){
+					last[updateSkillsIndex]=Date.now();
+					saveLastAccessData();
+				}
+				returner["skillstime"] = last[updateSkillsIndex];
+				returner["skillsdata"] = skills;
 			}
 			client.send(JSON.stringify(returner));
 		}
@@ -207,6 +226,24 @@ socket.on('connection', function(client){
 			items=event["saveitemswhole"];
 			setItemData(items);
 			event["updatetime"]=last[updateItemIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+       if(event["saveskills"]){
+			last[updateSkillsIndex]=Date.now();
+			saveLastAccessData();
+			skills[parseInt(event["saveskills"])]=event["skilldata"];
+			setSkillsData(items);
+			event["updatetime"]=last[updateSkillsIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+		if(event["saveskillswhole"]){
+			last[updateSkillsIndex]=Date.now();
+			saveLastAccessData();
+			skills=event["saveskillswhole"];
+			setSkillsData(skills);
+			event["updatetime"]=last[updateSkillsIndex];
 			client.broadcast.send(JSON.stringify(event));
 			client.send(JSON.stringify(event));
 		}

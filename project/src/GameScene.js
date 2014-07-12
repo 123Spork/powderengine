@@ -5,25 +5,9 @@ var GameScene = Scene.extend({
 	},
 	
 	getLayoutObject:function(){
-		var health_panel ={
-			position: cc.p(0,640-60),
-			children:{
-				"health": {
-					size: cc.size(290,20),
-					bg: cc.c4b(255,0,0,200),
-					position: cc.p(5,5)
-				},
-				"mana": { 
-					size: cc.size(290,20),
-					position: cc.p(5,30),
-					bg:cc.c4b(0,0,255,200)
-				}
-			}
-		}
 		 return {
 		 "panels":{
 			 children:{	
-				"health_panel": health_panel,
 				"logout_button":{
 					position:cc.p(860,620),
 					size:cc.size(100,20),
@@ -170,10 +154,6 @@ var GameScene = Scene.extend({
 			return true;
 		}
 		SceneManager.setActiveScene(this);
-		if(cc.rectContainsPoint(this.panels["health_panel"].getBoundingBox(),touch._point)){
-			SceneManager.getInstance().goToScene("Main");
-			return true;
-		}
 		if(this.mobileControls){
 			if(cc.rectContainsPoint(this.mobileControls["upbutton"].getBoundingBox(),touch._point) && this.mobileControls["upbutton"].isVisible()){
 				keyMap[38]=true
@@ -310,7 +290,20 @@ var GameScene = Scene.extend({
 					Equipment.didBecomeActive();
 					this.addChild(Equipment);
 				}
-				break;
+			break;
+			case "S":
+				if(Skills!=null && !Skills._parent) Skills=null;
+				if(Skills){
+					Skills.willTerminate();
+					Skills.removeFromParent();
+					Skills=null;
+				} else{
+					Skills = new SkillsPanel();
+					Skills.init();
+					Skills.didBecomeActive();
+					this.addChild(Skills);
+				}
+			break;
 		}
 	},
 	
@@ -375,6 +368,19 @@ var GameScene = Scene.extend({
 					this.addChild(Warpeditor);
 				}
 			break;
+			case "/editskills": 
+				if(Skillseditor!=null && !Skillseditor._parent) Skillseditor=null;
+				if(Skillseditor){
+					Skillseditor.willTerminate();
+					Skillseditor.removeFromParent();
+					Skillseditor=null;
+				} else{
+					Skillseditor = new PopupList();
+					Skillseditor.init({delegate:null,editor:new SkillsEditor(),list:ObjectLists.getSkillsList(),name:"Skills List"});
+					Skillseditor.didBecomeActive();
+					this.addChild(Skillseditor);
+				}
+			break;		
 			case "/edititems": 
 				if(Itemeditor!=null && !Itemeditor._parent) Itemeditor=null;
 				if(Itemeditor){
@@ -449,6 +455,8 @@ var GameScene = Scene.extend({
 		
 		this.addChild(GameChat.create());
 		
+		this.addChild(SkillBars.create());
+
 		if(isMobile()){
 			this.mobileControls = requestLayout(this.getMobileLayoutObject(),true);
 			this.addChild(this.mobileControls);

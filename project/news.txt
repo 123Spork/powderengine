@@ -1,14 +1,10 @@
+(12th July 2014) - Version 0.60
+-Removed a bunch of logging in bugs and cleared up some bugs caused by optimizations.
+-Engine is now distributable at 0.6.
+
 (11th July 2014) - Version 0.59
 -Implemented equippable item types. Items can now be equipped from inventory into equipment.
 -Streamlined item types to remove redundant types.
 -Made stackabilty a property of every item instead of a particular item type, abstracts currency to general type.
 -Added dequipping into equipment panel.
 -Condensed touch handling logic to conserve space (removed 12kb with no game change). Cleaned up popup code a lot.
-
-(6th July 2014) - Version 0.56
--Reduced server storage load by fixing up saving and loading a bit.
--Fixed from map editor touch movement issue.
--Added script manipulation so that stackable items can be added in amounts to map.
--Fixed stackable picking up and dropping.
--Fixed issues caused by above 2 features.
--Fully implemented v1 book item type. Use the in game book to read.

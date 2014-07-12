@@ -1,3 +1,9 @@
+(11th July 2014) - Version 0.58
+-Implemented equippable item types. Items can now be equipped from inventory into equipment.
+-Streamlined item types to remove redundant types.
+-Made stackabilty a property of every item instead of a particular item type, abstracts currency to general type.
+-Added dequipping into equipment panel.
+
 (6th July 2014) - Version 0.56
 -Reduced server storage load by fixing up saving and loading a bit.
 -Fixed from map editor touch movement issue.
@@ -5,12 +11,3 @@
 -Fixed stackable picking up and dropping.
 -Fixed issues caused by above 2 features.
 -Fully implemented v1 book item type. Use the in game book to read.
-
-(4th July 2014) - Version 0.55
--Added item picking up and dropping to player character
--Added drup/use submenu to inventory menu.
--Inventory now populates with picked up items
--Dropped items are "temp" and map items are "fixed" (drop by clicking on item in inventory).
--Fixed some item and warp editing bugs.
--Added mouse over highlight on items.
--Added stackable item pickup/dropping.

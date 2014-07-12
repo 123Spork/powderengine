@@ -47,6 +47,9 @@ window.onfocus = function () {
 	}
 }; 
 
+var WHITE = cc.c4b(255,255,255,255);
+var GREEN = cc.c4b(0,255,0,255);
+var RED = cc.c4b(255,0,0,255);
 
 
 document.getElementById("gameCanvas").onkeyup = function (event) {
@@ -84,6 +87,10 @@ document.getElementById("gameCanvas").onkeyup = function (event) {
 			SceneManager.getInstance().currentScene.onKeyUp(button);
 		}
 	}
+};
+
+function isTouching(obj,pos){
+	return obj.isVisible() && cc.rectContainsPoint(cc.rect(obj.getPositionX(),obj.getPositionY(),obj.getContentSize().width,obj.getContentSize().height),pos);
 };
 
 function cloneObj(obj) {

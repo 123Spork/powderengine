@@ -571,25 +571,31 @@ exports.gameModules = cc.gameModules;
 exports.jsRes = js;
 var js = js || {};
 js.project = {
+    Book_js : './src/Book.js',
     Character_js : './src/Character.js',
     ChatBox_js : './src/ChatBox.js',
     EntryBox_js : './src/EntryBox.js',
+    Equipment_js : './src/Equipment.js',
     GameScene_js : './src/GameScene.js',
     GameTile_js : './src/GameTile.js',
     InputBox_js : './src/InputBox.js',
+    Inventory_js : './src/Inventory.js',
+    ItemEditor_js : './src/ItemEditor.js',
     LocalStorage_js : './src/LocalStorage.js',
     Login_js : './src/Login.js',
     MainScene_js : './src/MainScene.js',
+    MapEditor_js : './src/MapEditor.js',
     ObjectLists_js : './src/ObjectLists.js',
     PlayersController_js : './src/PlayersController.js',
     Popup_js : './src/Popup.js',
+    PopupList_js : './src/PopupList.js',
     Scene_js : './src/Scene.js',
     SceneManager_js : './src/SceneManager.js',
     StatsController_js : './src/StatsController.js',
     Strings_js : './src/Strings.js',
     Utils_js : './src/Utils.js',
+    WarpEditor_js : './src/WarpEditor.js',
     client_js : './src/client.js',
-    item_js : './src/item.js',
     map_js : './src/map.js'
 };
 var resCfg = cc.resCfg;
@@ -602,7 +608,7 @@ resCfg["project"] = {
 cc.gameModules = [jsRes.SceneManager_js];//Game modules
 
 resCfg[jsRes.SceneManager_js] = {
-    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js,jsRes.Popup_js,jsRes.MainScene_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
+    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js,jsRes.Popup_js, jsRes.Book_js, jsRes.Equipment_js, jsRes.Inventory_js, jsRes.ItemEditor_js, jsRes.MapEditor_js, jsRes.PopupList_js, jsRes.WarpEditor_js, jsRes.MainScene_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
 };
 exports.res = res;
 exports.resCfg = resCfg;

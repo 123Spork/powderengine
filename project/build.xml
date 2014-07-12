@@ -109,6 +109,13 @@
                 <file name="./src/Character.js"></file>
                 <file name="./src/Scene.js"></file>
                 <file name="./src/Popup.js"></file>
+                <file name="./src/Book.js"></file>
+                <file name="./src/Equipment.js"></file>
+                <file name="./src/Inventory.js"></file>
+                <file name="./src/ItemEditor.js"></file>
+                <file name="./src/MapEditor.js"></file>
+                <file name="./src/PopupList.js"></file>
+                <file name="./src/WarpEditor.js"></file>
                 <file name="./src/MainScene.js"></file>
                 <file name="./src/Login.js"></file>
                 <file name="./src/GameScene.js"></file>

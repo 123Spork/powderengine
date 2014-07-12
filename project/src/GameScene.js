@@ -1,10 +1,3 @@
-var Inventory=null,
-Equipment=null,
-Mapeditor=null,
-Itemeditor=null,
-Book=null,
-Warpeditor=null;
-
 var GameScene = Scene.extend({
 	
 	ctor:function(){
@@ -216,7 +209,7 @@ var GameScene = Scene.extend({
 					Inventory.removeFromParent();
 					Inventory=null;
 				} else{
-					Inventory = new InventoryPopup();
+					Inventory = new InventoryPanel();
 					Inventory.init();
 					Inventory.didBecomeActive();
 					this.addChild(Inventory);
@@ -231,7 +224,7 @@ var GameScene = Scene.extend({
 					Equipment.removeFromParent();
 					Equipment=null;
 				} else{
-					Equipment = new EquipmentPopup();
+					Equipment = new EquipmentPanel();
 					Equipment.init();
 					Equipment.didBecomeActive();
 					this.addChild(Equipment);
@@ -299,7 +292,7 @@ var GameScene = Scene.extend({
 					Inventory.removeFromParent();
 					Inventory=null;
 				} else{
-					Inventory = new InventoryPopup();
+					Inventory = new InventoryPanel();
 					Inventory.init();
 					Inventory.didBecomeActive();
 					this.addChild(Inventory);
@@ -312,7 +305,7 @@ var GameScene = Scene.extend({
 					Equipment.removeFromParent();
 					Equipment=null;
 				} else{
-					Equipment = new EquipmentPopup();
+					Equipment = new EquipmentPanel();
 					Equipment.init();
 					Equipment.didBecomeActive();
 					this.addChild(Equipment);
@@ -376,8 +369,8 @@ var GameScene = Scene.extend({
 					Warpeditor.removeFromParent();
 					Warpeditor=null;
 				} else{
-					Warpeditor = new ObjectList();
-					Warpeditor.init({delegate:null,editor:new WarpEditorPopup(),list:ObjectLists.getWarpList(),name:"Warp List"});
+					Warpeditor = new PopupList();
+					Warpeditor.init({delegate:null,editor:new WarpEditor(),list:ObjectLists.getWarpList(),name:"Warp List"});
 					Warpeditor.didBecomeActive();
 					this.addChild(Warpeditor);
 				}
@@ -390,7 +383,7 @@ var GameScene = Scene.extend({
 					Itemeditor=null;
 					GameMap.setInteractionDelegate(null);
 				} else{
-					Itemeditor = new ObjectList();
+					Itemeditor = new PopupList();
 					Itemeditor.init({delegate:null,editor:new ItemEditor(),list:ObjectLists.getItemList(),name:"Item List"});
 					Itemeditor.didBecomeActive();
 					this.addChild(Itemeditor);

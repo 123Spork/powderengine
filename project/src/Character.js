@@ -338,7 +338,7 @@ PlayerCharacter = Character.extend({
 					Book.removeFromParent();
 					Book=null;
 				}
-				Book = new BookPopup();
+				Book = new BookPanel();
 				Book.init(this.items["stored"][itemnumber]);
 				Book.didBecomeActive();
 				this._parent._parent._parent.addChild(Book);

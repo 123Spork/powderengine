@@ -10,6 +10,7 @@ fs.readFile('config.txt', 'utf8', function (err,data) {
 var port = parseInt(data.split("\n")[1]);
   
 var positions = [];
+var mapplayers=[];
 var clients =[];
 var names=[];
 var maps=[];
@@ -92,15 +93,20 @@ socket.on('connection', function(client){
 				client.send(JSON.stringify({"login_success":true}));
 				names[client.id]=event["username"];
 				clients[client.id]=true;
+				mapplayers[event["username"]]=1;
 				client.broadcast.send(JSON.stringify({"newPlayer":event["username"]}));
 				for(var i in clients){
 					if(i!=client.id && clients[i]==true){
 						if(positions[i]){
 							client.send(JSON.stringify({"moveTo":positions[i],"id":names[i]}));
+							client.send(JSON.stringify({"changemap":mapplayers[names[i]],"id":names[i],"setTo":positions[i]}));
 						} else{
 							client.send(JSON.stringify({"moveTo":"default","id":names[i]}));
 						}
 					}
+				}
+				for(var i in droppedItems[1]){
+					client.send(JSON.stringify(droppedItems[1][i]));
 				}
 			}
 		}
@@ -220,6 +226,7 @@ socket.on('connection', function(client){
 		}
 		if(event["changemap"]){
 			client.broadcast.send(JSON.stringify({"id":names[client.id],"changemap":event["changemap"],"setTo":event["setTo"]}));
+			mapplayers[names[client.id]]=event["changemap"];
 			for(var i in droppedItems[event["changemap"]]){
 				client.send(JSON.stringify({"droppeditem":droppedItems[event["changemap"]][i]["droppeditem"],"mapnumber":event["changemap"],"index":droppedItems[event["changemap"]][i]["index"]}));
 			}

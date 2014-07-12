@@ -142,10 +142,12 @@ reactToSocketMessage=function(data){
 				PlayersController.getYou().updateItemData(oldItemName,data["itemdata"])
 			}
 			else if(data["droppeditem"]){
-				if(data["mapnumber"] == GameMap.getMapNumber()){
+				if(data["mapnumber"] == GameMap.getMapNumber() && GameMap.getInstance().isMapDirty==false){
 					var tile = GameMap.getTileNodeForIndex(data["index"]);
 					tile.addDroppedItem(data["droppeditem"]);
 					GameMap.updateMap();
+				} else{
+					storedClientMessages.push(JSON.stringify(data));
 				}
 			}
 			else if(data["pickupitem"]){

@@ -1,8 +1,9 @@
-(11th July 2014) - Version 0.58
+(11th July 2014) - Version 0.59
 -Implemented equippable item types. Items can now be equipped from inventory into equipment.
 -Streamlined item types to remove redundant types.
 -Made stackabilty a property of every item instead of a particular item type, abstracts currency to general type.
 -Added dequipping into equipment panel.
+-Condensed touch handling logic to conserve space (removed 12kb with no game change). Cleaned up popup code a lot.
 
 (6th July 2014) - Version 0.56
 -Reduced server storage load by fixing up saving and loading a bit.

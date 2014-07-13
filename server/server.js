@@ -232,8 +232,8 @@ socket.on('connection', function(client){
        if(event["saveskills"]){
 			last[updateSkillsIndex]=Date.now();
 			saveLastAccessData();
-			skills[parseInt(event["saveskills"])]=event["skilldata"];
-			setSkillsData(items);
+			skills[parseInt(event["saveskills"])]=event["skillsdata"];
+			setSkillsData(skills);
 			event["updatetime"]=last[updateSkillsIndex];
 			client.broadcast.send(JSON.stringify(event));
 			client.send(JSON.stringify(event));

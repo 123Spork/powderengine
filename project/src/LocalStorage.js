@@ -31,7 +31,7 @@ LocalStorage.getMapData=function(mapNumber){
 			return data[mapNumber] ? data[mapNumber] :null;
 		}
 	} else{
-		sendMessageToServer({"requestmaps":true});
+		return [];
 	}
 };
 
@@ -52,10 +52,12 @@ LocalStorage.changeMap=function(mapNumber,data,updatetime){
 
 LocalStorage.getWarpData=function(){
 	if(this.instance.getLastUpdate("warps")){
-		var data = JSON.parse(sys.localStorage.getItem("warps_data"));
+		if(sys.localStorage.getItem("warps_data")!=""){
+			var data = JSON.parse(sys.localStorage.getItem("warps_data"));
+		}
 		return data? data :[];
 	} else{
-		sendMessageToServer({"requestwarps":true});
+		return [];
 	}
 };
 
@@ -68,7 +70,11 @@ LocalStorage.changeWarp=function(warpNumber,data,updatetime){
 	if(!this.instance.getLastUpdate("warps")){
 		var warparray = [];
 	} else{
-		var warparray = JSON.parse(sys.localStorage.getItem("warps_data"));
+		if(sys.localStorage.getItem("warps_data")!=""){
+			var warparray = JSON.parse(sys.localStorage.getItem("warps_data"));
+		} else{
+			var warparray=[];
+		}
 	}
 	warparray[warpNumber]=data;
 	LocalStorage.updateWarpData(warparray,updatetime);
@@ -81,10 +87,12 @@ LocalStorage.refreshWarp=function(data,updatetime){
 
 LocalStorage.getItemData=function(){
 	if(this.instance.getLastUpdate("items")){
-		var data = JSON.parse(sys.localStorage.getItem("items_data"));
+		if(sys.localStorage.getItem("items_data")!=""){
+			var data = JSON.parse(sys.localStorage.getItem("items_data"));
+		}
 		return data? data :[];
 	} else{
-		sendMessageToServer({"requestitems":true});
+		return [];
 	}
 };
 
@@ -97,7 +105,11 @@ LocalStorage.changeItems=function(itemNumber,data,updatetime){
 	if(!this.instance.getLastUpdate("items")){
 		var itemarray = [];
 	} else{
-		var itemarray = JSON.parse(sys.localStorage.getItem("items_data"));
+		if(sys.localStorage.getItem("items_data")!=""){
+			var itemarray = JSON.parse(sys.localStorage.getItem("items_data"));
+		} else{
+			var itemarray=[];
+		}
 	}
 	itemarray[itemNumber]=data;
 	LocalStorage.updateItemData(itemarray,updatetime);
@@ -110,10 +122,12 @@ LocalStorage.refreshItems=function(data,updatetime){
 
 LocalStorage.getSkillsData=function(){
 	if(this.instance.getLastUpdate("skills")){
-		var data = JSON.parse(sys.localStorage.getItem("skills_data"));
-		return data? data :[];
+		if(sys.localStorage.getItem("skills_data")!=""){
+			var data = JSON.parse(sys.localStorage.getItem("skills_data"));
+		}
+		return data ? data :[];
 	} else{
-		sendMessageToServer({"requestskills":true});
+		return [];
 	}
 };
 
@@ -126,7 +140,11 @@ LocalStorage.changeSkills=function(skillNumber,data,updatetime){
 	if(!this.instance.getLastUpdate("skills")){
 		var skillarray = [];
 	} else{
-		var skillarray = JSON.parse(sys.localStorage.getItem("skills_data"));
+		if(sys.localStorage.getItem("skills_data")!=""){
+			var skillarray = JSON.parse(sys.localStorage.getItem("skills_data"));
+		} else{
+			var skillarray = [];
+		}
 	}
 	skillarray[skillNumber]=data;
 	LocalStorage.updateSkillsData(skillarray,updatetime);

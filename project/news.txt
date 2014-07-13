@@ -1,3 +1,8 @@
+(12th July 2014) - Version 0.62
+-Added skills editing.
+-Added healthbar setup based on bar based skills.
+-Added skills menu (Hotkey "S");
+
 (12th July 2014) - Version 0.60
 -Removed a bunch of logging in bugs and cleared up some bugs caused by optimizations.
 -Engine is now distributable at 0.6.

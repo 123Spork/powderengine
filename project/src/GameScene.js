@@ -1,3 +1,4 @@
+MainScene=null;
 var GameScene = Scene.extend({
 	
 	ctor:function(){
@@ -222,7 +223,19 @@ var GameScene = Scene.extend({
 		}
 	},
 	
-	
+	showSign:function(data){
+		if(Sign!=null && !Sign._parent) Sign=null;
+		if(Sign){
+			Sign.willTerminate();
+			Sign.removeFromParent();
+			Sign=null;
+		} else{
+			Sign = new SignPanel();
+			Sign.init(data);
+			Sign.didBecomeActive();
+			this.addChild(Sign);
+		}
+	},
 	
 	onTouchEnded:function(touch){
 		if(this.mobileControls){
@@ -263,6 +276,9 @@ var GameScene = Scene.extend({
 				if(Inventory){
 					Inventory.updateTileGrid();
 				}
+			break;
+			case "CTRL":
+				PlayersController.getYou().interactWithFacing();
 			break;
 			case "ESC": this.destroyGame(); SceneManager.getInstance().goToScene("Login",{logout:true,serverConnected:true}); break;
 			case "I":
@@ -368,6 +384,19 @@ var GameScene = Scene.extend({
 					this.addChild(Warpeditor);
 				}
 			break;
+			case "/editsigns": 
+				if(Signeditor!=null && !Signeditor._parent) Signeditor=null;
+				if(Signeditor){
+					Signeditor.willTerminate();
+					Signeditor.removeFromParent();
+					Signeditor=null;
+				} else{
+					Signeditor = new PopupList();
+					Signeditor.init({delegate:null,editor:new SignEditor(),list:ObjectLists.getSignsList(),name:"Sign List"});
+					Signeditor.didBecomeActive();
+					this.addChild(Signeditor);
+				}
+			break;
 			case "/editskills": 
 				if(Skillseditor!=null && !Skillseditor._parent) Skillseditor=null;
 				if(Skillseditor){
@@ -466,7 +495,8 @@ var GameScene = Scene.extend({
 		
 		
 		this.addChild(this.panels);		
-		this.schedule(this.storedMessages);		
+		this.schedule(this.storedMessages);	
+		MainScene=this;	
 
 	},
 	

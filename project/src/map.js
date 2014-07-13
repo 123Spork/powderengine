@@ -18,10 +18,10 @@ var GameMap=cc.Layer.extend({
 		var self=this;
 		var Neighbours=function(x, y){
 			var	N = y - 1,S = y + 1,E = x + 1,W = x - 1,
-			myN = N > -1 && self.tileNodes["tile"+indexFromPos(x,N)] && self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=1
-			myS = S < gridWidth && self.tileNodes["tile"+indexFromPos(x,S)] && self.tileNodes["tile"+ indexFromPos(x,S)].getType()!=1
-			myE = E < gridWidth && self.tileNodes["tile"+indexFromPos(E,y)] && self.tileNodes["tile"+ indexFromPos(E,y)].getType()!=1
-			myW = W > -1 && self.tileNodes["tile"+indexFromPos(W,y)] && self.tileNodes["tile"+ indexFromPos(W,y)].getType()!=1
+			myN = N > -1 && self.tileNodes["tile"+indexFromPos(x,N)] && (self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=7)
+			myS = S < gridWidth && self.tileNodes["tile"+indexFromPos(x,S)] && (self.tileNodes["tile"+ indexFromPos(x,S)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=7)
+			myE = E < gridWidth && self.tileNodes["tile"+indexFromPos(E,y)] && (self.tileNodes["tile"+ indexFromPos(E,y)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=7)
+			myW = W > -1 && self.tileNodes["tile"+indexFromPos(W,y)] && (self.tileNodes["tile"+ indexFromPos(W,y)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=7)
 			result = [];
 			if(myN)
 				result.push({x:x, y:N});

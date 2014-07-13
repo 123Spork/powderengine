@@ -306,6 +306,7 @@ var GameTile = cc.Node.extend({
 			case 4: this.string.setString("ITM"); break;	
 			case 5: this.string.setString("SCR"); break;	
 			case 6: this.string.setString("SKL"); break;
+			case 7: this.string.setString("SGN"); break;
 		}
 	},
 	
@@ -333,6 +334,7 @@ var GameTile = cc.Node.extend({
 			case 4: var itemData = ObjectLists.getItemList()[this.script[this.script.length-1]["num"]];
 					itemData["amount"]=parseInt(this.script[this.script.length-1]["data"]["amount"]);
 					return itemData;
+			case 7: return ObjectLists.getSignsList()[this.script[this.script.length-1]["num"]];
 		}
 	},
 	

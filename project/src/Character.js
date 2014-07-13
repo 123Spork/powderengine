@@ -11,6 +11,7 @@ Character = cc.Sprite.extend({
 	status:null,
 	onMap:null,
 	path:null,
+	facing:"DOWN",
 
 
 	init:function(withData){
@@ -33,6 +34,10 @@ Character = cc.Sprite.extend({
 		this.updateNameString();
 	},
 	
+	getFacing:function(){
+		return this.facing;
+	},
+
 	setMap:function(value){
 		this.onMap=value;
 	},
@@ -62,9 +67,10 @@ Character = cc.Sprite.extend({
 		return this.name;
 	},
 	
-	setSpriteFrame:function(x,y){
+	setSpriteFrame:function(x,y,dir){
 		this.setTextureRect(cc.rect(x*32,((this.textureData.id*4)*32)+(y*32),32,32));
 		this.spriteFrame=cc.p(x,y);
+		this.facing=dir;
 	},
 	
 	getSpriteFrame:function(x,y){
@@ -106,6 +112,24 @@ Character = cc.Sprite.extend({
 			}
 		}
 	},
+
+	interactWithFacing:function(){
+		if(!this.isWalking){
+			var gp = this.getGridPosition();
+			switch(this.facing){
+				case "RIGHT": gp.x+=1; break;
+				case "LEFT": gp.x-=1; break;
+				case "UP": gp.y+=1;break;
+				case "DOWN": gp.y-=1; break;
+			}
+			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
+			if(tile){
+				switch(tile.getType()){
+					case 7: MainScene.showSign(tile.getScript()); return;
+				}
+			}
+		}
+	},
 	
 	walk:function(dt){
 		this.animationCounter+=dt;
@@ -114,13 +138,13 @@ Character = cc.Sprite.extend({
 		if(this.animationCounter>this.velocity){
 			this.animationCounter=0;
 			if(this.toPosition.x<pos.x){
-				this.setSpriteFrame((sf.x+1)%3,1);
+				this.setSpriteFrame((sf.x+1)%3,1,"LEFT");
 			} else if(this.toPosition.x>pos.x){
-				this.setSpriteFrame((sf.x+1)%3,2);
+				this.setSpriteFrame((sf.x+1)%3,2,"RIGHT");
 			} else if(this.toPosition.y<pos.y){
-				this.setSpriteFrame((sf.x+1)%3,0);
+				this.setSpriteFrame((sf.x+1)%3,0,"DOWN");
 			} else if(this.toPosition.y>pos.y){
-				this.setSpriteFrame((sf.x+1)%3,3);
+				this.setSpriteFrame((sf.x+1)%3,3,"UP");
 			}
 		}
 			
@@ -153,13 +177,13 @@ Character = cc.Sprite.extend({
 		var gp = this.getGridPosition();
 		
 		if(gp.x>x){
-			this.setSpriteFrame(sf.x,1);
+			this.setSpriteFrame(sf.x,1,"LEFT");
 		} else if(gp.x<x){
-			this.setSpriteFrame(sf.x,2);
+			this.setSpriteFrame(sf.x,2,"RIGHT");
 		} if(gp.y>y){
-			this.setSpriteFrame(sf.x,0);
+			this.setSpriteFrame(sf.x,0,"DOWN");
 		} else if(gp.y<y){
-			this.setSpriteFrame(sf.x,3);
+			this.setSpriteFrame(sf.x,3,"UP");
 		}
 		if(!tile){
 			if(this.isPlayer && Mapeditor==null){
@@ -186,7 +210,7 @@ Character = cc.Sprite.extend({
 		if(this.isWalking==false && tile){	
 			switch(tile.getType()){
 				case 0: break;
-				case 1: return;
+				case 1: case 7: return;
 				case 3: this.warpPlayer(tile.getScriptData()); return;
 			}
 			this.toPosition = cc.p(32*x,32*y);
@@ -234,13 +258,13 @@ Character = cc.Sprite.extend({
 				return;
 			}
 			if(gp.x>x){
-				this.setSpriteFrame(sf.x,1);
+				this.setSpriteFrame(sf.x,1,"LEFT");
 			} else if(gp.x<x){
-				this.setSpriteFrame(sf.x,2);
+				this.setSpriteFrame(sf.x,2,"RIGHT");
 			} else if(gp.y>y){
-				this.setSpriteFrame(sf.x,0);
+				this.setSpriteFrame(sf.x,0,"DOWN");
 			} else if(gp.y<y){
-				this.setSpriteFrame(sf.x,3);
+				this.setSpriteFrame(sf.x,3,"UP");
 			}
 			this.toPosition = cc.p(32*x,32*y);
 			this.isWalking=true;

@@ -20,6 +20,8 @@ js.project = {
     PopupList_js : '[%project%]src/PopupList.js',
     Scene_js : '[%project%]src/Scene.js',
     SceneManager_js : '[%project%]src/SceneManager.js',
+    Sign_js : '[%project%]src/Sign.js',
+    SignEditor_js : '[%project%]src/SignEditor.js',
     Skills_js : '[%project%]src/Skills.js',
     SkillsEditor_js : '[%project%]src/SkillsEditor.js',
     StatsController_js : '[%project%]src/StatsController.js',

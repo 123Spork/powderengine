@@ -18,10 +18,13 @@ var last=[];
 var warps=[];
 var items=[];
 var skills=[];
+var signs=[];
 var updateMapIndex=0;
 var updateWarpIndex=1;
 var updateItemIndex=2;
 var updateSkillsIndex=3;
+var updateSignsIndex=4;
+
 
 
 var droppedItems={};
@@ -38,6 +41,9 @@ fs.readdirSync("./additionals").forEach(function(file) {
   }
   if(file=="skills.json"){
 	skills =require("./additionals/skills.json");
+  }
+  if(file=="signs.json"){
+	signs =require("./additionals/signs.json");
   }
 });
 
@@ -81,6 +87,10 @@ var setSkillsData = function(data){
 	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
 };
 
+var setSignsData = function(data){
+	var outputFilename = './additionals/signs.json';
+	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+};
 
 var saveLastAccessData = function(){
 	var outputFilename = 'tools/updatedata.json';
@@ -155,6 +165,14 @@ socket.on('connection', function(client){
 				}
 				returner["skillstime"] = last[updateSkillsIndex];
 				returner["skillsdata"] = skills;
+			}
+			if(!last[updateSignsIndex] || event["signsupdate"]<last[updateSignsIndex]){
+				if(!last[updateSignsIndex]){
+					last[updateSignsIndex]=Date.now();
+					saveLastAccessData();
+				}
+				returner["signstime"] = last[updateSignsIndex];
+				returner["signsdata"] = signs;
 			}
 			client.send(JSON.stringify(returner));
 		}
@@ -244,6 +262,24 @@ socket.on('connection', function(client){
 			skills=event["saveskillswhole"];
 			setSkillsData(skills);
 			event["updatetime"]=last[updateSkillsIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+       if(event["savesigns"]){
+			last[updateSignsIndex]=Date.now();
+			saveLastAccessData();
+			signs[parseInt(event["savesigns"])]=event["signsdata"];
+			setSignsData(signs);
+			event["updatetime"]=last[updateSignsIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+		if(event["savesignswhole"]){
+			last[updateSignsIndex]=Date.now();
+			saveLastAccessData();
+			signs=event["savesignswhole"];
+			setSignsData(signs);
+			event["updatetime"]=last[updateSignsIndex];
 			client.broadcast.send(JSON.stringify(event));
 			client.send(JSON.stringify(event));
 		}

@@ -19,16 +19,16 @@ var socket = io.connect(host,{
 ); 
 
 socket.on('connect',function() {
-   LocalStorage.Create();
-   LocalStorage.Sync();
+    LocalStorage.Create();
+    LocalStorage.Sync();
    
-   console.log('Client has connected to the server!');
+    console.log('Client has connected to the server!');
     if(SceneManager){
-    var gameScreen = SceneManager.getInstance().currentScene;
-    if(gameScreen){
-		gameScreen.setServerConnected(true);
-	}else{
-		storedClientMessages.push(JSON.stringify({"connect":true}));
+	    var gameScreen = SceneManager.getInstance().currentScene;
+	    if(gameScreen){
+			gameScreen.setServerConnected(true);
+		}else{
+			storedClientMessages.push(JSON.stringify({"connect":true}));
 	}
 	}else{
 		storedClientMessages.push(JSON.stringify({"connect":true}));
@@ -58,6 +58,12 @@ reactToSocketMessage=function(data){
 		}
 		if(data["itemdata"]){
 			LocalStorage.updateItemData(data["itemdata"],data["itemtime"]);
+		}
+		if(data["skillsdata"]){
+			LocalStorage.updateSkillsData(data["skillsdata"],data["skillstime"]);
+		}
+		if(data["signsdata"]){
+			LocalStorage.updateSignsData(data["signsdata"],data["signstime"]);
 		}
 		return;
 	}
@@ -150,6 +156,18 @@ reactToSocketMessage=function(data){
 				if(Skills){
 					Skills.updateTileGrid();
 				}
+			}
+			else if(data["savesigns"]){
+				LocalStorage.changeSigns(parseInt(data["savesigns"]),data["signsdata"],data["updatetime"]);
+				ObjectLists.getSignsList()[parseInt(data["savesigns"])]=data["signsdata"];
+				if(Signeditor){
+					Signeditor.editList = ObjectLists.getSignsList();
+					Signeditor.didBecomeActive();	
+				}	
+			}
+			else if(data["savesignswhole"]){
+				LocalStorage.refreshSigns(data["savesignswhole"],data["updatetime"]);
+				ObjectLists.setSignsList(data["savesignswhole"]);
 			}
 			else if(data["saveitems"]){
 				LocalStorage.changeItems(parseInt(data["saveitems"]),data["itemdata"],data["updatetime"]);

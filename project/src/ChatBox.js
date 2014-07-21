@@ -63,49 +63,58 @@ var GameChat=cc.Layer.extend({
 			children:{
 				"chat_panel":{
 					size: cc.size(400,150),
-					bg: cc.c4b(0,0,0,255),
-					opacity: 127,
+					texture:"GUI/chat.png",
+					anchorPoint:cc.p(0,0),
+					opacity: 200,
 					position: cc.p(0,-200),
 					children:{
 						"label7":{
 							label:"",
 							position:cc.p(5,0),
 							anchorPoint:cc.p(0,0),
+							color:cc.c3b(0,0,0),
 						},
 						"label6":{
 							label:"",
 							position:cc.p(5,15),
 							anchorPoint:cc.p(0,0),
+							color:cc.c3b(0,0,0),
 						},
 						"label5":{
 							label:"",
 							position:cc.p(5,30),
 							anchorPoint:cc.p(0,0),
+							color:cc.c3b(0,0,0),
 						},
 						"label4":{
 							label:"",
 							position:cc.p(5,45),
 							anchorPoint:cc.p(0,0),
+							color:cc.c3b(0,0,0),
 						},
 						"label3":{
 							label:"",
 							position:cc.p(5,60),
 							anchorPoint:cc.p(0,0),
+							color:cc.c3b(0,0,0),
 						},				
 						"label2":{
 							label:"",
 							position:cc.p(5,75),
 							anchorPoint:cc.p(0,0),
+							color:cc.c3b(0,0,0),
 						},				
 						"label1":{
 							label:"",
 							position:cc.p(5,90),
 							anchorPoint:cc.p(0,0),
+							color:cc.c3b(0,0,0),
 						},
 						"label0":{
 							label:"",
 							position:cc.p(5,105),
 							anchorPoint:cc.p(0,0),
+							color:cc.c3b(0,0,0),
 						},
 					}
 				}

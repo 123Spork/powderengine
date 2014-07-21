@@ -10,16 +10,10 @@ var GameScene = Scene.extend({
 		 "panels":{
 			 children:{	
 				"logout_button":{
-					position:cc.p(860,620),
-					size:cc.size(100,20),
-					bg:cc.c4b(0,0,0,127),
-					children:{
-						"Logout":{
-							label:"Logout",
-							color:cc.c3b(255,255,255),
-							position:cc.p(50,10),
-						}
-					}
+					position:cc.p(960-52,640-52),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/logout.png",
 				}
 			}
 			}

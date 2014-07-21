@@ -37,11 +37,11 @@ onKeyUp:function(key){
 setServerConnected:function(active){
 	this.serverActive=active;
 	if(active==true){
-		this.panels["server_activity"]["label"].setString("Server: Online");
-		this.panels["server_activity"]["label"].setColor(cc.c3b(0,255,0));
+		this.panels["server_activity"].setString("Server: Online");
+		this.panels["server_activity"].setColor(cc.c3b(0,255,0));
 	} else{
-		this.panels["server_activity"]["label"].setString("Server: Offline");
-		this.panels["server_activity"]["label"].setColor(cc.c3b(255,0,0));
+		this.panels["server_activity"].setString("Server: Offline");
+		this.panels["server_activity"].setColor(cc.c3b(255,0,0));
 	}
 },
 
@@ -57,6 +57,12 @@ storedMessages:function(){
 getLayoutObject:function(){
 				return { "panels":{
 				children:{	
+					"background":{
+						texture:"GUI/splash.png",
+						size:cc.size(960,640),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(0,0),
+					},
 					"name_entry":{
 						size: cc.size(300,30),
 						position: cc.p(325,300),
@@ -78,7 +84,6 @@ getLayoutObject:function(){
 					"news_message":{
 						label:newsValue,
 						fontSize:14,
-						color:cc.c3b(0,0,0),
 						anchorPoint:cc.p(0,1),
 						position:cc.p(30,610),
 					},
@@ -90,20 +95,14 @@ getLayoutObject:function(){
 						position:cc.p(327,325),
 					},
 					"server_activity":{
-						position:cc.p(860,620),
+						position:cc.p(910,630),
 						size:cc.size(100,20),
-						bg:cc.c4b(255,255,0,127),
-						children:{
-							"label":{
-								label:"Server: Offline",
-								color:cc.c3b(255,0,0),
-								anchorPoint:cc.p(0.5,0.5),
-								position:cc.p(50,10),
-							}
-						}
+						anchorPoint:cc.p(0.5,0.5),
+						label:"Server: Offline",
+						color:cc.c3b(255,0,0),
 					}
 				}
-				}
+			}
 			};
 },
 

@@ -115,6 +115,9 @@ var GameMap=cc.Layer.extend({
 							if(data[i][j]["type"]==4 && this.tileNodes[i].getScriptData()){
 								this.tileNodes[i].setLayer(this.tileNodes[i].getScriptData()["sprite"]["texture"],this.tileNodes[i].getScriptData()["sprite"]["position"],"item");
 							}
+							if(data[i][j]["type"]==5 && this.tileNodes[i].getScriptData()){
+								PlayersController.addNPC(this.tileNodes[i].getScriptData(),cc.p(this.tileNodes[i].getPosition().x/32,this.tileNodes[i].getPosition().y/32),this.currentMap);
+							}
 						}
 					}
 				}
@@ -157,6 +160,9 @@ var GameMap=cc.Layer.extend({
 							}
 							if(data[i][j]["type"]==4 && this.tileNodes[i].getScriptData()){
 								this.tileNodes[i].setLayer(this.tileNodes[i].getScriptData()["sprite"]["texture"],this.tileNodes[i].getScriptData()["sprite"]["position"],"item");
+							}
+							if(data[i][j]["type"]==5 && this.tileNodes[i].getScriptData()){
+								PlayersController.addNPC(this.tileNodes[i].getScriptData(),cc.p(this.tileNodes[i].getPosition().x/32,this.tileNodes[i].getPosition().y/32),this.currentMap);
 							}
 						}
 					}
@@ -478,8 +484,12 @@ GameMap.getMapRight=function(){
 	return this.instance.mapRight;
 };
 
-GameMap.goToMap=function(id){
+GameMap.goToMap=function(id,ignoreResetMaster){
+	if(!ignoreResetMaster){
+		MapMaster=false;
+	}
 	PlayersController.getInstance().setVisible(false);
+	PlayersController.destroyNPCs();
 	GameMap.destroy();
 	this.instance.currentMap=id;
 	PlayersController.getYou().setMap(id);

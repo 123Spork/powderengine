@@ -1,4 +1,14 @@
 var res = {
+    chat_png : 'GUI/chat.png',
+    close_png : 'GUI/close.png',
+    defaultitem_png : 'GUI/defaultitem.png',
+    equipment_png : 'GUI/equipment.png',
+    healthbar_png : 'GUI/healthbar.png',
+    inventory_png : 'GUI/inventory.png',
+    logout_png : 'GUI/logout.png',
+    signpost_png : 'GUI/signpost.png',
+    skills_png : 'GUI/skills.png',
+    splash_png : 'GUI/splash.png',
     building1_png : 'building1.png',
     items1_png : 'items1.png',
     sprites1_png : 'sprites1.png',
@@ -585,6 +595,7 @@ js.project = {
     Login_js : './src/Login.js',
     MainScene_js : './src/MainScene.js',
     MapEditor_js : './src/MapEditor.js',
+    NPCEditor_js : './src/NPCEditor.js',
     ObjectLists_js : './src/ObjectLists.js',
     PlayersController_js : './src/PlayersController.js',
     Popup_js : './src/Popup.js',
@@ -612,7 +623,7 @@ resCfg["project"] = {
 cc.gameModules = [jsRes.SceneManager_js];//Game modules
 
 resCfg[jsRes.SceneManager_js] = {
-    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js,jsRes.Popup_js, jsRes.Book_js, jsRes.Equipment_js, jsRes.Inventory_js, jsRes.Sign_js, jsRes.Skills_js, jsRes.ItemEditor_js, jsRes.MapEditor_js, jsRes.SkillsEditor_js, jsRes.PopupList_js, jsRes.WarpEditor_js, jsRes.SignEditor_js, jsRes.MainScene_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
+    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js,jsRes.Popup_js, jsRes.Book_js, jsRes.Equipment_js, jsRes.Inventory_js, jsRes.Sign_js, jsRes.Skills_js, jsRes.ItemEditor_js, jsRes.MapEditor_js, jsRes.NPCEditor_js,jsRes.SkillsEditor_js, jsRes.PopupList_js, jsRes.WarpEditor_js, jsRes.SignEditor_js, jsRes.MainScene_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
 };
 exports.res = res;
 exports.resCfg = resCfg;

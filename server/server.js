@@ -11,7 +11,10 @@ var port = parseInt(data.split("\n")[1]);
   
 var positions = [];
 var mapplayers=[];
+var mapNPCS=[];
 var clients =[];
+var playersOnMapsCount=[];
+var mapMasters=[];
 var names=[];
 var maps=[];
 var last=[];
@@ -19,11 +22,13 @@ var warps=[];
 var items=[];
 var skills=[];
 var signs=[];
+var npcs=[];
 var updateMapIndex=0;
 var updateWarpIndex=1;
 var updateItemIndex=2;
 var updateSkillsIndex=3;
 var updateSignsIndex=4;
+var updateNPCIndex=5;
 
 
 
@@ -31,6 +36,8 @@ var droppedItems={};
 
 fs.readdirSync("./maps").forEach(function(file) {
   maps[parseInt(file.split('.')[0])] =require("./maps/" + file);
+  playersOnMapsCount[parseInt(file.split('.')[0])]=0;
+  mapNPCS[parseInt(file.split('.')[0])]=[];
 });
 fs.readdirSync("./additionals").forEach(function(file) {
   if(file=="warps.json"){
@@ -44,6 +51,9 @@ fs.readdirSync("./additionals").forEach(function(file) {
   }
   if(file=="signs.json"){
 	signs =require("./additionals/signs.json");
+  }
+  if(file=="npcs.json"){
+	npcs =require("./additionals/npcs.json");
   }
 });
 
@@ -92,6 +102,11 @@ var setSignsData = function(data){
 	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
 };
 
+var setNPCData = function(data){
+	var outputFilename = './additionals/npcs.json';
+	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+};
+
 var saveLastAccessData = function(){
 	var outputFilename = 'tools/updatedata.json';
 	fs.writeFile(outputFilename, JSON.stringify(last), function(err) {});
@@ -113,11 +128,16 @@ socket.on('connection', function(client){
 			if(names.indexOf(event["username"])==-1){
 				client.send(JSON.stringify({"login_success":true}));
 				names[client.id]=event["username"];
-				clients[client.id]=true;
+				clients[client.id]=client;
 				mapplayers[event["username"]]=1;
+				if(playersOnMapsCount[1]==0){
+					mapMasters[1]=names[client.id];
+					client.send(JSON.stringify({"mapmaster":true}));
+				}
+				playersOnMapsCount[1]++;
 				client.broadcast.send(JSON.stringify({"newPlayer":event["username"]}));
 				for(var i in clients){
-					if(i!=client.id && clients[i]==true){
+					if(i!=client.id && clients[i]){
 						if(positions[i]){
 							client.send(JSON.stringify({"moveTo":positions[i],"id":names[i]}));
 							client.send(JSON.stringify({"changemap":mapplayers[names[i]],"id":names[i],"setTo":positions[i]}));
@@ -128,6 +148,9 @@ socket.on('connection', function(client){
 				}
 				for(var i in droppedItems[1]){
 					client.send(JSON.stringify(droppedItems[1][i]));
+				}
+				for(var i in mapNPCS[1]){
+					client.send(JSON.stringify({"changeNPCPosition":mapNPCS[1][i],"npcID":i}));
 				}
 			}
 		}
@@ -173,6 +196,14 @@ socket.on('connection', function(client){
 				}
 				returner["signstime"] = last[updateSignsIndex];
 				returner["signsdata"] = signs;
+			}
+			if(!last[updateNPCIndex] || event["npcsupdate"]<last[updateNPCIndex]){
+				if(!last[updateNPCIndex]){
+					last[updateNPCIndex]=Date.now();
+					saveLastAccessData();
+				}
+				returner["npcstime"] = last[updateSignsIndex];
+				returner["npcsdata"] = signs;
 			}
 			client.send(JSON.stringify(returner));
 		}
@@ -247,6 +278,28 @@ socket.on('connection', function(client){
 			client.broadcast.send(JSON.stringify(event));
 			client.send(JSON.stringify(event));
 		}
+        if(event["savenpcs"]){
+			last[updateNPCIndex]=Date.now();
+			saveLastAccessData();
+			npcs[parseInt(event["savenpcs"])]=event["npcsdata"];
+			setNPCData(items);
+			event["updatetime"]=last[updateNPCIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+		if(event["savenpcswhole"]){
+			last[updateNPCIndex]=Date.now();
+			saveLastAccessData();
+			npcs=event["savenpcswhole"];
+			setNPCData(npcs);
+			event["updatetime"]=last[updateNPCIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+		if(event["moveNPC"]){
+			client.broadcast.send(JSON.stringify(event));
+			mapNPCS[event["mapnumber"]][event["npcID"]]=event["moveNPC"];
+		}
        if(event["saveskills"]){
 			last[updateSkillsIndex]=Date.now();
 			saveLastAccessData();
@@ -299,9 +352,29 @@ socket.on('connection', function(client){
 		}
 		if(event["changemap"]){
 			client.broadcast.send(JSON.stringify({"id":names[client.id],"changemap":event["changemap"],"setTo":event["setTo"]}));
-			mapplayers[names[client.id]]=event["changemap"];
+			if(playersOnMapsCount[event["changemap"]]==0){
+				client.send(JSON.stringify({"mapmaster":true}));
+				mapMasters[event["changemap"]]=names[client.id];
+			}
+			playersOnMapsCount[event["changemap"]]++;
+			if(mapplayers[names[client.id]]){
+				var mapNumberFrom = mapplayers[names[client.id]];
+				playersOnMapsCount[mapplayers[names[client.id]]]--;
+				mapplayers[names[client.id]]=event["changemap"];
+				for(var i in clients){
+					if(mapplayers[names[i]]==mapNumberFrom){
+						console.log("New Master is " + i)
+						clients[i].send(JSON.stringify({"mapmaster":true}));
+						mapMasters[mapplayers[names[i]]]=mapplayers[names[i]];
+						break;
+					}
+				}
+			}
 			for(var i in droppedItems[event["changemap"]]){
 				client.send(JSON.stringify({"droppeditem":droppedItems[event["changemap"]][i]["droppeditem"],"mapnumber":event["changemap"],"index":droppedItems[event["changemap"]][i]["index"]}));
+			}
+			for(var i in mapNPCS[event["changemap"]]){
+				client.send(JSON.stringify({"changeNPCPosition":mapNPCS[event["changemap"]][i],"npcID":i}));
 			}
 		}
 		if(event["diceroll"]){
@@ -320,12 +393,24 @@ socket.on('connection', function(client){
     });
 
     client.on('disconnect',function(){
+       var mapNumberFrom = mapplayers[names[client.id]];
        client.broadcast.send(JSON.stringify({"playerLeft":names[client.id]}));
 	   client.send(JSON.stringify({"disconnect":true}));
-	   console.log("CLIENT HAS DISCONNECTED");
+	   console.log(names[client.id]+" HAS DISCONNECTED");
+	   playersOnMapsCount[mapplayers[names[client.id]]]--;
+	   mapplayers[names[client.id]]=undefined;
 	   clients[client.id]=undefined;
 	   names[client.id]=undefined;
 	   positions[client.id]=undefined;
+		for(var i in clients){
+			if(clients[i]){
+				if(mapplayers[names[i]]==mapNumberFrom){
+					clients[i].send(JSON.stringify({"mapmaster":true}));
+					mapMasters[mapplayers[names[i]]]=mapplayers[names[i]];
+					break;
+				}
+			}
+		}
     });
 });
 

@@ -8,6 +8,7 @@ Character = cc.Sprite.extend({
 	nameLabel:null,
 	spriteFrame:null,
 	isPlayer:false,
+	isNPC:-1,
 	status:null,
 	onMap:null,
 	path:null,
@@ -24,6 +25,9 @@ Character = cc.Sprite.extend({
 			this.isPlayer=withData.isPlayer;
 		} if(withData.map){
 			this.onMap=withData.map;
+		} if(withData.isNPC!=null && withData.isNPC!=="undefined"){
+			console.log(this.isNPC);
+			this.isNPC=withData.isNPC;
 		}
 		this.setAnchorPoint(0,1);
 		this.nameLabel = cc.LabelTTF.create("","Arial",12);
@@ -219,6 +223,8 @@ Character = cc.Sprite.extend({
 			this.walk(0);
 			if(this.isPlayer){
 				sendMessageToServer({"moveTo":((this.toPosition.x/32) + ((this.toPosition.y/32) * gridWidth))});
+			} else if(this.isNPC>-1){
+				sendMessageToServer({"npcID":(this.isNPC+""),"mapnumber":this.onMap, "moveNPC":((this.toPosition.x/32) + ((this.toPosition.y/32) * gridWidth))});
 			}
 		}
 	},
@@ -421,4 +427,20 @@ PlayerCharacter.create = function(withData){
 
 NonPlayerCharacter = Character.extend({
 	loot:null,
+	preparing:false,
+
+	setPreparing:function(position,delay){
+		this.preparing=true;
+		this.scheduleOnce(function(){this.walkTo(position.x,position.y); this.preparing=false;},delay);
+	},
+
+	isPreparing:function(){
+		return this.preparing;
+	},
+
 });
+NonPlayerCharacter.create = function(withData){
+	var nonplayerCharacter = new NonPlayerCharacter();
+	nonplayerCharacter.init(withData);
+	return nonplayerCharacter;
+};

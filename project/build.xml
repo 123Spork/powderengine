@@ -116,6 +116,7 @@
                 <file name="./src/Skills.js"></file>
                 <file name="./src/ItemEditor.js"></file>
                 <file name="./src/MapEditor.js"></file>
+                <file name="./src/NPCEditor.js"></file>
                 <file name="./src/SkillsEditor.js"></file>
                 <file name="./src/PopupList.js"></file>
                 <file name="./src/WarpEditor.js"></file>

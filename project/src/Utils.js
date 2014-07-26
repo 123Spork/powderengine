@@ -21,6 +21,17 @@ for(var i in filenames){
 }
 
 
+var request = new XMLHttpRequest();
+request.open("GET", "res/Graphics/character_graphics.txt", false);
+request.send(null);
+var returnValue = request.responseText;
+var filenames = returnValue.split(',');
+
+var characterTextureList = [];
+for(var i in filenames){
+    characterTextureList.push({"name":filenames[i],"texture":cc.TextureCache.getInstance().addImage(filenames[i])});
+}
+
 
 document.getElementById("gameCanvas").onkeydown = function (event) {
 	event.preventDefault();
@@ -90,7 +101,10 @@ document.getElementById("gameCanvas").onkeyup = function (event) {
 };
 
 function isTouching(obj,pos){
-	return obj.isVisible() && cc.rectContainsPoint(cc.rect(obj.getPositionX(),obj.getPositionY(),obj.getContentSize().width,obj.getContentSize().height),pos);
+	if(!obj){
+//		return false;
+	}
+	return ((obj.isVisible && obj.isVisible())|| !obj.isVisible) && cc.rectContainsPoint(cc.rect(obj.getPositionX(),obj.getPositionY(),obj.getContentSize().width,obj.getContentSize().height),pos);
 };
 
 function cloneObj(obj) {

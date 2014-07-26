@@ -79,6 +79,9 @@ reactToSocketMessage=function(data){
 			if(data["newPlayer"]){
 				PlayersController.addPlayer(data["newPlayer"]);
 			}else if(data["playerLeft"]){
+				if(PlayersController.getPlayer(data["playerLeft"]).getMap()==PlayersController.getYou().getMap()) {
+					MapMaster=false;
+				}
 				PlayersController.destroyPlayer(data["playerLeft"]);
 			} else if(data["changemap"]){
 				for(var i=0;i<storedClientMessages.length;i++){
@@ -88,6 +91,9 @@ reactToSocketMessage=function(data){
 						storedClientMessages.splice(i,1);
 						i--;
 					}
+				}
+				if(PlayersController.getPlayer(data["id"]).getMap()==PlayersController.getYou().getMap()) {
+					MapMaster=false;
 				}
 				PlayersController.changePlayerMap(data["id"],data["changemap"]);
 				PlayersController.positionPlayer(data["id"],data["setTo"]);
@@ -124,6 +130,9 @@ reactToSocketMessage=function(data){
 			else if(data["savemap"]){
 				LocalStorage.changeMap(data["savemap"],data["mapdata"],data["updatetime"]);
 				GameMap.setupMap(data["mapdata"]);
+			}
+			else if(data["mapmaster"]){
+				MapMaster=true;
 			}
 			else if(data["savewarps"]){
 				LocalStorage.changeWarp(parseInt(data["savewarps"]),data["warpdata"],data["updatetime"]);
@@ -165,9 +174,43 @@ reactToSocketMessage=function(data){
 					Signeditor.didBecomeActive();	
 				}	
 			}
+			else if(data["moveNPC"]){
+				data["npcID"]=parseInt(data["npcID"]);
+				if(!PlayersController.getNPC(data["npcID"]) || (PlayersController.getNPC(data["npcID"]) && PlayersController.getNPC(data["npcID"]).isWalking ==false)){
+					PlayersController.moveNPC(data["npcID"],data["moveNPC"],data["mapnumber"]);
+				}else{
+					storedClientMessages.push(JSON.stringify(data));
+				}
+			} else if(data["changeNPCPosition"]){
+				data["npcID"]=parseInt(data["npcID"]);
+				if((PlayersController.getNPC(data["npcID"]) && PlayersController.getNPC(data["npcID"]).isWalking ==false)){
+					PlayersController.repositionNPC(data["npcID"],data["changeNPCPosition"]);
+				}else{
+					storedClientMessages.push(JSON.stringify(data));
+				}
+			}
+
 			else if(data["savesignswhole"]){
 				LocalStorage.refreshSigns(data["savesignswhole"],data["updatetime"]);
 				ObjectLists.setSignsList(data["savesignswhole"]);
+			}
+			else if(data["savenpcs"]){
+				LocalStorage.changeNPC(parseInt(data["savenpcs"]),data["npcsdata"],data["updatetime"]);
+				ObjectLists.getNPCList()[parseInt(data["savenpcs"])]=data["npcsdata"];
+				GameMap.goToMap(GameMap.getMapNumber(),true);
+				if(NPCeditor){
+					NPCeditor.editList = ObjectLists.getNPCList();
+					NPCeditor.didBecomeActive();	
+				}
+			}
+			else if(data["savenpcswhole"]){
+				LocalStorage.refreshNPC(data["savenpcswhole"],data["updatetime"]);
+				ObjectLists.setNPCList(data["savenpcswhole"]);
+				GameMap.goToMap(GameMap.getMapNumber(),true);
+				if(NPCeditor){
+					NPCeditor.editList = ObjectLists.getNPCList();
+					NPCeditor.didBecomeActive();	
+				}
 			}
 			else if(data["saveitems"]){
 				LocalStorage.changeItems(parseInt(data["saveitems"]),data["itemdata"],data["updatetime"]);

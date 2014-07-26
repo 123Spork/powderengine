@@ -192,6 +192,43 @@ LocalStorage.refreshSigns=function(data,updatetime){
 };
 
 
+LocalStorage.getNPCData=function(){
+	if(this.instance.getLastUpdate("npcs")){
+		if(sys.localStorage.getItem("npcs_data")!=""){
+			var data = JSON.parse(sys.localStorage.getItem("npcs_data"));
+		}
+		return data ? data :[];
+	} else{
+		return [];
+	}
+};
+
+LocalStorage.updateNPCData=function(data,updatetime){
+	this.instance.setLastUpdate("npcs",updatetime);
+	sys.localStorage.setItem("npcs_data",JSON.stringify(data));
+};
+
+LocalStorage.changeNPC=function(npcNumber,data,updatetime){
+	if(!this.instance.getLastUpdate("npcs")){
+		var npcsarray = [];
+	} else{
+		if(sys.localStorage.getItem("npcs_data")!=""){
+			var npcsarray = JSON.parse(sys.localStorage.getItem("npcs_data"));
+		} else{
+			var npcsarray = [];
+		}
+	}
+	npcsarray[npcNumber]=data;
+	LocalStorage.updateNPCData(npcsarray,updatetime);
+};
+
+LocalStorage.refreshNPC=function(data,updatetime){
+	npcsarray=data;
+	LocalStorage.updateSignsData(npcsarray,updatetime);
+};
+
+
+
 LocalStorage.Clear=function(){
 	sys.localStorage.setItem("map_data",[]);
 	sys.localStorage.setItem("last_maps",0);
@@ -203,10 +240,12 @@ LocalStorage.Clear=function(){
 	sys.localStorage.setItem("last_skills",0);	
 	sys.localStorage.setItem("signs_data",[]);
 	sys.localStorage.setItem("last_signs",0);	
+	sys.localStorage.setItem("npcs_data",[]);
+	sys.localStorage.setItem("last_npcs",0);	
 };
 
 LocalStorage.Sync=function(){
-	sendMessageToServer({"sync":true, "mapupdate":(this.instance.getLastUpdate("maps")!=null ? this.instance.getLastUpdate("maps"):2),"warpupdate":(this.instance.getLastUpdate("warps")!=null ? this.instance.getLastUpdate("warps"):2),"itemupdate":(this.instance.getLastUpdate("items")!=null ? this.instance.getLastUpdate("items"):2),"skillsupdate":(this.instance.getLastUpdate("skills")!=null ? this.instance.getLastUpdate("skills"):2),"signsupdate":(this.instance.getLastUpdate("signs")!=null ? this.instance.getLastUpdate("signs"):2)});
+	sendMessageToServer({"sync":true, "mapupdate":(this.instance.getLastUpdate("maps")!=null ? this.instance.getLastUpdate("maps"):2),"warpupdate":(this.instance.getLastUpdate("warps")!=null ? this.instance.getLastUpdate("warps"):2),"itemupdate":(this.instance.getLastUpdate("items")!=null ? this.instance.getLastUpdate("items"):2),"skillsupdate":(this.instance.getLastUpdate("skills")!=null ? this.instance.getLastUpdate("skills"):2),"signsupdate":(this.instance.getLastUpdate("signs")!=null ? this.instance.getLastUpdate("signs"):2),"npcsupdate":(this.instance.getLastUpdate("npcs")!=null ? this.instance.getLastUpdate("npcs"):2)});
 };
 
 LocalStorage.setMapSaveOnExit=function(value){

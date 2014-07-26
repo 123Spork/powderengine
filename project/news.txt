@@ -1,14 +1,15 @@
+(21st July 2014) - Version 0.64
+-Added first pass GUI graphics.
+-Implemented new GUI graphics.
+
 (13th July 2014) - Version 0.63
 -Added signs editing.
 -Signs can now be added in map editor. Also applied them to the pathfinding and blocking logic.
 
-(12th July 2014) - Version 0.62
+Legacy - Version 0.62
 -Added skills editing.
 -Added healthbar setup based on bar based skills.
 -Added skills menu (Hotkey "S");
 - Version 0.60
 -Removed a bunch of logging in bugs and cleared up some bugs caused by optimizations.
 -Engine is now distributable at 0.6.
-
-(Legacy) - Version 0.59
--Implemented equippable item types. Items can now be equipped from inventory into equipment.

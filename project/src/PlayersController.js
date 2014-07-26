@@ -1,6 +1,7 @@
 var PlayersController=cc.Layer.extend({
 	instance:null,
 	players:[],
+	npcs:[],
 	you:null,
 });
 
@@ -22,6 +23,62 @@ PlayersController.create=function(youData){
 	}
 	return this.instance;
 };
+
+PlayersController.NPCsInMap = function(mapNumber){
+	var NPCList=[];
+	for(var i in this.instance.npcs){
+		if(this.instance.npcs[i].getMap()==mapNumber){
+			NPCList.push(this.instance.npcs[i]);
+		}
+	}
+	return NPCList;
+};
+
+PlayersController.getNPC=function(id){
+	return this.instance.npcs[id];
+};
+
+PlayersController.moveNPC=function(id,index,map){
+	if(this.instance.npcs[id] && index!="default"){
+		if(this.instance.you.getMap()==map){
+			this.instance.npcs[id].walkToIndex(index);
+		}
+	}
+};
+
+PlayersController.repositionNPC=function(id,index){
+	if(this.instance.npcs[id] && index!="default"){
+		this.instance.npcs[id].setPosition(cc.p((index % gridWidth)*32,(Math.floor(index/gridWidth))*32));
+	}
+};
+
+
+
+PlayersController.destroyNPCs=function(){
+	for(var i in this.instance.npcs){
+		this.instance.npcs[i].removeFromParent();
+	}
+	this.instance.npcs=[];
+};
+
+PlayersController.addNPC=function(data,position,map){
+	var npcID = parseInt(this.instance.npcs.length);
+	var withData ={
+		name: data["name"],
+		stats: {
+			"health":{level:1,value:100,maxval:200,maxlvl:900},
+			"mana":{level:1,value:100,maxval:200,maxlvl:99},
+		},
+		map:map,
+		textureName: "sprites1.png",
+		spriteId: 2,
+		isNPC:npcID
+	};
+	this.instance.npcs.push(NonPlayerCharacter.create(withData));
+	this.instance.npcs[npcID].setPosition(position.x*32,position.y*32);
+	this.instance.addChild(this.instance.npcs[npcID]);
+};
+
 
 PlayersController.getYou = function(){
 	return this.instance.you;

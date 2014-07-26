@@ -14,6 +14,7 @@ js.project = {
     Login_js : '[%project%]src/Login.js',
     MainScene_js : '[%project%]src/MainScene.js',
     MapEditor_js : '[%project%]src/MapEditor.js',
+    NPCEditor_js : '[%project%]src/NPCEditor.js',
     ObjectLists_js : '[%project%]src/ObjectLists.js',
     PlayersController_js : '[%project%]src/PlayersController.js',
     Popup_js : '[%project%]src/Popup.js',

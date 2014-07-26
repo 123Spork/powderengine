@@ -3,6 +3,7 @@ ObjectLists=cc.Class.extend({
 	itemlist:null,
 	skillslist:null,
 	signslist:null,
+	npclist:null,
 });
 var ObjectListInstance
 
@@ -13,6 +14,7 @@ ObjectLists.getInstance=function(){
 		ObjectListInstance.itemlist=LocalStorage.getItemData();
 		ObjectListInstance.skillslist = LocalStorage.getSkillsData();
 		ObjectListInstance.signslist=LocalStorage.getSignsData();
+		ObjectListInstance.npclist=LocalStorage.getNPCData();
 	} 
 	return ObjectListInstance;
 };
@@ -48,3 +50,13 @@ ObjectLists.getSignsList=function(){
 ObjectLists.setSignsList=function(data){
 	ObjectListInstance.signslist=data;
 };
+
+ObjectLists.getNPCList=function(){
+	return ObjectListInstance.npclist;
+};
+
+ObjectLists.setNPCList=function(data){
+	ObjectListInstance.npclist=data;
+};
+
+

@@ -1,4 +1,10 @@
+//Editing character.js to provide map number to server so can save npc positions.
+
+
+
+
 MainScene=null;
+MapMaster=false;
 var GameScene = Scene.extend({
 	
 	ctor:function(){
@@ -418,6 +424,20 @@ var GameScene = Scene.extend({
 					this.addChild(Itemeditor);
 				}
 			break;
+			case "/editnpcs": 
+				if(NPCeditor!=null && !NPCeditor._parent) NPCeditor=null;
+				if(NPCeditor){
+					NPCeditor.willTerminate();
+					NPCeditor.removeFromParent();
+					NPCeditor=null;
+					GameMap.setInteractionDelegate(null);
+				} else{
+					NPCeditor = new PopupList();
+					NPCeditor.init({delegate:null,editor:new NPCEditor(),list:ObjectLists.getNPCList(),name:"NPC List"});
+					NPCeditor.didBecomeActive();
+					this.addChild(NPCeditor);
+				}
+			break;
 			case "/help":
 			    GameChat.showHelp();
 
@@ -484,12 +504,10 @@ var GameScene = Scene.extend({
 			this.mobileControls = requestLayout(this.getMobileLayoutObject(),true);
 			this.addChild(this.mobileControls);
 			this.showMobileControls(false);
-		}
-		
-		
-		
+		}		
 		this.addChild(this.panels);		
 		this.schedule(this.storedMessages);	
+		this.schedule(this.serverProcess);
 		MainScene=this;	
 
 	},
@@ -504,6 +522,25 @@ var GameScene = Scene.extend({
 				} else if(!msg["moveTo"]) {
 					reactToSocketMessage(JSON.stringify(msg));
 					storedClientMessages.splice(i,1);
+				}
+			}
+		}
+	},
+
+	serverProcess:function(){
+		if(MapMaster==true){
+			var NPCsInMap = PlayersController.NPCsInMap(GameMap.getMapNumber());
+			for(var i in NPCsInMap){
+				if(NPCsInMap[i].isPreparing()==false){
+					var delay = Math.random()*10+1;
+					var currentGridPos = NPCsInMap[i].getGridPosition();
+					switch(Math.floor(Math.random() * 4) + 1){
+						case 1: currentGridPos.x++; break;
+						case 2: currentGridPos.y++; break;
+						case 3: currentGridPos.x--; break;
+						case 4: currentGridPos.y--; break;
+					}
+					NPCsInMap[i].setPreparing(currentGridPos,delay);
 				}
 			}
 		}

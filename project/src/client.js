@@ -65,6 +65,9 @@ reactToSocketMessage=function(data){
 		if(data["signsdata"]){
 			LocalStorage.updateSignsData(data["signsdata"],data["signstime"]);
 		}
+		if(data["npcsdata"]){
+			LocalStorage.updateNPCData(data["npcsdata"],data["npcstime"]);
+		}
 		return;
 	}
 	

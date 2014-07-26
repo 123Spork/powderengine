@@ -1,15 +1,12 @@
+(26th July 2014) - Version 0.65
+-Added startup of npc editor.
+-Added client server npc system.
+-Added map user master system to relieve server processing.
+
 (21st July 2014) - Version 0.64
 -Added first pass GUI graphics.
 -Implemented new GUI graphics.
 
-(13th July 2014) - Version 0.63
+Legacy - Version 0.63
 -Added signs editing.
 -Signs can now be added in map editor. Also applied them to the pathfinding and blocking logic.
-
-Legacy - Version 0.62
--Added skills editing.
--Added healthbar setup based on bar based skills.
--Added skills menu (Hotkey "S");
-- Version 0.60
--Removed a bunch of logging in bugs and cleared up some bugs caused by optimizations.
--Engine is now distributable at 0.6.

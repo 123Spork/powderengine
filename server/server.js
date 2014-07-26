@@ -202,8 +202,8 @@ socket.on('connection', function(client){
 					last[updateNPCIndex]=Date.now();
 					saveLastAccessData();
 				}
-				returner["npcstime"] = last[updateSignsIndex];
-				returner["npcsdata"] = signs;
+				returner["npcstime"] = last[updateNPCIndex];
+				returner["npcsdata"] = npcs;
 			}
 			client.send(JSON.stringify(returner));
 		}
@@ -282,7 +282,7 @@ socket.on('connection', function(client){
 			last[updateNPCIndex]=Date.now();
 			saveLastAccessData();
 			npcs[parseInt(event["savenpcs"])]=event["npcsdata"];
-			setNPCData(items);
+			setNPCData(npcs);
 			event["updatetime"]=last[updateNPCIndex];
 			client.broadcast.send(JSON.stringify(event));
 			client.send(JSON.stringify(event));

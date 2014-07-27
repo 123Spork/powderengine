@@ -1,3 +1,4 @@
+var screenSize;
 var cocos2dApp = cc.Application.extend({
     config : document["ccConfig"],
     ctor : function(){
@@ -14,16 +15,17 @@ var cocos2dApp = cc.Application.extend({
         var director = cc.Director.getInstance();
 		
         var eglView = cc.EGLView.getInstance();
-      //  eglView._adjustSizeToBrowser();		
-        var screenSize = eglView.getFrameSize();
-        var resourceSize = cc.size(960, 640);
-        var designSize = cc.size(960, 640);
-
+        eglView._adjustSizeToBrowser(true);		
+        screenSize = eglView.getFrameSize();
+        var resourceSize = cc.size(screenSize.width, screenSize.height);
+        var designSize = cc.size(screenSize.width,screenSize.height);
         var fileUtils = cc.FileUtils.getInstance();
         var platform = cc.Application.getInstance().getTargetPlatform();
         fileUtils.setSearchPaths(["res/Graphics"]);
         if(cc.AudioEngine) cc.AudioEngine.getInstance().setResPath("res/Audio");
         director.setContentScaleFactor(1);
+
+        eglView.setDesignResolutionSize(designSize.width, designSize.height, cc.RESOLUTION_POLICY.SHOW_ALL);
 
         // turn on display FPS
        // director.setDisplayStats(config['showFPS']);

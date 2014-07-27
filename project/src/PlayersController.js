@@ -18,7 +18,7 @@ PlayersController.create=function(youData){
 	if(!this.instance){
 		this.instance = new PlayersController();
 		this.instance.you = PlayerCharacter.create(youData);
-		this.instance.you.setPosition(320,320);
+		this.instance.you.setPosition(960,320);
 		this.instance.addChild(this.instance.you);
 	}
 	return this.instance;
@@ -100,7 +100,7 @@ PlayersController.addPlayer=function(id){
 			spriteId: 1,
 		};
 		this.instance.players[id] = PlayerCharacter.create(withData);
-		this.instance.players[id].setPosition(320,320);
+		this.instance.players[id].setPosition(960,320);
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[id]);
 		GameChat.addMessage(id + strings.gameChat.playerJoin);
@@ -136,7 +136,7 @@ PlayersController.movePlayer=function(id,index){
 			spriteId: 1,
 		};
 		this.instance.players[id] = PlayerCharacter.create(withData);
-		this.instance.players[id].setPosition(320,320);
+		this.instance.players[id].setPosition(960,320);
 		this.instance.players[id].setPosition(cc.p((index % gridWidth)*32,(Math.floor(index/gridWidth))*32)); 
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[id]);

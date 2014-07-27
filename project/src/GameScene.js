@@ -16,7 +16,7 @@ var GameScene = Scene.extend({
 		 "panels":{
 			 children:{	
 				"logout_button":{
-					position:cc.p(960-52,640-52),
+					position:cc.p(screenSize.width-52,screenSize.height-52),
 					anchorPoint:cc.p(0,0),
 					size:cc.size(48,48),
 					texture:"GUI/logout.png",

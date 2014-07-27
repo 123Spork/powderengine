@@ -1,5 +1,5 @@
+gameMapInstance=null;
 var GameMap=cc.Layer.extend({
-	instance:null,
 	tileData:null,
 	tileNodes:null,
 	isMapDirty:false,
@@ -11,6 +11,7 @@ var GameMap=cc.Layer.extend({
 	mapDown:null,
 	mapLeft:null,
 	mapRight:null,
+	mapOffset:cc.p(0,0),
 	currentMap:1,
 	
 	findPath:function(pathStart, pathEnd){
@@ -225,7 +226,7 @@ var GameMap=cc.Layer.extend({
 		if(this.interactionDelegate){
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){
-					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x,touch._point.y+32))){
+					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+32-this.mapOffset.y))){
 						this.interactionDelegate.tilePressed(this.tileNodes,i);
 						GameMap.updateMap();
 					}
@@ -235,7 +236,7 @@ var GameMap=cc.Layer.extend({
 
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){
-					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x,touch._point.y+32))){
+					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+32-this.mapOffset.y))){
 						if(this.tileNodes[i].getType()==4){
 							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.itemClicked,["Pick Up","Walk To"],touch._point));
 						} else{
@@ -257,7 +258,7 @@ var GameMap=cc.Layer.extend({
 		if(this.interactionDelegate){
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){
-					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x,touch._point.y+32))){
+					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+32-this.mapOffset.y))){
 						this.interactionDelegate.tilePressed(this.tileNodes,i,"moved");
 						GameMap.updateMap();
 					}
@@ -268,7 +269,7 @@ var GameMap=cc.Layer.extend({
 		else{
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){
-					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x,touch._point.y+32))){
+					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+32-this.mapOffset.y))){
 						var gp = PlayersController.getYou().getGridPosition();
 						PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/32,this.tileNodes[i].getPosition().y/32)));
 					}
@@ -350,147 +351,208 @@ var GameMap=cc.Layer.extend({
 	
 });
 
-GameMap.create=function(){
-	if(!this.instance){
-		this.instance = new GameMap();
-		this.instance.tileNodes = requestLayout(this.instance);
-		this.instance.addChild(this.instance.tileNodes);
-		this.instance.underPlayerRenderTexture = cc.RenderTexture.create(gamePanelSize.width,gamePanelSize.height);
-		this.instance.underPlayerRenderTexture.setPosition(cc.p(Math.floor(gamePanelSize.width/2),Math.floor(gamePanelSize.height/2)));	
-		this.instance.addChild(this.instance.underPlayerRenderTexture);
-		this.instance.underPlayerRenderTexture.setVisible(false);
-		
-		this.instance.playerLayer=cc.Node.create();
-		this.instance.addChild(this.instance.playerLayer);
-		
-		this.instance.overPlayerRenderTexture = cc.RenderTexture.create(gamePanelSize.width,gamePanelSize.height);
-		this.instance.overPlayerRenderTexture.setPosition(cc.p(Math.floor(gamePanelSize.width/2),Math.floor(gamePanelSize.height/2)));	
-		this.instance.addChild(this.instance.overPlayerRenderTexture);
-		this.instance.overPlayerRenderTexture.setVisible(false);
-		this.instance.setTouchPriority(-15);
-		this.instance.init();
+//blitz@uprpg.com;
+
+GameMap.updateOffset=function(x,y){
+		if((gameMapInstance.mapOffset.x+(gameGridSize.width-screenSize.width)+x>=0&&PlayersController.getYou().getPosition().x<(gameGridSize.width-(screenSize.width/2))) && (gameMapInstance.mapOffset.x+x<=0 && PlayersController.getYou().getPosition().x>screenSize.width/2)) {
+			gameMapInstance.mapOffset.x+=x;
+		}
+		if((gameMapInstance.mapOffset.y+(gameGridSize.height-screenSize.height)+y>=0&&PlayersController.getYou().getPosition().y<(gameGridSize.height-(screenSize.height/2))) && (gameMapInstance.mapOffset.y+y<=0 && PlayersController.getYou().getPosition().y>screenSize.height/2)) {
+			gameMapInstance.mapOffset.y+=y;
+		}
+	
+	gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
+};
+
+GameMap.goToOffsetRight=function(){
+	if(gameMapInstance.isMapDirty==true){
+		gameMapInstance.schedule(GameMap.goToOffsetRight);
+		return;
+	} else{
+		gameMapInstance.unschedule(GameMap.goToOffsetRight);
+		gameMapInstance.mapOffset.x = -(gameGridSize.width-screenSize.width);
+		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
 	}
-	return this.instance;
+};
+
+GameMap.goToOffsetLeft=function(){
+	if(gameMapInstance.isMapDirty==true){
+		gameMapInstance.schedule(GameMap.goToOffsetLeft);
+		return;
+	} else{
+		gameMapInstance.unschedule(GameMap.goToOffsetLeft);
+		gameMapInstance.mapOffset.x = 0;
+		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
+	}
+};
+
+
+GameMap.goToOffsetDown=function(){
+	if(gameMapInstance.isMapDirty==true){
+		gameMapInstance.schedule(GameMap.goToOffsetDown);
+		return;
+	} else{
+		gameMapInstance.unschedule(GameMap.goToOffsetDown);
+		gameMapInstance.mapOffset.y = -(gameGridSize.height-screenSize.height);
+		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
+	}
+};
+
+
+GameMap.goToOffsetUp=function(){
+	if(gameMapInstance.isMapDirty==true){
+		gameMapInstance.schedule(GameMap.goToOffsetUp);
+		return;
+	} else{
+		gameMapInstance.unschedule(GameMap.goToOffsetUp);
+		gameMapInstance.mapOffset.y = 0;
+		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
+	}
+};
+
+
+
+GameMap.create=function(){
+	if(!gameMapInstance){
+		gameMapInstance = new GameMap();
+		gameMapInstance.tileNodes = requestLayout(gameMapInstance);
+		gameMapInstance.addChild(gameMapInstance.tileNodes);
+		gameMapInstance.underPlayerRenderTexture = cc.RenderTexture.create(gameGridSize.width,gameGridSize.height);
+		gameMapInstance.underPlayerRenderTexture.setPosition(cc.p(Math.floor(gameGridSize.width/2),Math.floor(gameGridSize.height/2)));	
+		gameMapInstance.addChild(gameMapInstance.underPlayerRenderTexture);
+		gameMapInstance.underPlayerRenderTexture.setVisible(false);
+		
+		gameMapInstance.playerLayer=cc.Node.create();
+		gameMapInstance.addChild(gameMapInstance.playerLayer);
+		
+		gameMapInstance.overPlayerRenderTexture = cc.RenderTexture.create(gameGridSize.width,gameGridSize.height);
+		gameMapInstance.overPlayerRenderTexture.setPosition(cc.p(Math.floor(gameGridSize.width/2),Math.floor(gameGridSize.height/2)));	
+		gameMapInstance.addChild(gameMapInstance.overPlayerRenderTexture);
+		gameMapInstance.overPlayerRenderTexture.setVisible(false);
+		gameMapInstance.setTouchPriority(-15);
+		gameMapInstance.init();
+	}
+	return gameMapInstance;
 };
 
 GameMap.getInstance = function(mapnumber){
-	return this.instance;
+	return gameMapInstance;
 };
 
 GameMap.setInstanceNull = function(){
-	this.instance.removeFromParent();
-	this.instance=null;
+	gameMapInstance.removeFromParent();
+	gameMapInstance=null;
 };
 
 GameMap.updateMap=function(){
-	if(!this.instance){
-		this.instance = GameMap.create();
+	if(!gameMapInstance){
+		gameMapInstance = GameMap.create();
 	}
-	this.instance.isMapDirty=true;
+	gameMapInstance.isMapDirty=true;
 };
 
 GameMap.setupMap=function(data){
-	this.instance.setupFromServer(data);
+	gameMapInstance.setupFromServer(data);
 };
 
 GameMap.getInstance=function(){
-	return this.instance;
+	return gameMapInstance;
 };
 
 GameMap.setLayer=function(id,texture,frame,type){
-	this.instance.tileNodes[id].setLayer(texture,frame,type);
-	this.instance.tileData[id][type]={"texture":texture,"frame":frame};
+	gameMapInstance.tileNodes[id].setLayer(texture,frame,type);
+	gameMapInstance.tileData[id][type]={"texture":texture,"frame":frame};
 };
 
 GameMap.updateServer=function(){
-	sendMessageToServer({"savemap":this.instance.currentMap, "mapdata":this.instance.tileData});
+	sendMessageToServer({"savemap":gameMapInstance.currentMap, "mapdata":gameMapInstance.tileData});
 };
 
 GameMap.destroyLayer=function(id,type){
-	this.instance.tileData[id][type]=null;
-	this.instance.tileNodes[id].destroyLayer(type);
+	gameMapInstance.tileData[id][type]=null;
+	gameMapInstance.tileNodes[id].destroyLayer(type);
 };
 
 GameMap.setTileInfo=function(id,type,scriptID,scriptData){
-	this.instance.tileNodes[id].setType(type);
+	gameMapInstance.tileNodes[id].setType(type);
 	if(scriptID){
-		this.instance.tileNodes[id].setScript(scriptID,scriptData);
-		this.instance.tileData[id]["info"]={"type":type, "script":{"id":scriptID,"data":scriptData?scriptData:null}};
+		gameMapInstance.tileNodes[id].setScript(scriptID,scriptData);
+		gameMapInstance.tileData[id]["info"]={"type":type, "script":{"id":scriptID,"data":scriptData?scriptData:null}};
 		return;
 	}
-	this.instance.tileData[id]["info"]={"type":type};
+	gameMapInstance.tileData[id]["info"]={"type":type};
 };
 
 GameMap.setMapInfo=function(data){
-	this.instance.tileData["mapdata"]["mapConnectors"] = data;
-	this.instance.mapUp = data["up"];
-	this.instance.mapDown = data["down"];
-	this.instance.mapLeft = data["left"];
-	this.instance.mapRight = data["right"];
+	gameMapInstance.tileData["mapdata"]["mapConnectors"] = data;
+	gameMapInstance.mapUp = data["up"];
+	gameMapInstance.mapDown = data["down"];
+	gameMapInstance.mapLeft = data["left"];
+	gameMapInstance.mapRight = data["right"];
 };
 
 
 GameMap.fillMap = function(texture,frame,type){
-	for(var i in this.instance.tileNodes){
+	for(var i in gameMapInstance.tileNodes){
 		if(i.substring(0,4)=="tile"){
-			this.instance.tileNodes[i].setLayer(texture,frame,type);
-			this.instance.tileData[i][type]={"texture":texture,"frame":frame};
+			gameMapInstance.tileNodes[i].setLayer(texture,frame,type);
+			gameMapInstance.tileData[i][type]={"texture":texture,"frame":frame};
 		}
 	}
 };
 
 GameMap.setStringsVisible=function(value){
-	for(var i in this.instance.tileNodes){
+	for(var i in gameMapInstance.tileNodes){
 		if(i.substring(0,4)=="tile"){
-			this.instance.tileNodes[i].setStringVisible(value);
+			gameMapInstance.tileNodes[i].setStringVisible(value);
 		}
 	}
-	this.instance.isMapDirty=true;
+	gameMapInstance.isMapDirty=true;
 };
 
 GameMap.setStringsToIndex=function(){
-	for(var i in this.instance.tileNodes){
+	for(var i in gameMapInstance.tileNodes){
 		if(i.substring(0,4)=="tile"){
-			this.instance.tileNodes[i].string.setString(i.substring(4));
+			gameMapInstance.tileNodes[i].string.setString(i.substring(4));
 		}
 	}
-	this.instance.isMapDirty=true;
+	gameMapInstance.isMapDirty=true;
 };
 
 GameMap.hasMapUp=function(){
-	return this.instance.mapUp!=null;
+	return gameMapInstance.mapUp!=null;
 };
 
 GameMap.hasMapDown=function(){
-	return this.instance.mapDown!=null;
+	return gameMapInstance.mapDown!=null;
 };
 
 GameMap.hasMapLeft=function(){
-	return this.instance.mapLeft!=null;
+	return gameMapInstance.mapLeft!=null;
 };
 
 GameMap.hasMapRight=function(){
-	return this.instance.mapRight!=null;
+	return gameMapInstance.mapRight!=null;
 };
 
 GameMap.getMapNumber=function(){
-	return this.instance.currentMap;
+	return gameMapInstance.currentMap;
 };
 
 GameMap.getMapUp=function(){
-	return this.instance.mapUp;
+	return gameMapInstance.mapUp;
 };
 
 GameMap.getMapDown=function(){
-	return this.instance.mapDown;
+	return gameMapInstance.mapDown;
 };
 
 GameMap.getMapLeft=function(){
-	return this.instance.mapLeft;
+	return gameMapInstance.mapLeft;
 };
 
 GameMap.getMapRight=function(){
-	return this.instance.mapRight;
+	return gameMapInstance.mapRight;
 };
 
 GameMap.goToMap=function(id,ignoreResetMaster){
@@ -500,75 +562,75 @@ GameMap.goToMap=function(id,ignoreResetMaster){
 	PlayersController.getInstance().setVisible(false);
 	PlayersController.destroyNPCs();
 	GameMap.destroy();
-	this.instance.currentMap=id;
+	gameMapInstance.currentMap=id;
 	PlayersController.getYou().setMap(id);
 	PlayersController.showPlayersInMapOnly();
-	this.instance.setup(id);
+	gameMapInstance.setup(id);
 };
 
 GameMap.goToMapUp=function(){
 	PlayersController.getInstance().setVisible(false);
 	GameMap.destroy();
-	this.instance.currentMap=this.instance.mapUp;
-	PlayersController.getYou().setMap(this.instance.mapUp);
+	gameMapInstance.currentMap=gameMapInstance.mapUp;
+	PlayersController.getYou().setMap(gameMapInstance.mapUp);
 	PlayersController.showPlayersInMapOnly();
-	this.instance.setup(this.instance.mapUp);
+	gameMapInstance.setup(gameMapInstance.mapUp);
 };
 
 GameMap.goToMapDown=function(){
 	PlayersController.getInstance().setVisible(false);
 	GameMap.destroy();
-	this.instance.currentMap=this.instance.mapDown;
-	PlayersController.getYou().setMap(this.instance.mapDown);
+	gameMapInstance.currentMap=gameMapInstance.mapDown;
+	PlayersController.getYou().setMap(gameMapInstance.mapDown);
 	PlayersController.showPlayersInMapOnly();
-	this.instance.setup(this.instance.mapDown);
+	gameMapInstance.setup(gameMapInstance.mapDown);
 };
 
 GameMap.goToMapLeft=function(){
 	PlayersController.getInstance().setVisible(false);
 	GameMap.destroy();
-	this.instance.currentMap=this.instance.mapLeft;
-	PlayersController.getYou().setMap(this.instance.mapLeft);
+	gameMapInstance.currentMap=gameMapInstance.mapLeft;
+	PlayersController.getYou().setMap(gameMapInstance.mapLeft);
 	PlayersController.showPlayersInMapOnly();
-	this.instance.setup(this.instance.mapLeft);
+	gameMapInstance.setup(gameMapInstance.mapLeft);
 };
 
 GameMap.goToMapRight=function(){
 	PlayersController.getInstance().setVisible(false);
 	GameMap.destroy();
-	this.instance.currentMap=this.instance.mapRight;
-	PlayersController.getYou().setMap(this.instance.mapRight);
+	gameMapInstance.currentMap=gameMapInstance.mapRight;
+	PlayersController.getYou().setMap(gameMapInstance.mapRight);
 	PlayersController.showPlayersInMapOnly();
-	this.instance.setup(this.instance.mapRight);
+	gameMapInstance.setup(gameMapInstance.mapRight);
 };
 
 GameMap.setInteractionDelegate=function(delegate){
-	this.instance.interactionDelegate=delegate;
+	gameMapInstance.interactionDelegate=delegate;
 };
 
 GameMap.getTileNodeForXY=function(x,y){
 	if(x>(gridWidth-1)||x<0){
 		return undefined;
 	}
-	return this.instance.tileNodes["tile"+(x + (gridHeight-y) * gridWidth)];
+	return gameMapInstance.tileNodes["tile"+(x + (gridHeight-y) * gridWidth)];
 };
 
 GameMap.getTileNodeForIndex=function(idx){
-	return this.instance.tileNodes["tile"+idx];
+	return gameMapInstance.tileNodes["tile"+idx];
 };
 
 GameMap.addPlayersController=function(_in){
-	this.instance.playerLayer.addChild(_in);
+	gameMapInstance.playerLayer.addChild(_in);
 };
 
 GameMap.destroy=function(){
-	this.instance.tileData={};
-	for(var i in this.instance.tileNodes){
+	gameMapInstance.tileData={};
+	for(var i in gameMapInstance.tileNodes){
 		if(i.substring(0,4)=="tile"){
-			this.instance.tileNodes[i].destroy();
-			this.instance.tileData[i]={};
+			gameMapInstance.tileNodes[i].destroy();
+			gameMapInstance.tileData[i]={};
 		}
 	}
-	this.instance.tileData["mapdata"]={};
-	this.instance.isMapDirty=true;
+	gameMapInstance.tileData["mapdata"]={};
+	gameMapInstance.isMapDirty=true;
 };

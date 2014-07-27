@@ -154,12 +154,24 @@ Character = cc.Sprite.extend({
 			
 		if(this.toPosition.x<pos.x){
 			this.setPositionX(pos.x-this.distToMove);
+			if(this.isPlayer){
+				GameMap.updateOffset(+this.distToMove,0);
+			}
 		} else if(this.toPosition.x>pos.x){
 			this.setPositionX(pos.x+this.distToMove);
+			if(this.isPlayer){
+				GameMap.updateOffset(-this.distToMove,0);
+			}
 		} else if(this.toPosition.y<pos.y){
 			this.setPositionY(pos.y-this.distToMove);
+			if(this.isPlayer){
+				GameMap.updateOffset(0,this.distToMove);
+			}
 		} else if(this.toPosition.y>pos.y){
 			this.setPositionY(pos.y+this.distToMove);
+			if(this.isPlayer){
+				GameMap.updateOffset(0,-this.distToMove);
+			}
 		}
 		if(pos.y==this.toPosition.y && pos.x==this.toPosition.x){
 			this.isWalking=false;
@@ -195,18 +207,22 @@ Character = cc.Sprite.extend({
 					this.setPosition(0,32*y)
 					sendMessageToServer({"changemap":parseInt(GameMap.getMapRight()), "setTo":((0) + ((y) * gridWidth))});
 					GameMap.goToMapRight();
+					GameMap.goToOffsetLeft();
 				} else if(gp.x>x && GameMap.hasMapLeft()){
 					this.setPosition(32*(gridWidth-1),32*y)
 					sendMessageToServer({"changemap":parseInt(GameMap.getMapLeft()), "setTo":((gridWidth-1) + ((y) * gridWidth))});
 					GameMap.goToMapLeft();
+					GameMap.goToOffsetRight();
 				} if(gp.y<y && GameMap.hasMapUp()){
 					this.setPosition(32*x,32);
 					sendMessageToServer({"changemap":parseInt(GameMap.getMapUp()), "setTo":((x) + ((1) * gridWidth))});
 					GameMap.goToMapUp();
+					GameMap.goToOffsetUp();
 				} else if(gp.y>y && GameMap.hasMapDown()){
 					sendMessageToServer({"changemap":parseInt(GameMap.getMapDown()),"setTo":((x) + ((gridHeight) * gridWidth))});
 					GameMap.goToMapDown();
 					this.setPosition(32*x,32*(gridHeight));
+					GameMap.goToOffsetDown();
 				}
 			}
 			return;

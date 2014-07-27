@@ -202,9 +202,10 @@ function getLayoutNodes(nodes,request,parent){
 };
 
 var gamePanelSize = cc.size(960,640);
+var gameGridSize=cc.size(1600,1600);
 var cellsize = 32;
-var gridHeight = Math.floor(gamePanelSize.height/cellsize);
-var gridWidth = Math.floor(gamePanelSize.width/cellsize);
+var gridHeight = Math.floor(gameGridSize.height/cellsize);
+var gridWidth = Math.floor(gameGridSize.width/cellsize);
 
 function indexFromPos(x,y){
 	return parseInt((gridWidth*((gridHeight)-y)))+parseInt(x);

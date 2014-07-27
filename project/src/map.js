@@ -232,16 +232,25 @@ var GameMap=cc.Layer.extend({
 				}
 			}
 		} else{
+
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){
 					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x,touch._point.y+32))){
-						var gp = PlayersController.getYou().getGridPosition();
-						PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/32,this.tileNodes[i].getPosition().y/32)));
+						if(this.tileNodes[i].getType()==4){
+							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.itemClicked,["Pick Up","Walk To"],touch._point));
+						} else{
+							var gp = PlayersController.getYou().getGridPosition();
+							PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/32,this.tileNodes[i].getPosition().y/32)));
+						}
 					}
 				}
 			}
 		}
 		return true;
+	},
+
+	itemClicked:function(val){
+		console.log(val + "CLICKED!");
 	},
 	
 	onTouchMoved:function(touch){

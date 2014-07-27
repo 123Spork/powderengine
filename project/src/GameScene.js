@@ -184,7 +184,7 @@ var GameScene = Scene.extend({
 			}
 			if(cc.rectContainsPoint(this.mobileControls["inventorytoggle"].getBoundingBox(),touch._point) && this.mobileControls["inventorytoggle"].isVisible()){
 				PlayersController.getYou().path=null;
-				if(Inventory!=null && !Inventory._parent) Equipment=null;
+				if(Inventory!=null && !Inventory._parent) Inventory=null;
 				if(Inventory){
 					Inventory.willTerminate();
 					Inventory.removeFromParent();

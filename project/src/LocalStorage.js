@@ -24,6 +24,22 @@ LocalStorage.getInstance=function(){
 	return this.instance;
 };
 
+LocalStorage.setPanelPosition=function(panelName,position){
+	var obj = sys.localStorage.getItem("panelStore");
+	if(obj=="null" || obj==null){
+		console.log("NEW PANEL STORE");
+		obj={};
+	} else{
+		obj = JSON.parse(obj);
+	}
+	obj[panelName]={"x":position.x,"y":position.y};
+	sys.localStorage.setItem("panelStore",JSON.stringify(obj));
+};
+
+LocalStorage.getPanelPosition=function(){
+	return sys.localStorage.getItem("panelStore");
+};
+
 LocalStorage.getMapData=function(mapNumber){
 	if(this.instance.getLastUpdate("maps")){
 		if(mapNumber){
@@ -242,6 +258,7 @@ LocalStorage.Clear=function(){
 	sys.localStorage.setItem("last_signs",0);	
 	sys.localStorage.setItem("npcs_data",[]);
 	sys.localStorage.setItem("last_npcs",0);	
+	sys.localStorage.setItem("panelStore",null);
 };
 
 LocalStorage.Sync=function(){

@@ -138,6 +138,10 @@ function requestLayout(delegate,isLayoutObject){
 	return getLayoutNodes(layoutObject,"panels");
 };
 
+function scheduleDestroy(object){
+	MainScene.scheduleOnce(function(){object=null;});
+};
+
 function hex2rgba(h) {
   var alpha = 255;
   h = h.replace('#','');

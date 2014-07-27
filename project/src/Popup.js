@@ -37,10 +37,12 @@ Popup = Scene.extend({
 			this.panels.setPosition(cc.p(pt.x-this.prevMovPos.x,pt.y-this.prevMovPos.y));
 			return true;
 		}
+		return false;
 	},
 
-	onTouchEnded:function(touch){
-		this.prevMovPos=null;
+	removeFromParent:function(){
+		LocalStorage.setPanelPosition(this.getIdentifier(),this.panels.getPosition());
+		this._super();
 	},
 
 	setupPopup:function(){
@@ -53,6 +55,18 @@ Popup = Scene.extend({
 	},
 
 	onTouchEnded:function(touch){
+	},
+
+	didBecomeActive:function(){
+		this._super();
+		var panelPos = LocalStorage.getPanelPosition();
+		console.log(panelPos);
+		if(panelPos!="null"){
+			var obj = JSON.parse(panelPos)[this.getIdentifier()];
+			if(obj){
+				this.panels.setPosition(obj["x"],obj["y"]);
+			}
+		}
 	},
 
 });

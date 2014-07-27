@@ -3,6 +3,7 @@ js.project = {
     Book_js : '[%project%]src/Book.js',
     Character_js : '[%project%]src/Character.js',
     ChatBox_js : '[%project%]src/ChatBox.js',
+    DropDownList_js : '[%project%]src/DropDownList.js',
     EntryBox_js : '[%project%]src/EntryBox.js',
     Equipment_js : '[%project%]src/Equipment.js',
     GameScene_js : '[%project%]src/GameScene.js',

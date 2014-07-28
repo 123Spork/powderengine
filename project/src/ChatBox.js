@@ -142,6 +142,9 @@ GameChat.getInstance=function(){
 };
 
 GameChat.addMessage=function(message,isPlayer){
+	if(message.length>50){
+		message=message.substring(0,50)+"...";
+	}
 	if(isPlayer){
 		sendMessageToServer({"chatMessage":message});
 		gameChatInstance.addChatMessage(PlayersController.getYou().getName()+": "+message);

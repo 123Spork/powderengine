@@ -238,8 +238,9 @@ var GameMap=cc.Layer.extend({
 				if(i.substring(0,4)=="tile"){
 					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+32-this.mapOffset.y))){
 						if(this.tileNodes[i].getType()==4){
-							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.itemClicked,["Pick Up","Walk To"],touch._point));
-						} else{
+							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.itemClicked,["Pick up " + this.tileNodes[i].getScriptData()["name"],"Walk To"],touch._point));
+							this.clickContext=i;
+						} else if(this.tileNodes[i].getType()!=1 && this.tileNodes[i].getType()!=7 && this.tileNodes[i].getType()!=4){
 							var gp = PlayersController.getYou().getGridPosition();
 							PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/32,this.tileNodes[i].getPosition().y/32)));
 						}
@@ -250,8 +251,41 @@ var GameMap=cc.Layer.extend({
 		return true;
 	},
 
+	clickContext:null,
+
 	itemClicked:function(val){
-		console.log(val + "CLICKED!");
+		if(this.delegate.clickContext!=null){
+			var gp = PlayersController.getYou().getGridPosition();
+			var itemPosition = cc.p(gameMapInstance.tileNodes[gameMapInstance.clickContext].getPosition().x/32,gameMapInstance.tileNodes[gameMapInstance.clickContext].getPosition().y/32);
+			switch(val){
+				case 0:
+					if(gp.x>itemPosition.x){
+						var xSize=gp.x-itemPosition.x;
+					} else{
+						var xSize=itemPosition.x-gp.x;
+					}
+					if(gp.y>itemPosition.y){
+						var ySize=gp.y-itemPosition.y;
+					} else{
+						var ySize=itemPosition.y-gp.y;
+					}
+					xSize*=xSize;
+					ySize*=ySize;
+					var distance = Math.sqrt(xSize+ySize);
+					if(distance<5){
+						PlayersController.getYou().interactWithGivenTile(gameMapInstance.tileNodes[gameMapInstance.clickContext]);
+					}else{
+						GameChat.addMessage("The item is too far away!");
+					}
+				break;
+
+
+				case 1:
+					PlayersController.getYou().setWalkingPath(gameMapInstance.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),itemPosition));
+					this.delegate.clickContext=null;
+				break;
+			}
+		}
 	},
 	
 	onTouchMoved:function(touch){
@@ -269,9 +303,11 @@ var GameMap=cc.Layer.extend({
 		else{
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){
-					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+32-this.mapOffset.y))){
-						var gp = PlayersController.getYou().getGridPosition();
-						PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/32,this.tileNodes[i].getPosition().y/32)));
+					if(this.tileNodes[i].getType()!=1 && this.tileNodes[i].getType()!=7 && this.tileNodes[i].getType()!=4){
+						if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+32-this.mapOffset.y))){
+							var gp = PlayersController.getYou().getGridPosition();
+							PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/32,this.tileNodes[i].getPosition().y/32)));
+						}
 					}
 				}
 			}
@@ -354,14 +390,50 @@ var GameMap=cc.Layer.extend({
 //blitz@uprpg.com;
 
 GameMap.updateOffset=function(x,y){
-		if((gameMapInstance.mapOffset.x+(gameGridSize.width-screenSize.width)+x>=0&&PlayersController.getYou().getPosition().x<(gameGridSize.width-(screenSize.width/2))) && (gameMapInstance.mapOffset.x+x<=0 && PlayersController.getYou().getPosition().x>screenSize.width/2)) {
-			gameMapInstance.mapOffset.x+=x;
-		}
-		if((gameMapInstance.mapOffset.y+(gameGridSize.height-screenSize.height)+y>=0&&PlayersController.getYou().getPosition().y<(gameGridSize.height-(screenSize.height/2))) && (gameMapInstance.mapOffset.y+y<=0 && PlayersController.getYou().getPosition().y>screenSize.height/2)) {
-			gameMapInstance.mapOffset.y+=y;
-		}
-	
+	if((gameMapInstance.mapOffset.x+(gameGridSize.width-(screenSize.width/2))+x>=0&&PlayersController.getYou().getPosition().x<(gameGridSize.width-(screenSize.width/2))) && (gameMapInstance.mapOffset.x+x<=0 && PlayersController.getYou().getPosition().x>screenSize.width/2)) {
+		gameMapInstance.mapOffset.x+=x;
+	}
+	if((gameMapInstance.mapOffset.y+(gameGridSize.height-(screenSize.height/2))+y>=0&&PlayersController.getYou().getPosition().y<(gameGridSize.height-(screenSize.height/2))) && (gameMapInstance.mapOffset.y+y<=0 && PlayersController.getYou().getPosition().y>screenSize.height/2)) {
+		gameMapInstance.mapOffset.y+=y;
+	}
+
 	gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
+};
+
+GameMap.goToOffsetFromPosition=function(x,y){
+	x=parseInt(x); y=parseInt(y);
+	if(gameMapInstance.isMapDirty==true){
+		if(offsetFromPositionScheduledX==0 && offsetFromPositionScheduledY==0){
+			offsetFromPositionScheduledX=x;
+			offsetFromPositionScheduledY=y;
+			gameMapInstance.schedule(GameMap.scheduledOffsetFromPosition);
+		}
+		return;
+	} else{
+		if(x>gameGridSize.width-(screenSize.width/2)){
+			gameMapInstance.mapOffset.x = -(gameGridSize.width-screenSize.width);
+		} else if(x<screenSize.width/2){
+			gameMapInstance.mapOffset.x = 0;
+		} else{
+			gameMapInstance.mapOffset.x = -(x-(screenSize.width/2));
+		}
+		if(y>gameGridSize.height-(screenSize.height/2)){
+			gameMapInstance.mapOffset.y = -(gameGridSize.height-screenSize.height);
+		} else if(y<screenSize.height/2){
+			gameMapInstance.mapOffset.y = 0;
+		} else{
+			gameMapInstance.mapOffset.y = -(y-(screenSize.height/2));
+		}
+		offsetFromPositionScheduledX=0;
+		offsetFromPositionScheduledY=0;
+		gameMapInstance.unschedule(GameMap.scheduledOffsetFromPosition);
+		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
+	}
+};
+offsetFromPositionScheduledX=0;
+offsetFromPositionScheduledY=0;
+GameMap.scheduledOffsetFromPosition=function(){
+	GameMap.goToOffsetFromPosition(offsetFromPositionScheduledX,offsetFromPositionScheduledY);
 };
 
 GameMap.goToOffsetRight=function(){
@@ -621,6 +693,7 @@ GameMap.getTileNodeForIndex=function(idx){
 
 GameMap.addPlayersController=function(_in){
 	gameMapInstance.playerLayer.addChild(_in);
+	GameMap.goToOffsetFromPosition(PlayersController.getYou().getPositionX(),PlayersController.getYou().getPositionY());
 };
 
 GameMap.destroy=function(){

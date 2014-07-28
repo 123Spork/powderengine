@@ -299,7 +299,7 @@ var GameTile = cc.Node.extend({
 	setType:function(_in){
 		this.type=_in;
 		switch(this.type){
-			case 0: this.string.setString("+"); break;
+			case 0: this.string.setString(""); break;
 			case 1: this.string.setString("BLK"); break;
 			case 2: this.string.setString("SPW"); break;	
 			case 3: this.string.setString("WRP"); break;	

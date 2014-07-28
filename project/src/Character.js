@@ -104,6 +104,7 @@ Character = cc.Sprite.extend({
 		this.setPosition(x*32,y*32);
 		sendMessageToServer({"changemap":data["mapTo"], "setTo":data["position"]});
 		GameMap.goToMap(data["mapTo"]);
+		GameMap.goToOffsetFromPosition(x*32,y*32);
 	},
 
 
@@ -113,6 +114,17 @@ Character = cc.Sprite.extend({
 			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 			switch(tile.getType()){
 				case 4: this.pickupItem(tile.getScript()); return;
+			}
+		}
+	},
+
+	interactWithGivenTile:function(tile){
+		if(!tile){
+			return;
+		}
+		if(!this.isWalking){
+			switch(tile.getType()){
+				case 4: this.pickupItemFromTile(tile.getScript(),tile); return;
 			}
 		}
 	},
@@ -317,6 +329,48 @@ PlayerCharacter = Character.extend({
 		var gp = this.getGridPosition();
 		var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 
+		if(item["stackable"]==true){
+			for(var i=0;i<40;i++){
+				if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
+					if(Inventory){
+						this.items["stored"][i]["amount"] +=item["amount"];
+						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
+					}
+					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+					if(tile.getScriptObject()["temp"]){
+						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+					} else{
+						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+					}
+					return;
+				}
+			}
+		}
+		
+		var added=false;
+		for(var i=0;i<40;i++){
+			if(this.items["stored"][i]==null){
+				this.items["stored"][i]=cloneObj(item);
+				if(Inventory){
+					Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
+				}
+				GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+				if(tile.getScriptObject()["temp"]){
+					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+				} else{
+					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+				}
+				var added=true;
+				break;
+			}
+		}
+		if(added==false){
+			GameChat.addMessage(strings.gameChat.inventoryFull);
+		}
+	},
+
+	pickupItemFromTile:function(item,tile){
+		var gp = cc.p(tile.getPositionX()/32,tile.getPositionY()/32);
 		if(item["stackable"]==true){
 			for(var i=0;i<40;i++){
 				if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){

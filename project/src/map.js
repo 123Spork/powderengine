@@ -20,9 +20,9 @@ var GameMap=cc.Layer.extend({
 		var Neighbours=function(x, y){
 			var	N = y - 1,S = y + 1,E = x + 1,W = x - 1,
 			myN = N > -1 && self.tileNodes["tile"+indexFromPos(x,N)] && (self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=7)
-			myS = S < gridWidth && self.tileNodes["tile"+indexFromPos(x,S)] && (self.tileNodes["tile"+ indexFromPos(x,S)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=7)
-			myE = E < gridWidth && self.tileNodes["tile"+indexFromPos(E,y)] && (self.tileNodes["tile"+ indexFromPos(E,y)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=7)
-			myW = W > -1 && self.tileNodes["tile"+indexFromPos(W,y)] && (self.tileNodes["tile"+ indexFromPos(W,y)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=7)
+			myS = S < gridWidth && self.tileNodes["tile"+indexFromPos(x,S)] && (self.tileNodes["tile"+ indexFromPos(x,S)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,S)].getType()!=7)
+			myE = E < gridWidth && self.tileNodes["tile"+indexFromPos(E,y)] && (self.tileNodes["tile"+ indexFromPos(E,y)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(E,y)].getType()!=7)
+			myW = W > -1 && self.tileNodes["tile"+indexFromPos(W,y)] && (self.tileNodes["tile"+ indexFromPos(W,y)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(W,y)].getType()!=7)
 			result = [];
 			if(myN)
 				result.push({x:x, y:N});
@@ -240,6 +240,9 @@ var GameMap=cc.Layer.extend({
 						if(this.tileNodes[i].getType()==4){
 							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.itemClicked,["Pick up " + this.tileNodes[i].getScriptData()["name"],"Walk To"],touch._point));
 							this.clickContext=i;
+						} else if(this.tileNodes[i].getType()==7){
+							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.signClicked,["Read Sign"],touch._point));
+							this.clickContext=i;
 						} else if(this.tileNodes[i].getType()!=1 && this.tileNodes[i].getType()!=7 && this.tileNodes[i].getType()!=4){
 							var gp = PlayersController.getYou().getGridPosition();
 							PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/32,this.tileNodes[i].getPosition().y/32)));
@@ -288,6 +291,37 @@ var GameMap=cc.Layer.extend({
 		}
 	},
 	
+	signClicked:function(val){
+		if(this.delegate.clickContext!=null){
+			var gp = PlayersController.getYou().getGridPosition();
+			var itemPosition = cc.p(gameMapInstance.tileNodes[gameMapInstance.clickContext].getPosition().x/32,gameMapInstance.tileNodes[gameMapInstance.clickContext].getPosition().y/32);
+			switch(val){
+				case 0:
+					if(gp.x>itemPosition.x){
+						var xSize=gp.x-itemPosition.x;
+					} else{
+						var xSize=itemPosition.x-gp.x;
+					}
+					if(gp.y>itemPosition.y){
+						var ySize=gp.y-itemPosition.y;
+					} else{
+						var ySize=itemPosition.y-gp.y;
+					}
+					xSize*=xSize;
+					ySize*=ySize;
+					var distance = Math.sqrt(xSize+ySize);
+					if(distance<5){
+						PlayersController.getYou().interactWithGivenTile(gameMapInstance.tileNodes[gameMapInstance.clickContext]);
+					}else{
+						GameChat.addMessage("The sign is too far away to read!");
+					}
+				break;
+			}
+		}
+	},
+
+
+
 	onTouchMoved:function(touch){
 		if(this.interactionDelegate){
 			for(var i in this.tileNodes){

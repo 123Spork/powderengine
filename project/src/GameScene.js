@@ -20,116 +20,43 @@ var GameScene = Scene.extend({
 					anchorPoint:cc.p(0,0),
 					size:cc.size(48,48),
 					texture:"GUI/logout.png",
-				}
+				},
+				"quicknav_button":{
+					position:cc.p(screenSize.width-15,Math.floor(screenSize.height/2)-24),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/quickmenu_closed_icon.png",
+				},
+				"inventory_button":{
+					position:cc.p(screenSize.width-52,Math.floor(screenSize.height/2)+60),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/inventory_icon.png",
+				},
+				"equipment_button":{
+					position:cc.p(screenSize.width-70,Math.floor(screenSize.height/2)+4),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/equipment_icon.png",
+				},
+				"skill_button":{
+					position:cc.p(screenSize.width-70,Math.floor(screenSize.height/2)-52),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/skills_icon.png",
+				},
+				"chat_button":{
+					position:cc.p(screenSize.width-52,Math.floor(screenSize.height/2)-108),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/chat_icon.png",
+				},
+
 			}
 			}
 		}
 	},
 	
-	getMobileLayoutObject:function(){
-		return {
-			"panels":{
-				children:{
-					"chattoggle":{
-						position:cc.p(410,0),
-						size:cc.size(64,64),
-						bg:cc.c4b(255,255,255,120),
-						children:{
-							"label":{
-								label:"Chat",
-								color:cc.c3b(0,0,0),
-								position:cc.p(32,32),
-							}
-						}
-					},
-					"inventorytoggle":{
-						position:cc.p(484,0),
-						size:cc.size(64,64),
-						bg:cc.c4b(255,255,255,120),
-						children:{
-							"label":{
-								label:"Inventory",
-								color:cc.c3b(0,0,0),
-								position:cc.p(32,32),
-							}
-						}
-					},
-					"equipmenttoggle":{
-						position:cc.p(558,0),
-						size:cc.size(64,64),
-						bg:cc.c4b(255,255,255,120),
-						children:{
-							"label":{
-								label:"Equipment",
-								color:cc.c3b(0,0,0),
-								position:cc.p(32,32),
-							}
-						}
-					},
-					"upbutton":{
-						position:cc.p(632,0),
-						size:cc.size(64,64),
-						bg:cc.c4b(255,255,255,120),
-						children:{
-							"label":{
-								label:"Up",
-								color:cc.c3b(0,0,0),
-								position:cc.p(32,32),
-							}
-						}
-					},
-					"downbutton":{
-						position:cc.p(706,0),
-						size:cc.size(64,64),
-						bg:cc.c4b(255,255,255,120),
-						children:{
-							"label":{
-								label:"Down",
-								color:cc.c3b(0,0,0),
-								position:cc.p(32,32),
-							}
-						}
-					},
-					"leftbutton":{
-						position:cc.p(780,0),
-						size:cc.size(64,64),
-						bg:cc.c4b(255,255,255,120),
-						children:{
-							"label":{
-								label:"Left",
-								color:cc.c3b(0,0,0),
-								position:cc.p(32,32),
-							}
-						}
-					},
-					"rightbutton":{
-						position:cc.p(854,0),
-						size:cc.size(64,64),
-						bg:cc.c4b(255,255,255,120),
-						children:{
-							"label":{
-								label:"Right",
-								color:cc.c3b(0,0,0),
-								position:cc.p(32,32),
-							}
-						}
-					},
-					"hidebutton":{
-						position:cc.p(928,0),
-						size:cc.size(32,64),
-						bg:cc.c4b(255,255,255,120),
-						children:{
-							"label":{
-								label:"<<",
-								color:cc.c3b(0,0,0),
-								position:cc.p(16,32),
-							}
-						}
-					},
-				}
-			}
-		};
-	},
 
 	
 	setServerConnected:function(active){
@@ -142,6 +69,22 @@ var GameScene = Scene.extend({
 	destroyGame:function(){
 		GameMap.destroy();
 		GameMap.setInstanceNull();
+		if(Equipment!=null){
+			Equipment.willTerminate();
+			Equipment.removeFromParent();
+			Equipment=null;
+		}
+		if(Inventory!=null){
+			Inventory.willTerminate();
+			Inventory.removeFromParent();
+			Inventory=null;
+		}
+		if(Skills!=null){
+			Skills.willTerminate();
+			Skills.removeFromParent();
+			Skills=null;
+		}
+		SkillBarsInstance.removeFromParent();
 		PlayersController.destroy();
 		PlayersController.setInstanceNull();
 		GameChat.destroy();
@@ -155,72 +98,27 @@ var GameScene = Scene.extend({
 			return true;
 		}
 		SceneManager.setActiveScene(this);
-		if(this.mobileControls){
-			if(cc.rectContainsPoint(this.mobileControls["upbutton"].getBoundingBox(),touch._point) && this.mobileControls["upbutton"].isVisible()){
-				keyMap[38]=true
-				return true;
-			}
-			if(cc.rectContainsPoint(this.mobileControls["downbutton"].getBoundingBox(),touch._point) && this.mobileControls["downbutton"].isVisible()){
-				keyMap[40]=true
-				return true;
-			}
-			if(cc.rectContainsPoint(this.mobileControls["leftbutton"].getBoundingBox(),touch._point) && this.mobileControls["leftbutton"].isVisible()){
-				keyMap[37]=true
-				return true;
-			}
-			if(cc.rectContainsPoint(this.mobileControls["rightbutton"].getBoundingBox(),touch._point) && this.mobileControls["rightbutton"].isVisible()){
-				keyMap[39]=true
-				return true;
-			}
-			if(cc.rectContainsPoint(this.mobileControls["chattoggle"].getBoundingBox(),touch._point) && this.mobileControls["chattoggle"].isVisible()){
-				PlayersController.getYou().path=null;
-				if(GameChat.isShowing()){
-					GameChat.hide();
-				}
-				else{
-					GameChat.show();
-				}
-				return true;
-			}
-			if(cc.rectContainsPoint(this.mobileControls["inventorytoggle"].getBoundingBox(),touch._point) && this.mobileControls["inventorytoggle"].isVisible()){
-				PlayersController.getYou().path=null;
-				if(Inventory!=null && !Inventory._parent) Inventory=null;
-				if(Inventory){
-					Inventory.willTerminate();
-					Inventory.removeFromParent();
-					Inventory=null;
-				} else{
-					Inventory = new InventoryPanel();
-					Inventory.init();
-					Inventory.didBecomeActive();
-					this.addChild(Inventory);
-				}
-				return true;
-			}
-			if(cc.rectContainsPoint(this.mobileControls["equipmenttoggle"].getBoundingBox(),touch._point) && this.mobileControls["equipmenttoggle"].isVisible()){
-				PlayersController.getYou().path=null;
-				if(Equipment!=null && !Equipment._parent) Equipment=null;
-				if(Equipment){
-					Equipment.willTerminate();
-					Equipment.removeFromParent();
-					Equipment=null;
-				} else{
-					Equipment = new EquipmentPanel();
-					Equipment.init();
-					Equipment.didBecomeActive();
-					this.addChild(Equipment);
-				}
-				return true;
-			}
-			if(cc.rectContainsPoint(this.mobileControls["hidebutton"].getBoundingBox(),touch._point) && this.mobileControls["hidebutton"].isVisible()){
-				this.showMobileControls(this.mobileControls.isVis==true?false:true);
-				keyMap[37]=false;
-				keyMap[38]=false;
-				keyMap[39]=false;
-				keyMap[34]=false;
-				return true;
-			}
+		if(cc.rectContainsPoint(this.panels["chat_button"].getBoundingBox(),touch._point) && this.panels["chat_button"].isVisible()){
+			this.onKeyUp("C");
+			return true;
 		}
+		if(cc.rectContainsPoint(this.panels["inventory_button"].getBoundingBox(),touch._point) && this.panels["inventory_button"].isVisible()){
+			this.onKeyUp("I");
+			return true;
+		}
+		if(cc.rectContainsPoint(this.panels["equipment_button"].getBoundingBox(),touch._point) &&  this.panels["equipment_button"].isVisible()){
+			this.onKeyUp("E");
+			return true;
+		}
+		if(cc.rectContainsPoint(this.panels["skill_button"].getBoundingBox(),touch._point) && this.panels["skill_button"].isVisible()){
+			this.onKeyUp("S");
+			return true;
+		}
+		if(cc.rectContainsPoint(this.panels["quicknav_button"].getBoundingBox(),touch._point) && this.panels["quicknav_button"].isVisible()){
+			this.showQuickControls(!this.isQuickVis);
+			return true;
+		}
+			
 	},
 	
 	showSign:function(data){
@@ -237,25 +135,23 @@ var GameScene = Scene.extend({
 		}
 	},
 	
-	onTouchEnded:function(touch){
-		if(this.mobileControls){
-			if(cc.rectContainsPoint(this.mobileControls["upbutton"].getBoundingBox(),touch._point) && this.mobileControls["upbutton"].isVisible()){
-				keyMap[38]=false;
-				return true;
-			}
-			if(cc.rectContainsPoint(this.mobileControls["downbutton"].getBoundingBox(),touch._point) && this.mobileControls["downbutton"].isVisible()){
-				keyMap[40]=false;
-				return true;
-			}
-			if(cc.rectContainsPoint(this.mobileControls["leftbutton"].getBoundingBox(),touch._point) && this.mobileControls["leftbutton"].isVisible()){
-				keyMap[37]=false;
-				return true;
-			}
-			if(cc.rectContainsPoint(this.mobileControls["rightbutton"].getBoundingBox(),touch._point) && this.mobileControls["rightbutton"].isVisible()){
-				keyMap[39]=false;
-				return true;
-			}
+	showBook:function(data){
+		if(Book!=null && !Book._parent) Book=null;
+		if(Book){
+			Book.willTerminate();
+			Book.removeFromParent();
+			Book=null;
+		} else{
+			Book = new BookPanel();
+			Book.init(data);
+			Book.didBecomeActive();
+			this.addChild(Book);
 		}
+	},
+	
+
+	onTouchEnded:function(touch){
+		
 	},
 	
 	onKeyUp:function(key){
@@ -336,18 +232,13 @@ var GameScene = Scene.extend({
 		}
 	},
 	
-	showMobileControls:function(visible){
-		if(this.mobileControls){
-			this.mobileControls.isVis = visible;
-			this.mobileControls["upbutton"].setVisible(visible);
-			this.mobileControls["downbutton"].setVisible(visible);
-			this.mobileControls["leftbutton"].setVisible(visible);
-			this.mobileControls["rightbutton"].setVisible(visible);
-			this.mobileControls["chattoggle"].setVisible(visible);
-			this.mobileControls["inventorytoggle"].setVisible(visible);
-			this.mobileControls["equipmenttoggle"].setVisible(visible);
-			this.mobileControls["hidebutton"]["label"].setString(visible==true?">>":"<<");
-		}
+	showQuickControls:function(visible){
+		this.isQuickVis = visible;
+		this.panels["chat_button"].setVisible(visible);
+		this.panels["inventory_button"].setVisible(visible);
+		this.panels["equipment_button"].setVisible(visible);
+		this.panels["skill_button"].setVisible(visible);
+		this.panels["quicknav_button"].setTexture(cc.TextureCache.getInstance().addImage(visible==true?"GUI/quickmenu_opened_icon.png":"GUI/quickmenu_closed_icon.png"));
 	},
 	
 	runCommand:function(command){
@@ -500,11 +391,7 @@ var GameScene = Scene.extend({
 		
 		this.addChild(SkillBars.create());
 
-		if(isMobile()){
-			this.mobileControls = requestLayout(this.getMobileLayoutObject(),true);
-			this.addChild(this.mobileControls);
-			this.showMobileControls(false);
-		}		
+		this.showQuickControls(false);
 		this.addChild(this.panels);		
 		this.schedule(this.storedMessages);	
 		this.schedule(this.serverProcess);

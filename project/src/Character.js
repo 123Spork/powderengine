@@ -125,6 +125,7 @@ Character = cc.Sprite.extend({
 		if(!this.isWalking){
 			switch(tile.getType()){
 				case 4: this.pickupItemFromTile(tile.getScript(),tile); return;
+				case 7: MainScene.showSign(tile.getScript()); return;
 			}
 		}
 	},
@@ -432,16 +433,7 @@ PlayerCharacter = Character.extend({
 
 	useItem:function(itemnumber){
 		switch(this.items["stored"][itemnumber]["itemType"]){
-			case "book": if(Book!=null && !Book._parent) Itemeditor=null;
-				if(Book){
-					Book.willTerminate();
-					Book.removeFromParent();
-					Book=null;
-				}
-				Book = new BookPanel();
-				Book.init(this.items["stored"][itemnumber]);
-				Book.didBecomeActive();
-				this._parent._parent._parent.addChild(Book);
+			case "book": MainScene.showBook(this.items["stored"][itemnumber]);
 			break;
 			case "wearable":
 				this.equipItem(itemnumber)

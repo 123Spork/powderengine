@@ -1,15 +1,11 @@
+(31st July 2014) - Version 0.68
+-Fixed pathing bug that occurs sometimes.
+-Added missing book gui graphics.
+-Fixed logging out->logging in missing assets.
+-Fixed panel issue on game resize (e.g skills is reloaded from localstorage and position is off screen).
+-Implemented sign read on click/tap so mobiles can read signs.
+-Added new quicknav bar, removed legacy mobile panel code (appears centered vertically on the right).
+
 (28th July 2014) - Version 0.675
 -Mostly bug fixes to do with the new full screen mapping system.
 -Implemented picking up items when within 5 square lengths by clicking.
-
-(27th July 2014) - Version 0.67
--Implemented full screen play.
--All screen sizes should be able to handle the new maps without scaling graphics.
--At the moment you will need to refresh on orientation swapping in device.
-
-(26th July 2014) - Version 0.66
--Implemented an abstracted drop down list controller (like seen in inventory).
--Implemented the new drop down list controller into inventory, equipment and on-map items.
--Added list scroll buttons for all editor lists (you are no longer constrained by panel size).
--Added localstorage saving of panel positions. Move inventory and close it, it will re-open in same position.
--Fixed a couple of simple bugs.

@@ -22,7 +22,7 @@ var GameScene = Scene.extend({
 					texture:"GUI/logout.png",
 				},
 				"quicknav_button":{
-					position:cc.p(screenSize.width-15,Math.floor(screenSize.height/2)-24),
+					position:cc.p(screenSize.width-30,Math.floor(screenSize.height/2)-24),
 					anchorPoint:cc.p(0,0),
 					size:cc.size(48,48),
 					texture:"GUI/quickmenu_closed_icon.png",
@@ -34,13 +34,13 @@ var GameScene = Scene.extend({
 					texture:"GUI/inventory_icon.png",
 				},
 				"equipment_button":{
-					position:cc.p(screenSize.width-70,Math.floor(screenSize.height/2)+4),
+					position:cc.p(screenSize.width-82,Math.floor(screenSize.height/2)+4),
 					anchorPoint:cc.p(0,0),
 					size:cc.size(48,48),
 					texture:"GUI/equipment_icon.png",
 				},
 				"skill_button":{
-					position:cc.p(screenSize.width-70,Math.floor(screenSize.height/2)-52),
+					position:cc.p(screenSize.width-82,Math.floor(screenSize.height/2)-52),
 					anchorPoint:cc.p(0,0),
 					size:cc.size(48,48),
 					texture:"GUI/skills_icon.png",
@@ -52,12 +52,75 @@ var GameScene = Scene.extend({
 					texture:"GUI/chat_icon.png",
 				},
 
+				"quickedit_button":{
+					position:cc.p(0,Math.floor(screenSize.height/2)-24),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/quickedit_closed_icon.png",
+				},
+				"mapedit_button":{
+					position:cc.p(4,Math.floor(screenSize.height/2)+116),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/mapeditor_icon.png",
+				},
+				"npcedit_button":{
+					position:cc.p(34,Math.floor(screenSize.height/2)+60),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/npceditor_icon.png",
+				},
+				"itemedit_button":{
+					position:cc.p(64,Math.floor(screenSize.height/2)+4),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/itemeditor_icon.png",
+				},
+				"skilledit_button":{
+					position:cc.p(64,Math.floor(screenSize.height/2)-52),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/skilleditor_icon.png",
+				},
+				"signedit_button":{
+					position:cc.p(34,Math.floor(screenSize.height/2)-108),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/signeditor_icon.png",
+				},
+				"warpedit_button":{
+					position:cc.p(4,Math.floor(screenSize.height/2)-164),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/warpeditor_icon.png",
+				},
+				//Level 2
+				"bankedit_button":{
+					position:cc.p(90,Math.floor(screenSize.height/2)+60),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/bankeditor_icon.png",
+				},
+				"shopedit_button":{
+					position:cc.p(120,Math.floor(screenSize.height/2)+4),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/shopeditor_icon.png",
+				},
+				"questedit_button":{
+					position:cc.p(120,Math.floor(screenSize.height/2)-52),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/questeditor_icon.png",
+				},
+
 			}
 			}
 		}
 	},
 	
-
+	isQuickVis:false,
+	isEditVis:false,
 	
 	setServerConnected:function(active){
 		if(active==false){
@@ -114,11 +177,50 @@ var GameScene = Scene.extend({
 			this.onKeyUp("S");
 			return true;
 		}
+		if(cc.rectContainsPoint(this.panels["quickedit_button"].getBoundingBox(),touch._point) && this.panels["quickedit_button"].isVisible()){
+			this.showEditControls(!this.isEditVis);
+			return true;
+		}
 		if(cc.rectContainsPoint(this.panels["quicknav_button"].getBoundingBox(),touch._point) && this.panels["quicknav_button"].isVisible()){
 			this.showQuickControls(!this.isQuickVis);
 			return true;
 		}
-			
+		if(cc.rectContainsPoint(this.panels["mapedit_button"].getBoundingBox(),touch._point) && this.panels["mapedit_button"].isVisible()){
+			this.runCommand("/editmap");
+			return true;
+		}
+		if(cc.rectContainsPoint(this.panels["npcedit_button"].getBoundingBox(),touch._point) && this.panels["npcedit_button"].isVisible()){
+			this.runCommand("/editnpc");
+			return true;
+		}	
+		if(cc.rectContainsPoint(this.panels["itemedit_button"].getBoundingBox(),touch._point) && this.panels["itemedit_button"].isVisible()){
+			this.runCommand("/edititem");
+			return true;
+		}	
+		if(cc.rectContainsPoint(this.panels["skilledit_button"].getBoundingBox(),touch._point) && this.panels["skilledit_button"].isVisible()){
+			this.runCommand("/editskill");
+			return true;
+		}
+		if(cc.rectContainsPoint(this.panels["signedit_button"].getBoundingBox(),touch._point) && this.panels["signedit_button"].isVisible()){
+			this.runCommand("/editsign");
+			return true;
+		}		
+		if(cc.rectContainsPoint(this.panels["warpedit_button"].getBoundingBox(),touch._point) && this.panels["warpedit_button"].isVisible()){
+			this.runCommand("/editwarp");
+			return true;
+		}	
+		if(cc.rectContainsPoint(this.panels["shopedit_button"].getBoundingBox(),touch._point) && this.panels["shopedit_button"].isVisible()){
+			this.runCommand("/editshop");
+			return true;
+		}	
+		if(cc.rectContainsPoint(this.panels["questedit_button"].getBoundingBox(),touch._point) && this.panels["questedit_button"].isVisible()){
+			this.runCommand("/editquest");
+			return true;
+		}	
+		if(cc.rectContainsPoint(this.panels["bankedit_button"].getBoundingBox(),touch._point) && this.panels["bankedit_button"].isVisible()){
+			this.runCommand("/editbank");
+			return true;
+		}	
 	},
 	
 	showSign:function(data){
@@ -241,6 +343,20 @@ var GameScene = Scene.extend({
 		this.panels["quicknav_button"].setTexture(cc.TextureCache.getInstance().addImage(visible==true?"GUI/quickmenu_opened_icon.png":"GUI/quickmenu_closed_icon.png"));
 	},
 	
+	showEditControls:function(visible){
+		this.isEditVis = visible;
+		this.panels["mapedit_button"].setVisible(visible);
+		this.panels["npcedit_button"].setVisible(visible);
+		this.panels["itemedit_button"].setVisible(visible);
+		this.panels["skilledit_button"].setVisible(visible);
+		this.panels["signedit_button"].setVisible(visible);
+		this.panels["warpedit_button"].setVisible(visible);
+		this.panels["shopedit_button"].setVisible(visible);
+		this.panels["bankedit_button"].setVisible(visible);
+		this.panels["questedit_button"].setVisible(visible);
+		this.panels["quickedit_button"].setTexture(cc.TextureCache.getInstance().addImage(visible==true?"GUI/quickedit_opened_icon.png":"GUI/quickedit_closed_icon.png"));
+	},
+
 	runCommand:function(command){
 	if(!command){
 		return;
@@ -275,7 +391,7 @@ var GameScene = Scene.extend({
 					this.addChild(Warpeditor);
 				}
 			break;
-			case "/editsigns": 
+			case "/editsign": 
 				if(Signeditor!=null && !Signeditor._parent) Signeditor=null;
 				if(Signeditor){
 					Signeditor.willTerminate();
@@ -288,7 +404,7 @@ var GameScene = Scene.extend({
 					this.addChild(Signeditor);
 				}
 			break;
-			case "/editskills": 
+			case "/editskill": 
 				if(Skillseditor!=null && !Skillseditor._parent) Skillseditor=null;
 				if(Skillseditor){
 					Skillseditor.willTerminate();
@@ -301,7 +417,7 @@ var GameScene = Scene.extend({
 					this.addChild(Skillseditor);
 				}
 			break;		
-			case "/edititems": 
+			case "/edititem": 
 				if(Itemeditor!=null && !Itemeditor._parent) Itemeditor=null;
 				if(Itemeditor){
 					Itemeditor.willTerminate();
@@ -315,7 +431,7 @@ var GameScene = Scene.extend({
 					this.addChild(Itemeditor);
 				}
 			break;
-			case "/editnpcs": 
+			case "/editnpc": 
 				if(NPCeditor!=null && !NPCeditor._parent) NPCeditor=null;
 				if(NPCeditor){
 					NPCeditor.willTerminate();
@@ -392,6 +508,7 @@ var GameScene = Scene.extend({
 		this.addChild(SkillBars.create());
 
 		this.showQuickControls(false);
+		this.showEditControls(false);
 		this.addChild(this.panels);		
 		this.schedule(this.storedMessages);	
 		this.schedule(this.serverProcess);

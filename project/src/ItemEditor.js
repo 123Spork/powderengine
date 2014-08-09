@@ -606,7 +606,8 @@ ItemEditor = Popup.extend({
 		}
 	},
 	
-	onMouseMoved:function(pos){
+	onMouseMoved:function(event){
+		var pos = event.getLocation();
 		if(this.currentTab==1){
 			this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
 			var truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);

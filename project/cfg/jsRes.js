@@ -11,6 +11,7 @@ js.project = {
     InputBox_js : '[%project%]src/InputBox.js',
     Inventory_js : '[%project%]src/Inventory.js',
     ItemEditor_js : '[%project%]src/ItemEditor.js',
+    ListView_js : '[%project%]src/ListView.js',
     LocalStorage_js : '[%project%]src/LocalStorage.js',
     Login_js : '[%project%]src/Login.js',
     MainScene_js : '[%project%]src/MainScene.js',

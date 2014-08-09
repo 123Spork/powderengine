@@ -153,7 +153,8 @@ InventoryPanel = Popup.extend({
 		}
 	},
 
-	onMouseMoved:function(pos){
+	onMouseMoved:function(event){
+		var pos = event.getLocation();
 		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
 		for(var i=0;i<40;i++){
 			if(PlayersController.getYou().getInventory()[i]){

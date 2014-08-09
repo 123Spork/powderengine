@@ -1,3 +1,8 @@
+(4th August 2014) - Version 0.683
+-Added a load of additional graphics for a new editor panel (left center).
+-Updated the item list view so its easier to navigate/ add/delete etc.
+-Added a dropdown list option to delete so that user can decide if they are certain.
+
 (31st July 2014) - Version 0.68
 -Fixed pathing bug that occurs sometimes.
 -Added missing book gui graphics.
@@ -5,7 +10,3 @@
 -Fixed panel issue on game resize (e.g skills is reloaded from localstorage and position is off screen).
 -Implemented sign read on click/tap so mobiles can read signs.
 -Added new quicknav bar, removed legacy mobile panel code (appears centered vertically on the right).
-
-(28th July 2014) - Version 0.675
--Mostly bug fixes to do with the new full screen mapping system.
--Implemented picking up items when within 5 square lengths by clicking.

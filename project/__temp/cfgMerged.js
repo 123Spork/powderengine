@@ -1,14 +1,40 @@
 var res = {
+    bankeditor_icon_png : 'GUI/bankeditor_icon.png',
+    book_png : 'GUI/book.png',
+    btnDown_png : 'GUI/btnDown.png',
+    btnLeft_png : 'GUI/btnLeft.png',
+    btnRight_png : 'GUI/btnRight.png',
+    btnUp_png : 'GUI/btnUp.png',
     chat_png : 'GUI/chat.png',
+    chat_icon_png : 'GUI/chat_icon.png',
     close_png : 'GUI/close.png',
     defaultitem_png : 'GUI/defaultitem.png',
+    edit_png : 'GUI/edit.png',
     equipment_png : 'GUI/equipment.png',
+    equipment_icon_png : 'GUI/equipment_icon.png',
     healthbar_png : 'GUI/healthbar.png',
     inventory_png : 'GUI/inventory.png',
+    inventory_icon_png : 'GUI/inventory_icon.png',
+    itemeditor_icon_png : 'GUI/itemeditor_icon.png',
+    list_panel_png : 'GUI/list_panel.png',
     logout_png : 'GUI/logout.png',
+    mapeditor_icon_png : 'GUI/mapeditor_icon.png',
+    npceditor_icon_png : 'GUI/npceditor_icon.png',
+    questeditor_icon_png : 'GUI/questeditor_icon.png',
+    quickedit_closed_icon_png : 'GUI/quickedit_closed_icon.png',
+    quickedit_opened_icon_png : 'GUI/quickedit_opened_icon.png',
+    quickmenu_closed_icon_png : 'GUI/quickmenu_closed_icon.png',
+    quickmenu_opened_icon_png : 'GUI/quickmenu_opened_icon.png',
+    shopeditor_icon_png : 'GUI/shopeditor_icon.png',
+    signeditor_icon_png : 'GUI/signeditor_icon.png',
     signpost_png : 'GUI/signpost.png',
+    skilleditor_icon_png : 'GUI/skilleditor_icon.png',
     skills_png : 'GUI/skills.png',
+    skills_icon_png : 'GUI/skills_icon.png',
     splash_png : 'GUI/splash.png',
+    trash_png : 'GUI/trash.png',
+    use_png : 'GUI/use.png',
+    warpeditor_icon_png : 'GUI/warpeditor_icon.png',
     building1_png : 'building1.png',
     character_graphics_txt : 'character_graphics.txt',
     items1_png : 'items1.png',
@@ -593,6 +619,7 @@ js.project = {
     InputBox_js : './src/InputBox.js',
     Inventory_js : './src/Inventory.js',
     ItemEditor_js : './src/ItemEditor.js',
+    ListView_js : './src/ListView.js',
     LocalStorage_js : './src/LocalStorage.js',
     Login_js : './src/Login.js',
     MainScene_js : './src/MainScene.js',
@@ -625,7 +652,7 @@ resCfg["project"] = {
 cc.gameModules = [jsRes.SceneManager_js];//Game modules
 
 resCfg[jsRes.SceneManager_js] = {
-    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js, jsRes.DropDownList_js, jsRes.Popup_js, jsRes.Book_js, jsRes.Equipment_js, jsRes.Inventory_js, jsRes.Sign_js, jsRes.Skills_js, jsRes.ItemEditor_js, jsRes.MapEditor_js, jsRes.NPCEditor_js,jsRes.SkillsEditor_js, jsRes.PopupList_js, jsRes.WarpEditor_js, jsRes.SignEditor_js, jsRes.MainScene_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
+    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.ListView_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js, jsRes.DropDownList_js, jsRes.Popup_js, jsRes.Book_js, jsRes.Equipment_js, jsRes.Inventory_js, jsRes.Sign_js, jsRes.Skills_js, jsRes.ItemEditor_js, jsRes.MapEditor_js, jsRes.NPCEditor_js,jsRes.SkillsEditor_js, jsRes.PopupList_js, jsRes.WarpEditor_js, jsRes.SignEditor_js, jsRes.MainScene_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
 };
 exports.res = res;
 exports.resCfg = resCfg;

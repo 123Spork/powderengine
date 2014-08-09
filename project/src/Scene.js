@@ -13,6 +13,10 @@ var Scene = cc.Layer.extend({
 	setServerConnected:function(){
 	},
 	
+	onMouseMoved:function(event){
+		var pos = event.getLocation();
+	},
+
 	didBecomeActive:function(){
 		if(this.panels){
 			this.panels.removeFromParent();
@@ -26,6 +30,7 @@ var Scene = cc.Layer.extend({
 	
 	init:function(){
 		this.setTouchMode(1);
+		this.setMouseEnabled(true);
 		this.setTouchEnabled(true);
 		SceneManager.setActiveScene(this);
 		this._super();

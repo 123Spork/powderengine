@@ -147,7 +147,8 @@ EquipmentPanel = Popup.extend({
 		}
 	},
 
-	onMouseMoved:function(pos){
+	onMouseMoved:function(event){
+		var pos = event.getLocation();
 		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
 		this.panels["item_name"].setVisible(false);
 		  var equipmentList = PlayersController.getYou().getEquipment();

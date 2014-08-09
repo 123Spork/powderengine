@@ -6,6 +6,7 @@ PopupList = Popup.extend({
 	saveNewDataID:-1,
 	itemOffsets:0,
 	defaultPositions:null,
+	listPanel:null,
 	
 	willTerminate:function(){
 		this._super();
@@ -26,104 +27,155 @@ PopupList = Popup.extend({
 			this.editList=withData.list;
 		}
 		this.listName=withData.name;
-		this.delegate=withData.delegate;
+		delegate=withData.delegate;
 	},
+
+
 
 	didBecomeActive:function(){
 		this._super();
-		this.updateItemOffsets();
+		//this.panels.setVisible(false);
+		this.prepareList();
 	},
-	
-	getLayoutObject:function(){
-		var listPanel = {};
+
+	listPanel:null,
+
+	prepareList:function(){
+		if(this.listPanel){
+			this.listPanel.listView.removeFromParent();
+		}
+		var listnodes = [];
+		var callBackList=[];
+		var tc = cc.TextureCache.getInstance();
 		this.defaultPositions={};
 		for(var i in this.editList){
+			listnodes[i]=cc.Node.create();
+			listnodes[i].setContentSize(324,32);
 			if(this.editList[i]==null){
 				this.editList.splice(i,1);
 				continue;
 			}
-			if(this.delegate!=null){
-				listPanel["useElement"+i]={
-					size: cc.size(20,20),
-					texture:"GUI/use.png",
-					position: cc.p(244,305-(i*30)),
-					anchorPoint:cc.p(0,0),
-				};
+			if(delegate!=null){
+				var useElement=cc.Sprite.createWithTexture(tc.addImage("GUI/use.png"));
+				useElement.setPosition(cc.p(244,6));
+				useElement.setAnchorPoint(cc.p(0,0));
 			}
-			this.defaultPositions["element"+i] = cc.p(32,302-(i*30));		
-			
+			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),316,1);
+			element.setPosition(cc.p(4,0));			
 
-			listPanel["element"+i]={
-				size: cc.size(300,1),
-				bg: cc.c4b(0,0,0,127),
-				position: cc.p(4,302-(i*30)),
-				children:{	
-					"content":{
-						label:this.editList[i].name,
-						fontSize:20,
-						anchorPoint:cc.p(0,0.5),
-						position:cc.p(0,13),
-					}
-				}
-			};
+			var text = cc.LabelTTF.create(this.editList[i].name,"Arial",20);
+			text.setAnchorPoint(cc.p(0,0.5));
+			text.setPosition(cc.p(0,16));
 
-			listPanel["editElement"+i]={
-				size: cc.size(20,20),
-				texture:"GUI/edit.png",
-				anchorPoint:cc.p(0,0),
-				position: cc.p(272,305-(i*30)),
-			};
+			var editElement=cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
+			editElement.setPosition(cc.p(272,6));
+			editElement.setAnchorPoint(cc.p(0,0));
 			
-			listPanel["delElement"+i]={
-				size: cc.size(20,20),
-				texture:"GUI/trash.png",
-				anchorPoint:cc.p(0,0),
-				position: cc.p(300,305-(i*30)),
+			var delElement=cc.Sprite.createWithTexture(tc.addImage("GUI/trash.png"));
+			delElement.setPosition(cc.p(300,6));
+			delElement.setAnchorPoint(cc.p(0,0));		
+
+
+			editElement.callBack = "Edit";
+			var touchableNodes =[];
+			touchableNodes.push(editElement);
+			delElement.callBack = "Delete";
+			touchableNodes.push(delElement);
+			if(delegate!=null){
+				useElement.callBack="Use";
+				touchableNodes.push(useElement);
+			}
+			callBackList.push(touchableNodes);
+
+			listnodes[i].addChild(element);
+			listnodes[i].addChild(text);
+			listnodes[i].addChild(editElement);
+			listnodes[i].addChild(delElement);	
+			if(delegate!=null){
+				listnodes[i].addChild(useElement);
 			}
 
-		
-			
+
 		}
-		
-		return { 
+
+		var addButton = cc.LayerColor.create(cc.c4b(70,200,70,255),90,26);
+		var plus = cc.LabelTTF.create("+","Arial",20);
+		plus.setPosition(45,13);
+		plus.setAnchorPoint(cc.p(0.5,0.5));
+		addButton.setPosition(cc.p(120,0));
+		addButton.callBack="Add";
+		addButton.addChild(plus);
+		callBackList.push([addButton]);
+		listnodes.push(addButton);
+
+		this.listPanel = this.panels["main_panel"]["list"];
+		var self=this;
+		this.listPanel.getListSize = function(){
+			return cc.size(324,32*listnodes.length);
+		};
+		this.listPanel.getListElementAmount=function(){
+			return listnodes.length;
+		};
+		this.listPanel.getSizeForElement=function(elementID){
+			return listnodes[elementID].getContentSize();
+		};
+		this.listPanel.getListNodeForIndex=function(elementID){
+			return listnodes[elementID];
+		};
+		this.listPanel.runListCallBack=function(name,listelement,touch){
+			var pos = touch._point;
+			var truePos = self.convertToNodeSpace(pos);
+			if(self.showingEditor==true){
+				return;
+			}
+			switch(name){
+				case "Delete":
+					self._parent.addChild(DropDownList.createWithListAndPosition(self,self.deleteClicked,["Cancel","Delete"],touch._point));
+					self.elementContext =listelement;
+				break;
+				case "Edit":
+					self.showingEditor=true;
+					self.childEditor.init({delegate:self, data:self.editList[listelement]});
+					self._parent.addChild(self.childEditor);
+					self.setTouchEnabled(false);
+					self.childEditor.didBecomeActive();
+					self.saveNewDataID=listelement+"";
+				break;
+				case "Add":
+					self.addingNew=true;
+					self.showingEditor=true;
+					self.saveNewDataID=self.editList.length;
+					self.childEditor.init({delegate:self, data:null});
+					self.setTouchEnabled(false);
+					self._parent.addChild(self.childEditor);
+					self.childEditor.didBecomeActive();
+				break;
+			}
+		};
+		this.listPanel.listView = ListView.create(this.listPanel);
+		this.listPanel.listView.setCallBackList(callBackList);
+		this.listPanel.addChild(this.listPanel.listView);
+	},
+
+	
+	getLayoutObject:function(){
+			return { 
 			"panels":{
 				position:cc.p(300,200),
 				children:{	
+					"background_image":{
+						texture:"GUI/list_panel.png",
+						anchorPoint:cc.p(0,0),
+					},
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
 						size: cc.size(365,328),
-						texture:"GUI/list_panel.png",
 						children: {
-							"list": {
-								children: listPanel
-							},
-							"addButton":{
-								size: cc.size(90,26),
-								bg: cc.c4b(70,200,70,255),
-								position: cc.p(120,302-(this.editList.length*30)),
-								children:{	
-									"content":{
-										label:"+",
-										fontSize:20,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(45,13),
-										color:cc.c3b(0,0,0),
-									}
-								}
-							},
-							"upButton":{
-								size: cc.size(48,48),
-								texture: "GUI/btnUp.png",
-								position: cc.p(328,200),
+							"list":{
+								size:cc.size(324,328),
+								position:cc.p(0,0),
 								anchorPoint:cc.p(0,0),
 							},
-							"downButton":{
-								size: cc.size(48,48),
-								texture: "GUI/btnDown.png",
-								position: cc.p(328,100),
-								anchorPoint:cc.p(0,0),
-							}
-
 						},
 					},
 					"control_panel":{
@@ -150,59 +202,6 @@ PopupList = Popup.extend({
 		};
 	},
 
-	updateItemOffsets:function(){
-		this.panels["main_panel"]["upButton"].setVisible(false);
-		this.panels["main_panel"]["downButton"].setVisible(false);
-		if(this.editList.length>10){
-			if(this.itemOffsets>0){
-				this.panels["main_panel"]["upButton"].setVisible(true);
-			}
-			if(this.itemOffsets<this.editList.length-10){
-				this.panels["main_panel"]["downButton"].setVisible(true);
-			}
-
-			for(var i=0;i<this.editList.length;i++){
-				this.panels["main_panel"]["list"]["element"+i].setPositionY(this.defaultPositions["element"+i].y+(this.itemOffsets*30));
-				this.panels["main_panel"]["list"]["delElement"+i].setPositionY(this.defaultPositions["element"+i].y+3+(this.itemOffsets*30));
-				this.panels["main_panel"]["list"]["editElement"+i].setPositionY(this.defaultPositions["element"+i].y+3+(this.itemOffsets*30));
-				if(this.delegate!=null){
-					this.panels["main_panel"]["list"]["useElement"+i].setPositionY(this.defaultPositions["element"+i].y+3+(this.itemOffsets*30));
-				}
-				this.panels["main_panel"]["addButton"].setPositionY(this.defaultPositions["element"+i].y+((this.itemOffsets-1)*30));
-			}
-			for(var i=0;i<this.editList.length;i++){
-				this.panels["main_panel"]["list"]["element"+i].setVisible(true);
-				this.panels["main_panel"]["list"]["delElement"+i].setVisible(true);
-				this.panels["main_panel"]["list"]["editElement"+i].setVisible(true);
-				if(this.delegate!=null){
-					this.panels["main_panel"]["list"]["useElement"+i].setVisible(true);
-				}
-				this.panels["main_panel"]["addButton"].setVisible(true);
-				if(i<this.itemOffsets){
-					this.panels["main_panel"]["list"]["element"+i].setVisible(false);
-					this.panels["main_panel"]["list"]["delElement"+i].setVisible(false);
-					this.panels["main_panel"]["list"]["editElement"+i].setVisible(false);
-					if(this.delegate!=null){
-						this.panels["main_panel"]["list"]["useElement"+i].setVisible(false);
-					}
-					this.panels["main_panel"]["addButton"].setVisible(false);
-				}
-				if(i-this.itemOffsets>10){
-					this.panels["main_panel"]["list"]["element"+i].setVisible(false);
-					this.panels["main_panel"]["list"]["delElement"+i].setVisible(false);
-					this.panels["main_panel"]["list"]["editElement"+i].setVisible(false);
-					if(this.delegate!=null){
-						this.panels["main_panel"]["list"]["useElement"+i].setVisible(false);
-					}
-					this.panels["main_panel"]["addButton"].setVisible(false);
-				}
-				if(i-this.itemOffsets>9){
-					this.panels["main_panel"]["addButton"].setVisible(false);
-				}
-			}
-		}
-	},
-
 	elementContext:null,
 
 	deleteClicked:function(clicknum){
@@ -220,58 +219,14 @@ PopupList = Popup.extend({
 		if(this._super(touch)){
 			return true;
 		}
+		
 		this.prevMovPos=null;
 		var pos = touch._point;
 		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
-		
-		if(this.showingEditor==false){
-			for(var i in this.editList){
-				if(isTouching(this.panels["main_panel"]["list"]["editElement"+i],truePos)){
-					this.showingEditor=true;
-					this.childEditor.init({delegate:this, data:this.editList[i]});
-					this._parent.addChild(this.childEditor);
-					this.setTouchEnabled(false);
-					this.childEditor.didBecomeActive();
-					this.saveNewDataID=i+"";
-					return true;
-				}
-				
-				if(isTouching(this.panels["main_panel"]["list"]["delElement"+i],truePos)){
-					this._parent.addChild(DropDownList.createWithListAndPosition(this,this.deleteClicked,["Cancel","Delete"],touch._point));
-					this.elementContext =i;
-					return true;
-				}
-				
-				if(this.delegate && isTouching(this.panels["main_panel"]["list"]["useElement"+i],truePos)){
-					this.delegate.setTypeData(i,this.editList[i]);
-					return true;
-				}
-			}
-			if(isTouching(this.panels["main_panel"]["addButton"],truePos)){
-				this.addingNew=true;
-				this.showingEditor=true;
-				this.saveNewDataID=this.editList.length;
-				this.childEditor.init({delegate:this, data:null});
-				this.setTouchEnabled(false);
-				this._parent.addChild(this.childEditor);
-				this.childEditor.didBecomeActive();
-				return true;
-			}
-			if(isTouching(this.panels["main_panel"]["downButton"],truePos)){
-				if(this.itemOffsets<this.editList.length-10){
-					this.itemOffsets++;
-					this.updateItemOffsets();
-				}
-				return true;
-			}
-			if(isTouching(this.panels["main_panel"]["upButton"],truePos)){
-				if(this.itemOffsets>0){
-					this.itemOffsets--;
-					this.updateItemOffsets();
-				}
-				return true;
-			}
+		if(isTouching(this.panels["main_panel"],truePos)){
+			return true;
 		}
+		return false;
 	},
 
 	endedEdit:function(addData){
@@ -279,9 +234,7 @@ PopupList = Popup.extend({
 			this.childEditor.runSaveNewData(this.saveNewDataID);
 			if(this.addingNew){
 				this.editList.push(addData);
-				this.panels.removeFromParent();
-				this.panels=requestLayout(this);
-				this.addChild(this.panels);
+				this.prepareList();
 			}
 		}
 		this.setTouchEnabled(true);
@@ -291,17 +244,13 @@ PopupList = Popup.extend({
 		this.scheduleOnce(function(){
 		self.childEditor.willTerminate(true);
 		self.childEditor.removeFromParent();
-		this.updateItemOffsets();
 		})
 	},
 	
 	deleteElement:function(number){
 		this.editList.splice(number,1);
 		this.childEditor.deleteSave(number,this.editList);
-		this.panels.removeFromParent();
-		this.panels=requestLayout(this);
-		this.addChild(this.panels);
-		this.updateItemOffsets();
+		this.prepareList();
 	},
 	
 });

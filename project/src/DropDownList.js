@@ -14,7 +14,7 @@ DropDownList = Scene.extend({
 	},
 
 	init:function(delegate,delegateFunc,list,position){
-	this._super();
+		this._super();
 		if(!delegate){
 			return;
 		}
@@ -28,7 +28,8 @@ DropDownList = Scene.extend({
 		}
 		this.previousScene = SceneManager.getActiveScene();
 		SceneManager.setActiveScene(this);
-		this.setTouchPriority(-1000);
+		this.setTouchPriority(-1001);
+		this.setMouseEnabled(true);
 	},
 
 	onTouchBegan:function(touch){
@@ -98,15 +99,16 @@ DropDownList = Scene.extend({
 	},
 
 
-onMouseMoved:function(pos){
-	var menuPos = this.panels["control_menu"].convertToNodeSpace(pos);
-	for(var i =0;i<this.list.length;i++){
-		this.panels["control_menu"][i+""].setColor(cc.c4b(200,200,200,200));
-		if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"][i+""].getPositionX(),this.panels["control_menu"][i+""].getPositionY(),this.panels["control_menu"][i+""].getContentSize().width,this.panels["control_menu"][i+""].getContentSize().height),menuPos)){
-			this.panels["control_menu"][i+""].setColor(cc.c4b(255,0,0,255));
+	onMouseMoved:function(event){
+		var pos = event.getLocation();
+		var menuPos = this.panels["control_menu"].convertToNodeSpace(pos);
+		for(var i =0;i<this.list.length;i++){
+			this.panels["control_menu"][i+""].setColor(cc.c4b(200,200,200,200));
+			if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"][i+""].getPositionX(),this.panels["control_menu"][i+""].getPositionY(),this.panels["control_menu"][i+""].getContentSize().width,this.panels["control_menu"][i+""].getContentSize().height),menuPos)){
+				this.panels["control_menu"][i+""].setColor(cc.c4b(255,0,0,255));
+			}
 		}
 	}
-}
 
 });
 

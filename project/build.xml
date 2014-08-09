@@ -101,6 +101,7 @@
                 <file name="./src/Strings.js"></file>
                 <file name="./src/Utils.js"></file>
                 <file name="./src/LocalStorage.js"></file>
+                <file name="./src/ListView.js"></file>
                 <file name="./src/GameTile.js"></file>
                 <file name="./src/StatsController.js"></file>
                 <file name="./src/ObjectLists.js"></file>

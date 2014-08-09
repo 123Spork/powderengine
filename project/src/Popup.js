@@ -60,7 +60,6 @@ Popup = Scene.extend({
 	didBecomeActive:function(){
 		this._super();
 		var panelPos = LocalStorage.getPanelPosition();
-		console.log(panelPos);
 		if(panelPos!="null" && panelPos!=null){
 			var obj = JSON.parse(panelPos)[this.getIdentifier()];
 			if(obj){

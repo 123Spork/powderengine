@@ -11,14 +11,6 @@ var SceneManager = cc.Layer.extend({
 		this.addChild(this.background_node);
 		this.goToScene("Login",{});	
 		this.schedule(this.buttonDown);
-		this.setMouseEnabled(true);
-	},
-	
-	onMouseMoved:function(event){
-		var pos = event.getLocation();
-		if(this.activeScene.onMouseMoved){
-			this.activeScene.onMouseMoved(pos);
-		}
 	},
 
 	buttonDown:function(){

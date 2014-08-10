@@ -7,11 +7,14 @@ ItemEditor = Popup.extend({
 		return { "panels":{
 				position:cc.p(300,10),
 				children:{	
+					"background":{
+						texture:"GUI/itemeditor_tab1_bg.png",
+						anchorPoint:cc.p(0,0),
+					},
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,0),
 						size: cc.size(420,396),
-						bg: cc.c4b(0,0,100,120),
 						children: {
 							"tab1":{
 								children:{
@@ -24,37 +27,19 @@ ItemEditor = Popup.extend({
 									"textureleftbtn" : {
 										position:cc.p(208,340),
 										size:cc.size(16,32),
-										bg: WHITE,
+										texture:"GUI/texture_change_left.png",
 										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"<<",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(8,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
 									},
 									"texturerightbtn" : {
 										position:cc.p(320,340),
 										size:cc.size(16,32),
-										bg: WHITE,
+										texture:"GUI/texture_change_right.png",
 										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:">>",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(8,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
 									},
 									"textureName" : {
 										position:cc.p(224,340),
 										size:cc.size(96,32),
-										bg: cc.c4b(255,255,255,170),
+										texture:"GUI/texture_change_middle.png",
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -397,7 +382,7 @@ ItemEditor = Popup.extend({
 							"tab1Clickable":{
 								position:cc.p(0,376),
 								size:cc.size(60,20),
-								bg: WHITE,
+								texture:"GUI/editor-tab.png",
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -412,7 +397,7 @@ ItemEditor = Popup.extend({
 							"tab2Clickable":{
 								position:cc.p(64,376),
 								size:cc.size(60,20),
-								bg: WHITE,
+								texture:"GUI/editor-tab.png",
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -427,7 +412,7 @@ ItemEditor = Popup.extend({
 							"tab3Clickable":{
 								position:cc.p(128,376),
 								size:cc.size(60,20),
-								bg: WHITE,
+								texture:"GUI/editor-tab.png",
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -440,34 +425,16 @@ ItemEditor = Popup.extend({
 								}
 							},
 							"okbtn" : {
-								position:cc.p(76,8),
-								size:cc.size(60,32),
-								bg: WHITE,
+								position:cc.p(92,8),
+								size:cc.size(32,32),
+								texture:"GUI/tick_icon.png",
 								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"OK",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(30,16),
-										color:cc.c3b(0,0,0),
-									}
-								}
 							},
 							"cancelbtn" : {
-								position:cc.p(8,8),
-								size:cc.size(60,32),
-								bg: WHITE,
+								position:cc.p(24,8),
+								size:cc.size(32,32),
+								texture:"GUI/cross_icon.png",
 								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"Cancel",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(30,16),
-										color:cc.c3b(0,0,0),
-									}
-								}
 							},
 						}
 					},
@@ -475,7 +442,6 @@ ItemEditor = Popup.extend({
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,396),
 						size: cc.size(420,32),
-						bg: cc.c4b(255,0,0,200),
 						children:{	
 							"header":{
 								label:"Item Editor",
@@ -484,19 +450,10 @@ ItemEditor = Popup.extend({
 								position:cc.p(8,16),
 							},
 							"exitBtn":{
-								position: cc.p(391,3),
-								size: cc.size(26,26),
+								position: cc.p(396,6),
+								size: cc.size(20,20),
 								anchorPoint:cc.p(0,0),
-								bg: cc.c4b(255,255,255,200),
-								children:{	
-								"content":{
-									label:"X",
-									fontSize:20,
-									color:cc.c3b(0,0,0),
-									anchorPoint:cc.p(0.5,0.5),
-									position:cc.p(13,13),
-									}
-								}
+								texture:"GUI/close.png"
 							}
 						}
 					},
@@ -639,7 +596,10 @@ ItemEditor = Popup.extend({
 				this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(4);
 				if(this.data["itemType"]=="book"){this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].setPositionX(150); this.panels["main_panel"]["tab2"]["booktab"]["book_text"].setVisible(true);} else{this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].setPositionX(-1000000000); this.panels["main_panel"]["tab2"]["booktab"]["book_text"].setVisible(false);}
 			}
-			this.panels["control_panel"]["exitBtn"].setPositionX(this.tabWidths[value]-29);
+			this.panels["control_panel"]["exitBtn"].setPositionX(this.tabWidths[value]-24);
+			var newTexture = cc.TextureCache.getInstance().addImage("GUI/itemeditor_tab"+value+"_bg.png");
+			this.panels["background"].setTexture(newTexture);
+			this.panels["background"].setTextureRect(cc.rect(0,0,this.tabWidths[value]+2,this.panels["main_panel"].getContentSize().height+32));
 		}
 	},
 	
@@ -657,7 +617,7 @@ ItemEditor = Popup.extend({
 		}
 		this.prevMovPos=null;
 		var pos = touch._point;
-		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
+		var truePos = this.panels["main_panel"].convertToNodeSpace(cc.p(pos.x,pos.y));
 
 		if(isTouching(this.panels["main_panel"]["tab1Clickable"],truePos)){
 			this.setTab(1);	return true;
@@ -723,9 +683,9 @@ ItemEditor = Popup.extend({
 				this.usePrevTexture();
 				return true;
 			}
-			
 			truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);
-			if(isTouching(this.panels["main_panel"]["tab1"]["tiles"],truePos)){
+			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().height){
+				
 				truePos.x = truePos.x-(truePos.x%32)+16;
 				truePos.y = truePos.y-(truePos.y%32)+64;
 				

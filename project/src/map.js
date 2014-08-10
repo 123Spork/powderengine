@@ -157,6 +157,7 @@ var GameMap=cc.Layer.extend({
 						} else{
 							this.tileNodes[i].setType(data[i][j]["type"]);
 							if(data[i][j]["script"]){
+
 								this.tileNodes[i].setScript(data[i][j]["script"]);
 							}
 							if(data[i][j]["type"]==4 && this.tileNodes[i].getScriptData()){
@@ -581,9 +582,9 @@ GameMap.destroyLayer=function(id,type){
 
 GameMap.setTileInfo=function(id,type,scriptID,scriptData){
 	gameMapInstance.tileNodes[id].setType(type);
-	if(scriptID){
+	if(scriptID!=null && scriptID!=='undefined'){
 		gameMapInstance.tileNodes[id].setScript(scriptID,scriptData);
-		gameMapInstance.tileData[id]["info"]={"type":type, "script":{"id":scriptID,"data":scriptData?scriptData:null}};
+		gameMapInstance.tileData[id]["info"]={"type":type, "script":{"id":scriptID+"","data":scriptData!=null && scriptData!=='undefined'?scriptData:null}};
 		return;
 	}
 	gameMapInstance.tileData[id]["info"]={"type":type};
@@ -613,6 +614,8 @@ GameMap.setStringsVisible=function(value){
 			gameMapInstance.tileNodes[i].setStringVisible(value);
 		}
 	}
+	SkillBarsInstance.setVisible(!value);
+	gameChatInstance.setVisible(!value);
 	gameMapInstance.isMapDirty=true;
 };
 

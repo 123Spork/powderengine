@@ -18,41 +18,27 @@ WarpEditor = Popup.extend({
 		return { 
 			"panels":{
 				position:cc.p(300,200),
-				children:{	
+				children:{
+					"background":{
+						texture:"GUI/warpeditor_bg.png",
+						anchorPoint:cc.p(0,0),
+					},
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
 						size: cc.size(180,160),
-						bg: cc.c4b(100,255,100,200),
+						
 						children:{
 							"okbtn" : {
-								position:cc.p(100,16),
-								size:cc.size(60,32),
-								bg: cc.c4b(255,255,255,255),
+								position:cc.p(114,16),
+								size:cc.size(32,32),
+								texture:"GUI/tick_icon.png",
 								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"OK",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(30,16),
-										color:cc.c3b(0,0,0),
-									}
-								}
 							},
 							"cancelbtn" : {
-								position:cc.p(20,16),
-								size:cc.size(60,32),
-								bg: cc.c4b(255,255,255,255),
+								position:cc.p(34,16),
+								size:cc.size(32,32),
+								texture:"GUI/cross_icon.png",
 								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"Cancel",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(30,16),
-										color:cc.c3b(0,0,0),
-									}
-								}
 							},
 							"namelbl" : {
 								label:"Name of warp.",
@@ -104,7 +90,6 @@ WarpEditor = Popup.extend({
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,160),
 						size: cc.size(180,32),
-						bg: cc.c4b(255,0,0,200),
 						children:{	
 							"header":{
 								label:"Warp Editor",
@@ -113,19 +98,10 @@ WarpEditor = Popup.extend({
 								position:cc.p(8,16),
 							},
 							"exitBtn":{
-								position: cc.p(151,3),
-								size: cc.size(26,26),
+								position: cc.p(156,6),
+								size: cc.size(20,20),
 								anchorPoint:cc.p(0,0),
-								bg: cc.c4b(255,255,255,200),
-								children:{	
-								"content":{
-									label:"X",
-									fontSize:20,
-									color:cc.c3b(0,0,0),
-									anchorPoint:cc.p(0.5,0.5),
-									position:cc.p(13,13),
-									}
-								}
+								texture:"GUI/close.png",
 							}
 						}
 					},

@@ -96,11 +96,6 @@ QuestEditor = Popup.extend({
 			listnodes[i].setContentSize(324,text.getContentSize().height+8);
 			editElement.setPositionY(((text.getContentSize().height+8)/2)-10);
 			delElement.setPositionY(((text.getContentSize().height+8)/2)-10);
-			if(delegate!=null){
-				listnodes[i].addChild(useElement);
-			}
-
-
 		}
 
 		var addButton = cc.LayerColor.create(cc.c4b(70,200,70,255),90,26);

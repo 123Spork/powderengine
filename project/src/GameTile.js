@@ -314,7 +314,7 @@ var GameTile = cc.Node.extend({
 		if(!isTemp){
 			var isTemp=false;
 		}
-		this.script.push({"num":_in["id"],"data":_in["data"],"temp":isTemp});
+		this.script.push({"num":parseInt(_in["id"]),"data":_in["data"],"temp":isTemp});
 	},
 
 	popScript:function(_){

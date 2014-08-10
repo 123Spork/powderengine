@@ -27,7 +27,7 @@ PopupList = Popup.extend({
 			this.editList=withData.list;
 		}
 		this.listName=withData.name;
-		delegate=withData.delegate;
+		this.delegate=withData.delegate;
 	},
 
 
@@ -55,7 +55,7 @@ PopupList = Popup.extend({
 				this.editList.splice(i,1);
 				continue;
 			}
-			if(delegate!=null){
+			if(this.delegate!=null){
 				var useElement=cc.Sprite.createWithTexture(tc.addImage("GUI/use.png"));
 				useElement.setPosition(cc.p(244,6));
 				useElement.setAnchorPoint(cc.p(0,0));
@@ -81,7 +81,7 @@ PopupList = Popup.extend({
 			touchableNodes.push(editElement);
 			delElement.callBack = "Delete";
 			touchableNodes.push(delElement);
-			if(delegate!=null){
+			if(this.delegate!=null){
 				useElement.callBack="Use";
 				touchableNodes.push(useElement);
 			}
@@ -91,7 +91,7 @@ PopupList = Popup.extend({
 			listnodes[i].addChild(text);
 			listnodes[i].addChild(editElement);
 			listnodes[i].addChild(delElement);	
-			if(delegate!=null){
+			if(this.delegate!=null){
 				listnodes[i].addChild(useElement);
 			}
 
@@ -153,6 +153,9 @@ PopupList = Popup.extend({
 					self._parent.addChild(self.childEditor);
 					self.childEditor.didBecomeActive();
 				break;
+				case "Use":
+					self.delegate.setTypeData(listelement,self.editList[listelement]);
+				break;
 			}
 		};
 		this.listPanel.listView = ListView.create(this.listPanel);
@@ -210,7 +213,7 @@ PopupList = Popup.extend({
 	deleteClicked:function(clicknum){
 		switch(clicknum){
 			case 1:
-				if(this.delegate.elementContext){
+				if(this.delegate.elementContext!=null){
 					this.delegate.deleteElement(this.delegate.elementContext);
 					this.delegate.elementContext=null;
 				}

@@ -11,6 +11,10 @@ reloadData:function(){
 	if(!this.delegate){
 		return;
 	}
+	if(this.scrollBarBack){
+		this.scrollBarBack.removeFromParent();
+		this.scrollBar.removeFromParent();
+	}
 	var listSize = this.delegate.getListSize();
 	if(listSize.height<this.delegate.getContentSize().height){
 		listSize=this.delegate.getContentSize();

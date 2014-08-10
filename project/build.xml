@@ -117,6 +117,7 @@
                 <file name="./src/Sign.js"></file>
                 <file name="./src/Skills.js"></file>
                 <file name="./src/ItemEditor.js"></file>
+                <file name="./src/QuestEditor.js"></file>
                 <file name="./src/MapEditor.js"></file>
                 <file name="./src/NPCEditor.js"></file>
                 <file name="./src/SkillsEditor.js"></file>

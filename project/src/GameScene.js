@@ -445,6 +445,20 @@ var GameScene = Scene.extend({
 					this.addChild(NPCeditor);
 				}
 			break;
+			case "/editquest": 
+				if(Questeditor!=null && !Questeditor._parent) Questeditor=null;
+				if(Questeditor){
+					Questeditor.willTerminate();
+					Questeditor.removeFromParent();
+					Questeditor=null;
+					GameMap.setInteractionDelegate(null);
+				} else{
+					Questeditor = new PopupList();
+					Questeditor.init({delegate:null,editor:new QuestEditor(),list:ObjectLists.getQuestList(),name:"Quest List"});
+					Questeditor.didBecomeActive();
+					this.addChild(Questeditor);
+				}
+			break;
 			case "/help":
 			    GameChat.showHelp();
 

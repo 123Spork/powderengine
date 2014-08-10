@@ -23,12 +23,14 @@ var items=[];
 var skills=[];
 var signs=[];
 var npcs=[];
+var quests=[];
 var updateMapIndex=0;
 var updateWarpIndex=1;
 var updateItemIndex=2;
 var updateSkillsIndex=3;
 var updateSignsIndex=4;
 var updateNPCIndex=5;
+var updateQuestIndex=6;
 
 
 
@@ -54,6 +56,9 @@ fs.readdirSync("./additionals").forEach(function(file) {
   }
   if(file=="npcs.json"){
 	npcs =require("./additionals/npcs.json");
+  }
+  if(file=="quests.json"){
+	quests =require("./additionals/quests.json");
   }
 });
 
@@ -104,6 +109,11 @@ var setSignsData = function(data){
 
 var setNPCData = function(data){
 	var outputFilename = './additionals/npcs.json';
+	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+};
+
+var setQuestData = function(data){
+	var outputFilename = './additionals/quests.json';
 	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
 };
 
@@ -205,6 +215,14 @@ socket.on('connection', function(client){
 				returner["npcstime"] = last[updateNPCIndex];
 				returner["npcsdata"] = npcs;
 			}
+			if(!last[updateQuestIndex] || event["questsupdate"]<last[updateQuestIndex]){
+				if(!last[updateQuestIndex]){
+					last[updateQuestIndex]=Date.now();
+					saveLastAccessData();
+				}
+				returner["queststime"] = last[updateQuestIndex];
+				returner["questdata"] = quests;
+			}
 			client.send(JSON.stringify(returner));
 		}
 		
@@ -293,6 +311,24 @@ socket.on('connection', function(client){
 			npcs=event["savenpcswhole"];
 			setNPCData(npcs);
 			event["updatetime"]=last[updateNPCIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+ 		 if(event["savequests"]){
+			last[updateQuestIndex]=Date.now();
+			saveLastAccessData();
+			quests[parseInt(event["savequests"])]=event["questdata"];
+			setQuestData(quests);
+			event["updatetime"]=last[updateQuestIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+		if(event["savequestswhole"]){
+			last[updateQuestIndex]=Date.now();
+			saveLastAccessData();
+			quests=event["savequestswhole"];
+			setQuestData(quests);
+			event["updatetime"]=last[updateQuestIndex];
 			client.broadcast.send(JSON.stringify(event));
 			client.send(JSON.stringify(event));
 		}

@@ -134,6 +134,9 @@ PopupList = Popup.extend({
 					self.elementContext =listelement;
 				break;
 				case "Edit":
+					if(self.childEditor._parent){
+						self.childEditor.removeFromParent();
+					}
 					self.showingEditor=true;
 					self.childEditor.init({delegate:self, data:self.editList[listelement]});
 					self._parent.addChild(self.childEditor);

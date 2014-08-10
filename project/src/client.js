@@ -68,6 +68,9 @@ reactToSocketMessage=function(data){
 		if(data["npcsdata"]){
 			LocalStorage.updateNPCData(data["npcsdata"],data["npcstime"]);
 		}
+		if(data["questdata"]){
+			LocalStorage.updateQuestData(data["questdata"],data["queststime"]);
+		}
 		return;
 	}
 	
@@ -148,6 +151,18 @@ reactToSocketMessage=function(data){
 			else if(data["savewarpswhole"]){
 				LocalStorage.refreshWarp(data["savewarpswhole"],data["updatetime"]);
 				ObjectLists.setWarpList(data["savewarpswhole"]);
+			}
+			else if(data["savequests"]){
+				LocalStorage.changeQuest(parseInt(data["savequests"]),data["questdata"],data["updatetime"]);
+				ObjectLists.getQuestList()[parseInt(data["savequests"])]=data["questdata"];
+				if(Questeditor){
+					Questeditor.editList = ObjectLists.getQuestList();
+					Questeditor.didBecomeActive();	
+				}	
+			}
+			else if(data["savequestswhole"]){
+				LocalStorage.refreshQuest(data["savequestswhole"],data["updatetime"]);
+				ObjectLists.setQuestList(data["savequestswhole"]);
 			}
 			else if(data["saveskills"]){
 				LocalStorage.changeSkills(parseInt(data["saveskills"]),data["skillsdata"],data["updatetime"]);

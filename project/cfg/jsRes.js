@@ -21,6 +21,7 @@ js.project = {
     PlayersController_js : '[%project%]src/PlayersController.js',
     Popup_js : '[%project%]src/Popup.js',
     PopupList_js : '[%project%]src/PopupList.js',
+    QuestEditor_js : '[%project%]src/QuestEditor.js',
     Scene_js : '[%project%]src/Scene.js',
     SceneManager_js : '[%project%]src/SceneManager.js',
     Sign_js : '[%project%]src/Sign.js',

@@ -103,14 +103,18 @@ PlayersController.addPlayer=function(id){
 		this.instance.players[id].setPosition(960,320);
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[id]);
-		GameChat.addMessage(id + strings.gameChat.playerJoin);
+		var playerJoinString = settingsData["Join Message"]+"";
+		playerJoinString = playerJoinString.replace("<PLAYER>",id);
+		GameChat.addMessage(playerJoinString);
 };
 
 PlayersController.destroyPlayer=function(id){
 	if(this.instance.players[id]){
 		this.instance.players[id].removeFromParent();
 		this.instance.players[id]=null;
-		GameChat.addMessage(id + strings.gameChat.playerLeave);
+		var playerLeaveString = settingsData["Leave Message"]+"";
+		playerLeaveString = playerJoinString.replace("<PLAYER>",id);
+		GameChat.addMessage(playerLeaveString);
 		for(var i=0;i<storedClientMessages.length;i++){
 			var msg = JSON.parse(storedClientMessages[i]);
 			if(msg["id"] && msg["id"]==id) {
@@ -140,7 +144,9 @@ PlayersController.movePlayer=function(id,index){
 		this.instance.players[id].setPosition(cc.p((index % gridWidth)*32,(Math.floor(index/gridWidth))*32)); 
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[id]);
-		GameChat.addMessage(id + strings.gameChat.playerJoin);
+		var playerJoinString = settingsData["Join Message"]+"";
+		playerJoinString = playerJoinString.replace("<PLAYER>",id);
+		GameChat.addMessage(playerJoinString);
 	}
 };
 	

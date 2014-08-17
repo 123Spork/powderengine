@@ -9,8 +9,23 @@ var SceneManager = cc.Layer.extend({
 		this.background_node = cc.LayerColor.create(cc.c4b(255,255,255,255),parseInt(screenSize.width*4),parseInt(screenSize.height*4));
 		this.background_node.setAnchorPoint(cc.p(0,0));
 		this.addChild(this.background_node);
-		this.goToScene("Login",{});	
-		this.schedule(this.buttonDown);
+
+		if(LocalStorage.getInstance() && isGameInSync){
+			settingsData = mergeSettings(settingsData,LocalStorage.getSettingsData());
+			this.goToScene("Login",{});	
+			this.schedule(this.buttonDown);
+		}else{
+			this.schedule(this.initGameWhenLocalStorage);
+		}
+	},
+
+	initGameWhenLocalStorage:function(){
+		if(LocalStorage.getInstance() && isGameInSync){
+			this.unschedule(this.initGameWhenLocalStorage);
+			settingsData = mergeSettings(settingsData,LocalStorage.getSettingsData());
+			this.goToScene("Login",{});	
+			this.schedule(this.buttonDown);
+		}
 	},
 
 	buttonDown:function(){

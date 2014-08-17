@@ -6,6 +6,7 @@ DropDownList = Scene.extend({
 	delegate:null,
 	delegateFunc:null,
 	previousScene:null,
+	setupOptions:null,
 
 	ctor:function(){
 		this._super()
@@ -35,8 +36,10 @@ DropDownList = Scene.extend({
 	onTouchBegan:function(touch){
 		var menuPos = this.panels["control_menu"].convertToNodeSpace(touch._point);
 		for(var i =0;i<this.list.length;i++){
-			if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"][i+""].getPositionX(),this.panels["control_menu"][i+""].getPositionY(),this.panels["control_menu"][i+""].getContentSize().width,this.panels["control_menu"][i+""].getContentSize().height),menuPos)){
-				this.delegateFunc(i);
+			if(!this.setupOptions || this.setupOptions[i]["enabled"]==true){
+				if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"][i+""].getPositionX(),this.panels["control_menu"][i+""].getPositionY(),this.panels["control_menu"][i+""].getContentSize().width,this.panels["control_menu"][i+""].getContentSize().height),menuPos)){
+					this.delegateFunc(i,touch);
+				}
 			}
 		}
 		this.prepareExit();
@@ -104,8 +107,10 @@ DropDownList = Scene.extend({
 		var menuPos = this.panels["control_menu"].convertToNodeSpace(pos);
 		for(var i =0;i<this.list.length;i++){
 			this.panels["control_menu"][i+""].setColor(cc.c4b(200,200,200,200));
-			if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"][i+""].getPositionX(),this.panels["control_menu"][i+""].getPositionY(),this.panels["control_menu"][i+""].getContentSize().width,this.panels["control_menu"][i+""].getContentSize().height),menuPos)){
-				this.panels["control_menu"][i+""].setColor(cc.c4b(255,0,0,255));
+			if(!this.setupOptions || this.setupOptions[i]["enabled"]==true){
+				if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"][i+""].getPositionX(),this.panels["control_menu"][i+""].getPositionY(),this.panels["control_menu"][i+""].getContentSize().width,this.panels["control_menu"][i+""].getContentSize().height),menuPos)){
+					this.panels["control_menu"][i+""].setColor(cc.c4b(255,0,0,255));
+				}
 			}
 		}
 	}
@@ -113,10 +118,18 @@ DropDownList = Scene.extend({
 });
 
 
-DropDownList.createWithListAndPosition=function(delegate,delegateFunc,list,position){
+DropDownList.createWithListAndPosition=function(delegate,delegateFunc,list,position,setupOptions){
 	var dropDown = new DropDownList();
 	dropDown.init(delegate,delegateFunc,list,position);
 	dropDown.panels = requestLayout(dropDown.getLayoutObject(),true);
+	if(setupOptions){
+		for(var i =0;i<dropDown.list.length;i++){
+			if(setupOptions[i]["enabled"]==false){
+				dropDown.panels["control_menu"][i+""]["content"].setColor(cc.c4b(127,127,127,200));
+			}
+		}
+		dropDown.setupOptions=setupOptions;
+	}
 	dropDown.addChild(dropDown.panels);
 	dropDown.reprepFromSizes();
 	return dropDown;

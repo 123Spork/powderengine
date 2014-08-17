@@ -5,6 +5,7 @@ ObjectLists=cc.Class.extend({
 	signslist:null,
 	npclist:null,
 	questlist:null,
+	scriptlist:null,
 });
 var ObjectListInstance
 
@@ -17,6 +18,7 @@ ObjectLists.getInstance=function(){
 		ObjectListInstance.signslist=LocalStorage.getSignsData();
 		ObjectListInstance.npclist=LocalStorage.getNPCData();
 		ObjectListInstance.questlist=LocalStorage.getQuestData();
+		ObjectListInstance.scriptlist=LocalStorage.getScriptData();
 
 	} 
 	return ObjectListInstance;
@@ -68,6 +70,14 @@ ObjectLists.getQuestList=function(){
 
 ObjectLists.setQuestList=function(data){
 	ObjectListInstance.questlist=data;
+};
+
+ObjectLists.getScriptList=function(){
+	return ObjectListInstance.scriptlist;
+};
+
+ObjectLists.setScriptList=function(data){
+	ObjectListInstance.scriptlist=data;
 };
 
 

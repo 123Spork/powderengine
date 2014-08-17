@@ -116,7 +116,9 @@
                 <file name="./src/Inventory.js"></file>
                 <file name="./src/Sign.js"></file>
                 <file name="./src/Skills.js"></file>
+                <file name="./src/ScriptEditor.js"></file>
                 <file name="./src/ItemEditor.js"></file>
+                <file name="./src/SettingsEditor.js"></file>
                 <file name="./src/QuestEditor.js"></file>
                 <file name="./src/MapEditor.js"></file>
                 <file name="./src/NPCEditor.js"></file>
@@ -125,6 +127,8 @@
                 <file name="./src/WarpEditor.js"></file>
                 <file name="./src/SignEditor.js"></file>
                 <file name="./src/MainScene.js"></file>
+                <file name="./src/News.js"></file>
+                <file name="./src/Credits.js"></file>
                 <file name="./src/Login.js"></file>
                 <file name="./src/GameScene.js"></file>
                 <file name="./src/InputBox.js"></file>

@@ -13,15 +13,17 @@ var LocalStorage=cc.Class.extend({
 	
 });
 
+var LocalstorageInstance = null;
+
 LocalStorage.Create = function(){
-	if(!this.instance){
-		this.instance = new LocalStorage();
+	if(!LocalstorageInstance){
+		LocalstorageInstance = new LocalStorage();
 	}
-	return this.instance;
+	return LocalstorageInstance;
 };
 
 LocalStorage.getInstance=function(){
-	return this.instance;
+	return LocalstorageInstance;
 };
 
 LocalStorage.setPanelPosition=function(panelName,position){
@@ -41,7 +43,7 @@ LocalStorage.getPanelPosition=function(){
 };
 
 LocalStorage.getMapData=function(mapNumber){
-	if(this.instance.getLastUpdate("maps")){
+	if(LocalstorageInstance.getLastUpdate("maps")){
 		if(mapNumber){
 			var data = JSON.parse(sys.localStorage.getItem("map_data"));
 			return data[mapNumber] ? data[mapNumber] :null;
@@ -52,11 +54,11 @@ LocalStorage.getMapData=function(mapNumber){
 };
 
 LocalStorage.updateMapData=function(data,updatetime){
-	this.instance.setLastUpdate("maps",updatetime);
+	LocalstorageInstance.setLastUpdate("maps",updatetime);
 	sys.localStorage.setItem("map_data",JSON.stringify(data));
 };
 LocalStorage.changeMap=function(mapNumber,data,updatetime){
-	if(!this.instance.getLastUpdate("maps")){
+	if(!LocalstorageInstance.getLastUpdate("maps")){
 		var maparray = [];
 	} else{
 		var maparray = JSON.parse(sys.localStorage.getItem("map_data"));
@@ -65,9 +67,45 @@ LocalStorage.changeMap=function(mapNumber,data,updatetime){
 	LocalStorage.updateMapData(maparray,updatetime);
 };
 
+LocalStorage.getScriptData=function(){
+	if(LocalstorageInstance.getLastUpdate("scripts")){
+		if(sys.localStorage.getItem("scripts_data")!=""){
+			var data = JSON.parse(sys.localStorage.getItem("scripts_data"));
+		}
+		return data? data :[];
+	} else{
+		return [];
+	}
+};
+
+LocalStorage.updateScriptData=function(data,updatetime){
+	LocalstorageInstance.setLastUpdate("scripts",updatetime);
+	sys.localStorage.setItem("scripts_data",JSON.stringify(data));
+};
+
+LocalStorage.changeScript=function(scriptNumber,data,updatetime){
+	if(!LocalstorageInstance.getLastUpdate("scripts")){
+		var scriptarray = [];
+	} else{
+		if(sys.localStorage.getItem("scripts_data")!=""){
+			var scriptarray = JSON.parse(sys.localStorage.getItem("scripts_data"));
+		} else{
+			var scriptarray=[];
+		}
+	}
+	scriptarray[scriptNumber]=data;
+	LocalStorage.updateScriptData(scriptarray,updatetime);
+};
+
+LocalStorage.refreshScript=function(data,updatetime){
+	scriptarray=data;
+	LocalStorage.updateWarpData(scriptarray,updatetime);
+};
+
+
 
 LocalStorage.getWarpData=function(){
-	if(this.instance.getLastUpdate("warps")){
+	if(LocalstorageInstance.getLastUpdate("warps")){
 		if(sys.localStorage.getItem("warps_data")!=""){
 			var data = JSON.parse(sys.localStorage.getItem("warps_data"));
 		}
@@ -78,12 +116,12 @@ LocalStorage.getWarpData=function(){
 };
 
 LocalStorage.updateWarpData=function(data,updatetime){
-	this.instance.setLastUpdate("warps",updatetime);
+	LocalstorageInstance.setLastUpdate("warps",updatetime);
 	sys.localStorage.setItem("warps_data",JSON.stringify(data));
 };
 
 LocalStorage.changeWarp=function(warpNumber,data,updatetime){
-	if(!this.instance.getLastUpdate("warps")){
+	if(!LocalstorageInstance.getLastUpdate("warps")){
 		var warparray = [];
 	} else{
 		if(sys.localStorage.getItem("warps_data")!=""){
@@ -102,7 +140,7 @@ LocalStorage.refreshWarp=function(data,updatetime){
 };
 
 LocalStorage.getItemData=function(){
-	if(this.instance.getLastUpdate("items")){
+	if(LocalstorageInstance.getLastUpdate("items")){
 		if(sys.localStorage.getItem("items_data")!=""){
 			var data = JSON.parse(sys.localStorage.getItem("items_data"));
 		}
@@ -113,12 +151,12 @@ LocalStorage.getItemData=function(){
 };
 
 LocalStorage.updateItemData=function(data,updatetime){
-	this.instance.setLastUpdate("items",updatetime);
+	LocalstorageInstance.setLastUpdate("items",updatetime);
 	sys.localStorage.setItem("items_data",JSON.stringify(data));
 };
 
 LocalStorage.changeItems=function(itemNumber,data,updatetime){
-	if(!this.instance.getLastUpdate("items")){
+	if(!LocalstorageInstance.getLastUpdate("items")){
 		var itemarray = [];
 	} else{
 		if(sys.localStorage.getItem("items_data")!=""){
@@ -137,7 +175,7 @@ LocalStorage.refreshItems=function(data,updatetime){
 };
 
 LocalStorage.getSkillsData=function(){
-	if(this.instance.getLastUpdate("skills")){
+	if(LocalstorageInstance.getLastUpdate("skills")){
 		if(sys.localStorage.getItem("skills_data")!=""){
 			var data = JSON.parse(sys.localStorage.getItem("skills_data"));
 		}
@@ -148,12 +186,12 @@ LocalStorage.getSkillsData=function(){
 };
 
 LocalStorage.updateSkillsData=function(data,updatetime){
-	this.instance.setLastUpdate("skills",updatetime);
+	LocalstorageInstance.setLastUpdate("skills",updatetime);
 	sys.localStorage.setItem("skills_data",JSON.stringify(data));
 };
 
 LocalStorage.changeSkills=function(skillNumber,data,updatetime){
-	if(!this.instance.getLastUpdate("skills")){
+	if(!LocalstorageInstance.getLastUpdate("skills")){
 		var skillarray = [];
 	} else{
 		if(sys.localStorage.getItem("skills_data")!=""){
@@ -173,7 +211,7 @@ LocalStorage.refreshSkills=function(data,updatetime){
 };
 
 LocalStorage.getSignsData=function(){
-	if(this.instance.getLastUpdate("signs")){
+	if(LocalstorageInstance.getLastUpdate("signs")){
 		if(sys.localStorage.getItem("signs_data")!=""){
 			var data = JSON.parse(sys.localStorage.getItem("signs_data"));
 		}
@@ -184,12 +222,12 @@ LocalStorage.getSignsData=function(){
 };
 
 LocalStorage.updateSignsData=function(data,updatetime){
-	this.instance.setLastUpdate("signs",updatetime);
+	LocalstorageInstance.setLastUpdate("signs",updatetime);
 	sys.localStorage.setItem("signs_data",JSON.stringify(data));
 };
 
 LocalStorage.changeSigns=function(signNumber,data,updatetime){
-	if(!this.instance.getLastUpdate("signs")){
+	if(!LocalstorageInstance.getLastUpdate("signs")){
 		var signarray = [];
 	} else{
 		if(sys.localStorage.getItem("signs_data")!=""){
@@ -209,7 +247,7 @@ LocalStorage.refreshSigns=function(data,updatetime){
 
 
 LocalStorage.getNPCData=function(){
-	if(this.instance.getLastUpdate("npcs")){
+	if(LocalstorageInstance.getLastUpdate("npcs")){
 		if(sys.localStorage.getItem("npcs_data")!=""){
 			var data = JSON.parse(sys.localStorage.getItem("npcs_data"));
 		}
@@ -220,12 +258,12 @@ LocalStorage.getNPCData=function(){
 };
 
 LocalStorage.updateNPCData=function(data,updatetime){
-	this.instance.setLastUpdate("npcs",updatetime);
+	LocalstorageInstance.setLastUpdate("npcs",updatetime);
 	sys.localStorage.setItem("npcs_data",JSON.stringify(data));
 };
 
 LocalStorage.changeNPC=function(npcNumber,data,updatetime){
-	if(!this.instance.getLastUpdate("npcs")){
+	if(!LocalstorageInstance.getLastUpdate("npcs")){
 		var npcsarray = [];
 	} else{
 		if(sys.localStorage.getItem("npcs_data")!=""){
@@ -245,7 +283,7 @@ LocalStorage.refreshNPC=function(data,updatetime){
 
 
 LocalStorage.getQuestData=function(){
-	if(this.instance.getLastUpdate("quests")){
+	if(LocalstorageInstance.getLastUpdate("quests")){
 		if(sys.localStorage.getItem("quests_data")!=""){
 			var data = JSON.parse(sys.localStorage.getItem("quests_data"));
 		}
@@ -256,12 +294,12 @@ LocalStorage.getQuestData=function(){
 };
 
 LocalStorage.updateQuestData=function(data,updatetime){
-	this.instance.setLastUpdate("quests",updatetime);
+	LocalstorageInstance.setLastUpdate("quests",updatetime);
 	sys.localStorage.setItem("quests_data",JSON.stringify(data));
 };
 
 LocalStorage.changeQuest=function(questNumber,data,updatetime){
-	if(!this.instance.getLastUpdate("quests")){
+	if(!LocalstorageInstance.getLastUpdate("quests")){
 		var questsarray = [];
 	} else{
 		if(sys.localStorage.getItem("quests_data")!=""){
@@ -279,8 +317,21 @@ LocalStorage.refreshQuest=function(data,updatetime){
 	LocalStorage.updateQuestData(questsarray,updatetime);
 };
 
+LocalStorage.getSettingsData=function(){
+	if(LocalstorageInstance.getLastUpdate("settings")){
+		if(sys.localStorage.getItem("settings_data")!=""){
+			var data = JSON.parse(sys.localStorage.getItem("settings_data"));
+		}
+		return data ? data :[];
+	} else{
+		return [];
+	}
+};
 
-
+LocalStorage.updateSettingsData=function(data,updatetime){
+	LocalstorageInstance.setLastUpdate("settings",updatetime);
+	sys.localStorage.setItem("settings_data",JSON.stringify(data));
+};
 
 LocalStorage.Clear=function(){
 	sys.localStorage.setItem("map_data",[]);
@@ -297,11 +348,15 @@ LocalStorage.Clear=function(){
 	sys.localStorage.setItem("last_npcs",0);	
 	sys.localStorage.setItem("quests_data",[]);
 	sys.localStorage.setItem("last_quests",0);	
+	sys.localStorage.setItem("settings_data",[]);
+	sys.localStorage.setItem("last_settings",0);	
+	sys.localStorage.setItem("scripts_data",[]);
+	sys.localStorage.setItem("last_scripts",0);	
 	sys.localStorage.setItem("panelStore",null);
 };
 
 LocalStorage.Sync=function(){
-	sendMessageToServer({"sync":true, "mapupdate":(this.instance.getLastUpdate("maps")!=null ? this.instance.getLastUpdate("maps"):2),"warpupdate":(this.instance.getLastUpdate("warps")!=null ? this.instance.getLastUpdate("warps"):2),"itemupdate":(this.instance.getLastUpdate("items")!=null ? this.instance.getLastUpdate("items"):2),"skillsupdate":(this.instance.getLastUpdate("skills")!=null ? this.instance.getLastUpdate("skills"):2),"signsupdate":(this.instance.getLastUpdate("signs")!=null ? this.instance.getLastUpdate("signs"):2),"npcsupdate":(this.instance.getLastUpdate("npcs")!=null ? this.instance.getLastUpdate("npcs"):2),"questsupdate":(this.instance.getLastUpdate("quests")!=null ? this.instance.getLastUpdate("quests"):2)});
+	sendMessageToServer({"sync":true, "mapupdate":(LocalstorageInstance.getLastUpdate("maps")!=null ? LocalstorageInstance.getLastUpdate("maps"):2),"warpupdate":(LocalstorageInstance.getLastUpdate("warps")!=null ? LocalstorageInstance.getLastUpdate("warps"):2),"itemupdate":(LocalstorageInstance.getLastUpdate("items")!=null ? LocalstorageInstance.getLastUpdate("items"):2),"skillsupdate":(LocalstorageInstance.getLastUpdate("skills")!=null ? LocalstorageInstance.getLastUpdate("skills"):2),"signsupdate":(LocalstorageInstance.getLastUpdate("signs")!=null ? LocalstorageInstance.getLastUpdate("signs"):2),"npcsupdate":(LocalstorageInstance.getLastUpdate("npcs")!=null ? LocalstorageInstance.getLastUpdate("npcs"):2),"questsupdate":(LocalstorageInstance.getLastUpdate("quests")!=null ? LocalstorageInstance.getLastUpdate("quests"):2),"settingsupdate":(LocalstorageInstance.getLastUpdate("settings")!=null ? LocalstorageInstance.getLastUpdate("settings"):2),"scriptsupdate":(LocalstorageInstance.getLastUpdate("scripts")!=null ? LocalstorageInstance.getLastUpdate("scripts"):2)});
 };
 
 LocalStorage.setMapSaveOnExit=function(value){

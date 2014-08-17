@@ -1,8 +1,5 @@
 //Editing character.js to provide map number to server so can save npc positions.
 
-
-
-
 MainScene=null;
 MapMaster=false;
 var GameScene = Scene.extend({
@@ -93,6 +90,18 @@ var GameScene = Scene.extend({
 					anchorPoint:cc.p(0,0),
 					size:cc.size(48,48),
 					texture:"GUI/warpeditor_icon.png",
+				},
+				"scriptedit_button":{
+					position:cc.p(90,Math.floor(screenSize.height/2)-108),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/scripteditor_icon.png",
+				},
+				"settings_button":{
+					position:cc.p(4,Math.floor(screenSize.height/2)-220),
+					anchorPoint:cc.p(0,0),
+					size:cc.size(48,48),
+					texture:"GUI/settings_icon.png",
 				},
 				//Level 2
 				"bankedit_button":{
@@ -204,9 +213,17 @@ var GameScene = Scene.extend({
 		if(cc.rectContainsPoint(this.panels["signedit_button"].getBoundingBox(),touch._point) && this.panels["signedit_button"].isVisible()){
 			this.runCommand("/editsign");
 			return true;
+		}
+		if(cc.rectContainsPoint(this.panels["scriptedit_button"].getBoundingBox(),touch._point) && this.panels["scriptedit_button"].isVisible()){
+			this.runCommand("/editscript");
+			return true;
 		}		
 		if(cc.rectContainsPoint(this.panels["warpedit_button"].getBoundingBox(),touch._point) && this.panels["warpedit_button"].isVisible()){
 			this.runCommand("/editwarp");
+			return true;
+		}	
+		if(cc.rectContainsPoint(this.panels["settings_button"].getBoundingBox(),touch._point) && this.panels["settings_button"].isVisible()){
+			this.runCommand("/editsettings");
 			return true;
 		}	
 		if(cc.rectContainsPoint(this.panels["shopedit_button"].getBoundingBox(),touch._point) && this.panels["shopedit_button"].isVisible()){
@@ -350,7 +367,9 @@ var GameScene = Scene.extend({
 		this.panels["itemedit_button"].setVisible(visible);
 		this.panels["skilledit_button"].setVisible(visible);
 		this.panels["signedit_button"].setVisible(visible);
+		this.panels["scriptedit_button"].setVisible(visible);
 		this.panels["warpedit_button"].setVisible(visible);
+		this.panels["settings_button"].setVisible(visible);
 		this.panels["shopedit_button"].setVisible(visible);
 		this.panels["bankedit_button"].setVisible(visible);
 		this.panels["questedit_button"].setVisible(visible);
@@ -363,19 +382,45 @@ var GameScene = Scene.extend({
 	}
 	cc.log(command);
 		switch(command){
+			case "/editscript":
+				if(Scripteditor!=null && !Scripteditor._parent) Scripteditor=null;
+				if(Scripteditor){
+					Scripteditor.willTerminate();
+					Scripteditor.removeFromParent();
+					Scripteditor=null;
+				} else{
+					Scripteditor = new PopupList();
+					Scripteditor.init({delegate:null,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
+					Scripteditor.didBecomeActive();
+					this.addChild(Scripteditor);
+				}
+			break;
 			case "/editmap":
-				if(Mapeditor!=null && !Mapeditor._parent) Mapeditor=null;
-				if(Mapeditor){
-					Mapeditor.willTerminate();
-					Mapeditor.removeFromParent();
-					Mapeditor=null;
+				if(Eventsystem!=null && !Eventsystem._parent) Eventsystem=null;
+				if(Eventsystem){
+					Eventsystem.willTerminate();
+					Eventsystem.removeFromParent();
+					Eventsystem=null;
 					GameMap.setInteractionDelegate(null);
 				} else{
-					Mapeditor = new MapEditor();
-					Mapeditor.init();
-					Mapeditor.didBecomeActive();
-					this.addChild(Mapeditor);
-					GameMap.setInteractionDelegate(Mapeditor);
+					Eventsystem = new Eventsystem();
+					Eventsystem.init();
+					Eventsystem.didBecomeActive();
+					this.addChild(Eventsystem);
+					GameMap.setInteractionDelegate(Eventsystem);
+				}
+			break;
+			case "/editsettings":
+				if(Settingseditor!=null && !Settingseditor._parent) Settingseditor=null;
+				if(Settingseditor){
+					Settingseditor.willTerminate();
+					Settingseditor.removeFromParent();
+					Settingseditor=null;
+				} else{
+					Settingseditor = new SettingsEditor();
+					Settingseditor.init();
+					Settingseditor.didBecomeActive();
+					this.addChild(Settingseditor);
 				}
 			break;
 			case "/editwarp": 
@@ -468,20 +513,25 @@ var GameScene = Scene.extend({
 			break;
 			case "/diceroll":
 				var number = Math.floor( (Math.random() * 6) + 1);
-				number = PlayersController.getYou().getName()+" threw a dice and got "+number+"."
-				GameChat.addMessage(number);
-				sendMessageToServer({"diceroll":number});
+				var dicerollString = settingsData["/diceroll"];
+				dicerollString = dicerollString.replace("<PLAYER>",PlayersController.getYou().getName());
+				dicerollString = dicerollString.replace("<VALUE>",number);
+				GameChat.addMessage(dicerollString);
+				sendMessageToServer({"diceroll":dicerollString});
 			break;
 			case "/coinflip":
 				var coin = Math.floor( (Math.random() * 3) + 1) == 1 ? "Heads" : "Tails";
-				coin = PlayersController.getYou().getName()+" flipped a coin and got "+coin+"."
-				GameChat.addMessage(coin);
-				sendMessageToServer({"coinflip":coin});
+				var coinflipString = settingsData["/coinflip"];
+				coinflipString = coinflipString.replace("<PLAYER>",PlayersController.getYou().getName());
+				coinflipString = coinflipString.replace("<VALUE>",coin);
+				GameChat.addMessage(coinflipString);
+				sendMessageToServer({"coinflip":coinflipString});
 			break;
 			case "/dance":
-				var dance = PlayersController.getYou().getName()+" dances the dance of his people.";
-				GameChat.addMessage(dance);
-				sendMessageToServer({"dance":dance});
+				var danceString = settingsData["/dance"];
+				danceString = danceString.replace("<PLAYER>",PlayersController.getYou().getName());
+				GameChat.addMessage(danceString);
+				sendMessageToServer({"dance":danceString});
 			break;
 			case "/afk":
 				PlayersController.getYou().updateStatus("AFK");

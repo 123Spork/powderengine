@@ -24,6 +24,8 @@ var skills=[];
 var signs=[];
 var npcs=[];
 var quests=[];
+var scripts=[];
+var settings=null;
 var updateMapIndex=0;
 var updateWarpIndex=1;
 var updateItemIndex=2;
@@ -31,6 +33,8 @@ var updateSkillsIndex=3;
 var updateSignsIndex=4;
 var updateNPCIndex=5;
 var updateQuestIndex=6;
+var updateSettingsIndex=7;
+var updateScriptIndex=8;
 
 
 
@@ -59,6 +63,12 @@ fs.readdirSync("./additionals").forEach(function(file) {
   }
   if(file=="quests.json"){
 	quests =require("./additionals/quests.json");
+  }
+   if(file=="settings.json"){
+	settings =require("./additionals/settings.json");
+  }
+  if(file=="scripts.json"){
+	scripts =require("./additionals/scripts.json");
   }
 });
 
@@ -114,6 +124,17 @@ var setNPCData = function(data){
 
 var setQuestData = function(data){
 	var outputFilename = './additionals/quests.json';
+	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+};
+
+var setScriptData = function(data){
+	var outputFilename = './additionals/scripts.json';
+	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+};
+
+
+var setSettingsData = function(data){
+	var outputFilename = './additionals/settings.json';
 	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
 };
 
@@ -183,6 +204,14 @@ socket.on('connection', function(client){
 				returner["warptime"] = last[updateWarpIndex];
 				returner["warpdata"] = warps;
 			}
+			if(!last[updateScriptIndex] || event["scriptsupdate"]<last[updateScriptIndex]){
+				if(!last[updateScriptIndex]){
+					last[updateScriptIndex]=Date.now();
+					saveLastAccessData();
+				}
+				returner["scriptstime"] = last[updateScriptIndex];
+				returner["scriptsdata"] = scripts;
+			}
 			if(!last[updateItemIndex] || event["itemupdate"]<last[updateItemIndex]){
 				if(!last[updateItemIndex]){
 					last[updateItemIndex]=Date.now();
@@ -223,8 +252,17 @@ socket.on('connection', function(client){
 				returner["queststime"] = last[updateQuestIndex];
 				returner["questdata"] = quests;
 			}
+			if(!last[updateSettingsIndex] || event["settingsupdate"]<last[updateSettingsIndex]){
+				if(!last[updateSettingsIndex]){
+					last[updateSettingsIndex]=Date.now();
+					saveLastAccessData();
+				}
+				returner["settingstime"] = last[updateSettingsIndex];
+				returner["settingsdata"] = settings;
+			}
 			client.send(JSON.stringify(returner));
 		}
+
 		
 		if(event["moveTo"]){
 			client.broadcast.send(JSON.stringify({"moveTo":event["moveTo"],"id":names[client.id]}));
@@ -277,6 +315,32 @@ socket.on('connection', function(client){
 			event["updatetime"]=last[updateWarpIndex];
 			client.broadcast.send(JSON.stringify(event));
 			client.send(JSON.stringify(event));
+		}
+		if(event["savescripts"]){
+			last[updateScriptIndex]=Date.now();
+			saveLastAccessData();
+			scripts[parseInt(event["savescripts"])]=event["scriptsdata"];
+			setScriptData(scripts);
+			event["updatetime"]=last[updateScriptIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+		if(event["savescriptswhole"]){
+			last[updateScriptIndex]=Date.now();
+			saveLastAccessData();
+			scripts=event["savescriptswhole"];
+			setScriptData(scripts);
+			event["updatetime"]=last[updateScriptIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+		if(event["savesettings"]){
+			last[updateSettingsIndex]=Date.now();
+			saveLastAccessData();
+			settings = event["savesettings"];
+			setSettingsData(event["savesettings"]);
+			event["updatetime"]=last[updateSettingsIndex];
+			client.broadcast.send(JSON.stringify(event));
 		}
         if(event["saveitems"]){
 			last[updateItemIndex]=Date.now();

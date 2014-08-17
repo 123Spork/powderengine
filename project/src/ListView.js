@@ -6,6 +6,7 @@ callbacklist:null,
 noScroll:false,
 scrollBar:null,
 scrollBarBack:null,
+storedPosition:null,
 
 reloadData:function(){
 	if(!this.delegate){
@@ -23,9 +24,8 @@ reloadData:function(){
     this.listNodes = [];
 	var elementSize=0;
 	for(var i=0;i<this.delegate.getListElementAmount();i++){
-		console.log("THINGS CARL " + i);
-			var ilistElementSize = this.delegate.getSizeForElement(i);	
-			elementSize+=ilistElementSize.height;
+		var ilistElementSize = this.delegate.getSizeForElement(i);	
+		elementSize+=ilistElementSize.height;
 		this.listNodes[i]=cc.Node.create();
 		this.listNodes[i].setContentSize(ilistElementSize);
 		this.listNodes[i].setPosition(cc.p(0,listSize.height-elementSize));
@@ -40,15 +40,19 @@ reloadData:function(){
 		this.scrollBarBack = cc.LayerColor.create(cc.c4b(0,0,0,255),1,this.delegate.getContentSize().height);
 		this.scrollBarBack.setPosition(cc.p(this.delegate.getContentSize().width+20,0))
 		this.scrollBar = cc.LayerColor.create(cc.c4b(90,90,255,255),20,this.delegate.getContentSize().height/5);
-		this.scrollBar.setPosition(cc.p(this.delegate.getContentSize().width+10,this.delegate.getContentSize().height-(this.delegate.getContentSize().height/5)));
+		this.scrollBar.setPosition(cc.p(this.delegate.getContentSize().width+10,0));
 		this.delegate.addChild(this.scrollBarBack);
 		this.delegate.addChild(this.scrollBar);
-		this.setContentOffset(cc.p(0,this.minContainerOffset().y),false);
+		this.setContentOffset(cc.p(0,this.maxContainerOffset().y),false);
 	}
+	this.delegate.setPosition(this.storedPosition);
 },
+
 
 init:function(delegate){
 	this.delegate = delegate;
+	this.setAnchorPoint(cc.p(0,0));
+	this.storedPosition=cc.p(delegate.getPositionX(),delegate.getPositionY());
 	this.initWithViewSize(this.delegate.getContentSize(),this.delegate)
     this.setDirection(cc.SCROLLVIEW_DIRECTION_VERTICAL);
     this.setBounceable(false);
@@ -70,7 +74,9 @@ onTouchBegan:function(touch){
 	for(var i=0;i<this.delegate.getListElementAmount();i++){
 		for(var j in this.callbacklist[i]){
 			var truePos = this.listNodes[i].convertToNodeSpace(pos);
-			var isInScene = isTouching(this.delegate,this.delegate.convertToNodeSpace(pos))
+			var nodePos = this.delegate.convertToNodeSpace(pos);
+			nodePos.x+=this.delegate.getPositionX();
+			var isInScene = isTouching(this.delegate,nodePos)
 			if(isTouching(this.callbacklist[i][j],truePos) && isInScene==true){
 				this.delegate.runListCallBack(this.callbacklist[i][j].callBack,i,touch);
 				this.returningFromDelTouch=true;
@@ -89,7 +95,7 @@ onTouchBegan:function(touch){
 			this.scrollBarStartPos=null;
 		}
 
-		return this._super(touch);
+	//	return this._super(touch);
 	}
 },
 

@@ -239,10 +239,16 @@ var GameMap=cc.Layer.extend({
 				if(i.substring(0,4)=="tile"){
 					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+32-this.mapOffset.y))){
 						if(this.tileNodes[i].getType()==4){
-							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.itemClicked,["Pick up " + this.tileNodes[i].getScriptData()["name"],"Walk To"],touch._point));
+							var pickupString = settingsData["Item Dropdown Pick Up"]+"";
+							var walktoString = settingsData["Item Dropdown Walk To"]+"";
+							pickupString = pickupString.replace("<ITEM>",this.tileNodes[i].getScriptData()["name"]);
+							walktoString = walktoString.replace("<ITEM>",this.tileNodes[i].getScriptData()["name"]);
+							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.itemClicked,[pickupString,walktoString],touch._point));
 							this.clickContext=i;
 						} else if(this.tileNodes[i].getType()==7){
-							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.signClicked,["Read Sign"],touch._point));
+							var readSignString = settingsData["Sign Dropdown list Read"]+"";
+							readSignString = readSignString.replace("<SIGN>",this.tileNodes[i].getScript()["name"]);
+							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.signClicked,[readSignString],touch._point));
 							this.clickContext=i;
 						} else if(this.tileNodes[i].getType()!=1 && this.tileNodes[i].getType()!=7 && this.tileNodes[i].getType()!=4){
 							var gp = PlayersController.getYou().getGridPosition();
@@ -279,7 +285,9 @@ var GameMap=cc.Layer.extend({
 					if(distance<5){
 						PlayersController.getYou().interactWithGivenTile(gameMapInstance.tileNodes[gameMapInstance.clickContext]);
 					}else{
-						GameChat.addMessage("The item is too far away!");
+						var pickupFailString = settingsData["Item Out-of-range"]+"";
+						pickupFailString = pickupFailString.replace("<ITEM>",this.delegate.tileNodes[gameMapInstance.clickContext].getScriptData()["name"]);
+						GameChat.addMessage(pickupFailString);
 					}
 				break;
 
@@ -314,7 +322,9 @@ var GameMap=cc.Layer.extend({
 					if(distance<5){
 						PlayersController.getYou().interactWithGivenTile(gameMapInstance.tileNodes[gameMapInstance.clickContext]);
 					}else{
-						GameChat.addMessage("The sign is too far away to read!");
+						var readFailString = settingsData["Sign Out-of-range"]+"";
+						readFailString = readFailString.replace("<SIGN>",this.delegate.tileNodes[gameMapInstance.clickContext].getScript()["name"]);
+						GameChat.addMessage(readFailString);
 					}
 				break;
 			}

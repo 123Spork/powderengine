@@ -71,6 +71,14 @@ reactToSocketMessage=function(data){
 		if(data["questdata"]){
 			LocalStorage.updateQuestData(data["questdata"],data["queststime"]);
 		}
+		if(data["settingsdata"]){
+			LocalStorage.updateSettingsData(data["settingsdata"],data["settingstime"]);
+			settingsData = mergeSettings(settingsData,data["settingsdata"]);
+		}
+		if(data["scriptsdata"]){
+			LocalStorage.updateScriptData(data["scriptsdata"],data["scriptstime"]);
+		}
+		isGameInSync=true;
 		return;
 	}
 	
@@ -151,6 +159,26 @@ reactToSocketMessage=function(data){
 			else if(data["savewarpswhole"]){
 				LocalStorage.refreshWarp(data["savewarpswhole"],data["updatetime"]);
 				ObjectLists.setWarpList(data["savewarpswhole"]);
+			}
+			else if(data["savescripts"]){
+				LocalStorage.changeScript(parseInt(data["savescripts"]),data["scriptsdata"],data["updatetime"]);
+				ObjectLists.getScriptList()[parseInt(data["savescripts"])]=data["scriptsdata"];
+				if(Eventsystem){
+					Eventsystem.editList = ObjectLists.getScriptList();
+					Eventsystem.didBecomeActive();	
+				}	
+			}
+			else if(data["savescriptswhole"]){
+				LocalStorage.refreshScript(data["savescriptswhole"],data["updatetime"]);
+				ObjectLists.setScriptList(data["savescriptswhole"]);
+			}
+			else if(data["savesettings"]){
+				LocalStorage.updateSettingsData(data["savesettings"],data["updatetime"]);
+				settingsData = mergeSettings(settingsData,data["savesettings"]);
+				if(Settingseditor){
+					Settingseditor.data = cloneObj(settingsData);
+					Settingseditor.prepareList();
+				}
 			}
 			else if(data["savequests"]){
 				LocalStorage.changeQuest(parseInt(data["savequests"]),data["questdata"],data["updatetime"]);

@@ -2,436 +2,214 @@ Itemeditor=null,
 ItemEditor = Popup.extend({
 	currentTexture:tileTextureList[0]["name"],
 	currentTextureNumber:0,
+
+
+
+	setTypeData:function(value,data){
+		if(Eventsystem){
+			Eventsystem.willTerminate();
+			this.scheduleOnce(function(){Eventsystem.removeFromParent(); Eventsystem=null;});
+			this.typeData=value;
+			this.setTouchEnabled(true);
+			this.panels["main_panel"]["scriptbtn"]["text"].setString(data["name"]);
+			this.panels["main_panel"]["scriptbtn"].setColor(cc.c4b(0,255,0,255));
+		}
+	},
+
+	setNoType:function(){
+		this.panels["main_panel"]["scriptbtn"]["text"].setString("None");
+		this.panels["main_panel"]["scriptbtn"].setColor(cc.c4b(255,0,0,255));
+	},
+
 	
 	getLayoutObject:function(){
 		return { "panels":{
 				position:cc.p(300,10),
 				children:{	
 					"background":{
-						texture:"GUI/itemeditor_tab1_bg.png",
+						texture:"GUI/itemeditor_bg.png",
 						anchorPoint:cc.p(0,0),
 					},
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,0),
-						size: cc.size(420,396),
+						size: cc.size(500,330),
 						children: {
-							"tab1":{
-								children:{
-									"tiles" : {
-										anchorPoint:cc.p(0,1),
-										position:cc.p(16,320),
-										texture:tileTextureList[0]["name"],
-									},
-									
-									"textureleftbtn" : {
-										position:cc.p(208,340),
-										size:cc.size(16,32),
-										texture:"GUI/texture_change_left.png",
-										anchorPoint:cc.p(0,0),
-									},
-									"texturerightbtn" : {
-										position:cc.p(320,340),
-										size:cc.size(16,32),
-										texture:"GUI/texture_change_right.png",
-										anchorPoint:cc.p(0,0),
-									},
-									"textureName" : {
-										position:cc.p(224,340),
-										size:cc.size(96,32),
-										texture:"GUI/texture_change_middle.png",
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:tileTextureList[0]["name"],
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(48,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"leftbtn" : {
-										position:cc.p(0,64),
-										size:cc.size(16,252),
-										bg: cc.c4b(0,0,255,255),
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"<",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(8,160),
-												color:cc.c3b(255,255,255),
-											}
-										}
-									},
-									"rightbtn" : {
-										position:cc.p(336,64),
-										size:cc.size(16,252),
-										bg: cc.c4b(0,0,255,255),
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:">",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(8,160),
-												color:cc.c3b(255,255,255),
-											}
-										}
-									},
-									"upbtn" : {
-										position:cc.p(16,320),
-										size:cc.size(320,16),
-										bg: cc.c4b(0,0,255,255),
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"^",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(160,8),
-												color:cc.c3b(255,255,255),
-											}
-										}
-									},
-									"downbtn" : {
-										position:cc.p(16,48),
-										size:cc.size(320,16),
-										bg: cc.c4b(0,0,255,255),
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"v",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(160,8),
-												color:cc.c3b(255,255,255),
-											}
-										}
-									},
-									
-									"highlightnode" : {
-										anchorPoint:cc.p(0,0),
-										position:cc.p(0,0),
-										size:cc.size(32,32),
-										bg:cc.c4b(255,100,100,255),
-									},
-									"selectednode" : {
-										anchorPoint:cc.p(0,0),
-										position:cc.p(0,0),
-										size:cc.size(32,32),
-										bg:cc.c4b(100,255,100,255),
-									},
-								}
+							"namelbl" : {
+								label:"Name:",
+								fontSize:20,
+								anchorPoint:cc.p(0,0),
+								position:cc.p(4,292),
+								color:cc.c3b(0,0,0),
 							},
-							"tab2":{
-								children:{
-									"itemdetailsback":{
-										position:cc.p(144,0),
-										size:cc.size(250,366),
-										bg: cc.c4b(0,0,255,100),
-										anchorPoint:cc.p(0,0),
-									},
-									"name_text":{
-										label:"Item Name",
-										fontSize:10,
-										anchorPoint:cc.p(0,0),
-										position: cc.p(8,344),
-									},
-									"name_entry":{
-										size: cc.size(136,32),
-										position: cc.p(4,312),
-									},
-									"resourcetab":{
-										visible:false,
-									},
-									"consumabletab":{
-										visible:false,
-									},
-									"booktab":{
-										visible:false,
-										children:{
-											"book_text":{
-												label:"Book Contents",
-												fontSize:10,
-												anchorPoint:cc.p(0,0),
-												position: cc.p(152,348),
-											},
-											"book_entry":{
-												size: cc.size(240,340),
-												position: cc.p(-100000,8),
-											},
-										}
-									},
-									"wearabletab":{
-										visible:false,
-										children:{
-											"head" : {
-												position:cc.p(250,230),
-												size:cc.size(64,26),
-												bg: GREEN,
-												anchorPoint:cc.p(0,0),
-												children:{
-													"text":{
-														label:"Head",
-														fontSize:12,
-														anchorPoint:cc.p(0.5,0.5),
-														position:cc.p(32,13),
-														color:cc.c3b(0,0,0),
-													}
-												}
-											},
-											"body" : {
-												position:cc.p(250,200),
-												size:cc.size(64,26),
-												bg: GREEN,
-												anchorPoint:cc.p(0,0),
-												children:{
-													"text":{
-														label:"Body",
-														fontSize:12,
-														anchorPoint:cc.p(0.5,0.5),
-														position:cc.p(32,13),
-														color:cc.c3b(0,0,0),
-													}
-												}
-											},
-											"legs" : {
-												position:cc.p(250,170),
-												size:cc.size(64,26),
-												bg: GREEN,
-												anchorPoint:cc.p(0,0),
-												children:{
-													"text":{
-														label:"Legs",
-														fontSize:12,
-														anchorPoint:cc.p(0.5,0.5),
-														position:cc.p(32,13),
-														color:cc.c3b(0,0,0),
-													}
-												}
-											},
-											"feet" : {
-												position:cc.p(250,140),
-												size:cc.size(64,26),
-												bg: GREEN,
-												anchorPoint:cc.p(0,0),
-												children:{
-													"text":{
-														label:"Feet",
-														fontSize:12,
-														anchorPoint:cc.p(0.5,0.5),
-														position:cc.p(32,13),
-														color:cc.c3b(0,0,0),
-													}
-												}
-											},
-											"larm" : {
-												position:cc.p(180,200),
-												size:cc.size(64,26),
-												bg: GREEN,
-												anchorPoint:cc.p(0,0),
-												children:{
-													"text":{
-														label:"L Arm",
-														fontSize:12,
-														anchorPoint:cc.p(0.5,0.5),
-														position:cc.p(32,13),
-														color:cc.c3b(0,0,0),
-													}
-												}
-											},
-											"rarm" : {
-												position:cc.p(320,200),
-												size:cc.size(64,26),
-												bg: GREEN,
-												anchorPoint:cc.p(0,0),
-												children:{
-													"text":{
-														label:"R Arm",
-														fontSize:12,
-														anchorPoint:cc.p(0.5,0.5),
-														position:cc.p(32,13),
-														color:cc.c3b(0,0,0),
-													}
-												}
-											},
-											"mod" : {
-												position:cc.p(150,230),
-												size:cc.size(64,26),
-												bg: GREEN,
-												anchorPoint:cc.p(0,0),
-												children:{
-													"text":{
-														label:"Mod",
-														fontSize:12,
-														anchorPoint:cc.p(0.5,0.5),
-														position:cc.p(32,13),
-														color:cc.c3b(0,0,0),
-													}
-												}
-											},
-										}	
-									},
-									"resourcebtn" : {
-										position:cc.p(8,248),
-										size:cc.size(128,26),
-										bg: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Resource",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"consumablebtn" : {
-										position:cc.p(8,218),
-										size:cc.size(128,26),
-										bg: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Consumable",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"bookbtn" : {
-										position:cc.p(8,188),
-										size:cc.size(128,26),
-										bg: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Book",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"wearablebtn" : {
-										position:cc.p(8,158),
-										size:cc.size(128,26),
-										bg: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"wearable",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"tile" : {
-										anchorPoint:cc.p(0,1),
-										position:cc.p(55,130),
-										texture:tileTextureList[0]["name"],
-									},
-									"stackbtn" : {
-										position:cc.p(8,48),
-										size:cc.size(128,26),
-										bg: RED,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"NOT STACKABLE",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-								}
+							"name_entry":{
+								position:cc.p(74,292),
+								size:cc.size(266,32),
+								bg:cc.c4b(255,255,255,255),
 							},
-							"tab3":{
-								children:{
-									"saveBack":{
-										position:cc.p(0,78),
-										size:cc.size(200,60),
-										bg: cc.c4b(0,255,0,100),
-										anchorPoint:cc.p(0,0),
-									},
-									"deleteback":{
-										position:cc.p(0,138),
-										size:cc.size(200,60),
-										bg: cc.c4b(255,0,0,100),
-										anchorPoint:cc.p(0,0),
-									},
-									"mapnumsback":{
-										position:cc.p(0,198),
-										size:cc.size(200,162),
-										bg: cc.c4b(0,0,0,170),
-										anchorPoint:cc.p(0,0),
-									},
-								}
+						
+							"tiles" : {
+								anchorPoint:cc.p(0,1),
+								position:cc.p(16,272),
+								texture:tileTextureList[0]["name"],
 							},
-							"tab1Clickable":{
-								position:cc.p(0,376),
-								size:cc.size(60,20),
-								texture:"GUI/editor-tab.png",
+							
+							"textureleftbtn" : {
+								position:cc.p(362,292),
+								size:cc.size(16,32),
+								texture:"GUI/texture_change_left.png",
+								anchorPoint:cc.p(0,0),
+							},
+							"texturerightbtn" : {
+								position:cc.p(471,292),
+								size:cc.size(16,32),
+								texture:"GUI/texture_change_right.png",
+								anchorPoint:cc.p(0,0),
+							},
+							"textureName" : {
+								position:cc.p(375,292),
+								size:cc.size(96,32),
+								texture:"GUI/texture_change_middle.png",
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
-										label:"Sprite",
+										label:tileTextureList[0]["name"],
 										fontSize:12,
 										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(32,10),
+										position:cc.p(48,16),
 										color:cc.c3b(0,0,0),
 									}
 								}
 							},
-							"tab2Clickable":{
-								position:cc.p(64,376),
-								size:cc.size(60,20),
-								texture:"GUI/editor-tab.png",
+							"leftbtn" : {
+								position:cc.p(0,16),
+								size:cc.size(16,256),
+								bg: cc.c4b(0,0,255,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
-										label:"Details",
+										label:"<",
 										fontSize:12,
 										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(32,10),
+										position:cc.p(8,160),
+										color:cc.c3b(255,255,255),
+									}
+								}
+							},
+							"rightbtn" : {
+								position:cc.p(336,16),
+								size:cc.size(16,256),
+								bg: cc.c4b(0,0,255,255),
+								anchorPoint:cc.p(0,0),
+								children:{
+									"text":{
+										label:">",
+										fontSize:12,
+										anchorPoint:cc.p(0.5,0.5),
+										position:cc.p(8,160),
+										color:cc.c3b(255,255,255),
+									}
+								}
+							},
+							"upbtn" : {
+								position:cc.p(16,272),
+								size:cc.size(320,16),
+								bg: cc.c4b(0,0,255,255),
+								anchorPoint:cc.p(0,0),
+								children:{
+									"text":{
+										label:"^",
+										fontSize:12,
+										anchorPoint:cc.p(0.5,0.5),
+										position:cc.p(160,8),
+										color:cc.c3b(255,255,255),
+									}
+								}
+							},
+							"downbtn" : {
+								position:cc.p(16,0),
+								size:cc.size(320,16),
+								bg: cc.c4b(0,0,255,255),
+								anchorPoint:cc.p(0,0),
+								children:{
+									"text":{
+										label:"v",
+										fontSize:12,
+										anchorPoint:cc.p(0.5,0.5),
+										position:cc.p(160,8),
+										color:cc.c3b(255,255,255),
+									}
+								}
+							},
+
+							"stacklbl" : {
+								label:"Stackable:",
+								fontSize:12,
+								anchorPoint:cc.p(0,0),
+								position:cc.p(360,206),
+								color:cc.c3b(0,0,0),
+							},
+							"stackbtn" : {
+								position:cc.p(360,176),
+								size:cc.size(128,26),
+								bg: RED,
+								anchorPoint:cc.p(0,0),
+								children:{
+									"text":{
+										label:"No",
+										fontSize:12,
+										anchorPoint:cc.p(0.5,0.5),
+										position:cc.p(64,13),
 										color:cc.c3b(0,0,0),
 									}
 								}
 							},
-							"tab3Clickable":{
-								position:cc.p(128,376),
-								size:cc.size(60,20),
-								texture:"GUI/editor-tab.png",
+
+							"scriptlbl" : {
+								label:"Script:",
+								fontSize:12,
+								anchorPoint:cc.p(0,0),
+								position:cc.p(360,262),
+								color:cc.c3b(0,0,0),
+							},
+							"scriptbtn" : {
+								position:cc.p(360,232),
+								size:cc.size(128,26),
+								bg: RED,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
-										label:"Modifier",
+										label:"None",
 										fontSize:12,
 										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(32,10),
+										position:cc.p(64,13),
 										color:cc.c3b(0,0,0),
 									}
 								}
 							},
+							
+							"highlightnode" : {
+								anchorPoint:cc.p(0,0),
+								position:cc.p(0,0),
+								size:cc.size(32,32),
+								bg:cc.c4b(255,100,100,255),
+							},
+							"selectednode" : {
+								anchorPoint:cc.p(0,0),
+								position:cc.p(0,0),
+								size:cc.size(32,32),
+								bg:cc.c4b(100,255,100,255),
+							},
+								
+							
 							"okbtn" : {
-								position:cc.p(92,8),
+								position:cc.p(434,16),
 								size:cc.size(32,32),
 								texture:"GUI/tick_icon.png",
 								anchorPoint:cc.p(0,0),
 							},
 							"cancelbtn" : {
-								position:cc.p(24,8),
+								position:cc.p(384,16),
 								size:cc.size(32,32),
 								texture:"GUI/cross_icon.png",
 								anchorPoint:cc.p(0,0),
@@ -440,8 +218,8 @@ ItemEditor = Popup.extend({
 					},
 					"control_panel":{
 						anchorPoint:cc.p(0,0),
-						position: cc.p(0,396),
-						size: cc.size(420,32),
+						position: cc.p(0,330),
+						size: cc.size(500,32),
 						children:{	
 							"header":{
 								label:"Item Editor",
@@ -450,7 +228,7 @@ ItemEditor = Popup.extend({
 								position:cc.p(8,16),
 							},
 							"exitBtn":{
-								position: cc.p(396,6),
+								position: cc.p(476,6),
 								size: cc.size(20,20),
 								anchorPoint:cc.p(0,0),
 								texture:"GUI/close.png"
@@ -466,22 +244,19 @@ ItemEditor = Popup.extend({
 		return "itemEditor";
 	},
 	nameBox:null,
-	tabWidths:null,
-	currentTab:0,
 	delegate:null,
 	data:null,
+	typeData:null,
 	
 	init:function(withData){
 		this._super();	
-		this.data={"itemType":"resource","subType":"","sprite":{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},"additionalData":{},"stackable":false, "name":""};
+		this.data={"sprite":{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},"script":null,"stackable":false, "name":""};
 		this.currentTexture=tileTextureList[0]["name"],
 		this.currentTextureNumber=0,
 		this.nameBox=null,
-		this.tabWidths=null,
-		this.currentTab=0,
 		this.delegate=null,
+		this.typeData=null,
 		this.mapOffset=cc.p(0,0);
-		this.tabWidths=[null,352,400,200];
 		this.delegate=withData.delegate;
 
 		if(withData && withData.data){
@@ -500,8 +275,8 @@ ItemEditor = Popup.extend({
 	
 	didBecomeActive:function(){
 		this._super();
-		this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
-		this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(127);
+		this.panels["main_panel"]["highlightnode"].setOpacity(0);
+		this.panels["main_panel"]["selectednode"].setOpacity(127);
 
 		for(var i in tileTextureList){
 			if(tileTextureList[i]["name"]==this.data["sprite"]["texture"]){
@@ -509,9 +284,15 @@ ItemEditor = Popup.extend({
 				this.currentTexture=tileTextureList[i]["name"];
 			}
 		}
-		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
-		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["main_panel"]["textureName"]["text"].setString(this.currentTexture);
+		this.panels["main_panel"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
 		
+		if(this.data["script"]!=null){
+			this.panels["main_panel"]["scriptbtn"].setColor(cc.c4b(0,255,0,255));
+			this.panels["main_panel"]["scriptbtn"]["text"].setString(ObjectLists.getScriptList()[this.data["script"]]["name"]);
+			this.typeData=this.data["script"];
+		}
+
 		var posX = this.data["sprite"]["position"].x;
 		while(posX>=10){
 			posX--;
@@ -523,35 +304,19 @@ ItemEditor = Popup.extend({
 			this.mapOffset.y++;
 		}
 		var tilePos = cc.p((this.data["sprite"]["position"].x-this.mapOffset.x)*32,(this.data["sprite"]["position"].y-this.mapOffset.y)*32);
-		this.panels["main_panel"]["tab1"]["selectednode"].setPosition(this.panels["main_panel"]["tab1"]["tiles"].getPosition().x+tilePos.x,this.panels["main_panel"]["tab1"]["tiles"].getPosition().y-(tilePos.y+32)) ;
-		this.panels["main_panel"]["tab2"]["tile"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
-		this.panels["main_panel"]["tab2"]["tile"].setTextureRect(cc.rect(Math.floor(32*this.data["sprite"]["position"].x),Math.floor(32*this.data["sprite"]["position"].y),32,32));
-		this.nameBox = new EntryBox(this.panels["main_panel"]["tab2"]["name_entry"],cc.size(this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["name_entry"].getContentSize().height), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.panels["main_panel"]["selectednode"].setPosition(this.panels["main_panel"]["tiles"].getPosition().x+tilePos.x,this.panels["main_panel"]["tiles"].getPosition().y-(tilePos.y+32)) 
+		this.nameBox = new EntryBox(this.panels["main_panel"]["name_entry"],cc.size(this.panels["main_panel"]["name_entry"].getContentSize().width,this.panels["main_panel"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["name_entry"].getContentSize().height), this.data["name"]?this.data["name"]:"", cc.c4b(255,255,255), cc.c3b(0,0,0));
 		this.nameBox.setDefaultFineFlag(true);
-		this.bookEntryBox = new EntryBox(this.panels["main_panel"]["tab2"]["booktab"]["book_entry"],cc.size(this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].getContentSize().height), this.data["additionalData"]["Contents"]? this.data["additionalData"]["Contents"]:"", cc.c4b(100,100,100), cc.c3b(255,255,255),true);
-		this.bookEntryBox.setDefaultFineFlag(true);
-		this.bookEntryBox.setDontClear(true);
-		this.updateCurrentLayer(this.data["itemType"]);
-		
-		if(this.data["subType"]!=""){
-			this.selectSubType(this.data["subType"]);
-		}
 
-		this.panels["main_panel"]["tab2"]["stackbtn"].setColor(RED);
-		this.panels["main_panel"]["tab2"]["stackbtn"]["text"].setString("NOT STACKABLE");
+		this.panels["main_panel"]["stackbtn"].setColor(RED);
+		this.panels["main_panel"]["stackbtn"]["text"].setString("No");
 		if(this.data["stackable"]==true){
-			this.panels["main_panel"]["tab2"]["stackbtn"].setColor(GREEN);
-			this.panels["main_panel"]["tab2"]["stackbtn"]["text"].setString("IS STACKABLE");
+			this.panels["main_panel"]["stackbtn"].setColor(GREEN);
+			this.panels["main_panel"]["stackbtn"]["text"].setString("Yes");
 		}
-
-		this.setTab(1);
 		this.updateMapOffset();
 	},
 
-	setTextureFromStart:function(){
-
-	},
-	
 	willTerminate:function(ignoreTerminate){
 		this._super();
 		if(this.delegate){
@@ -565,49 +330,37 @@ ItemEditor = Popup.extend({
 	
 	onMouseMoved:function(event){
 		var pos = event.getLocation();
-		if(this.currentTab==1){
-			this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
-			var truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);
-			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().height){
-				truePos.x = truePos.x-(truePos.x%32)+16;
-				truePos.y = truePos.y-(truePos.y%32)+64;
-				this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(127);
-				this.panels["main_panel"]["tab1"]["highlightnode"].setPosition(truePos);
-				return true;
-			}
+		this.panels["main_panel"]["highlightnode"].setOpacity(0);
+		var truePos = this.panels["main_panel"]["tiles"].convertToNodeSpace(pos);
+		if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tiles"].getContentSize().height){
+			truePos.x = truePos.x-(truePos.x%32)+16;
+			truePos.y = truePos.y-(truePos.y%32)+16;
+			this.panels["main_panel"]["highlightnode"].setOpacity(127);
+			this.panels["main_panel"]["highlightnode"].setPosition(truePos);
+			return true;
 		}		
 	},
+
 	
-	setTab:function(value){
-		if(value!=this.currentTab){
-			this.panels["main_panel"].setContentSize(this.tabWidths[value],this.panels["main_panel"].getContentSize().height);
-			this.panels["control_panel"].setContentSize(this.tabWidths[value],this.panels["control_panel"].getContentSize().height);
-			this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(this.panels["main_panel"]["tab2"]["name_entry"].getPositionX()-1000);
-			this.currentTab=value;
-			this.panels["main_panel"]["tab1"].setVisible(false);
-			this.panels["main_panel"]["tab2"].setVisible(false)
-			this.panels["main_panel"]["tab3"].setVisible(false);
-			this.panels["main_panel"]["tab1Clickable"].setColor(WHITE);
-			this.panels["main_panel"]["tab2Clickable"].setColor(WHITE);
-			this.panels["main_panel"]["tab3Clickable"].setColor(WHITE);
-			this.panels["main_panel"]["tab"+value].setVisible(true);
-			this.panels["main_panel"]["tab"+value+"Clickable"].setColor(cc.c4b(255,255,0,255));
-			if(value==2){
-				this.panels["main_panel"]["tab2"]["name_entry"].setPositionX(4);
-				if(this.data["itemType"]=="book"){this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].setPositionX(150); this.panels["main_panel"]["tab2"]["booktab"]["book_text"].setVisible(true);} else{this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].setPositionX(-1000000000); this.panels["main_panel"]["tab2"]["booktab"]["book_text"].setVisible(false);}
+	selectScript:function(){
+		if(Eventsystem!=null && !Eventsystem._parent) Eventsystem=null;
+			if(Eventsystem){
+				Eventsystem.willTerminate();
+				Eventsystem.removeFromParent();
+				Eventsystem=null;
 			}
-			this.panels["control_panel"]["exitBtn"].setPositionX(this.tabWidths[value]-24);
-			var newTexture = cc.TextureCache.getInstance().addImage("GUI/itemeditor_tab"+value+"_bg.png");
-			this.panels["background"].setTexture(newTexture);
-			this.panels["background"].setTextureRect(cc.rect(0,0,this.tabWidths[value]+2,this.panels["main_panel"].getContentSize().height+32));
-		}
+			Eventsystem = new PopupList();
+			Eventsystem.init({delegate:this,editor:new EventSystem(),list:ObjectLists.getScriptList(),name:"Script List"});
+			Eventsystem.didBecomeActive();
+			this._parent.addChild(Eventsystem);
+			this.setTouchEnabled(false);
 	},
-	
+
 	updateMapOffset:function(){
 		this.schedule(this.updateMapOffset);
-		if(this.panels["main_panel"]["tab1"]["tiles"].getTexture() && this.panels["main_panel"]["tab1"]["tiles"].getTexture()._isLoaded==true){
+		if(this.panels["main_panel"]["tiles"].getTexture() && this.panels["main_panel"]["tiles"].getTexture()._isLoaded==true){
 			this.unschedule(this.updateMapOffset);
-			this.panels["main_panel"]["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(32*this.mapOffset.x),Math.floor(32*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:320,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<256?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:256));
+			this.panels["main_panel"]["tiles"].setTextureRect(cc.rect(Math.floor(32*this.mapOffset.x),Math.floor(32*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:320,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<256?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:256));
 		}
 	},
 	
@@ -619,17 +372,6 @@ ItemEditor = Popup.extend({
 		var pos = touch._point;
 		var truePos = this.panels["main_panel"].convertToNodeSpace(cc.p(pos.x,pos.y));
 
-		if(isTouching(this.panels["main_panel"]["tab1Clickable"],truePos)){
-			this.setTab(1);	return true;
-		}		
-		
-		if(isTouching(this.panels["main_panel"]["tab2Clickable"],truePos)){
-			this.setTab(2); return true;
-		}	
-
-		if(isTouching(this.panels["main_panel"]["tab3Clickable"],truePos)){
-			this.setTab(3); return true;
-		}	
 		
 		if(isTouching(this.panels["main_panel"]["okbtn"],truePos)){
 			if(this.nameBox.getText()==null || this.nameBox.getText()==""){
@@ -637,9 +379,7 @@ ItemEditor = Popup.extend({
 			}
 			this.ignoreTerminate=true;
 			this.data["name"]=this.nameBox.getText();
-			switch(this.data["itemType"]){
-				case "book": this.data["additionalData"] = {"Contents":this.bookEntryBox.getText()};
-			}
+			this.data["script"]=this.typeData;
 			this.delegate.endedEdit(this.data);
 			return true;
 		}
@@ -650,149 +390,75 @@ ItemEditor = Popup.extend({
 			return true;
 		}
 
-		if(this.currentTab==1){
-			if(isTouching(this.panels["main_panel"]["tab1"]["leftbtn"],truePos)){
+			if(isTouching(this.panels["main_panel"]["leftbtn"],truePos)){
 				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>264 && this.mapOffset.x>0){
 					this.mapOffset.x--;	this.updateMapOffset();
 				}
 				return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["rightbtn"],truePos)){
+			if(isTouching(this.panels["main_panel"]["rightbtn"],truePos)){
 				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>320 && this.mapOffset.x<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width-320)/32)){
 					this.mapOffset.x++;	this.updateMapOffset();
 				}
 				return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["upbtn"],truePos)){
+			if(isTouching(this.panels["main_panel"]["upbtn"],truePos)){
 				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>320 && this.mapOffset.y>0){
 					this.mapOffset.y--;	this.updateMapOffset();
 				}
 				return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["downbtn"],truePos)){
+			if(isTouching(this.panels["main_panel"]["downbtn"],truePos)){
 				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>320 && this.mapOffset.y<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height-320)/32)){
 					this.mapOffset.y++; this.updateMapOffset();
 				}
 				return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["texturerightbtn"],truePos)){
+			if(isTouching(this.panels["main_panel"]["texturerightbtn"],truePos)){
 				this.useNextTexture();
 				return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["textureleftbtn"],truePos)){
+			if(isTouching(this.panels["main_panel"]["textureleftbtn"],truePos)){
 				this.usePrevTexture();
 				return true;
 			}
-			truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);
-			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().height){
+		
+			if(isTouching(this.panels["main_panel"]["stackbtn"],truePos)){
+				this.swapStackable(); return true;
+			}
+			if(isTouching(this.panels["main_panel"]["scriptbtn"],truePos)){
+				this.selectScript(); return true;
+			}
+
+			truePos = this.panels["main_panel"]["tiles"].convertToNodeSpace(pos);
+			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tiles"].getContentSize().height){
 				
 				truePos.x = truePos.x-(truePos.x%32)+16;
-				truePos.y = truePos.y-(truePos.y%32)+64;
+				truePos.y = truePos.y-(truePos.y%32)+16;
 				
-				this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(0);
-				if(this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()!=truePos.x || this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()!=truePos.y){
-					this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(127);
-					this.panels["main_panel"]["tab1"]["selectednode"].setPosition(truePos);
+				this.panels["main_panel"]["selectednode"].setOpacity(0);
+				if(this.panels["main_panel"]["selectednode"].getPositionX()!=truePos.x || this.panels["main_panel"]["selectednode"].getPositionY()!=truePos.y){
+					this.panels["main_panel"]["selectednode"].setOpacity(127);
+					this.panels["main_panel"]["selectednode"].setPosition(truePos);
 				}
 
-				var pos = cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,((8-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-64)/32))+this.mapOffset.y)-1);
-				this.panels["main_panel"]["tab2"]["tile"].setTextureRect(cc.rect(pos.x*32,pos.y*32,32,32));
+				var pos = cc.p(((this.panels["main_panel"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,((8-((this.panels["main_panel"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y)-1);
 				this.data["sprite"]["position"]=pos;
 
 				return true;
 			} 
-
-		}
-		if(this.currentTab==2){	
-			if(isTouching(this.panels["main_panel"]["tab2"]["stackbtn"],truePos)){
-				this.swapStackable(); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["resourcebtn"],truePos)){
-				this.updateCurrentLayer("resource"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["consumablebtn"],truePos)){
-				this.updateCurrentLayer("consumable"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["bookbtn"],truePos)){
-				this.updateCurrentLayer("book"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["wearablebtn"],truePos)){
-				this.updateCurrentLayer("wearable"); this.selectSubType("body"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["wearabletab"]["body"],truePos)){
-				this.selectSubType("body"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["wearabletab"]["head"],truePos)){
-				this.selectSubType("head"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["wearabletab"]["legs"],truePos)){
-				this.selectSubType("legs"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["wearabletab"]["feet"],truePos)){
-				this.selectSubType("feet"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["wearabletab"]["larm"],truePos)){
-				this.selectSubType("larm");	return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["wearabletab"]["rarm"],truePos)){
-				this.selectSubType("rarm");	return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["wearabletab"]["mod"],truePos)){
-				this.selectSubType("mod");	return true;
-			}
-		}	
+	
 		return false;
 	},	
 
 	swapStackable:function(){
 		this.data["stackable"]=!this.data["stackable"];
-		this.panels["main_panel"]["tab2"]["stackbtn"].setColor(RED);
-		this.panels["main_panel"]["tab2"]["stackbtn"]["text"].setString("NOT STACKABLE");
+		this.panels["main_panel"]["stackbtn"].setColor(RED);
+		this.panels["main_panel"]["stackbtn"]["text"].setString("No");
 		if(this.data["stackable"]==true){
-			this.panels["main_panel"]["tab2"]["stackbtn"].setColor(GREEN);
-			this.panels["main_panel"]["tab2"]["stackbtn"]["text"].setString("IS STACKABLE");
+			this.panels["main_panel"]["stackbtn"].setColor(GREEN);
+			this.panels["main_panel"]["stackbtn"]["text"].setString("Yes");
 		}
-	},
-	
-	updateCurrentLayer:function(layerName){
-		this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].setPositionX(-10000000);
-		this.panels["main_panel"]["tab2"]["booktab"]["book_text"].setVisible(false);
-		this.panels["main_panel"]["tab2"]["resourcebtn"].setColor(WHITE);
-		this.panels["main_panel"]["tab2"]["consumablebtn"].setColor(WHITE);
-		this.panels["main_panel"]["tab2"]["bookbtn"].setColor(WHITE);
-		this.panels["main_panel"]["tab2"]["wearablebtn"].setColor(WHITE);
-		this.panels["main_panel"]["tab2"]["resourcetab"].setVisible(false);
-		this.panels["main_panel"]["tab2"]["consumabletab"].setVisible(false);		
-		this.panels["main_panel"]["tab2"]["booktab"].setVisible(false);
-		this.panels["main_panel"]["tab2"]["wearabletab"].setVisible(false);
-
-		switch(layerName){
-			case "resource": break;
-			case "consumable": break;
-			case "book": this.panels["main_panel"]["tab2"]["booktab"]["book_entry"].setPositionX(150);
-						 this.panels["main_panel"]["tab2"]["booktab"]["book_text"].setVisible(true);
-						 break;
-			case "wearable": break;
-		}
-		this.data["itemType"]=layerName;
-		this.panels["main_panel"]["tab2"][layerName+"btn"].setColor(GREEN);
-		this.panels["main_panel"]["tab2"][layerName+"tab"].setVisible(true);
-	},
-
-	selectSubType:function(type){
-		this.panels["main_panel"]["tab2"]["wearabletab"]["head"].setColor(WHITE);
-		this.panels["main_panel"]["tab2"]["wearabletab"]["body"].setColor(WHITE);
-		this.panels["main_panel"]["tab2"]["wearabletab"]["legs"].setColor(WHITE);
-		this.panels["main_panel"]["tab2"]["wearabletab"]["feet"].setColor(WHITE);
-		this.panels["main_panel"]["tab2"]["wearabletab"]["rarm"].setColor(WHITE);
-		this.panels["main_panel"]["tab2"]["wearabletab"]["larm"].setColor(WHITE);
-		this.panels["main_panel"]["tab2"]["wearabletab"]["mod"].setColor(WHITE);
-
-		if(this.data["itemType"]=="wearable" && this.panels["main_panel"]["tab2"]["wearabletab"][type]){
-			this.panels["main_panel"]["tab2"]["wearabletab"][type].setColor(RED);
-		}
-
-		this.data["subType"]=type;
 	},
 	
 	useNextTexture:function(){
@@ -800,10 +466,9 @@ ItemEditor = Popup.extend({
 			this.currentTextureNumber=-1;
 		}
 		this.currentTextureNumber++;
-		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
-		this.panels["main_panel"]["tab2"]["tile"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["main_panel"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
 		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
-		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
+		this.panels["main_panel"]["textureName"]["text"].setString(this.currentTexture);
 		this.data["sprite"]["texture"]=this.currentTexture;
 		this.mapOffset=cc.p(0,0);
 		this.updateMapOffset();
@@ -814,10 +479,9 @@ ItemEditor = Popup.extend({
 			this.currentTextureNumber=tileTextureList.length;
 		}
 		this.currentTextureNumber--;
-		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
-		this.panels["main_panel"]["tab2"]["tile"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["main_panel"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
 		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
-		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
+		this.panels["main_panel"]["textureName"]["text"].setString(this.currentTexture);
 		this.mapOffset=cc.p(0,0);
 		this.updateMapOffset();
 	},

@@ -12,7 +12,7 @@ var ChatBox = InputBox.extend({
 				GameChat.addMessage(editBox.getText(),true);
 			}
 		}
-		editBox.setText(strings.gameChat.defaultChat);
+		editBox.setText(settingsData["Default ChatBar Message"]);
         //cc.log("chatBox " + this._getEditBoxName(editBox) + " DidEnd !");
     },
 	
@@ -40,7 +40,7 @@ var GameChat=cc.Layer.extend({
 	
 	
 	init:function(){
-		this.chatbox = new ChatBox(this.panels["chat_panel"],cc.size(this.panels["chat_panel"].getContentSize().width-4,25), cc.p(2,this.panels["chat_panel"].getContentSize().height-2), strings.gameChat.defaultChat, cc.c3b(255,255,255), cc.c3b(0,0,0));
+		this.chatbox = new ChatBox(this.panels["chat_panel"],cc.size(this.panels["chat_panel"].getContentSize().width-4,25), cc.p(2,this.panels["chat_panel"].getContentSize().height-2), settingsData["Default ChatBar Message"], cc.c3b(255,255,255), cc.c3b(0,0,0));
 		this.chatbox.inputBox._parent.setPositionY(this.chatbox.inputBox.getPositionY()+59);
 	},
 	
@@ -194,7 +194,7 @@ GameChat.showCommands=function(){
 };
 
 GameChat.showWelcome=function(){
-	GameChat.addMessage(strings.gameChat.introText);
+	GameChat.addMessage(settingsData["Welcome Message"]);
 };
 
 GameChat.destroy = function(){

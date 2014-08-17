@@ -1,14 +1,10 @@
-var newsreq = new XMLHttpRequest();
-newsreq.open("GET", "news.txt", false);
-newsreq.send(null);
-var newsValue = newsreq.responseText;
-
 Login = Scene.extend({
 serverActive:false,
 waitingOnServer:false,
 
 init:function(withData){
-	this._super();	
+	settingsData = mergeSettings(settingsData,LocalStorage.getSettingsData());
+	this._super();
 	SceneManager.setActiveScene(this);
 	this.namebox = new EntryBox(this.panels["name_entry"],cc.size(this.panels["name_entry"].getContentSize().width,this.panels["name_entry"].getContentSize().height), cc.p(0,this.panels["name_entry"].getContentSize().height), "Enter Name", cc.c4b(100,100,100), cc.c3b(255,255,255));
 	if(withData){
@@ -68,7 +64,7 @@ getLayoutObject:function(){
 						position: cc.p(325,300),
 					},
 					"go_button":{
-						position: cc.p(420,220),
+						position: cc.p(325,220),
 						size: cc.size(120,40),
 						bg: cc.c4b(0,0,0,255),
 						children:{
@@ -81,11 +77,34 @@ getLayoutObject:function(){
 							}
 						}
 					},
-					"news_message":{
-						label:newsValue,
-						fontSize:14,
+					"credits_button":{
+						position: cc.p(30,400),
+						size: cc.size(120,40),
+						bg: cc.c4b(0,0,0,255),
+						children:{
+							"label":{
+								label:"Credits",
+								fontSize:20,
+								color:cc.c3b(255,255,255),
+								anchorPoint:cc.p(0.5,0.5),
+								position:cc.p(60,20),
+							}
+						}
+					},
+					"news_button":{
+						position: cc.p(505,220),
+						size: cc.size(120,40),
+						bg: cc.c4b(0,0,0,255),
 						anchorPoint:cc.p(0,1),
-						position:cc.p(30,610),
+						children:{
+							"label":{
+								label:"News",
+								fontSize:20,
+								color:cc.c3b(255,255,255),
+								anchorPoint:cc.p(0.5,0.5),
+								position:cc.p(60,20),
+							}
+						}
 					},
 					"server_message":{
 						label:"",
@@ -93,6 +112,13 @@ getLayoutObject:function(){
 						color:cc.c3b(127,0,0),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(327,325),
+					},
+					"version_number":{
+						label:settingsData["Version Number"],
+						fontSize:34,
+						color:cc.c3b(255,255,255),
+						anchorPoint:cc.p(1,1),
+						position:cc.p(710,55),
 					},
 					"server_activity":{
 						position:cc.p(910,630),
@@ -118,6 +144,43 @@ onTouchBegan:function(touch){
 				return true;
 			}
 		}
+	}
+	if(cc.rectContainsPoint(cc.rect(this.panels["credits_button"].getPositionX(),this.panels["credits_button"].getPositionY(),this.panels["credits_button"].getContentSize().width,this.panels["credits_button"].getContentSize().height),touch._point)){
+		this.runCommand("/openCredits");
+	}
+	if(cc.rectContainsPoint(cc.rect(this.panels["news_button"].getPositionX(),this.panels["news_button"].getPositionY(),this.panels["news_button"].getContentSize().width,this.panels["news_button"].getContentSize().height),touch._point)){
+		this.runCommand("/openNews");
+	}
+},
+
+runCommand:function(command){
+	switch(command){
+		case "/openCredits":
+				if(CreditsPanel!=null && !CreditsPanel._parent) CreditsPanel=null;
+				if(CreditsPanel){
+					CreditsPanel.willTerminate();
+					CreditsPanel.removeFromParent();
+					CreditsPanel=null;
+				} else{
+					CreditsPanel = new Credits();
+					CreditsPanel.init();
+					CreditsPanel.didBecomeActive();
+					this.addChild(CreditsPanel);
+				}
+		break;
+		case "/openNews":
+				if(NewsPanel!=null && !NewsPanel._parent) NewsPanel=null;
+				if(NewsPanel){
+					NewsPanel.willTerminate();
+					NewsPanel.removeFromParent();
+					NewsPanel=null;
+				} else{
+					NewsPanel = new News();
+					NewsPanel.init();
+					NewsPanel.didBecomeActive();
+					this.addChild(NewsPanel);
+				}
+		break;
 	}
 },
 

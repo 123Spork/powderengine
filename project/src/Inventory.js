@@ -52,7 +52,7 @@ InventoryPanel = Popup.extend({
 						size: cc.size(208,32),
 						children:{
 							"header":{
-								label:"Inventory",
+								label:settingsData["Inventory Header"],
 								fontSize:20,
 								anchorPoint:cc.p(0,0.5),
 								position:cc.p(8,16),
@@ -138,15 +138,18 @@ InventoryPanel = Popup.extend({
 			if(PlayersController.getYou().getInventory()[i]){
 				var reducer= 32;
 				if(isTouching(this.panels["main_panel"][(i+"")],cc.p(truePos.x,truePos.y+reducer))){
-					var firstItem="Use";
+					var firstItem=firstItem=settingsData["Item Dropdown Use"]+"";
 					switch(PlayersController.getYou().getInventory()[i]["itemType"]){
-						case "wearable": firstItem="Equip";break;
-						case "consumable": firstItem="Consume"; break;
-						case "book": firstItem="Read"; break;
+						case "wearable": firstItem=settingsData["Item Dropdown Equip"]+"";break;
+						case "consumable": firstItem=settingsData["Item Dropdown Eat"]+""; break;
+						case "book": firstItem=settingsData["Item Dropdown Read"]+""; break;
 					}
+					firstItem = firstItem.replace("<ITEM>",(PlayersController.getYou().getInventory()[i]["name"]));
+					var secondItem = settingsData["Item Dropdown Drop"]+"";
+					secondItem = secondItem.replace("<ITEM>",(PlayersController.getYou().getInventory()[i]["name"]));
 					this.itemContext=i;
 					this.panels["item_name"].setVisible(false)
-					this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,[firstItem,"Drop"],touch._point));
+					this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,[firstItem,secondItem],touch._point));
 					return true;
 				}
 			}

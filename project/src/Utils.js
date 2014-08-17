@@ -20,6 +20,7 @@ for(var i in filenames){
     tileTextureList.push({"name":filenames[i],"texture":cc.TextureCache.getInstance().addImage(filenames[i])});
 }
 
+var isGameInSync=false;
 
 var request = new XMLHttpRequest();
 request.open("GET", "res/Graphics/character_graphics.txt", false);
@@ -99,6 +100,61 @@ document.getElementById("gameCanvas").onkeyup = function (event) {
 		}
 	}
 };
+
+var settingsData = {
+	"GENERAL":"ISSECTION",
+	"Project Name":"Powder Engine Testbed",
+	"Version Number": "0.705",
+
+	"CHATBAR":"ISSECTION",
+	"Welcome Message":"Welcome to the Powder Engine! Enter /help for some help.",
+	"Join Message":"<PLAYER> has joined the game!",
+	"Leave Message":"<PLAYER> has left the game!",
+	"Default ChatBar Message": "C to popup/dismiss, enter for chat. Say /help for help.",
+
+	"ITEMS":"ISSECTION",
+	"Item Dropdown Pick Up": "Pick up <ITEM>",
+	"Item Dropdown Walk To": "Walk to <ITEM>",
+	"Item Pick Up": "Picked up <ITEM>.",
+	"Item Dropped": "Dropped <ITEM>.",
+	"Item Out-of-range": "<ITEM> is too far away to pick up!",
+	"Item Dropdown Examine":"Examine <ITEM>",
+	"Item Dropdown Equip": "Equip <ITEM>",
+	"Item Dropdown Read": "Read <ITEM>",
+	"Item Dropdown Eat": "Eat <ITEM>",
+	"Item Dropdown Use" : "Use <ITEM>",
+	"Item Dropdown Unequip": "Unequip <ITEM>",
+	"Item Dropdown Drop": "Drop <ITEM>",
+
+	"NPCS":"ISSECTION",
+	"NPC Dropdown Examine": "Examine",
+	"NPC Dropdown Attack": "Attack",
+	"NPC Dropdown Talk": "Talk To",
+	"NPC Dropdown Follow": "Follow",
+	"NPC Dropdown Trade": "Trade",
+	"NPC Dropdown Bank": "Open Bank",
+
+	"SIGNS":"ISSECTION",
+	"Sign Dropdown list Read": "Read sign <SIGN>",
+	"Sign Out-of-range": "<SIGN> is too far away to read!",
+
+	"PANELS":"ISSECTION",
+	//"Use Equipment Panel": "ISYESNO",
+	"Equipment Header": "Equipment",
+	//"Use Inventory Panel": "ISYESNO",
+	"Inventory Header": "Inventory",
+	"Skills Header":"Skills List",
+	//"Use Skills Panel": "ISYESNO",
+	"Quest Header":"Quest Log",
+	//"Use Quests Panel": "ISYESNO",
+
+	"COMMANDS":"ISSECTION",
+	"/dance" : "<PLAYER> danced the dance of his people.",
+	"/diceroll": "<PLAYER> threw a dice and got <VALUE>",
+	"/coinflip": "<PLAYER> flipped a coin and got <VALUE>",
+};
+
+
 
 function isTouching(obj,pos){
 	if(!obj){
@@ -215,5 +271,12 @@ function merge_objects(obj1,obj2){
 	var obj3 = {};
 	for (var attrname in obj1) { obj3[attrname] = cloneObj(obj1[attrname]); }
 	for (var attrname in obj2) { obj3[attrname] = cloneObj(obj2[attrname]); }
+	return obj3;
+};
+
+function mergeSettings(obj1,obj2){
+	var obj3 = {};
+	for (var attrname in obj1) { obj3[attrname] = obj1[attrname]+""; }
+	for (var attrname in obj2) { if(obj3[attrname]) obj3[attrname] = obj2[attrname]+""; }
 	return obj3;
 };

@@ -64,7 +64,7 @@ EquipmentPanel = Popup.extend({
 						size: cc.size(168,32),
 						children:{
 							"header":{
-								label:"Equipment",
+								label:settingsData["Equipment Header"],
 								fontSize:20,
 								anchorPoint:cc.p(0,0.5),
 								position:cc.p(8,16),
@@ -140,7 +140,11 @@ EquipmentPanel = Popup.extend({
 				if(isTouching(this.panels["main_panel"][equipmentList[i]["subType"]],cc.p(truePos.x,truePos.y+reducer))){
 					this.itemContext=i;
 					this.panels["item_name"].setVisible(false)
-					this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,["Unequip","Drop"],touch._point));
+					var firstItem = settingsData["Item Dropdown Unequip"]+"";
+					firstItem = firstItem.replace("<ITEM>",(PlayersController.getYou().getEquipment()[i]["name"]));
+					var secondItem = settingsData["Item Dropdown Drop"]+"";
+					secondItem = secondItem.replace("<ITEM>",(PlayersController.getYou().getEquipment()[i]["name"]));
+					this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,[firstItem,secondItem],touch._point));
 					return true;
 				}
 			}
@@ -154,7 +158,7 @@ EquipmentPanel = Popup.extend({
 		  var equipmentList = PlayersController.getYou().getEquipment();
 			for(var i in equipmentList){
 				if(equipmentList[i]){
-					var reducer= t32;
+					var reducer= 32;
 					if(isTouching(this.panels["main_panel"][equipmentList[i]["subType"]],cc.p(truePos.x,truePos.y+reducer))){
 						this.panels["item_name"]["content"].setString(equipmentList[i]["name"]);
 						this.panels["item_name"].setVisible(true);

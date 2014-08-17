@@ -7,11 +7,15 @@ PopupList = Popup.extend({
 	itemOffsets:0,
 	defaultPositions:null,
 	listPanel:null,
+	hasChosen:false,
 	
 	willTerminate:function(){
 		this._super();
 		if(this.delegate){
 			this.delegate.setTouchEnabled(true);
+			if(!this.hasChosen && this.delegate.setNoType){
+				this.delegate.setNoType(null,null);
+			}
 		}
 	},
 
@@ -155,6 +159,7 @@ PopupList = Popup.extend({
 				break;
 				case "Use":
 					self.delegate.setTypeData(listelement,self.editList[listelement]);
+					self.hasChosen=true;
 				break;
 			}
 		};

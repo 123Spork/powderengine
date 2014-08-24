@@ -396,18 +396,18 @@ var GameScene = Scene.extend({
 				}
 			break;
 			case "/editmap":
-				if(Eventsystem!=null && !Eventsystem._parent) Eventsystem=null;
-				if(Eventsystem){
-					Eventsystem.willTerminate();
-					Eventsystem.removeFromParent();
-					Eventsystem=null;
+				if(Mapeditor!=null && !Mapeditor._parent) Mapeditor=null;
+				if(Mapeditor){
+					Mapeditor.willTerminate();
+					Mapeditor.removeFromParent();
+					Mapeditor=null;
 					GameMap.setInteractionDelegate(null);
 				} else{
-					Eventsystem = new Eventsystem();
-					Eventsystem.init();
-					Eventsystem.didBecomeActive();
-					this.addChild(Eventsystem);
-					GameMap.setInteractionDelegate(Eventsystem);
+					Mapeditor = new MapEditor();
+					Mapeditor.init();
+					Mapeditor.didBecomeActive();
+					this.addChild(Mapeditor);
+					GameMap.setInteractionDelegate(Mapeditor);
 				}
 			break;
 			case "/editsettings":

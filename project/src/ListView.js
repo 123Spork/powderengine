@@ -69,6 +69,16 @@ setCallBackList:function(_in){
 returningFromDelTouch:false,
 scrollBarStartPos:null,
 
+highlightNode:function(listelement){
+	if(!this.delegate.getHighlightNode){
+		return false;
+	}
+	for(var i=0;i<this.delegate.getListElementAmount();i++){
+		this.delegate.getHighlightNode(i).setColor(cc.c4b(255,255,255,255));
+	}
+	this.delegate.getHighlightNode(listelement).setColor(cc.c4b(255,0,0,255));
+},
+
 onTouchBegan:function(touch){
 	var pos = touch._point;
 	for(var i=0;i<this.delegate.getListElementAmount();i++){
@@ -77,7 +87,7 @@ onTouchBegan:function(touch){
 			var nodePos = this.delegate.convertToNodeSpace(pos);
 			nodePos.x+=this.delegate.getPositionX();
 			var isInScene = isTouching(this.delegate,nodePos)
-			if(isTouching(this.callbacklist[i][j],truePos) && isInScene==true){
+			if(isTouching(this.callbacklist[i][j],truePos)){ //&& isInScene==true){
 				this.delegate.runListCallBack(this.callbacklist[i][j].callBack,i,touch);
 				this.returningFromDelTouch=true;
 				return true;

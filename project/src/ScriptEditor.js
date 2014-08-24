@@ -11,6 +11,9 @@ ScriptEditor = Popup.extend({
 	nameBox:null,
 	specifierContext:null,
 	defaultContext:null,
+	dataContext:null,
+	subEditor:null,
+	subEditorType:null,
 
 	runSaveNewData:function(num){
 		sendMessageToServer({"savescripts":num+"","scriptsdata":this.data});
@@ -136,7 +139,7 @@ ScriptEditor = Popup.extend({
 								for(var j=0;j<this.data["data"][i]["responses"].length;j++){
 									responsesNodes[i].push(cc.Node.create());
 									responsesNodes[i][j].setContentSize(259,32);
-
+									var allowResponseEdit=true;
 									var responseName = cc.LabelTTF.create((j+1)+": " + this.data["data"][i]["responses"][j]["type"],"Arial",15);
 									responseName.setColor(cc.c3b(0,0,0));
 									responseName.setAnchorPoint(cc.p(0,0));
@@ -151,13 +154,23 @@ ScriptEditor = Popup.extend({
 									delElement.callBack = "Delete";		
 									responsesNodes[i][j].addChild(delElement);
 
-									var editElement = cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
-									editElement.setPosition(cc.p(205,0));
-									editElement.setAnchorPoint(cc.p(0,0));
-									editElement.callBack = "Edit";		
-									responsesNodes[i][j].addChild(editElement);
+									switch(this.data["data"][i]["responses"][j]["type"]){
+										case "Destroy": case "Consume Item": case "Attack": case "Run Away":
+										 allowResponseEdit=false; break;
+									}
 
-									responseCallBackList[i].push([delElement,editElement]);
+
+									if(allowResponseEdit){
+										var editElement = cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
+										editElement.setPosition(cc.p(205,0));
+										editElement.setAnchorPoint(cc.p(0,0));
+										editElement.callBack = "Edit";		
+										responsesNodes[i][j].addChild(editElement);
+
+										responseCallBackList[i].push([delElement,editElement]);
+									}else{
+										responseCallBackList[i].push([delElement]);
+									}
 								}
 
 						
@@ -194,6 +207,9 @@ ScriptEditor = Popup.extend({
 								this.responseLists[i].runListCallBack=function(name,listelement,touch){
 									var pos = touch._point;
 									var truePos = self.convertToNodeSpace(pos);
+										if(self.subEditor!=null){
+										return;
+									}
 									switch(name){
 										case "Delete":
 											self._parent.addChild(DropDownList.createWithListAndPosition(self,self.deleteResponseClicked,["Cancel","Delete"],touch._point));
@@ -201,7 +217,7 @@ ScriptEditor = Popup.extend({
 											self.listContext=this.identifier;
 										break;
 										case "Edit":
-										
+											self.editPressed(this.identifier,"responses",listelement);
 										break;
 										case "Add":
 											var resArray = ["Talk","Give Talk Options","Destroy","Give/ Take Item","Set Quest Point", "Warp Player", "Wait", "Open/Close Panel", "Modify Player Stats"];
@@ -209,6 +225,7 @@ ScriptEditor = Popup.extend({
 											switch(self.data["specifier"]){
 												case "NPC": 
 													resArray.push("Attack","Run Away","Defend","Modify NPC Stats");
+												break;
 												case "Item": 
 													resArray.push("Equip Item","Consume Item","Read Item");
 												break;
@@ -236,7 +253,7 @@ ScriptEditor = Popup.extend({
 								for(var j=0;j<this.data["data"][i]["requirements"].length;j++){
 									requirementsNodes[i].push(cc.Node.create());
 									requirementsNodes[i][j].setContentSize(259,32);
-
+									var allowRequireEdit=true;
 									var requireName = cc.LabelTTF.create((j+1)+": " + this.data["data"][i]["requirements"][j]["type"],"Arial",15);
 									requireName.setColor(cc.c3b(0,0,0));
 									requireName.setAnchorPoint(cc.p(0,0));
@@ -251,13 +268,17 @@ ScriptEditor = Popup.extend({
 									delElement.callBack = "Delete";		
 									requirementsNodes[i][j].addChild(delElement);
 
-									var editElement = cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
-									editElement.setPosition(cc.p(205,0));
-									editElement.setAnchorPoint(cc.p(0,0));
-									editElement.callBack = "Edit";		
-									requirementsNodes[i][j].addChild(editElement);
+									if(allowRequireEdit){
+										var editElement = cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
+										editElement.setPosition(cc.p(205,0));
+										editElement.setAnchorPoint(cc.p(0,0));
+										editElement.callBack = "Edit";		
+										requirementsNodes[i][j].addChild(editElement);
 
-									requirementCallBackList[i].push([delElement,editElement]);
+										requirementCallBackList[i].push([delElement,editElement]);
+									} else{
+										requirementCallBackList[i].push([delElement]);
+									}
 								}
 
 					
@@ -294,6 +315,9 @@ ScriptEditor = Popup.extend({
 								this.requirementsLists[i].runListCallBack=function(name,listelement,touch){
 									var pos = touch._point;
 									var truePos = self.convertToNodeSpace(pos);
+										if(self.subEditor!=null){
+										return;
+									}
 									switch(name){
 										case "Delete":
 											self._parent.addChild(DropDownList.createWithListAndPosition(self,self.deleteRequireClicked,["Cancel","Delete"],touch._point));
@@ -301,16 +325,18 @@ ScriptEditor = Popup.extend({
 											self.listContext=this.identifier;
 										break;
 										case "Edit":
-											
+											self.editPressed(this.identifier,"requirements",listelement);
 										break;
 										case "Add":
-											var reqArr = ["Has Player Items","Is Player Statistics","Is Quest Point","Is Player Position","Is Panel Visibility","Is Player Inventory Space","Is NPC Statistics","Is NPC Attacking","Is NPC Actioning"];						
+											var reqArr = ["Has Player Items","Is Player Statistics","Is Quest Point","Is Player Position","Is Panel Visibility","Is Player Inventory Space"];						
 																			
 											switch(self.data["specifier"]){
 												case "Tile": 
 													reqArr.push("Is Object Type"); 
 												break;
-											}
+												case "NPC":
+													reqArr.push("Is NPC Statistics","Is NPC Actioning");
+												break;											}
 
 											self._parent.addChild(DropDownList.createWithListAndPosition(self,self.addRequireListElement,reqArr,touch._point));
 											self.listContext=this.identifier;
@@ -366,6 +392,9 @@ ScriptEditor = Popup.extend({
 		this.listPanel.runListCallBack=function(name,listelement,touch){
 			var pos = touch._point;
 			var truePos = self.convertToNodeSpace(pos);
+			if(self.subEditor!=null){
+				return;
+			}
 			switch(name){
 				case "Delete":
 					var deleteText = "Delete";
@@ -587,14 +616,18 @@ ScriptEditor = Popup.extend({
 			case 3: requireText = "Is Player Position"; break;
 			case 4: requireText = "Is Panel Visbility";break;
 			case 5: requireText = "Is Player Inventory Space";break;
-			case 6: requireText = "Is NPC Statistics"; break;
-			case 7: requireText = "Is NPC Actioning"; break;
 		}
 		if(requireText==""){
 			switch(this.delegate.data["specifier"]){
 				case "Tile":
 					switch(clicknum){
-						case 8: requireText = "Is Object Type"; break;
+						case 6: requireText = "Is Object Type"; break;
+					}
+				break;
+				case "NPC":
+					switch(clicknum){
+						case 6: requireText = "Is NPC Statistics"; break;
+						case 7: requireText = "Is NPC Actioning"; break;
 					}
 				break;
 			}
@@ -614,9 +647,10 @@ ScriptEditor = Popup.extend({
 						texture:"GUI/event_panel.png",
 						anchorPoint:cc.p(0,0),
 					},
+
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
-						size: cc.size(800,400),
+						size: cc.size(1000,400),
 						children: {
 							"list":{
 								size:cc.size(758,360),
@@ -684,7 +718,7 @@ ScriptEditor = Popup.extend({
 					"control_panel":{
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,400),
-						size: cc.size(800,32),
+						size: cc.size(1000,32),
 						children:{	
 							"header":{
 								label:"Script Editor",
@@ -693,16 +727,48 @@ ScriptEditor = Popup.extend({
 								position:cc.p(8,16),
 							},
 							"exitBtn":{
-								position: cc.p(776,6),
+								position: cc.p(976,6),
 								size: cc.size(20,20),
 								anchorPoint:cc.p(0,0),
 								texture: "GUI/close.png",	
 							}
 						}
 					},
+					"subEditorOver":{
+						visible:false,
+						bg:cc.c4b(0,0,0,127),
+						position:cc.p(0,0),
+						size:cc.size(800,400),
+					},
+					"mainEditorOver":{
+						bg:cc.c4b(0,0,0,127),
+						position:cc.p(800,0),
+						size:cc.size(200,400),
+					},
 				}	
 			}
 		};
+	},
+
+	editPressed:function(event,listtype,id){
+		this.disallowTouchForMain(true);
+		this.dataContext = {"event":event,"listtype":listtype,"id":id};
+		this.subEditorType = this.data["data"][event][listtype][id]["type"];
+		this.showSubEditor();
+	},
+
+	returnFromEditOkPressed:function(dataToSave){
+		this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = cloneObj(dataToSave);
+		this.disallowTouchForMain(false);
+		this.hideSubEditor();
+		this.dataContext=null;
+		this.prepareList();
+	},
+
+	returnFromEditCancelPressed:function(){
+		this.hideSubEditor();
+		this.disallowTouchForMain(false);
+		this.dataContext=null;
 	},
 
 	defaultSelected:function(clicknum,touch){
@@ -712,6 +778,501 @@ ScriptEditor = Popup.extend({
 			return;
 		}
 		this.delegate.setDefault(clicknum)		
+	},
+
+	disallowTouchForMain:function(value){
+
+	},
+
+	warpMapBox:null,
+	warpXBox:null,
+	warpYBox:null,
+
+	sayBox:null,
+
+	questContext:null,
+	objectiveContext:null,
+
+	itemAmountBox:null,
+	itemContext:null,
+
+	skillContext:null,
+	skillLevelBox:null,
+	skillXPBox:null,
+	skillHealthBox:null,
+
+
+	showSubEditor:function(){
+		this.panels["subEditorOver"].setVisible(true);
+		this.panels["mainEditorOver"].setVisible(false);
+		var panels = {
+			"panels":{
+				position:cc.p(802,0),
+				children:{}
+			}
+		};
+		var data = this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"];
+		switch(this.subEditorType){
+			case "Warp Player":
+				panels["panels"].children={
+					"mapNumberLabel":{
+						label:"Map ID",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"mapNumberText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,340),
+						size:cc.size(100,32),
+					},
+					"mapXLabel":{
+						label:"Map X",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,310),
+					},
+					"mapXText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,276),
+						size:cc.size(80,32),
+					},
+					"mapYLabel":{
+						label:"Map Y",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(100,310),
+					},
+					"mapYText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(100,276),
+						size:cc.size(80,32),
+					},
+				}
+			break;
+			case "Talk":
+				panels["panels"].children={
+					"sayLabel":{
+						label:"Say:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"sayText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,50),
+						size:cc.size(174,322),
+					},
+				}
+			break;
+			case "Is Quest Point": case "Set Quest Point":
+				panels["panels"].children={
+					"questLabel":{
+						label:"Quest:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"questList":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,230),
+						size:cc.size(154,135),
+					},
+					"objectiveLabel":{
+						label:"Objective:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,189),
+					},
+					"objectiveList":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,50),
+						size:cc.size(154,135),
+					},
+				}
+			break;
+			case "Give /Take Item":
+			panels["panels"].children={
+					"itemsLabel":{
+						label:"Item:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"itemList":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,230),
+						size:cc.size(154,135),
+					},
+					"amountLabel":{
+						label:"Amount:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,189),
+					},
+					"amountText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,153),
+						size:cc.size(154,32),
+					},
+					"amountNote":{
+						label:"Use negative item amounts to take away. Use positive amounts to give.",
+						anchorPoint:cc.p(0,1),
+						position:cc.p(12,145),
+					},
+				};
+			break;
+			case "Modify Player Stats":
+				panels["panels"].children={
+					"skillsLabel":{
+						label:"Skill:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"skillList":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,230),
+						size:cc.size(154,135),
+					},
+					"levelLabel":{
+						label:"Level Modify",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,205),
+					},
+					"levelText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,169),
+						size:cc.size(154,32),
+					},
+					"expLabel":{
+						label:"XP Modify: (% allowed)",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,145),
+					},
+					"expText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,109),
+						size:cc.size(154,32),
+					},
+					"healthLabel":{
+						label:"Health Modify: (% allowed)",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,85),
+					},
+					"healthText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,49),
+						size:cc.size(154,32),
+					},
+				};
+			break;
+		}
+
+		panels["panels"].children["okbtn"]={
+			position:cc.p(62,8),
+			size:cc.size(32,32),
+			texture:"GUI/tick_icon.png",
+			anchorPoint:cc.p(0,0),
+		};
+		panels["panels"].children["cancelbtn"]={
+			position:cc.p(106,8),
+			size:cc.size(32,32),
+			texture:"GUI/cross_icon.png",
+			anchorPoint:cc.p(0,0),
+		};
+		this.subEditor = requestLayout(panels,true);
+		this.panels.addChild(this.subEditor);
+		
+
+		switch(this.subEditorType){
+			case "Warp Player":
+				var x=1, y=1;
+				if(data["index"]){
+					x=data["index"] % gridWidth;
+					y=(Math.floor(data["index"]/gridWidth));
+				} 
+				this.warpMapBox = new EntryBox(this.subEditor["mapNumberText"],cc.size(this.subEditor["mapNumberText"].getContentSize().width,this.subEditor["mapNumberText"].getContentSize().height), cc.p(0,this.subEditor["mapNumberText"].getContentSize().height), data["mapnum"]!=null && data["mapnum"]!=='undefined' ?  data["mapnum"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.warpMapBox.setDefaultFineFlag(true);
+				this.warpXBox = new EntryBox(this.subEditor["mapXText"],cc.size(this.subEditor["mapXText"].getContentSize().width,this.subEditor["mapXText"].getContentSize().height), cc.p(0,this.subEditor["mapXText"].getContentSize().height), x, cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.warpXBox.setDefaultFineFlag(true);
+				this.warpYBox = new EntryBox(this.subEditor["mapYText"],cc.size(this.subEditor["mapYText"].getContentSize().width,this.subEditor["mapYText"].getContentSize().height), cc.p(0,this.subEditor["mapYText"].getContentSize().height), y, cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.warpYBox.setDefaultFineFlag(true);
+			break;
+			case "Talk":
+				this.sayBox = new EntryBox(this.subEditor["sayText"],cc.size(this.subEditor["sayText"].getContentSize().width,this.subEditor["sayText"].getContentSize().height), cc.p(0,this.subEditor["sayText"].getContentSize().height), data["say"] ?  data["say"] : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.sayBox.setDefaultFineFlag(true);
+				this.sayBox.setNullAllowed(false);
+			break;
+			case "Is Quest Point": case "Set Quest Point":
+				var listnodes = [];
+				var callBackList=[];
+				var questList = ObjectLists.getQuestList();
+				for(var i=0;i<questList.length;i++){
+					listnodes[i]=cc.Node.create();
+					var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
+					var text = cc.LabelTTF.create(questList[i]["name"],"Arial",15);
+					text.setColor(cc.c3b(0,0,0));
+					text.setAnchorPoint(cc.p(0,0));
+					text.setPosition(cc.p(4,4));
+					text.setDimensions(cc.size(126,0));
+					var useElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/use.png"));
+					useElement.setPosition(cc.p(130,0));
+					useElement.setAnchorPoint(cc.p(0,0));
+					useElement.callBack="Use";
+					listnodes[i].setContentSize(154,text.getContentSize().height+8);
+					useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+					callBackList.push([useElement]);
+
+					var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+					listnodes[i].addChild(highlightNode);
+					listnodes[i].highlightNode=highlightNode;
+					listnodes[i].addChild(element);
+					listnodes[i].addChild(text);
+					listnodes[i].addChild(useElement);
+				}
+				var self=this;
+				this.subEditor["questList"].getListSize = function(){
+					var height =0;
+					for(var i=0;i<listnodes.length;i++){
+						height+=listnodes[i].getContentSize().height;
+					}
+					return cc.size(154,height);
+				};
+				this.subEditor["questList"].getListElementAmount=function(){
+					return listnodes.length;
+				};
+				this.subEditor["questList"].getSizeForElement=function(elementID){
+					return listnodes[elementID].getContentSize();
+				};
+				this.subEditor["questList"].getListNodeForIndex=function(elementID){
+					return listnodes[elementID];
+				};
+				this.subEditor["questList"].getHighlightNode = function(elementID){
+					return listnodes[elementID].highlightNode;
+				};
+				this.subEditor["questList"].runListCallBack=function(name,listelement){
+					if(name== "Use"){
+						if(self.subEditor["objectiveList"].listView){
+							self.subEditor["objectiveList"].listView.removeFromParent();
+						}
+						this.listView.highlightNode(listelement);
+						self.questContext=listelement;
+						var sublistnodes = [];
+						var subcallBackList=[];
+						var tc = cc.TextureCache.getInstance();
+						var objectiveList = ObjectLists.getQuestList()[listelement]["objectiveList"];
+						for(var i=0;i<objectiveList.length;i++){
+							sublistnodes[i]=cc.Node.create();
+							var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);
+							element.setPosition(cc.p(0,0));						
+							var text = cc.LabelTTF.create(objectiveList[i],"Arial",15);
+							text.setColor(cc.c3b(0,0,0));
+							text.setAnchorPoint(cc.p(0,0));
+							text.setPosition(cc.p(4,4));
+							text.setDimensions(cc.size(126,0));
+							var useElement=cc.Sprite.createWithTexture(tc.addImage("GUI/use.png"));
+							useElement.setPosition(cc.p(130,0));
+							useElement.setAnchorPoint(cc.p(0,0));
+							useElement.callBack="Use";
+							subcallBackList.push([useElement]);
+							sublistnodes[i].setContentSize(126,text.getContentSize().height+8);
+							useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+
+							var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+							sublistnodes[i].addChild(highlightNode);
+							sublistnodes[i].highlightNode=highlightNode;
+							sublistnodes[i].addChild(element);
+							sublistnodes[i].addChild(text);
+							sublistnodes[i].addChild(useElement);
+
+						}
+						self.subEditor["objectiveList"].getListSize = function(){
+							var height =0;
+							for(var i=0;i<sublistnodes.length;i++){
+								height+=sublistnodes[i].getContentSize().height;
+							}
+							return cc.size(154,height);
+						};
+						self.subEditor["objectiveList"].getListElementAmount=function(){
+							return sublistnodes.length;
+						};
+						self.subEditor["objectiveList"].getHighlightNode = function(elementID){
+							return sublistnodes[elementID].highlightNode;
+						};
+						self.subEditor["objectiveList"].getSizeForElement=function(elementID){
+							return sublistnodes[elementID].getContentSize();
+						};
+						self.subEditor["objectiveList"].getListNodeForIndex=function(elementID){
+							return sublistnodes[elementID];
+						};
+						self.subEditor["objectiveList"].runListCallBack=function(name,listelement,touch){
+							this.listView.highlightNode(listelement);
+							self.objectiveContext=listelement;
+						};
+						self.subEditor["objectiveList"].listView = ListView.create(self.subEditor["objectiveList"]);
+						self.subEditor["objectiveList"].listView.setCallBackList(subcallBackList);
+						self.subEditor["objectiveList"].addChild(self.subEditor["objectiveList"].listView);
+					}
+				};
+				this.subEditor["questList"].listView = ListView.create(this.subEditor["questList"]);
+				this.subEditor["questList"].listView.setCallBackList(callBackList);
+				this.subEditor["questList"].addChild(this.subEditor["questList"].listView);
+
+				if(data["quest"]!=null && data["quest"]!=='undefined'){
+					this.subEditor["questList"].runListCallBack("Use",data["quest"]);
+					if(data["objective"]!=null && data["objective"]!=='undefined'){
+						this.subEditor["objectiveList"].runListCallBack("Use",data["objective"]);
+					}
+				}
+			break;
+			case "Give /Take Item":
+				this.subEditor["amountNote"].setDimensions(cc.size(180,0));
+				var listnodes = [];
+				var callBackList=[];
+				var itemList = ObjectLists.getItemList();
+				for(var i=0;i<itemList.length;i++){
+					listnodes[i]=cc.Node.create();
+					var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
+					var text = cc.LabelTTF.create(itemList[i]["name"],"Arial",15);
+					text.setColor(cc.c3b(0,0,0));
+					text.setAnchorPoint(cc.p(0,0));
+					text.setPosition(cc.p(4,4));
+					text.setDimensions(cc.size(126,0));
+					var useElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/use.png"));
+					useElement.setPosition(cc.p(130,0));
+					useElement.setAnchorPoint(cc.p(0,0));
+					useElement.callBack="Use";
+					listnodes[i].setContentSize(154,text.getContentSize().height+8);
+					useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+					callBackList.push([useElement]);
+
+					var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+					listnodes[i].addChild(highlightNode);
+					listnodes[i].highlightNode=highlightNode;
+					listnodes[i].addChild(element);
+					listnodes[i].addChild(text);
+					listnodes[i].addChild(useElement);
+				}
+				var self=this;
+				this.subEditor["itemList"].getListSize = function(){
+					var height =0;
+					for(var i=0;i<listnodes.length;i++){
+						height+=listnodes[i].getContentSize().height;
+					}
+					return cc.size(154,height);
+				};
+				this.subEditor["itemList"].getListElementAmount=function(){
+					return listnodes.length;
+				};
+				this.subEditor["itemList"].getSizeForElement=function(elementID){
+					return listnodes[elementID].getContentSize();
+				};
+				this.subEditor["itemList"].getListNodeForIndex=function(elementID){
+					return listnodes[elementID];
+				};
+				this.subEditor["itemList"].getHighlightNode = function(elementID){
+					return listnodes[elementID].highlightNode;
+				};
+				this.subEditor["itemList"].runListCallBack=function(name,listelement){
+					if(name== "Use"){
+						this.listView.highlightNode(listelement);
+						self.itemContext=listelement;
+					}
+				};
+				this.subEditor["itemList"].listView = ListView.create(this.subEditor["itemList"]);
+				this.subEditor["itemList"].listView.setCallBackList(callBackList);
+				this.subEditor["itemList"].addChild(this.subEditor["itemList"].listView);
+				if(data["item"]!=null && data["item"]!=='undefined'){
+					this.subEditor["itemList"].runListCallBack("Use",data["item"]);
+				}
+				this.itemAmountBox = new EntryBox(this.subEditor["amountText"],cc.size(this.subEditor["amountText"].getContentSize().width,this.subEditor["amountText"].getContentSize().height), cc.p(0,this.subEditor["amountText"].getContentSize().height), data["amount"] ?  data["amount"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.itemAmountBox.setDefaultFineFlag(true);
+				this.itemAmountBox.setNullAllowed(false);
+			break;
+			case "Modify Player Stats":
+				var listnodes = [];
+				var callBackList=[];
+				var skillList = ObjectLists.getSkillsList();
+				for(var i=0;i<skillList.length;i++){
+					listnodes[i]=cc.Node.create();
+					var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
+					var text = cc.LabelTTF.create(skillList[i]["name"],"Arial",15);
+					text.setColor(cc.c3b(0,0,0));
+					text.setAnchorPoint(cc.p(0,0));
+					text.setPosition(cc.p(4,4));
+					text.setDimensions(cc.size(126,0));
+					var useElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/use.png"));
+					useElement.setPosition(cc.p(130,0));
+					useElement.setAnchorPoint(cc.p(0,0));
+					useElement.callBack="Use";
+					listnodes[i].setContentSize(154,text.getContentSize().height+8);
+					useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+					callBackList.push([useElement]);
+
+					var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+					listnodes[i].addChild(highlightNode);
+					listnodes[i].highlightNode=highlightNode;
+					listnodes[i].addChild(element);
+					listnodes[i].addChild(text);
+					listnodes[i].addChild(useElement);
+				}
+				var self=this;
+				this.subEditor["skillList"].getListSize = function(){
+					var height =0;
+					for(var i=0;i<listnodes.length;i++){
+						height+=listnodes[i].getContentSize().height;
+					}
+					return cc.size(154,height);
+				};
+				this.subEditor["skillList"].getListElementAmount=function(){
+					return listnodes.length;
+				};
+				this.subEditor["skillList"].getSizeForElement=function(elementID){
+					return listnodes[elementID].getContentSize();
+				};
+				this.subEditor["skillList"].getListNodeForIndex=function(elementID){
+					return listnodes[elementID];
+				};
+				this.subEditor["skillList"].getHighlightNode = function(elementID){
+					return listnodes[elementID].highlightNode;
+				};
+				this.subEditor["skillList"].runListCallBack=function(name,listelement){
+					if(name== "Use"){
+						this.listView.highlightNode(listelement);
+						self.skillContext=listelement;
+					}
+				};
+				this.subEditor["skillList"].listView = ListView.create(this.subEditor["skillList"]);
+				this.subEditor["skillList"].listView.setCallBackList(callBackList);
+				this.subEditor["skillList"].addChild(this.subEditor["skillList"].listView);
+				if(data["skill"]!=null && data["skill"]!=='undefined'){
+					this.subEditor["skillList"].runListCallBack("Use",data["skill"]);
+				}
+				this.skillLevelBox = new EntryBox(this.subEditor["levelText"],cc.size(this.subEditor["levelText"].getContentSize().width,this.subEditor["levelText"].getContentSize().height), cc.p(0,this.subEditor["levelText"].getContentSize().height), data["level"] ?  data["level"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.skillLevelBox.setDefaultFineFlag(true);
+				this.skillLevelBox.setNullAllowed(false);
+
+				this.skillXPBox = new EntryBox(this.subEditor["expText"],cc.size(this.subEditor["expText"].getContentSize().width,this.subEditor["expText"].getContentSize().height), cc.p(0,this.subEditor["expText"].getContentSize().height), data["xp"] ?  data["xp"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.skillXPBox.setDefaultFineFlag(true);
+				this.skillXPBox.setNullAllowed(false);
+
+				this.skillHealthBox = new EntryBox(this.subEditor["healthText"],cc.size(this.subEditor["healthText"].getContentSize().width,this.subEditor["healthText"].getContentSize().height), cc.p(0,this.subEditor["healthText"].getContentSize().height), data["health"] ?  data["health"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.skillHealthBox.setDefaultFineFlag(true);
+				this.skillHealthBox.setNullAllowed(false);
+			break;
+		}
+	},
+
+	hideSubEditor:function(type){
+		this.panels["subEditorOver"].setVisible(false);
+		this.panels["mainEditorOver"].setVisible(true);
+		this.subEditorType=null;
+		this.subEditor.removeFromParent();
+		this.subEditor=null;
 	},
 
 	setDefault:function(val){
@@ -768,37 +1329,90 @@ ScriptEditor = Popup.extend({
 		this.prevMovPos=null;
 		var pos = touch._point;
 		
-		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
-		if(isTouching(this.panels["main_panel"]["defaultsbtn"],truePos)){
-			this._parent.addChild(DropDownList.createWithListAndPosition(this,this.defaultSelected,["Block Player","Warp Player","Show Sign","Spawn NPC","Spawn Item","Block NPC","PVP Area"],touch._point));
-			return true;
-		}
+		
+	
 
-		if(isTouching(this.panels["main_panel"]["specifier"],truePos)){
-			this._parent.addChild(DropDownList.createWithListAndPosition(this,this.specifierSelected,["Item","Tile","NPC","None"],touch._point));
-			return true;
-		}
+		if(this.subEditor){
+			var truePos = this.subEditor.convertToNodeSpace(pos);
+			if(isTouching(this.subEditor["okbtn"],truePos)){
 
-		if(isTouching(this.panels["main_panel"]["okbtn"],truePos)){
-			if(this.nameBox.getText()==null || this.nameBox.getText()==""){
+				switch(this.subEditorType){
+					case "Warp Player":
+						var index = indexFromPos(parseInt(this.warpXBox.getText()),(gridHeight)-parseInt(this.warpYBox.getText()));
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"mapnum":parseInt(this.warpMapBox.getText()),
+							"index":index,
+						}
+					break
+					case "Talk":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"say":this.sayBox.getText(),
+						}
+					break;
+					case "Is Quest Point": case "Set Quest Point":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"quest":this.questContext,
+							"objective":this.objectiveContext,
+						}
+					break;
+					case "Give /Take Item":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"item":this.itemContext,
+							"amount":parseInt(this.itemAmountBox.getText()),
+						}
+					break;
+					case "Modify Player Stats":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"skill":this.skillContext,
+							"level":parseInt(this.skillLevelBox.getText()),
+							"xp":parseInt(this.skillXPBox.getText()),
+							"health":parseInt(this.skillHealthBox.getText()),
+						}
+					break;
+				}
+				this.hideSubEditor();
+				return true;
+
+			}
+
+			if (isTouching(this.subEditor["cancelbtn"],truePos)) {
+				this.hideSubEditor();
 				return true;
 			}
-			this.data["name"]=this.nameBox.getText();
-			this.ignoreTerminate=true;
-			this.delegate.endedEdit(this.data);
-			return true;
-		}
-		if(isTouching(this.panels["main_panel"]["cancelbtn"],truePos)){
-			this.ignoreTerminate=true;
-			var self= this.delegate;
-			this.delegate.scheduleOnce(function(){self.endedEdit(null)});
-			return true;
-		}
 
-		if(isTouching(this.panels["main_panel"],truePos)){
-			return true;
+		} else{
+			var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
+			if(isTouching(this.panels["main_panel"]["defaultsbtn"],truePos)){
+				this._parent.addChild(DropDownList.createWithListAndPosition(this,this.defaultSelected,["Block Player","Warp Player","Show Sign","Spawn NPC","Spawn Item","Block NPC","PVP Area"],touch._point));
+				return true;
+			}
+
+			if(isTouching(this.panels["main_panel"]["specifier"],truePos)){
+				this._parent.addChild(DropDownList.createWithListAndPosition(this,this.specifierSelected,["Item","Tile","NPC","None"],touch._point));
+				return true;
+			}
+
+			if(isTouching(this.panels["main_panel"]["okbtn"],truePos)){
+				if(this.nameBox.getText()==null || this.nameBox.getText()==""){
+					return true;
+				}
+				this.data["name"]=this.nameBox.getText();
+				this.ignoreTerminate=true;
+				this.delegate.endedEdit(this.data);
+				return true;
+			}
+			if(isTouching(this.panels["main_panel"]["cancelbtn"],truePos)){
+				this.ignoreTerminate=true;
+				var self= this.delegate;
+				this.delegate.scheduleOnce(function(){self.endedEdit(null)});
+				return true;
+			}
+
+			if(isTouching(this.panels["main_panel"],truePos)){
+				return true;
+			}
+			return false;
 		}
-		return false;
 	},
 
 	

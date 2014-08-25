@@ -155,7 +155,7 @@ ScriptEditor = Popup.extend({
 									responsesNodes[i][j].addChild(delElement);
 
 									switch(this.data["data"][i]["responses"][j]["type"]){
-										case "Destroy": case "Consume Item": case "Attack": case "Run Away":
+										case "Destroy": case "Attack": case "Run Away":
 										 allowResponseEdit=false; break;
 									}
 
@@ -220,21 +220,30 @@ ScriptEditor = Popup.extend({
 											self.editPressed(this.identifier,"responses",listelement);
 										break;
 										case "Add":
-											var resArray = ["Talk","Give Talk Options","Destroy","Give/ Take Item","Set Quest Point", "Warp Player", "Wait", "Open/Close Panel", "Modify Player Stats"];
-		
+											var resArray = ["Talk","Give Talk Options","Destroy","Give/ Take Item","Set Quest Point", "Warp Player", "Wait", "Repeat Responses", "Open/Close Panel", "Modify Player Stats"];
+											var resSetup = [{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true}]
+											for( var i=0;i<self.data["data"][this.identifier]["responses"].length;i++){
+												if(self.data["data"][this.identifier]["responses"][i]["type"]=="Repeat Responses"){
+													resSetup[7]["enabled"]=false;
+												}
+											}
+
 											switch(self.data["specifier"]){
 												case "NPC": 
 													resArray.push("Attack","Run Away","Defend","Modify NPC Stats");
+													resSetup.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true});
 												break;
 												case "Item": 
-													resArray.push("Equip Item","Consume Item","Read Item");
+													resArray.push("Equip Item","Read Item");
+													resSetup.push({"enabled":true},{"enabled":true});
 												break;
 												case "Tile":
 													resArray.push("Block Entry","Add Layer Graphic");
+													resSetup.push({"enabled":true},{"enabled":true});
 												break;
 											}
 
-											self._parent.addChild(DropDownList.createWithListAndPosition(self,self.addResponseListElement,resArray,touch._point));;
+											self._parent.addChild(DropDownList.createWithListAndPosition(self,self.addResponseListElement,resArray,touch._point,resSetup));
 											self.listContext=this.identifier;
 										
 										break;
@@ -328,11 +337,11 @@ ScriptEditor = Popup.extend({
 											self.editPressed(this.identifier,"requirements",listelement);
 										break;
 										case "Add":
-											var reqArr = ["Has Player Items","Is Player Statistics","Is Quest Point","Is Player Position","Is Panel Visibility","Is Player Inventory Space"];						
+											var reqArr = ["Has Player Item","Is Player Statistics","Is Quest Point","Is Panel Visibility","Is Player Inventory Space"];						
 																			
 											switch(self.data["specifier"]){
 												case "Tile": 
-													reqArr.push("Is Object Type"); 
+													reqArr.push("Is Event Fired By"); 
 												break;
 												case "NPC":
 													reqArr.push("Is NPC Statistics","Is NPC Actioning");
@@ -420,14 +429,16 @@ ScriptEditor = Popup.extend({
 
 
 
+
 					switch(self.data["specifier"]){
 						case "Item": 
 							eventArray.push("On Pickup","On Drop","On Dequip","On Trade")
 							setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true})
 						break;
 						case "Tile":
-							eventArray.push("Will Enter","On Enter","Will Leave","On Leave","On Come Near");
-							setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true});
+							eventArray.push("Interact On","Interact Facing","Will Enter","On Enter","Will Leave","On Leave","On Come Near");
+							setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true});
+							setupOptions[0]["enabled"]=false;
 						break;
 					}
 
@@ -549,11 +560,13 @@ ScriptEditor = Popup.extend({
 					break;
 					case "Tile":
 						switch(clicknum){
-							case 4: eventString = "Will Enter"; break;
-							case 5: eventString = "On Enter"; break;
-							case 6: eventString = "Will Leave"; break;
-							case 7: eventString = "On Leave"; break;
-							case 8: eventString = "On Come Near"; break;
+							case 4:  eventString = "Interact On"; break;
+							case 5:  eventString = "Interact Facing"; break;
+							case 6: eventString = "Will Enter"; break;
+							case 7: eventString = "On Enter"; break;
+							case 8: eventString = "Will Leave"; break;
+							case 9: eventString = "On Leave"; break;
+							case 10: eventString = "On Come Near"; break;
 						}
 					break;
 				}
@@ -572,30 +585,30 @@ ScriptEditor = Popup.extend({
 			case 4: responseText ="Set Quest Point"; break;
 			case 5: responseText ="Warp Player"; break;
 			case 6: responseText ="Wait"; break;
-			case 7: responseText ="Open/Close Panel"; break;
-			case 8: responseText ="Modify Player Stats"; break
+			case 7: responseText = "Repeat Responses"; break;
+			case 8: responseText ="Open/Close Panel"; break;
+			case 9: responseText ="Modify Player Stats"; break
 		}
 		if(responseText==""){
 			switch(this.delegate.data["specifier"]){
 				case "NPC": 
 					switch(clicknum){
-						case 9: responseText = "Attack"; break;
-						case 10: responseText = "Run Away"; break;
-						case 11: responseText = "Defend"; break;
-						case 12: responseText = "Modify NPC Stats"
+						case 10: responseText = "Attack"; break;
+						case 11: responseText = "Run Away"; break;
+						case 12: responseText = "Defend"; break;
+						case 13: responseText = "Modify NPC Stats"
 					}
 				break;
 				case "Item": 
 					switch(clicknum){
-						case 9: responseText = "Equip Item"; break;
-						case 10: responseText = "Consume Item"; break;
+						case 10: responseText = "Equip Item"; break;
 						case 11: responseText = "Read Item"; break;
 					}
 				break;
 				case "Tile":
 					switch(clicknum){
-						case 9: responseText = "Block Entry"; break;
-						case 10: responseText = "Add Layer Graphic"; break;
+						case 10: responseText = "Block Entry"; break;
+						case 11: responseText = "Add Layer Graphic"; break;
 					}
 				break;
 			}
@@ -610,24 +623,23 @@ ScriptEditor = Popup.extend({
 	addRequireListElement:function(clicknum){
 		var requireText="";
 		switch(clicknum){
-			case 0: requireText = "Is Player Items"; break;
+			case 0: requireText = "Has Player Item"; break;
 			case 1: requireText = "Is Player Statistics"; break;
 			case 2: requireText = "Is Quest Point"; break;
-			case 3: requireText = "Is Player Position"; break;
-			case 4: requireText = "Is Panel Visbility";break;
-			case 5: requireText = "Is Player Inventory Space";break;
+			case 3: requireText = "Is Panel Visbility";break;
+			case 4: requireText = "Is Player Inventory Space";break;
 		}
 		if(requireText==""){
 			switch(this.delegate.data["specifier"]){
 				case "Tile":
 					switch(clicknum){
-						case 6: requireText = "Is Object Type"; break;
+						case 5: requireText = "Is Event Fired By"; break;
 					}
 				break;
 				case "NPC":
 					switch(clicknum){
-						case 6: requireText = "Is NPC Statistics"; break;
-						case 7: requireText = "Is NPC Actioning"; break;
+						case 5: requireText = "Is NPC Statistics"; break;
+						case 6: requireText = "Is NPC Actioning"; break;
 					}
 				break;
 			}
@@ -800,7 +812,22 @@ ScriptEditor = Popup.extend({
 	skillLevelBox:null,
 	skillXPBox:null,
 	skillHealthBox:null,
+	skillLevelBoxUpper:null,
+	skillXPBoxUpper:null,
+	skillHealthBoxUpper:null,
 
+	panelContext:null,
+	visibleContext:0,
+
+	objectContext:null,
+
+	actionContext:null,
+
+	inventorySpaceBox:null,
+
+	equipContext:null,
+
+	timeBox:null,
 
 	showSubEditor:function(){
 		this.panels["subEditorOver"].setVisible(true);
@@ -850,7 +877,7 @@ ScriptEditor = Popup.extend({
 					},
 				}
 			break;
-			case "Talk":
+			case "Talk": case "Read Item":
 				panels["panels"].children={
 					"sayLabel":{
 						label:"Say:",
@@ -891,7 +918,7 @@ ScriptEditor = Popup.extend({
 					},
 				}
 			break;
-			case "Give /Take Item":
+			case "Give /Take Item": case "Has Player Item":
 			panels["panels"].children={
 					"itemsLabel":{
 						label:"Item:",
@@ -916,13 +943,13 @@ ScriptEditor = Popup.extend({
 						size:cc.size(154,32),
 					},
 					"amountNote":{
-						label:"Use negative item amounts to take away. Use positive amounts to give.",
+						label:this.subEditorType=="Has Player Item"?"":"Use negative item amounts to take away. Use positive amounts to give.",
 						anchorPoint:cc.p(0,1),
 						position:cc.p(12,145),
 					},
 				};
 			break;
-			case "Modify Player Stats":
+			case "Modify Player Stats": case "Modify NPC Stats":
 				panels["panels"].children={
 					"skillsLabel":{
 						label:"Skill:",
@@ -970,6 +997,309 @@ ScriptEditor = Popup.extend({
 					},
 				};
 			break;
+			case "Is Panel Visbility": case "Open/Close Panel":
+				panels["panels"].children={
+					"panelsLabel":{
+						label:"Panel:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"panelList":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,230),
+						size:cc.size(154,135),
+					},
+					"visibleLabel":{
+						label:"Visibility:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,205),
+					},
+					"visibleButton":{
+						bg:cc.c4b(255,0,0,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,169),
+						size:cc.size(154,32),
+						children:{
+							"content":{
+								position:cc.p(77,16),
+								anchorPoint:cc.p(0.5,0.5),
+								label: "Invisible",
+								color:cc.c3b(0,0,0),
+							}
+						}
+					},
+				};
+			break;
+			case "Is Event Fired By":
+				panels["panels"].children={
+					"objectLabel":{
+						label:"Possible Types:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"objectList":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,230),
+						size:cc.size(154,135),
+					},
+				};
+			break;
+			case "Is NPC Actioning":
+				panels["panels"].children={
+					"actionLabel":{
+						label:"Actions:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"actionList":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,230),
+						size:cc.size(154,135),
+					},
+				};
+			break;
+			case "Is Player Inventory Space":
+				panels["panels"].children={
+					"spaceLabel":{
+						label:"Inventory Space",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"spaceText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,340),
+						size:cc.size(100,32),
+					},
+				};
+			break;
+			case "Wait":
+				panels["panels"].children={
+					"timeLabel":{
+						label:"Time (Seconds)",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"timeText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,340),
+						size:cc.size(100,32),
+					},
+				};
+			break;
+			case "Repeat Responses":
+				panels["panels"].children={
+					"amountLabel":{
+						label:"Repeat Amount",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"amountText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,340),
+						size:cc.size(100,32),
+					},
+					"amountNote":{
+						label:"Use 0 for infinite amount of repeats.",
+						anchorPoint:cc.p(0,1),
+						position:cc.p(12,300),
+					},
+				};
+			break;
+			case "Is Player Statistics": case "Is NPC Statistics":
+				panels["panels"].children={
+					"skillsLabel":{
+						label:"Skill:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"skillList":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,230),
+						size:cc.size(154,135),
+					},
+					"levelLabel":{
+						label:"Level Range",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,205),
+					},
+					"levelDash":{
+						label:"-",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(91,174),
+					},
+					"levelTextLower":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,169),
+						size:cc.size(75,32),
+					},
+					"levelTextUpper":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(100,169),
+						size:cc.size(75,32),
+					},
+					"expLabel":{
+						label:"XP Range: (% allowed)",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,145),
+					},
+					"expDash":{
+						label:"-",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(91,114),
+					},
+					"expTextLower":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(100,109),
+						size:cc.size(75,32),
+					},
+					"expTextUpper":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,109),
+						size:cc.size(75,32),
+					},
+
+					"healthLabel":{
+						label:"Health Range: (% allowed)",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,85),
+					},
+					"healthDash":{
+						label:"-",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(91,54),
+					},
+					"healthTextLower":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,49),
+						size:cc.size(75,32),
+					},
+					"healthTextUpper":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(100,49),
+						size:cc.size(75,32),
+					},
+				};
+			break;
+			case "Equip Item":
+				panels["panels"].children={
+					"equipLabel":{
+						label:"Equips To:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"headButton":{
+						bg:cc.c4b(255,0,0,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(69,320),
+						size:cc.size(55,32),
+						children:{
+							"content":{
+								position:cc.p(28,16),
+								anchorPoint:cc.p(0.5,0.5),
+								label: "Head",
+								color:cc.c3b(0,0,0),
+							}
+						}
+					},
+					"bodyButton":{
+						bg:cc.c4b(255,0,0,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(69,280),
+						size:cc.size(55,32),
+						children:{
+							"content":{
+								position:cc.p(28,16),
+								anchorPoint:cc.p(0.5,0.5),
+								label: "Body",
+								color:cc.c3b(0,0,0),
+							}
+						}
+					},
+					"legButton":{
+						bg:cc.c4b(255,0,0,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(69,240),
+						size:cc.size(55,32),
+						children:{
+							"content":{
+								position:cc.p(28,16),
+								anchorPoint:cc.p(0.5,0.5),
+								label: "Legs",
+								color:cc.c3b(0,0,0),
+							}
+						}
+					},
+					"feetButton":{
+						bg:cc.c4b(255,0,0,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(69,200),
+						size:cc.size(55,32),
+						children:{
+							"content":{
+								position:cc.p(28,16),
+								anchorPoint:cc.p(0.5,0.5),
+								label: "Feet",
+								color:cc.c3b(0,0,0),
+							}
+						}
+					},
+					"lArmButton":{
+						bg:cc.c4b(255,0,0,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(10,280),
+						size:cc.size(55,32),
+						children:{
+							"content":{
+								position:cc.p(28,16),
+								anchorPoint:cc.p(0.5,0.5),
+								label: "L Arm",
+								color:cc.c3b(0,0,0),
+							}
+						}
+					},
+					"rArmButton":{
+						bg:cc.c4b(255,0,0,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(128,280),
+						size:cc.size(55,32),
+						children:{
+							"content":{
+								position:cc.p(28,16),
+								anchorPoint:cc.p(0.5,0.5),
+								label: "R Arm",
+								color:cc.c3b(0,0,0),
+							}
+						}
+					},
+					"modButton":{
+						bg:cc.c4b(255,0,0,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(10,160),
+						size:cc.size(55,32),
+						children:{
+							"content":{
+								position:cc.p(28,16),
+								anchorPoint:cc.p(0.5,0.5),
+								label: "Mod",
+								color:cc.c3b(0,0,0),
+							}
+						}
+					},
+				};
+			break;
 		}
 
 		panels["panels"].children["okbtn"]={
@@ -1002,7 +1332,7 @@ ScriptEditor = Popup.extend({
 				this.warpYBox = new EntryBox(this.subEditor["mapYText"],cc.size(this.subEditor["mapYText"].getContentSize().width,this.subEditor["mapYText"].getContentSize().height), cc.p(0,this.subEditor["mapYText"].getContentSize().height), y, cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.warpYBox.setDefaultFineFlag(true);
 			break;
-			case "Talk":
+			case "Talk": case "Read Item":
 				this.sayBox = new EntryBox(this.subEditor["sayText"],cc.size(this.subEditor["sayText"].getContentSize().width,this.subEditor["sayText"].getContentSize().height), cc.p(0,this.subEditor["sayText"].getContentSize().height), data["say"] ?  data["say"] : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
 				this.sayBox.setDefaultFineFlag(true);
 				this.sayBox.setNullAllowed(false);
@@ -1129,7 +1459,7 @@ ScriptEditor = Popup.extend({
 					}
 				}
 			break;
-			case "Give /Take Item":
+			case "Give /Take Item": case "Has Player Item":
 				this.subEditor["amountNote"].setDimensions(cc.size(180,0));
 				var listnodes = [];
 				var callBackList=[];
@@ -1189,11 +1519,11 @@ ScriptEditor = Popup.extend({
 				if(data["item"]!=null && data["item"]!=='undefined'){
 					this.subEditor["itemList"].runListCallBack("Use",data["item"]);
 				}
-				this.itemAmountBox = new EntryBox(this.subEditor["amountText"],cc.size(this.subEditor["amountText"].getContentSize().width,this.subEditor["amountText"].getContentSize().height), cc.p(0,this.subEditor["amountText"].getContentSize().height), data["amount"] ?  data["amount"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.itemAmountBox = new EntryBox(this.subEditor["amountText"],cc.size(this.subEditor["amountText"].getContentSize().width,this.subEditor["amountText"].getContentSize().height), cc.p(0,this.subEditor["amountText"].getContentSize().height), data["amount"] ?  data["amount"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.itemAmountBox.setDefaultFineFlag(true);
 				this.itemAmountBox.setNullAllowed(false);
 			break;
-			case "Modify Player Stats":
+			case "Modify Player Stats": case "Modify NPC Stats":
 				var listnodes = [];
 				var callBackList=[];
 				var skillList = ObjectLists.getSkillsList();
@@ -1252,17 +1582,309 @@ ScriptEditor = Popup.extend({
 				if(data["skill"]!=null && data["skill"]!=='undefined'){
 					this.subEditor["skillList"].runListCallBack("Use",data["skill"]);
 				}
-				this.skillLevelBox = new EntryBox(this.subEditor["levelText"],cc.size(this.subEditor["levelText"].getContentSize().width,this.subEditor["levelText"].getContentSize().height), cc.p(0,this.subEditor["levelText"].getContentSize().height), data["level"] ?  data["level"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.skillLevelBox = new EntryBox(this.subEditor["levelText"],cc.size(this.subEditor["levelText"].getContentSize().width,this.subEditor["levelText"].getContentSize().height), cc.p(0,this.subEditor["levelText"].getContentSize().height), data["level"] ?  data["level"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.skillLevelBox.setDefaultFineFlag(true);
 				this.skillLevelBox.setNullAllowed(false);
 
-				this.skillXPBox = new EntryBox(this.subEditor["expText"],cc.size(this.subEditor["expText"].getContentSize().width,this.subEditor["expText"].getContentSize().height), cc.p(0,this.subEditor["expText"].getContentSize().height), data["xp"] ?  data["xp"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.skillXPBox = new EntryBox(this.subEditor["expText"],cc.size(this.subEditor["expText"].getContentSize().width,this.subEditor["expText"].getContentSize().height), cc.p(0,this.subEditor["expText"].getContentSize().height), data["xp"] ?  data["xp"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.skillXPBox.setDefaultFineFlag(true);
 				this.skillXPBox.setNullAllowed(false);
 
-				this.skillHealthBox = new EntryBox(this.subEditor["healthText"],cc.size(this.subEditor["healthText"].getContentSize().width,this.subEditor["healthText"].getContentSize().height), cc.p(0,this.subEditor["healthText"].getContentSize().height), data["health"] ?  data["health"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.skillHealthBox = new EntryBox(this.subEditor["healthText"],cc.size(this.subEditor["healthText"].getContentSize().width,this.subEditor["healthText"].getContentSize().height), cc.p(0,this.subEditor["healthText"].getContentSize().height), data["health"] ?  data["health"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.skillHealthBox.setDefaultFineFlag(true);
 				this.skillHealthBox.setNullAllowed(false);
+			break;
+			case "Is Panel Visbility": case "Open/Close Panel":
+					var listnodes = [];
+					var callBackList=[];
+					var panelList = ["Inventory","Equipment","Skills","QuestLog"]
+					for(var i=0;i<panelList.length;i++){
+						listnodes[i]=cc.Node.create();
+						var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
+						var text = cc.LabelTTF.create(panelList[i],"Arial",15);
+						text.setColor(cc.c3b(0,0,0));
+						text.setAnchorPoint(cc.p(0,0));
+						text.setPosition(cc.p(4,4));
+						text.setDimensions(cc.size(126,0));
+						var useElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/use.png"));
+						useElement.setPosition(cc.p(130,0));
+						useElement.setAnchorPoint(cc.p(0,0));
+						useElement.callBack="Use";
+						listnodes[i].setContentSize(154,text.getContentSize().height+8);
+						useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+						callBackList.push([useElement]);
+
+						var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+						listnodes[i].addChild(highlightNode);
+						listnodes[i].highlightNode=highlightNode;
+						listnodes[i].addChild(element);
+						listnodes[i].addChild(text);
+						listnodes[i].addChild(useElement);
+					}
+					var self=this;
+					this.subEditor["panelList"].getListSize = function(){
+						var height =0;
+						for(var i=0;i<listnodes.length;i++){
+							height+=listnodes[i].getContentSize().height;
+						}
+						return cc.size(154,height);
+					};
+					this.subEditor["panelList"].getListElementAmount=function(){
+						return listnodes.length;
+					};
+					this.subEditor["panelList"].getSizeForElement=function(elementID){
+						return listnodes[elementID].getContentSize();
+					};
+					this.subEditor["panelList"].getListNodeForIndex=function(elementID){
+						return listnodes[elementID];
+					};
+					this.subEditor["panelList"].getHighlightNode = function(elementID){
+						return listnodes[elementID].highlightNode;
+					};
+					this.subEditor["panelList"].runListCallBack=function(name,listelement){
+						if(name== "Use"){
+							this.listView.highlightNode(listelement);
+							self.panelContext=listelement;
+						}
+					};
+					this.subEditor["panelList"].listView = ListView.create(this.subEditor["panelList"]);
+					this.subEditor["panelList"].listView.setCallBackList(callBackList);
+					this.subEditor["panelList"].addChild(this.subEditor["panelList"].listView);
+					if(data["panel"]!=null && data["panel"]!=='undefined'){
+						this.subEditor["panelList"].runListCallBack("Use",data["panel"]);
+					}
+					this.visibleContext = data["visible"]==1?1:0;
+					if(this.visibleContext==1){
+						this.subEditor["visibleButton"].setColor(cc.c4b(0,255,0,255));
+						this.subEditor["visibleButton"]["content"].setString("Visible");
+					}
+			break;
+			case "Is Event Fired By":
+				var listnodes = [];
+				var callBackList=[];
+				var objectList = ["Player","NPC"]
+				for(var i=0;i<objectList.length;i++){
+					listnodes[i]=cc.Node.create();
+					var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
+					var text = cc.LabelTTF.create(objectList[i],"Arial",15);
+					text.setColor(cc.c3b(0,0,0));
+					text.setAnchorPoint(cc.p(0,0));
+					text.setPosition(cc.p(4,4));
+					text.setDimensions(cc.size(126,0));
+					var useElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/use.png"));
+					useElement.setPosition(cc.p(130,0));
+					useElement.setAnchorPoint(cc.p(0,0));
+					useElement.callBack="Use";
+					listnodes[i].setContentSize(154,text.getContentSize().height+8);
+					useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+					callBackList.push([useElement]);
+
+					var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+					listnodes[i].addChild(highlightNode);
+					listnodes[i].highlightNode=highlightNode;
+					listnodes[i].addChild(element);
+					listnodes[i].addChild(text);
+					listnodes[i].addChild(useElement);
+				}
+				var self=this;
+				this.subEditor["objectList"].getListSize = function(){
+					var height =0;
+					for(var i=0;i<listnodes.length;i++){
+						height+=listnodes[i].getContentSize().height;
+					}
+					return cc.size(154,height);
+				};
+				this.subEditor["objectList"].getListElementAmount=function(){
+					return listnodes.length;
+				};
+				this.subEditor["objectList"].getSizeForElement=function(elementID){
+					return listnodes[elementID].getContentSize();
+				};
+				this.subEditor["objectList"].getListNodeForIndex=function(elementID){
+					return listnodes[elementID];
+				};
+				this.subEditor["objectList"].getHighlightNode = function(elementID){
+					return listnodes[elementID].highlightNode;
+				};
+				this.subEditor["objectList"].runListCallBack=function(name,listelement){
+					if(name== "Use"){
+						this.listView.highlightNode(listelement);
+						self.objectContext=listelement;
+					}
+				};
+				this.subEditor["objectList"].listView = ListView.create(this.subEditor["objectList"]);
+				this.subEditor["objectList"].listView.setCallBackList(callBackList);
+				this.subEditor["objectList"].addChild(this.subEditor["objectList"].listView);
+				if(data["object"]!=null && data["object"]!=='undefined'){
+					this.subEditor["objectList"].runListCallBack("Use",data["object"]);
+				}
+			break;
+			case "Is NPC Actioning":
+				var listnodes = [];
+				var callBackList=[];
+				var actionList = ["Attacking","Defending","Fleeing"]
+				for(var i=0;i<actionList.length;i++){
+					listnodes[i]=cc.Node.create();
+					var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
+					var text = cc.LabelTTF.create(actionList[i],"Arial",15);
+					text.setColor(cc.c3b(0,0,0));
+					text.setAnchorPoint(cc.p(0,0));
+					text.setPosition(cc.p(4,4));
+					text.setDimensions(cc.size(126,0));
+					var useElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/use.png"));
+					useElement.setPosition(cc.p(130,0));
+					useElement.setAnchorPoint(cc.p(0,0));
+					useElement.callBack="Use";
+					listnodes[i].setContentSize(154,text.getContentSize().height+8);
+					useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+					callBackList.push([useElement]);
+
+					var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+					listnodes[i].addChild(highlightNode);
+					listnodes[i].highlightNode=highlightNode;
+					listnodes[i].addChild(element);
+					listnodes[i].addChild(text);
+					listnodes[i].addChild(useElement);
+				}
+				var self=this;
+				this.subEditor["actionList"].getListSize = function(){
+					var height =0;
+					for(var i=0;i<listnodes.length;i++){
+						height+=listnodes[i].getContentSize().height;
+					}
+					return cc.size(154,height);
+				};
+				this.subEditor["actionList"].getListElementAmount=function(){
+					return listnodes.length;
+				};
+				this.subEditor["actionList"].getSizeForElement=function(elementID){
+					return listnodes[elementID].getContentSize();
+				};
+				this.subEditor["actionList"].getListNodeForIndex=function(elementID){
+					return listnodes[elementID];
+				};
+				this.subEditor["actionList"].getHighlightNode = function(elementID){
+					return listnodes[elementID].highlightNode;
+				};
+				this.subEditor["actionList"].runListCallBack=function(name,listelement){
+					if(name== "Use"){
+						this.listView.highlightNode(listelement);
+						self.actionContext=listelement;
+					}
+				};
+				this.subEditor["actionList"].listView = ListView.create(this.subEditor["actionList"]);
+				this.subEditor["actionList"].listView.setCallBackList(callBackList);
+				this.subEditor["actionList"].addChild(this.subEditor["actionList"].listView);
+				if(data["action"]!=null && data["action"]!=='undefined'){
+					this.subEditor["actionList"].runListCallBack("Use",data["action"]);
+				}
+			break;
+			case "Is Player Inventory Space":
+				this.inventorySpaceBox = new EntryBox(this.subEditor["spaceText"],cc.size(this.subEditor["spaceText"].getContentSize().width,this.subEditor["spaceText"].getContentSize().height), cc.p(0,this.subEditor["spaceText"].getContentSize().height), data["space"]!=null&&data["space"]!=='undefined' ?  data["space"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.inventorySpaceBox.setDefaultFineFlag(true);
+				this.inventorySpaceBox.setNullAllowed(false);
+			break;
+			case "Wait":
+				this.timeBox = new EntryBox(this.subEditor["timeText"],cc.size(this.subEditor["timeText"].getContentSize().width,this.subEditor["timeText"].getContentSize().height), cc.p(0,this.subEditor["timeText"].getContentSize().height), data["time"]!=null&&data["time"]!=='undefined' ?  data["time"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.timeBox.setDefaultFineFlag(true);
+				this.timeBox.setNullAllowed(false);
+			break;
+			case "Repeat Responses":
+				this.subEditor["amountNote"].setDimensions(cc.size(180,0));
+				this.repeatBox = new EntryBox(this.subEditor["amountText"],cc.size(this.subEditor["amountText"].getContentSize().width,this.subEditor["amountText"].getContentSize().height), cc.p(0,this.subEditor["amountText"].getContentSize().height), data["amount"]!=null&&data["amount"]!=='undefined' ?  data["amount"] : "1", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.repeatBox.setDefaultFineFlag(true);
+				this.repeatBox.setNullAllowed(false);
+			break;
+			case "Is Player Statistics": case "Is NPC Statistics":
+				var listnodes = [];
+				var callBackList=[];
+				var skillList = ObjectLists.getSkillsList();
+				for(var i=0;i<skillList.length;i++){
+					listnodes[i]=cc.Node.create();
+					var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
+					var text = cc.LabelTTF.create(skillList[i]["name"],"Arial",15);
+					text.setColor(cc.c3b(0,0,0));
+					text.setAnchorPoint(cc.p(0,0));
+					text.setPosition(cc.p(4,4));
+					text.setDimensions(cc.size(126,0));
+					var useElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/use.png"));
+					useElement.setPosition(cc.p(130,0));
+					useElement.setAnchorPoint(cc.p(0,0));
+					useElement.callBack="Use";
+					listnodes[i].setContentSize(154,text.getContentSize().height+8);
+					useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+					callBackList.push([useElement]);
+
+					var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+					listnodes[i].addChild(highlightNode);
+					listnodes[i].highlightNode=highlightNode;
+					listnodes[i].addChild(element);
+					listnodes[i].addChild(text);
+					listnodes[i].addChild(useElement);
+				}
+				var self=this;
+				this.subEditor["skillList"].getListSize = function(){
+					var height =0;
+					for(var i=0;i<listnodes.length;i++){
+						height+=listnodes[i].getContentSize().height;
+					}
+					return cc.size(154,height);
+				};
+				this.subEditor["skillList"].getListElementAmount=function(){
+					return listnodes.length;
+				};
+				this.subEditor["skillList"].getSizeForElement=function(elementID){
+					return listnodes[elementID].getContentSize();
+				};
+				this.subEditor["skillList"].getListNodeForIndex=function(elementID){
+					return listnodes[elementID];
+				};
+				this.subEditor["skillList"].getHighlightNode = function(elementID){
+					return listnodes[elementID].highlightNode;
+				};
+				this.subEditor["skillList"].runListCallBack=function(name,listelement){
+					if(name== "Use"){
+						this.listView.highlightNode(listelement);
+						self.skillContext=listelement;
+					}
+				};
+				this.subEditor["skillList"].listView = ListView.create(this.subEditor["skillList"]);
+				this.subEditor["skillList"].listView.setCallBackList(callBackList);
+				this.subEditor["skillList"].addChild(this.subEditor["skillList"].listView);
+				if(data["skill"]!=null && data["skill"]!=='undefined'){
+					this.subEditor["skillList"].runListCallBack("Use",data["skill"]);
+				}
+				this.skillLevelBox = new EntryBox(this.subEditor["levelTextLower"],cc.size(this.subEditor["levelTextLower"].getContentSize().width,this.subEditor["levelTextLower"].getContentSize().height), cc.p(0,this.subEditor["levelTextLower"].getContentSize().height), data["levelLower"]!=null && data["levelLower"]!=='undefined' ?  data["levelLower"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillLevelBox.setDefaultFineFlag(true);
+				this.skillLevelBox.setNullAllowed(false);
+
+				this.skillXPBox = new EntryBox(this.subEditor["expTextLower"],cc.size(this.subEditor["expTextLower"].getContentSize().width,this.subEditor["expTextLower"].getContentSize().height), cc.p(0,this.subEditor["expTextLower"].getContentSize().height), data["xpLower"]!=null && data["xpLower"]!=='undefined' ?  data["xpLower"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillXPBox.setDefaultFineFlag(true);
+				this.skillXPBox.setNullAllowed(false);
+
+				this.skillHealthBox = new EntryBox(this.subEditor["healthTextLower"],cc.size(this.subEditor["healthTextLower"].getContentSize().width,this.subEditor["healthTextLower"].getContentSize().height), cc.p(0,this.subEditor["healthTextLower"].getContentSize().height), data["healthLower"]!=null && data["healthLower"]!=='undefined' ?  data["healthLower"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillHealthBox.setDefaultFineFlag(true);
+				this.skillHealthBox.setNullAllowed(false);
+
+				this.skillLevelBoxUpper = new EntryBox(this.subEditor["levelTextUpper"],cc.size(this.subEditor["levelTextUpper"].getContentSize().width,this.subEditor["levelTextUpper"].getContentSize().height), cc.p(0,this.subEditor["levelTextUpper"].getContentSize().height), data["levelUpper"]!=null && data["levelUpper"]!=='undefined' ?  data["levelUpper"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillLevelBoxUpper.setDefaultFineFlag(true);
+				this.skillLevelBoxUpper.setNullAllowed(false);
+
+				this.skillXPBoxUpper = new EntryBox(this.subEditor["expTextUpper"],cc.size(this.subEditor["expTextUpper"].getContentSize().width,this.subEditor["expTextUpper"].getContentSize().height), cc.p(0,this.subEditor["expTextUpper"].getContentSize().height), data["xpUpper"]!=null && data["xpUpper"]!=='undefined' ?  data["xpUpper"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillXPBoxUpper.setDefaultFineFlag(true);
+				this.skillXPBoxUpper.setNullAllowed(false);
+
+				this.skillHealthBoxUpper = new EntryBox(this.subEditor["healthTextUpper"],cc.size(this.subEditor["healthTextUpper"].getContentSize().width,this.subEditor["healthTextUpper"].getContentSize().height), cc.p(0,this.subEditor["healthTextUpper"].getContentSize().height), data["healthUpper"]!=null && data["healthUpper"]!=='undefined' ?  data["healthUpper"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillHealthBoxUpper.setDefaultFineFlag(true);
+				this.skillHealthBoxUpper.setNullAllowed(false);
+			break;
+			case "Equip Item":
+				if(data["equip"]!=null && data["equip"]!=='undefined'){
+					this.equipContext="head";
+					this.setEquippableTo(data["equip"]);
+				}else{
+					this.setEquippableTo("head");
+				}
 			break;
 		}
 	},
@@ -1311,6 +1933,51 @@ ScriptEditor = Popup.extend({
 		}
 	},
 
+	setEquippableTo:function(type){
+		this.subEditor["headButton"].setColor(cc.c4b(255,255,255,255));
+		this.subEditor["bodyButton"].setColor(cc.c4b(255,255,255,255));
+		this.subEditor["legButton"].setColor(cc.c4b(255,255,255,255));
+		this.subEditor["feetButton"].setColor(cc.c4b(255,255,255,255));
+		this.subEditor["lArmButton"].setColor(cc.c4b(255,255,255,255));
+		this.subEditor["rArmButton"].setColor(cc.c4b(255,255,255,255));
+		this.subEditor["modButton"].setColor(cc.c4b(255,255,255,255));
+
+		switch(type){
+			case "head": this.equipContext=type; this.subEditor["headButton"].setColor(cc.c4b(255,0,0,255)); return;
+			case "body": this.equipContext=type; this.subEditor["bodyButton"].setColor(cc.c4b(255,0,0,255)); return;
+			case "legs": this.equipContext=type; this.subEditor["legButton"].setColor(cc.c4b(255,0,0,255)); return;
+			case "feet": this.equipContext=type; this.subEditor["feetButton"].setColor(cc.c4b(255,0,0,255)); return;
+			case "mod": this.equipContext=type; this.subEditor["modButton"].setColor(cc.c4b(255,0,0,255)); return;
+			case "bothArms": this.equipContext=type; this.subEditor["lArmButton"].setColor(cc.c4b(255,0,0,255));
+			this.subEditor["rArmButton"].setColor(cc.c4b(255,0,0,255)); return;
+		}
+		if(this.equipContext!="bothArms" && this.equipContext!="lArm" && this.equipContext!="rArm" && type=="lArm"){
+			this.subEditor["lArmButton"].setColor(cc.c4b(255,0,0,255));
+			this.equipContext="lArm";
+		}
+		else if(this.equipContext!="bothArms" && this.equipContext!="lArm" && this.equipContext!="rArm" && type=="rArm"){
+			this.subEditor["rArmButton"].setColor(cc.c4b(255,0,0,255));
+			this.equipContext="rArm";
+		}
+		else if(this.equipContext=="rArm" && type=="lArm"){
+			this.subEditor["lArmButton"].setColor(cc.c4b(255,0,0,255));
+			this.subEditor["rArmButton"].setColor(cc.c4b(255,0,0,255));
+			this.equipContext="bothArms";
+		}
+		else if(this.equipContext=="lArm" && type=="rArm"){
+			this.subEditor["lArmButton"].setColor(cc.c4b(255,0,0,255));
+			this.subEditor["rArmButton"].setColor(cc.c4b(255,0,0,255));
+			this.equipContext="bothArms";
+		}
+		else if(this.equipContext=="bothArms" && type=="rArm"){
+			this.subEditor["lArmButton"].setColor(cc.c4b(255,0,0,255));
+			this.equipContext="lArm";
+		}
+		else if(this.equipContext=="bothArms" && type=="lArm"){
+			this.subEditor["rArmButton"].setColor(cc.c4b(255,0,0,255));
+			this.equipContext="rArm";
+		}
+	},
 
 	specifierSelected:function(clicknum,touch){
 		if(this.delegate.data["data"].length>0){
@@ -1344,7 +2011,7 @@ ScriptEditor = Popup.extend({
 							"index":index,
 						}
 					break
-					case "Talk":
+					case "Talk": case "Read Item":
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"say":this.sayBox.getText(),
 						}
@@ -1355,13 +2022,13 @@ ScriptEditor = Popup.extend({
 							"objective":this.objectiveContext,
 						}
 					break;
-					case "Give /Take Item":
+					case "Give /Take Item": case "Has Player Item":
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"item":this.itemContext,
 							"amount":parseInt(this.itemAmountBox.getText()),
 						}
 					break;
-					case "Modify Player Stats":
+					case "Modify Player Stats": case "Modify NPC Stats":
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"skill":this.skillContext,
 							"level":parseInt(this.skillLevelBox.getText()),
@@ -1369,10 +2036,94 @@ ScriptEditor = Popup.extend({
 							"health":parseInt(this.skillHealthBox.getText()),
 						}
 					break;
+					case "Is Panel Visbility": case "Open/Close Panel":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"panel":this.panelContext,
+							"visible":this.visibleContext,
+						}
+					break;
+					case "Is Event Fired By":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"object":this.objectContext,
+						}
+					break;
+					case "Is NPC Actioning":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"action":this.actionContext,
+						}
+					break;
+					case "Is Player Inventory Space":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"space":parseInt(this.inventorySpaceBox.getText()),
+						}
+					break;
+					case "Wait":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"time":parseInt(this.timeBox.getText()),
+						}
+					break;
+					case "Repeat Responses":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"amount":parseInt(this.repeatBox.getText()),
+						}
+					break;
+					case "Is Player Statistics": case "Is NPC Statistics":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"skill":this.skillContext,
+							"levelLower":parseInt(this.skillLevelBox.getText()),
+							"xpLower":parseInt(this.skillXPBox.getText()),
+							"healthLower":parseInt(this.skillHealthBox.getText()),
+							"levelUpper":parseInt(this.skillLevelBoxUpper.getText()),
+							"xpUpper":parseInt(this.skillXPBoxUpper.getText()),
+							"healthUpper":parseInt(this.skillHealthBoxUpper.getText()),
+						}
+					break;
+					case "Equip Item":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"equip":this.equipContext,
+						}
+					break;
 				}
 				this.hideSubEditor();
 				return true;
 
+			}
+
+
+			if (this.subEditor["headButton"] && isTouching(this.subEditor["headButton"],truePos)) {
+				this.setEquippableTo("head");
+				return true;
+			}
+			if (this.subEditor["bodyButton"] && isTouching(this.subEditor["bodyButton"],truePos)) {
+				this.setEquippableTo("body");
+				return true;
+			}
+			if (this.subEditor["legButton"] && isTouching(this.subEditor["legButton"],truePos)) {
+				this.setEquippableTo("legs");
+				return true;
+			}
+			if (this.subEditor["feetButton"] && isTouching(this.subEditor["feetButton"],truePos)) {
+				this.setEquippableTo("feet");
+				return true;
+			}
+			if (this.subEditor["lArmButton"] && isTouching(this.subEditor["lArmButton"],truePos)) {
+				this.setEquippableTo("lArm");
+				return true;
+			}
+			if (this.subEditor["rArmButton"] && isTouching(this.subEditor["rArmButton"],truePos)) {
+				this.setEquippableTo("rArm");
+				return true;
+			}
+			if (this.subEditor["modButton"] && isTouching(this.subEditor["modButton"],truePos)) {
+				this.setEquippableTo("mod");
+				return true;
+			}
+
+			if (this.subEditor["visibleButton"] && isTouching(this.subEditor["visibleButton"],truePos)) {
+				this.visibleContext = this.visibleContext==0?1:0;
+				this.subEditor["visibleButton"].setColor(this.visibleContext==0?cc.c4b(255,0,0,255):cc.c4b(0,255,0,255));
+				this.subEditor["visibleButton"]["content"].setString(this.visibleContext==0?"Invisible":"Visible");
+				return true;
 			}
 
 			if (isTouching(this.subEditor["cancelbtn"],truePos)) {

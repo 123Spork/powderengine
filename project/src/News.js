@@ -14,6 +14,13 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"25th August 2014: (v0.718)":[
+					"Added 90% of subeditors needed for the scripting system. Go into the script editor and press the pencil icon on the responses and requirements to edit their core data.",
+					"Updated script panel texture to utilize inpanel submenu editors.",
+					"Abstracted out the script editor so that its not dependant on certain types.",
+					"Added/removed requirements responses based on logical conclusions on what is actually needed. Consume as an item response, for example, is unecessary because it would work identically to destroy."
+				],
+
 				"17th August 2014: (v0.714)":[
 					"Added basic template logic of new scripting editor system. Scripts can be saved and loaded like other list systems. This editor currently does not allow you to apply scripts to anything (it is simply the GUI interface template logic that's in there). The item editor has been changed to utilize the new saved scripts list.",
 					"Fixed localstorage issue caused by settings implementation. Game now does not now load until the game is fully in sync. The issue was causing an error on some game-loads because the localstorage was not yet available (requiring a refresh).",

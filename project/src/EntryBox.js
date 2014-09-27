@@ -2,14 +2,25 @@ var EntryBox = InputBox.extend({
 	hasEntry:false,
 	nullAllowed:false,
 	dontClear:false,
+	isCurrentlyEditing:false,
 	
     editBoxEditingDidBegin: function (editBox) {
     	if(this.dontClear==false){
 			editBox.setText("");
 		}
+		this.isCurrentlyEditing=true;
+    },
+
+    setInputFlag:function(flag){
+    	this.inputBox.setInputFlag(flag);
+    },
+
+    isEditing:function(){
+    	return this.isCurrentlyEditing;
     },
 
     editBoxEditingDidEnd: function (editBox) {
+		this.isCurrentlyEditing=false;
 		if(editBox.getText()==null || editBox.getText().length == "" && this.nullAllowed){
 			this.hasEntry=true;
 			return;
@@ -40,6 +51,7 @@ var EntryBox = InputBox.extend({
 	
 	setText:function(_in){
 		this.inputBox.setText(_in);
+		this.hasEntry=true;
 	},
 
 	setDefaultFineFlag:function(value){

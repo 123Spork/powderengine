@@ -186,7 +186,7 @@ var GameScene = Scene.extend({
 			this.onKeyUp("S");
 			return true;
 		}
-		if(cc.rectContainsPoint(this.panels["quickedit_button"].getBoundingBox(),touch._point) && this.panels["quickedit_button"].isVisible()){
+		if(this.panels["quickedit_button"].isVisible() && cc.rectContainsPoint(this.panels["quickedit_button"].getBoundingBox(),touch._point) && this.panels["quickedit_button"].isVisible()){
 			this.showEditControls(!this.isEditVis);
 			return true;
 		}
@@ -380,130 +380,133 @@ var GameScene = Scene.extend({
 	if(!command){
 		return;
 	}
-	cc.log(command);
+		if(PlayersController.getYou().access>1){
+			switch(command){
+				case "/editscript":
+					if(Scripteditor!=null && !Scripteditor._parent) Scripteditor=null;
+					if(Scripteditor){
+						Scripteditor.willTerminate();
+						Scripteditor.removeFromParent();
+						Scripteditor=null;
+					} else{
+						Scripteditor = new PopupList();
+						Scripteditor.init({delegate:null,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
+						Scripteditor.didBecomeActive();
+						this.addChild(Scripteditor);
+					}
+				break;
+				case "/editmap":
+					if(Mapeditor!=null && !Mapeditor._parent) Mapeditor=null;
+					if(Mapeditor){
+						Mapeditor.willTerminate();
+						Mapeditor.removeFromParent();
+						Mapeditor=null;
+						GameMap.setInteractionDelegate(null);
+					} else{
+						Mapeditor = new MapEditor();
+						Mapeditor.init();
+						Mapeditor.didBecomeActive();
+						this.addChild(Mapeditor);
+						GameMap.setInteractionDelegate(Mapeditor);
+					}
+				break;
+				case "/editsettings":
+					if(Settingseditor!=null && !Settingseditor._parent) Settingseditor=null;
+					if(Settingseditor){
+						Settingseditor.willTerminate();
+						Settingseditor.removeFromParent();
+						Settingseditor=null;
+					} else{
+						Settingseditor = new SettingsEditor();
+						Settingseditor.init();
+						Settingseditor.didBecomeActive();
+						this.addChild(Settingseditor);
+					}
+				break;
+				case "/editwarp": 
+					if(Warpeditor!=null && !Warpeditor._parent) Warpeditor=null;
+					if(Warpeditor){
+						Warpeditor.willTerminate();
+						Warpeditor.removeFromParent();
+						Warpeditor=null;
+					} else{
+						Warpeditor = new PopupList();
+						Warpeditor.init({delegate:null,editor:new WarpEditor(),list:ObjectLists.getWarpList(),name:"Warp List"});
+						Warpeditor.didBecomeActive();
+						this.addChild(Warpeditor);
+					}
+				break;
+				case "/editsign": 
+					if(Signeditor!=null && !Signeditor._parent) Signeditor=null;
+					if(Signeditor){
+						Signeditor.willTerminate();
+						Signeditor.removeFromParent();
+						Signeditor=null;
+					} else{
+						Signeditor = new PopupList();
+						Signeditor.init({delegate:null,editor:new SignEditor(),list:ObjectLists.getSignsList(),name:"Sign List"});
+						Signeditor.didBecomeActive();
+						this.addChild(Signeditor);
+					}
+				break;
+				case "/editskill": 
+					if(Skillseditor!=null && !Skillseditor._parent) Skillseditor=null;
+					if(Skillseditor){
+						Skillseditor.willTerminate();
+						Skillseditor.removeFromParent();
+						Skillseditor=null;
+					} else{
+						Skillseditor = new PopupList();
+						Skillseditor.init({delegate:null,editor:new SkillsEditor(),list:ObjectLists.getSkillsList(),name:"Skills List"});
+						Skillseditor.didBecomeActive();
+						this.addChild(Skillseditor);
+					}
+				break;		
+				case "/edititem": 
+					if(Itemeditor!=null && !Itemeditor._parent) Itemeditor=null;
+					if(Itemeditor){
+						Itemeditor.willTerminate();
+						Itemeditor.removeFromParent();
+						Itemeditor=null;
+						GameMap.setInteractionDelegate(null);
+					} else{
+						Itemeditor = new PopupList();
+						Itemeditor.init({delegate:null,editor:new ItemEditor(),list:ObjectLists.getItemList(),name:"Item List"});
+						Itemeditor.didBecomeActive();
+						this.addChild(Itemeditor);
+					}
+				break;
+				case "/editnpc": 
+					if(NPCeditor!=null && !NPCeditor._parent) NPCeditor=null;
+					if(NPCeditor){
+						NPCeditor.willTerminate();
+						NPCeditor.removeFromParent();
+						NPCeditor=null;
+						GameMap.setInteractionDelegate(null);
+					} else{
+						NPCeditor = new PopupList();
+						NPCeditor.init({delegate:null,editor:new NPCEditor(),list:ObjectLists.getNPCList(),name:"NPC List"});
+						NPCeditor.didBecomeActive();
+						this.addChild(NPCeditor);
+					}
+				break;
+				case "/editquest": 
+					if(Questeditor!=null && !Questeditor._parent) Questeditor=null;
+					if(Questeditor){
+						Questeditor.willTerminate();
+						Questeditor.removeFromParent();
+						Questeditor=null;
+						GameMap.setInteractionDelegate(null);
+					} else{
+						Questeditor = new PopupList();
+						Questeditor.init({delegate:null,editor:new QuestEditor(),list:ObjectLists.getQuestList(),name:"Quest List"});
+						Questeditor.didBecomeActive();
+						this.addChild(Questeditor);
+					}
+				break;
+			}
+		}
 		switch(command){
-			case "/editscript":
-				if(Scripteditor!=null && !Scripteditor._parent) Scripteditor=null;
-				if(Scripteditor){
-					Scripteditor.willTerminate();
-					Scripteditor.removeFromParent();
-					Scripteditor=null;
-				} else{
-					Scripteditor = new PopupList();
-					Scripteditor.init({delegate:null,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
-					Scripteditor.didBecomeActive();
-					this.addChild(Scripteditor);
-				}
-			break;
-			case "/editmap":
-				if(Mapeditor!=null && !Mapeditor._parent) Mapeditor=null;
-				if(Mapeditor){
-					Mapeditor.willTerminate();
-					Mapeditor.removeFromParent();
-					Mapeditor=null;
-					GameMap.setInteractionDelegate(null);
-				} else{
-					Mapeditor = new MapEditor();
-					Mapeditor.init();
-					Mapeditor.didBecomeActive();
-					this.addChild(Mapeditor);
-					GameMap.setInteractionDelegate(Mapeditor);
-				}
-			break;
-			case "/editsettings":
-				if(Settingseditor!=null && !Settingseditor._parent) Settingseditor=null;
-				if(Settingseditor){
-					Settingseditor.willTerminate();
-					Settingseditor.removeFromParent();
-					Settingseditor=null;
-				} else{
-					Settingseditor = new SettingsEditor();
-					Settingseditor.init();
-					Settingseditor.didBecomeActive();
-					this.addChild(Settingseditor);
-				}
-			break;
-			case "/editwarp": 
-				if(Warpeditor!=null && !Warpeditor._parent) Warpeditor=null;
-				if(Warpeditor){
-					Warpeditor.willTerminate();
-					Warpeditor.removeFromParent();
-					Warpeditor=null;
-				} else{
-					Warpeditor = new PopupList();
-					Warpeditor.init({delegate:null,editor:new WarpEditor(),list:ObjectLists.getWarpList(),name:"Warp List"});
-					Warpeditor.didBecomeActive();
-					this.addChild(Warpeditor);
-				}
-			break;
-			case "/editsign": 
-				if(Signeditor!=null && !Signeditor._parent) Signeditor=null;
-				if(Signeditor){
-					Signeditor.willTerminate();
-					Signeditor.removeFromParent();
-					Signeditor=null;
-				} else{
-					Signeditor = new PopupList();
-					Signeditor.init({delegate:null,editor:new SignEditor(),list:ObjectLists.getSignsList(),name:"Sign List"});
-					Signeditor.didBecomeActive();
-					this.addChild(Signeditor);
-				}
-			break;
-			case "/editskill": 
-				if(Skillseditor!=null && !Skillseditor._parent) Skillseditor=null;
-				if(Skillseditor){
-					Skillseditor.willTerminate();
-					Skillseditor.removeFromParent();
-					Skillseditor=null;
-				} else{
-					Skillseditor = new PopupList();
-					Skillseditor.init({delegate:null,editor:new SkillsEditor(),list:ObjectLists.getSkillsList(),name:"Skills List"});
-					Skillseditor.didBecomeActive();
-					this.addChild(Skillseditor);
-				}
-			break;		
-			case "/edititem": 
-				if(Itemeditor!=null && !Itemeditor._parent) Itemeditor=null;
-				if(Itemeditor){
-					Itemeditor.willTerminate();
-					Itemeditor.removeFromParent();
-					Itemeditor=null;
-					GameMap.setInteractionDelegate(null);
-				} else{
-					Itemeditor = new PopupList();
-					Itemeditor.init({delegate:null,editor:new ItemEditor(),list:ObjectLists.getItemList(),name:"Item List"});
-					Itemeditor.didBecomeActive();
-					this.addChild(Itemeditor);
-				}
-			break;
-			case "/editnpc": 
-				if(NPCeditor!=null && !NPCeditor._parent) NPCeditor=null;
-				if(NPCeditor){
-					NPCeditor.willTerminate();
-					NPCeditor.removeFromParent();
-					NPCeditor=null;
-					GameMap.setInteractionDelegate(null);
-				} else{
-					NPCeditor = new PopupList();
-					NPCeditor.init({delegate:null,editor:new NPCEditor(),list:ObjectLists.getNPCList(),name:"NPC List"});
-					NPCeditor.didBecomeActive();
-					this.addChild(NPCeditor);
-				}
-			break;
-			case "/editquest": 
-				if(Questeditor!=null && !Questeditor._parent) Questeditor=null;
-				if(Questeditor){
-					Questeditor.willTerminate();
-					Questeditor.removeFromParent();
-					Questeditor=null;
-					GameMap.setInteractionDelegate(null);
-				} else{
-					Questeditor = new PopupList();
-					Questeditor.init({delegate:null,editor:new QuestEditor(),list:ObjectLists.getQuestList(),name:"Quest List"});
-					Questeditor.didBecomeActive();
-					this.addChild(Questeditor);
-				}
-			break;
 			case "/help":
 			    GameChat.showHelp();
 
@@ -538,6 +541,8 @@ var GameScene = Scene.extend({
 				sendMessageToServer({"afk":true});
 			break;
 		}
+
+
 	},
 	
 	init:function(withData){
@@ -547,20 +552,22 @@ var GameScene = Scene.extend({
 		
 		
 		var withData ={
-			name: withData.username,
+			name: withData.playerData["name"],
 			isPlayer:true,
 			stats: {
 				"health":{level:1,value:100,maxval:200,maxlvl:900},
 				"mana":{level:1,value:100,maxval:200,maxlvl:99},
 			},
-			map:1,
+			map:withData.playerData["location"]["mapnumber"],
 			textureName: "sprites1.png",
 			spriteId: 1,
+			access:withData.playerData["rank"],
 		};
 		PlayersController.create(withData);
 		GameMap.addPlayersController(PlayersController.getInstance());
-		
-		
+	
+
+
 		this.panels.removeFromParent();
 		this.setTouchPriority(-20);
 		this.scheduleOnce(function(){GameMap.getInstance().setup(withData.map)});
@@ -573,11 +580,20 @@ var GameScene = Scene.extend({
 
 		this.showQuickControls(false);
 		this.showEditControls(false);
+
+		this.setupEditAccess();
+
 		this.addChild(this.panels);		
 		this.schedule(this.storedMessages);	
 		this.schedule(this.serverProcess);
 		MainScene=this;	
 
+	},
+
+	setupEditAccess:function(){
+		if(PlayersController.getYou().access==1){
+			this.panels["quickedit_button"].setVisible(false);
+		}
 	},
 	
 	storedMessages:function(){

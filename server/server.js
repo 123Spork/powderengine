@@ -92,6 +92,13 @@ socket.on('message',function(data) {
   console.log('Received a message from the server!',data);
 });
 
+saveNewPlayer = function(client,playerName,playerData){
+	var outputFilename = 'users/'+playerName+'.json';
+	fs.writeFile(outputFilename, JSON.stringify(playerData), function(err) {
+		client.send(JSON.stringify({"registrationsuccess":1}));
+	});
+};
+
 var setMapData = function(mapnumber,data){
 	var outputFilename = 'maps/'+mapnumber+'.json';
 	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
@@ -149,39 +156,96 @@ socket.on('connection', function(client){
     // Success!  Now listen to messages to be received
     client.on('message',function(event){
 		event = JSON.parse(event);
+		if(event["newUser"]){
+
+			if(fs.existsSync("users/"+event["name"]+".json")){
+				client.send(JSON.stringify({"registrationfailed":"UserTaken"}));
+			}else{
+				var newPlayerData = {
+					"pass":event["password"],
+					"email":event["email"],
+					"registrationdate":Date.now(),
+					"rank":1,
+					"location":{"mapnumber":1,"position":100},
+					"race":0,
+					"class":0,
+					"clan":"",
+					"guilds":[],
+					"quests":[],
+					"friends":[],
+					"skills":[],
+					"pets":[],
+					"pmessages":[],
+					"lastchats":[],
+					"health":100,
+					"inventory":[],
+					"equipment":[]
+				}
+				saveNewPlayer(client,event["name"],newPlayerData);
+			}
+		}
+
+
 		if(event["login"]){
 			for(var i in names){
 				if(names[i]==event["username"]){
-					client.send(JSON.stringify({"login_fail":"Username in use already."}));
+					client.send(JSON.stringify({"login_fail":"Login failed, user is already online."}));
 					return;
 				}
 			}
 			if(names.indexOf(event["username"])==-1){
-				client.send(JSON.stringify({"login_success":true}));
-				names[client.id]=event["username"];
-				clients[client.id]=client;
-				mapplayers[event["username"]]=1;
-				if(playersOnMapsCount[1]==0){
-					mapMasters[1]=names[client.id];
-					client.send(JSON.stringify({"mapmaster":true}));
-				}
-				playersOnMapsCount[1]++;
-				client.broadcast.send(JSON.stringify({"newPlayer":event["username"]}));
-				for(var i in clients){
-					if(i!=client.id && clients[i]){
-						if(positions[i]){
-							client.send(JSON.stringify({"moveTo":positions[i],"id":names[i]}));
-							client.send(JSON.stringify({"changemap":mapplayers[names[i]],"id":names[i],"setTo":positions[i]}));
-						} else{
-							client.send(JSON.stringify({"moveTo":"default","id":names[i]}));
+				if(!fs.existsSync("users/"+event["username"]+".json")){
+					client.send(JSON.stringify({"login_fail":"Login failed, Username or Password is incorrect."}));
+				}else{
+					var playerData = require("./users/"+event["username"]+".json");
+					if(event["password"]!=playerData["pass"]){
+						client.send(JSON.stringify({"login_fail":"Login failed, Username or Password is incorrect."}))
+					}else{
+						playerData={
+							"name":event["username"],
+							"rank":playerData["rank"],
+							"race":playerData["race"],
+							"class":playerData["class"],
+							"clan":playerData["clan"],
+							"guilds":playerData["guilds"],
+							"quests":playerData["quests"],
+							"friends":playerData["friends"],
+							"skills":playerData["skills"],
+							"pets":playerData["pets"],
+							"pmessages":playerData["pmessages"],
+							"lastchats":playerData["lastchats"],
+							"health":100,
+							"location":playerData["location"],
+							"inventory":playerData["inventory"],
+							"equipment":playerData["equipment"],
+						};
+						client.send(JSON.stringify({"login_success":playerData}));
+						names[client.id]=event["username"];
+						clients[client.id]=client;
+						mapplayers[event["username"]]=1;
+						if(playersOnMapsCount[1]==0){
+							mapMasters[1]=names[client.id];
+							client.send(JSON.stringify({"mapmaster":true}));
+						}
+						playersOnMapsCount[1]++;
+						client.broadcast.send(JSON.stringify({"newPlayer":event["username"]}));
+						for(var i in clients){
+							if(i!=client.id && clients[i]){
+								if(positions[i]){
+									client.send(JSON.stringify({"moveTo":positions[i],"id":names[i]}));
+									client.send(JSON.stringify({"changemap":mapplayers[names[i]],"id":names[i],"setTo":positions[i]}));
+								} else{
+									client.send(JSON.stringify({"moveTo":"default","id":names[i]}));
+								}
+							}
+						}
+						for(var i in droppedItems[1]){
+							client.send(JSON.stringify(droppedItems[1][i]));
+						}
+						for(var i in mapNPCS[1]){
+							client.send(JSON.stringify({"changeNPCPosition":mapNPCS[1][i],"npcID":i}));
 						}
 					}
-				}
-				for(var i in droppedItems[1]){
-					client.send(JSON.stringify(droppedItems[1][i]));
-				}
-				for(var i in mapNPCS[1]){
-					client.send(JSON.stringify({"changeNPCPosition":mapNPCS[1][i],"npcID":i}));
 				}
 			}
 		}

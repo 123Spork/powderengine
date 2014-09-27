@@ -313,8 +313,12 @@ Character = cc.Sprite.extend({
 
 PlayerCharacter = Character.extend({
 	items:null,
+	access:3,
 	init:function(withData){
 		this._super(withData);
+		if(withData.access){
+			this.access=withData.access;
+		}
 		this.items = {"stored":[], "equipped":{}};
 	},
 

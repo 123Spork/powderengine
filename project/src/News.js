@@ -14,6 +14,13 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"27th September 2014: (v0.72)":[
+					"Added registration and logging in system. Users can now have automatic login setup for their accounts and player data is starting to be saved from an actual account.",
+					"Server now has a new folder where user data is stored.",
+					"Added the beginnings of a user ranking system, game editors can now only be accessed if the player rank is above 1. Rank 1 is now the default registration rank.",
+				],
+
+
 				"25th August 2014: (v0.718)":[
 					"Added 90% of subeditors needed for the scripting system. Go into the script editor and press the pencil icon on the responses and requirements to edit their core data.",
 					"Updated script panel texture to utilize inpanel submenu editors.",

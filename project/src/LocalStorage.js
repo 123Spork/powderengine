@@ -369,3 +369,26 @@ LocalStorage.getMapSaveOnExit=function(){
 	return sys.localStorage.getItem("mapedit_saveonexit")==null?false:sys.localStorage.getItem("mapedit_saveonexit");
 };
 
+LocalStorage.setSaveLogin=function(name,pass){
+	sys.localStorage.setItem("savedcredentials",JSON.stringify({"user":name,"pass":pass}));
+};
+
+LocalStorage.setAutoLoginNextTime=function(value){
+	sys.localStorage.setItem("autologin",JSON.stringify(value))
+};
+
+LocalStorage.isAutoLogin=function(){
+	var autoObj = sys.localStorage.getItem("autologin");
+	if(autoObj!=null){return JSON.parse(autoObj);}
+	return false;
+};
+
+LocalStorage.isRememberLogin=function(){
+	return sys.localStorage.getItem("savedcredentials") ?true:false;
+};
+
+LocalStorage.getStoredCredentials=function(){
+	var credentialObj = sys.localStorage.getItem("savedcredentials");
+	if(credentialObj){return JSON.parse(credentialObj);}
+	return false;
+};

@@ -294,9 +294,13 @@ reactToSocketMessage=function(data){
 			}
 		} else if(screen.getIdentifier()=="Login"){
 			if(data["login_success"]){
-				screen.onLoginSuccess();
+				screen.onLoginSuccess(data["login_success"]);
 			} else if(data["login_fail"]){
 				screen.onLoginFailed(data["login_fail"]);
+			}else if(data["registrationsuccess"]){
+				screen.completedRegistration();
+			}else if(data["registrationfailed"]){
+				screen.failedRegistration(data["registrationfailed"]);
 			}
 		}
 	} else{

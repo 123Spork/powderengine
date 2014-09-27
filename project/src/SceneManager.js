@@ -14,6 +14,8 @@ var SceneManager = cc.Layer.extend({
 			settingsData = mergeSettings(settingsData,LocalStorage.getSettingsData());
 			this.goToScene("Login",{});	
 			this.schedule(this.buttonDown);
+			autoLoginNextTime=LocalStorage.isAutoLogin();
+			rememberLoginNextTime=LocalStorage.isRememberLogin();
 		}else{
 			this.schedule(this.initGameWhenLocalStorage);
 		}
@@ -25,6 +27,8 @@ var SceneManager = cc.Layer.extend({
 			settingsData = mergeSettings(settingsData,LocalStorage.getSettingsData());
 			this.goToScene("Login",{});	
 			this.schedule(this.buttonDown);
+			autoLoginNextTime=LocalStorage.isAutoLogin();
+			rememberLoginNextTime=LocalStorage.isRememberLogin();
 		}
 	},
 

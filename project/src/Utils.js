@@ -101,6 +101,9 @@ document.getElementById("gameCanvas").onkeyup = function (event) {
 	}
 };
 
+autoLoginNextTime=false;
+rememberLoginNextTime=false;
+
 var settingsData = {
 	"GENERAL":"ISSECTION",
 	"Project Name":"Powder Engine Testbed",
@@ -154,6 +157,11 @@ var settingsData = {
 	"/coinflip": "<PLAYER> flipped a coin and got <VALUE>",
 };
 
+function validateEmail(email) 
+{
+    var re = /\S+@\S+\.\S+/;
+    return re.test(email);
+};
 
 
 function isTouching(obj,pos){

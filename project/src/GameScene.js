@@ -4,6 +4,7 @@ MainScene=null;
 MapMaster=false;
 var GameScene = Scene.extend({
 	
+	isSaving:false,
 	ctor:function(){
 		this._super();
 	},
@@ -12,6 +13,13 @@ var GameScene = Scene.extend({
 		 return {
 		 "panels":{
 			 children:{	
+			 	"saving_icon":{
+			 		visible:false,
+			 		position:cc.p(screenSize.width-52,4),
+			 		anchorPoint:cc.p(0,0),
+			 		size:cc.size(48,48),
+			 		texture:"GUI/save_icon.png",
+			 	},
 				"logout_button":{
 					position:cc.p(screenSize.width-52,screenSize.height-52),
 					anchorPoint:cc.p(0,0),
@@ -551,7 +559,7 @@ var GameScene = Scene.extend({
 		ObjectLists.getInstance();
 		
 		
-		var withData ={
+		var playerData ={
 			name: withData.playerData["name"],
 			isPlayer:true,
 			stats: {
@@ -559,11 +567,15 @@ var GameScene = Scene.extend({
 				"mana":{level:1,value:100,maxval:200,maxlvl:99},
 			},
 			map:withData.playerData["location"]["mapnumber"],
+			position:withData.playerData["location"]["position"],
 			textureName: "sprites1.png",
 			spriteId: 1,
 			access:withData.playerData["rank"],
+			inventory:withData.playerData["inventory"],
+			equipment:withData.playerData["equipment"],
 		};
-		PlayersController.create(withData);
+
+		PlayersController.create(playerData);
 		GameMap.addPlayersController(PlayersController.getInstance());
 	
 
@@ -575,8 +587,8 @@ var GameScene = Scene.extend({
 		sendMessageToServer({"moveTo":((PlayersController.getYou().getGridPosition().x) + ((PlayersController.getYou().getGridPosition().y) * gridWidth))});
 		
 		this.addChild(GameChat.create());
-		
-		this.addChild(SkillBars.create());
+		console.log(withData.playerData);
+		this.addChild(SkillBars.create(withData.playerData["skills"]));
 
 		this.showQuickControls(false);
 		this.showEditControls(false);
@@ -587,7 +599,36 @@ var GameScene = Scene.extend({
 		this.schedule(this.storedMessages);	
 		this.schedule(this.serverProcess);
 		MainScene=this;	
+		this.schedule(this.saveSchedule,120);
 
+	},
+
+	saveSchedule:function(){
+		var saveData = {
+			"saveUser":true,
+			"name":PlayersController.getYou().getName(),
+			"location":{"mapnumber":GameMap.getMapNumber(),"position":((PlayersController.getYou().getGridPosition().x) + ((PlayersController.getYou().getGridPosition().y) * gridWidth))},
+			"inventory":PlayersController.getYou().getInventory(),
+			"equipment":PlayersController.getYou().getEquipment(),
+			"skills":[],
+			"clan":"",
+			"guilds":[],
+			"quests":[],
+			"friends":[],
+			"pets":[],
+			"pmessages":[],
+			"lastchats":[],
+			"health":100,
+		};
+		this.panels["saving_icon"].setVisible(true);
+		this.isSaving=true;
+		sendMessageToServer(saveData)
+		console.log("SAVING NOW!");
+	},
+
+	gameSaved:function(){
+		this.panels["saving_icon"].setVisible(false);
+		this.isSaving=false;
 	},
 
 	setupEditAccess:function(){

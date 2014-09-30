@@ -292,6 +292,9 @@ reactToSocketMessage=function(data){
 				LocalStorage.refreshItems(data["saveitemswhole"],data["updatetime"]);
 				ObjectLists.setItemList(data["saveitemswhole"]);
 			}
+			else if(data["savesuccess"]){
+				screen.gameSaved();
+			}
 		} else if(screen.getIdentifier()=="Login"){
 			if(data["login_success"]){
 				screen.onLoginSuccess(data["login_success"]);

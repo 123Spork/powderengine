@@ -18,7 +18,6 @@ PlayersController.create=function(youData){
 	if(!this.instance){
 		this.instance = new PlayersController();
 		this.instance.you = PlayerCharacter.create(youData);
-		this.instance.you.setPosition(960,320);
 		this.instance.addChild(this.instance.you);
 	}
 	return this.instance;

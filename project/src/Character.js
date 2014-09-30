@@ -320,6 +320,21 @@ PlayerCharacter = Character.extend({
 			this.access=withData.access;
 		}
 		this.items = {"stored":[], "equipped":{}};
+		if(withData.position){
+			var x=withData.position % gridWidth;
+			var y=Math.floor(withData.position/gridWidth);
+			this.setPosition(x*32,y*32);
+			GameMap.goToMapWithoutPlayer(withData.map);
+			GameMap.goToOffsetFromPosition(x*32,y*32);
+			this.onMap=withData.map;
+		}
+		if(withData.inventory){
+			this.items["stored"]=withData.inventory;
+		}
+		if(withData.equipment){
+			this.items["equipped"]=withData.equipment;
+		}
+		
 	},
 
 	updateItemData:function(name,item){
@@ -328,6 +343,7 @@ PlayerCharacter = Character.extend({
 				this.items["stored"][i]=item;
 			}
 		}
+		console.log(this.items);
 	},
 	
 	pickupItem:function(item){
@@ -347,6 +363,7 @@ PlayerCharacter = Character.extend({
 					} else{
 						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 					}
+					console.log(this.items);
 					return;
 				}
 			}
@@ -372,6 +389,7 @@ PlayerCharacter = Character.extend({
 		if(added==false){
 			GameChat.addMessage(strings.gameChat.inventoryFull);
 		}
+		console.log(this.items);
 	},
 
 	pickupItemFromTile:function(item,tile){

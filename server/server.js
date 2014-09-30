@@ -4,10 +4,7 @@ var http = require('http');
 var fs = require('fs');
 var io = require('socket.io');
 
-
-var fs = require('fs')
-fs.readFile('config.txt', 'utf8', function (err,data) {
-var port = parseInt(data.split("\n")[1]);
+var config = require('./config.js');
   
 var positions = [];
 var mapplayers=[];
@@ -45,6 +42,7 @@ fs.readdirSync("./maps").forEach(function(file) {
   playersOnMapsCount[parseInt(file.split('.')[0])]=0;
   mapNPCS[parseInt(file.split('.')[0])]=[];
 });
+
 fs.readdirSync("./additionals").forEach(function(file) {
   if(file=="warps.json"){
 	warps =require("./additionals/warps.json");
@@ -83,7 +81,7 @@ var server = http.createServer(function(req, res){
     res.end('<h1>Hello Socket Lover!</h1>');
 });
 
-server.listen(port);
+server.listen(config.port);
 
 // Create a Socket.IO instance, passing it our server
 var socket = io.listen(server);
@@ -96,6 +94,13 @@ saveNewPlayer = function(client,playerName,playerData){
 	var outputFilename = 'users/'+playerName+'.json';
 	fs.writeFile(outputFilename, JSON.stringify(playerData), function(err) {
 		client.send(JSON.stringify({"registrationsuccess":1}));
+	});
+};
+
+savePlayer = function(client,playerName,playerData){
+	var outputFilename = 'users/'+playerName+'.json';
+	fs.writeFile(outputFilename, JSON.stringify(playerData), function(err) {
+		client.send(JSON.stringify({"savesuccess":1}));
 	});
 };
 
@@ -161,6 +166,12 @@ socket.on('connection', function(client){
 			if(fs.existsSync("users/"+event["name"]+".json")){
 				client.send(JSON.stringify({"registrationfailed":"UserTaken"}));
 			}else{
+				var skillLevels = {};
+				for(var i in skills){
+					skillLevels[skills[i]["name"]]={"level":0,"experience":0,"currenthealth":100,"maxhealth":100, "modifier":0};
+				}
+
+
 				var newPlayerData = {
 					"pass":event["password"],
 					"email":event["email"],
@@ -173,15 +184,27 @@ socket.on('connection', function(client){
 					"guilds":[],
 					"quests":[],
 					"friends":[],
-					"skills":[],
+					"skills":skillLevels,
 					"pets":[],
 					"pmessages":[],
 					"lastchats":[],
-					"health":100,
 					"inventory":[],
-					"equipment":[]
+					"equipment":{}
 				}
 				saveNewPlayer(client,event["name"],newPlayerData);
+			}
+		}
+
+		if(event["saveUser"]){
+			if(fs.existsSync("users/"+event["name"]+".json")){
+				var playerData = require("./users/"+event["name"]+".json");
+				playerData["location"]=event["location"];
+				playerData["inventory"]=event["inventory"];
+				playerData["equipment"]=event["equipment"];
+
+				console.log(playerData);
+
+				savePlayer(client,event["name"],playerData);
 			}
 		}
 
@@ -201,6 +224,18 @@ socket.on('connection', function(client){
 					if(event["password"]!=playerData["pass"]){
 						client.send(JSON.stringify({"login_fail":"Login failed, Username or Password is incorrect."}))
 					}else{
+
+						var skillLevels = {};
+						for(var i in skills){
+							if(!playerData["skills"][skills[i]["name"]]){
+								playerData["skills"][skills[i]["name"]]={"level":0,"experience":0,"currenthealth":100,"maxhealth":100,"modifier":0};
+							}
+						}
+
+						for(var i in playerData["skills"]){
+							playerData["skills"][i]["requirement"]=config.requiredXpToNextLevel(playerData["skills"][i]["level"]);
+						}
+
 						playerData={
 							"name":event["username"],
 							"rank":playerData["rank"],
@@ -214,7 +249,6 @@ socket.on('connection', function(client){
 							"pets":playerData["pets"],
 							"pmessages":playerData["pmessages"],
 							"lastchats":playerData["lastchats"],
-							"health":100,
 							"location":playerData["location"],
 							"inventory":playerData["inventory"],
 							"equipment":playerData["equipment"],
@@ -584,5 +618,4 @@ socket.on('connection', function(client){
   
   
   
-});
 

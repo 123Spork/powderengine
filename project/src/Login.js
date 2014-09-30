@@ -32,6 +32,7 @@ init:function(withData){
 	this.panels["rem_login_text"].setDimensions(cc.size(80,0));
 	this.panels["auto_login_text"].setDimensions(cc.size(80,0));
 	this.panels["server_message"].setDimensions(cc.size(300,0));
+	this.panels["server_message2"].setDimensions(cc.size(150,0));
 },
 
 onKeyUp:function(key){
@@ -279,6 +280,13 @@ getLayoutObject:function(){
 						color:cc.c3b(255,255,255),
 						anchorPoint:cc.p(0,1),
 						position:cc.p(325,220),
+					},
+					"server_message2":{
+						label:"This game saves data automatically.",
+						fontSize:16,
+						color:cc.c3b(255,255,255),
+						anchorPoint:cc.p(0,1),
+						position:cc.p(175,355),
 					},
 					"version_number":{
 						label:settingsData["Version Number"],

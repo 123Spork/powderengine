@@ -1,134 +1,166 @@
 Skills=null;
 SkillsPanel = Popup.extend({
+
+	listPanel:null,
+
 	getIdentifier:function(){
 		return "Skills";
 	},
-	getLayoutObject:function(){
-		var equipment_panel={};
-		var skillslist = ObjectLists.getSkillsList();
 
-		for(var i=0;i<skillslist.length;i++){
-			equipment_panel[i+""]={
-				anchorPoint:cc.p(0,0),
-				position:cc.p(0,((skillslist.length*40))-((i+1)*40)+2),
-				children:{
-					"icon":{
-						position: cc.p(4,2),
-						isSprite:true,
+
+
+	prepareList:function(){
+		if(this.listPanel){
+			this.listPanel.removeAllChildren();
+		}
+		var listnodes = [];
+		var callBackList=[];
+		var tc = cc.TextureCache.getInstance();
+		var i=0;
+		var character_level=0;
+		for(var j in this.data){
+			character_level+=(this.data[j]["level"]+1)
+			listnodes[i]=cc.Node.create();
+			listnodes[i].setContentSize(420,32);
+			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),316,1);
+			element.setPosition(cc.p(4,0));						
+			
+			var skilllevel = cc.LabelTTF.create("Lvl " + ((this.data[j]["level"]+1)+this.data[j]["modifier"])+"/" + (this.data[j]["level"]+1),"Arial",15);
+			skilllevel.setColor(cc.c3b(0,0,0));
+			skilllevel.setAnchorPoint(cc.p(0,0));
+			skilllevel.setPosition(cc.p(4,4));
+
+			var skillname = cc.LabelTTF.create(j,"Arial",15);
+			skillname.setColor(cc.c3b(0,0,0));
+			skillname.setAnchorPoint(cc.p(0.5,0));
+			skillname.setPosition(cc.p((skilllevel.getContentSize().width+65),4));
+
+
+			var experienceBar = cc.LayerColor.create(cc.c4b(255,255,255,255),144,skillname.getContentSize().height);
+			var experience = cc.LayerColor.create(cc.c4b(100,120,200,255),144*(this.data[j]["experience"]/this.data[j]["requirement"]),skillname.getContentSize().height);
+			experienceBar.addChild(experience);
+			experience.setAnchorPoint(cc.p(0,0));
+			var exptext = cc.LabelTTF.create(this.data[j]["experience"]+"/"+this.data[j]["requirement"],"Arial",14);
+			exptext.setAnchorPoint(cc.p(0,0));
+			exptext.setColor(cc.c3b(0,0,0));
+			experienceBar.addChild(exptext);
+			exptext.setPositionY(1);
+
+
+
+		//	cc.LabelTTF.create(this.data[j]["level"]+"/"+"400","Arial",15);
+			experienceBar.setAnchorPoint(cc.p(0,0));
+			experienceBar.setPosition(cc.p(172,4));
+			//experienceBar.setDimensions(cc.size(150,0));
+
+
+			var touchableNodes =[];
+			callBackList.push(touchableNodes);
+			listnodes[i].addChild(element);
+			listnodes[i].addChild(skillname);
+			listnodes[i].addChild(skilllevel);
+			listnodes[i].addChild(experienceBar);
+			listnodes[i].setContentSize(324,skillname.getContentSize().height+8);
+			i++;
+		}
+
+		this.listPanel = this.panels["main_panel"]["list"];
+
+		console.log(this.panels);
+
+		var self=this;
+		this.listPanel.getListSize = function(){
+			var height =0;
+			for(var i=0;i<listnodes.length;i++){
+				height+=listnodes[i].getContentSize().height;
+			}
+			return cc.size(324,height);
+		};
+		this.listPanel.getListElementAmount=function(){
+			return listnodes.length;
+		};
+		this.listPanel.getSizeForElement=function(elementID){
+			return listnodes[elementID].getContentSize();
+		};
+		this.listPanel.getListNodeForIndex=function(elementID){
+			return listnodes[elementID];
+		};
+		this.listPanel.runListCallBack=function(name,listelement,touch){
+
+		};
+		this.listPanel.listView = ListView.create(this.listPanel);
+		this.listPanel.listView.setCallBackList(callBackList);
+		this.listPanel.addChild(this.listPanel.listView);
+
+
+
+		this.panels["main_panel"]["character_level"].setString("LEVEL: " + character_level)
+		this.panels["main_panel"]["character_level"].setPositionX(306);
+		this.panels["main_panel"]["character_level"].setAnchorPoint(cc.p(1,0));
+	},
+
+	
+	getLayoutObject:function(){
+			return { 
+			"panels":{
+				position:cc.p(300,200),
+				children:{	
+					"background_image":{
+						texture:"GUI/list_panel.png",
 						anchorPoint:cc.p(0,0),
 					},
-					"name":{
-						position: cc.p(46,18),
-						size: cc.size(120,32),
-						label:skillslist[i]["name"],
-						fontSize:16,
-						color:cc.c3b(255,255,255),
-						anchorPoint:cc.p(0,0.5),
-					},
-					"level":{
-						position: cc.p(210,18),
-						size: cc.size(86,32),
-						anchorPoint:cc.p(0.5,0.5),
-						label:"Level",
-						fontSize:16,
-						color:cc.c3b(255,255,255),
-					},
-					//"experience":{
-					//}
-				},
-			};
-		}
-		
-		return {
-			"panels":{
-				position:cc.p(100,300),
-				children:{	
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
-						size: cc.size(256,skillslist.length*40),
-						texture:"GUI/skills.png",
-						children: equipment_panel,
+						size: cc.size(365,328),
+						children: {
+							"character_level":{
+								label:"",
+								position:cc.p(2,310),
+								anchorPoint:cc.p(0,0),
+								color:cc.c3b(0,0,0),
+
+							},
+							"list":{
+								size:cc.size(324,308),
+								bg:cc.c4b(0,200,200,200),
+								position:cc.p(0,0),
+								anchorPoint:cc.p(0,0),
+							},
+						},
 					},
 					"control_panel":{
 						anchorPoint:cc.p(0,0),
-						position: cc.p(0,skillslist.length*40),
-						size: cc.size(256,32),
-						children:{
+						position: cc.p(0,328),
+						size: cc.size(365,32),
+						children:{	
 							"header":{
-								label:settingsData["Skills Header"],
+								label:"Skills",
 								fontSize:20,
 								anchorPoint:cc.p(0,0.5),
 								position:cc.p(8,16),
 							},
 							"exitBtn":{
-								position: cc.p(232,6),
+								position: cc.p(337,6),
 								size: cc.size(20,20),
 								anchorPoint:cc.p(0,0),
-								texture:"GUI/close.png"
+								texture: "GUI/close.png",	
 							}
 						}
 					},
-					"item_name":{
-						position:cc.p(0,0),
-						bg:cc.c4b(200,200,200,200),
-						size:cc.size(64,16),
-						visible:false,
-						children:{
-							"content":{
-								label:"",
-								fontSize:14,
-								color:cc.c3b(0,0,0),
-								anchorPoint:cc.p(0.5,0.5),
-								position:cc.p(32,8),
-							}
-						}
-					},
-					"control_menu":{
-						position:cc.p(0,0),
-						bg:cc.c4b(200,200,200,200),
-						size:cc.size(96,48),
-						visible:false,
-						children:{
-							"dropbtn":{
-								position: cc.p(0,0),
-								size: cc.size(96,24),
-								anchorPoint:cc.p(0,0),
-								bg: cc.c4b(200,200,200,200),
-								children:{	
-								"content":{
-									label:"Drop",
-									fontSize:20,
-									color:cc.c3b(0,0,0),
-									anchorPoint:cc.p(0,0.5),
-									position:cc.p(4,12),
-									}
-								}
-							},
-							"unequipbtn":{
-								position: cc.p(0,24),
-								size: cc.size(96,24),
-								anchorPoint:cc.p(0,0),
-								bg: cc.c4b(200,200,200,200),
-								children:{	
-								"content":{
-									label:"Unequip",
-									fontSize:20,
-									color:cc.c3b(0,0,0),
-									anchorPoint:cc.p(0,0.5),
-									position:cc.p(4,12),
-									}
-								}
-							},
-
-						}
-					}	
 				}	
 			}
 		};
 	},
 
+
+
+
+
+
+
+
 	updateTileGrid:function(){
-		console.log("Updating tile grid");
+	/*	console.log("Updating tile grid");
 		var skillsList = ObjectLists.getSkillsList();
 		for(var i=0;i<skillsList.length;i++){
 			this.panels["main_panel"][i+""]["icon"].setTexture(null);	
@@ -143,12 +175,14 @@ SkillsPanel = Popup.extend({
 				this.panels["main_panel"][i+""]["icon"].setTexture(texture);
 				this.panels["main_panel"][i+""]["icon"].setTextureRect(cc.rect(skillsList[i]["sprite"]["position"].x*32, (skillsList[i]["sprite"]["position"].y*32),32,32));
 			}
-		}
+		}*/
 	},
 
 	didBecomeActive:function(){
 		this._super();
 		this.updateTileGrid();
+		this.data = SkillBars.getSkillData();
+		this.prepareList();
 	},
 
 });
@@ -156,6 +190,7 @@ SkillsPanel = Popup.extend({
 var SkillBars=cc.Layer.extend({
 
 	bars:[],
+	skillsData:null,
 
 	updateLayoutFromSkills:function(){
 		var skillslist = ObjectLists.getSkillsList();
@@ -177,7 +212,8 @@ var SkillBars=cc.Layer.extend({
 
 	createSkillBar:function(name,color,i){
 		var newCol = hex2rgba(color);
-		var bar = cc.LayerColor.create(cc.c4b(newCol.r,newCol.g,newCol.b,newCol.a),300,23);
+		console.log(this.skillsData[name]);
+		var bar = cc.LayerColor.create(cc.c4b(newCol.r,newCol.g,newCol.b,newCol.a),this.skillsData[name]["currenthealth"]>0 ? 300*(this.skillsData[name]["currenthealth"]/this.skillsData[name]["maxhealth"]) : 1,23);
 		bar.bar = cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/healthbar.png"));
 		bar.setPosition(10,(i*32)-(i*-5)-10);
 		bar.setAnchorPoint(cc.p(0,0));
@@ -190,15 +226,34 @@ var SkillBars=cc.Layer.extend({
 		bar.addChild(textnode);
 		return bar;
 	},
+
+
 });
 SkillBarsInstance=null;
-SkillBars.create=function(){
+SkillBars.create=function(skillData){
 	if(SkillBarsInstance==null){
 		SkillBarsInstance=new SkillBars();
+		SkillBarsInstance.skillsData=skillData;
 		SkillBarsInstance.updateLayoutFromSkills();
 	}
 	return SkillBarsInstance;
 };
+
+SkillBars.modifyHealth=function(name,value){
+	SkillBarsInstance.skillsData[name]["currenthealth"]+=value;
+	if(SkillBarsInstance.skillsData[name]["currenthealth"]<0){
+		SkillBarsInstance.skillsData[name]["currenthealth"]=0;
+	}
+	if(SkillBarsInstance.skillsData[name]["currenthealth"]>SkillBarsInstance.skillsData[name]["maxhealth"]){
+		SkillBarsInstance.skillsData[name]["currenthealth"]=SkillBarsInstance.skillsData[name]["maxhealth"];
+	}
+	SkillBarsInstance.updateLayoutFromSkills();
+};
+
+SkillBars.getSkillData=function(){
+	return SkillBarsInstance.skillsData;
+};
+
 SkillBars.update=function(){
 	SkillBarsInstance.updateLayoutFromSkills();
 };

@@ -687,6 +687,13 @@ GameMap.goToMap=function(id,ignoreResetMaster){
 	gameMapInstance.setup(id);
 };
 
+GameMap.goToMapWithoutPlayer=function(id){
+	PlayersController.destroyNPCs();
+	GameMap.destroy();
+	gameMapInstance.currentMap=id;
+	gameMapInstance.setup(id);
+};
+
 GameMap.goToMapUp=function(){
 	PlayersController.getInstance().setVisible(false);
 	GameMap.destroy();

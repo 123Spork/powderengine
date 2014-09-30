@@ -14,6 +14,13 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"30th September 2014: (v0.72)":[
+					"Added user saving and loading for player position, items and equipment. Picked up and equipped items are now stored and saved regardless of session.",
+					"Edited the skills panel to utilise the list view logic. Skills menu now shows level and experience progression and uses data from the user account",
+					"Added health manipulation functionality utilising new skill logic as noted in the previous point."
+				],
+
+
 				"27th September 2014: (v0.72)":[
 					"Added registration and logging in system. Users can now have automatic login setup for their accounts and player data is starting to be saved from an actual account.",
 					"Server now has a new folder where user data is stored.",

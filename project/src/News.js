@@ -14,6 +14,15 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"24th October 2014: (v0.724)":[
+					"Added functionality to more scripts. Items can now use the destroy and open/close panel scripts.",
+					"Fixed equip script to use the equip position defined within the scripting system instead of previously defined sub-item types from previous versions.",
+				],
+				"23rd October 2014: (v0.722)":[
+					"Added functionality to some item scripts. Game now modifies inventory drop down behaviour based on responses type (read/equip).",
+					"Items can now influence player stats on equip, dequip, swapped and on read.",
+				],
+
 				"30th September 2014: (v0.72)":[
 					"Added user saving and loading for player position, items and equipment. Picked up and equipped items are now stored and saved regardless of session.",
 					"Edited the skills panel to utilise the list view logic. Skills menu now shows level and experience progression and uses data from the user account",

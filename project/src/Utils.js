@@ -206,6 +206,13 @@ function scheduleDestroy(object){
 	MainScene.scheduleOnce(function(){object=null;});
 };
 
+function destroyScriptController(object,scriptobjectContext){
+	MainScene.scheduleOnce(function(){object=null;});
+	if(scriptobjectContext){
+		scriptobjectContext.scriptHandler=null;
+	}
+};
+
 function hex2rgba(h) {
   var alpha = 255;
   h = h.replace('#','');
@@ -254,6 +261,9 @@ function getLayoutNodes(nodes,request,parent){
 			node.setOpacity(data.opacity);
 		}
 		if(typeof(data.color)!='undefined'){
+			if(!node.setColor){
+				console.log(data)
+			}
 			node.setColor(data.color);
 		}
 		if(typeof(data.children)!='undefined'){

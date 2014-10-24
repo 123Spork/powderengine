@@ -262,7 +262,7 @@ var GameScene = Scene.extend({
 		}
 	},
 	
-	showBook:function(data){
+	showBook:function(name,content){
 		if(Book!=null && !Book._parent) Book=null;
 		if(Book){
 			Book.willTerminate();
@@ -270,7 +270,7 @@ var GameScene = Scene.extend({
 			Book=null;
 		} else{
 			Book = new BookPanel();
-			Book.init(data);
+			Book.init(name,content);
 			Book.didBecomeActive();
 			this.addChild(Book);
 		}

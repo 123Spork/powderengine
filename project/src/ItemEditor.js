@@ -6,9 +6,9 @@ ItemEditor = Popup.extend({
 
 
 	setTypeData:function(value,data){
-		if(Eventsystem){
-			Eventsystem.willTerminate();
-			this.scheduleOnce(function(){Eventsystem.removeFromParent(); Eventsystem=null;});
+		if(Scripteditor){
+			Scripteditor.willTerminate();
+			Scripteditor.removeFromParent();
 			this.typeData=value;
 			this.setTouchEnabled(true);
 			this.panels["main_panel"]["scriptbtn"]["text"].setString(data["name"]);
@@ -261,6 +261,9 @@ ItemEditor = Popup.extend({
 
 		if(withData && withData.data){
 			this.data=withData.data;
+			if(this.data["script"]){
+				this.typeData=this.data["script"];
+			}
 		}
 	},
 	
@@ -342,20 +345,6 @@ ItemEditor = Popup.extend({
 	},
 
 	
-	selectScript:function(){
-		if(Eventsystem!=null && !Eventsystem._parent) Eventsystem=null;
-			if(Eventsystem){
-				Eventsystem.willTerminate();
-				Eventsystem.removeFromParent();
-				Eventsystem=null;
-			}
-			Eventsystem = new PopupList();
-			Eventsystem.init({delegate:this,editor:new EventSystem(),list:ObjectLists.getScriptList(),name:"Script List"});
-			Eventsystem.didBecomeActive();
-			this._parent.addChild(Eventsystem);
-			this.setTouchEnabled(false);
-	},
-
 	updateMapOffset:function(){
 		this.schedule(this.updateMapOffset);
 		if(this.panels["main_panel"]["tiles"].getTexture() && this.panels["main_panel"]["tiles"].getTexture()._isLoaded==true){
@@ -383,7 +372,20 @@ ItemEditor = Popup.extend({
 			this.delegate.endedEdit(this.data);
 			return true;
 		}
-			
+		
+		if(isTouching(this.panels["main_panel"]["scriptbtn"],truePos)){
+			if(Scripteditor){
+				Scripteditor.willTerminate();
+				Scripteditor.removeFromParent();
+				Scripteditor=null;
+			} else{
+				Scripteditor = new PopupList();
+				Scripteditor.init({delegate:this,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
+				Scripteditor.didBecomeActive();
+				this.addChild(Scripteditor);
+			}
+		}
+
 		if(isTouching(this.panels["main_panel"]["cancelbtn"],truePos)){
 			this.ignoreTerminate=true; var self= this.delegate;
 			this.delegate.scheduleOnce(function(){self.endedEdit(null)});

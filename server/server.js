@@ -84,7 +84,7 @@ var server = http.createServer(function(req, res){
 server.listen(config.port);
 
 // Create a Socket.IO instance, passing it our server
-var socket = io.listen(server);
+var socket = io.listen(server, { origins: '*:*' });
 
 socket.on('message',function(data) {
   console.log('Received a message from the server!',data);

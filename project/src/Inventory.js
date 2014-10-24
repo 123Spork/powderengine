@@ -1,6 +1,7 @@
 Inventory=null;
 InventoryPanel = Popup.extend({
 	itemContext:null,
+	itemUse:false,
 
 	getIdentifier:function(){
 		return "Inventory";
@@ -122,9 +123,15 @@ InventoryPanel = Popup.extend({
 
 	listItemSelected:function(val){
 		switch(val){
-			case 0: PlayersController.getYou().useItem(this.delegate.itemContext); break;
+			case 0:
+				if(this.delegate.itemUse == true){
+					PlayersController.getYou().useItem(this.delegate.itemContext);
+				} else{
+					PlayersController.getYou().dropItem(this.delegate.itemContext,"stored");
+				} break;
 			case 1: PlayersController.getYou().dropItem(this.delegate.itemContext,"stored"); break;
 		}
+		this.delegate.itemUse=false;
 	},
 
 	onTouchBegan:function(touch){
@@ -138,18 +145,43 @@ InventoryPanel = Popup.extend({
 			if(PlayersController.getYou().getInventory()[i]){
 				var reducer= 32;
 				if(isTouching(this.panels["main_panel"][(i+"")],cc.p(truePos.x,truePos.y+reducer))){
-					var firstItem=firstItem=settingsData["Item Dropdown Use"]+"";
-					switch(PlayersController.getYou().getInventory()[i]["itemType"]){
-						case "wearable": firstItem=settingsData["Item Dropdown Equip"]+"";break;
-						case "consumable": firstItem=settingsData["Item Dropdown Eat"]+""; break;
-						case "book": firstItem=settingsData["Item Dropdown Read"]+""; break;
+					var item = PlayersController.getYou().getInventory()[i];
+					var scriptData=[];
+					if(item["script"]){
+						scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
 					}
-					firstItem = firstItem.replace("<ITEM>",(PlayersController.getYou().getInventory()[i]["name"]));
+					var firstItem=null;
+					for(var j=0;j<scriptData.length;j++){
+						if(scriptData[j]["type"]=="Default Event"){
+							var defaultEvent = scriptData[j]["responses"];
+							for(var k=0;k<defaultEvent.length;k++){
+								console.log(defaultEvent[k]["type"]);
+								switch(defaultEvent[k]["type"]){
+									case "Equip Item":
+										firstItem = settingsData["Item Dropdown Equip"]+"";
+									break;
+									case "Read Item":
+										firstItem=settingsData["Item Dropdown Read"]+"";
+									break;
+								}						
+							}
+						}
+					}
+					
 					var secondItem = settingsData["Item Dropdown Drop"]+"";
 					secondItem = secondItem.replace("<ITEM>",(PlayersController.getYou().getInventory()[i]["name"]));
+					
+
+					if(firstItem){
+						this.itemUse=true;
+						firstItem = firstItem.replace("<ITEM>",(PlayersController.getYou().getInventory()[i]["name"]));
+						this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,[firstItem,secondItem],touch._point));
+					}else{
+							this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,[secondItem],touch._point));
+					}
 					this.itemContext=i;
 					this.panels["item_name"].setVisible(false)
-					this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,[firstItem,secondItem],touch._point));
+
 					return true;
 				}
 			}

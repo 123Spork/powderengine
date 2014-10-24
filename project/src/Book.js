@@ -2,7 +2,8 @@
 Book=null;
 BookPanel = Popup.extend({
 
-	data:null,
+	name:null,
+	content:null,
 	pages:null,
 
 	getIdentifier:function(){
@@ -34,13 +35,13 @@ BookPanel = Popup.extend({
 								anchorPoint:cc.p(0,0),
 							},
 							"leftPage":{
-								label:this.pages.length>0 ? this.pages[0] : this.pages,
+								label:this.pages[0],
 								anchorPoint:cc.p(0,1),
 								position:cc.p(4,308),
 								color:cc.c3b(0,0,0),
 							},
 							"rightPage":{
-								label:this.pages.length>0 ? this.pages[1] : "",
+								label:this.pages.length>1 ? this.pages[1] : "",
 								anchorPoint:cc.p(0,1),
 								position:cc.p(260,308),
 								color:cc.c3b(0,0,0),
@@ -53,7 +54,7 @@ BookPanel = Popup.extend({
 						size: cc.size(514,32),
 						children:{
 							"header":{
-								label:this.data["name"],
+								label:this.name,
 								fontSize:20,
 								anchorPoint:cc.p(0,0.5),
 								position:cc.p(8,16),
@@ -71,12 +72,13 @@ BookPanel = Popup.extend({
 		};
 	},
 
-	init:function(withData){
+	init:function(name,content){
 		this._super();
-		this.data=withData;
+		this.name=name;
+		this.content=content;
 		this.pages = [];
 		var chunkSize = 470;
-		var str =withData["additionalData"]["Contents"]
+		var str =content;
 		while (str) {
 		    if (str.length < chunkSize) {
 		       this.pages.push(str);

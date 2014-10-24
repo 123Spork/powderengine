@@ -333,13 +333,43 @@ PlayerCharacter = Character.extend({
 		}
 		if(withData.equipment){
 			this.items["equipped"]=withData.equipment;
+
+			this.scheduleOnce(function(){
+			for(var i in this.items["equipped"]){
+				var item = this.items["equipped"][i];
+				var scriptData=[];
+				if(item && item["script"]){
+					scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
+				}
+				for(var j=0;j<scriptData.length;j++){
+					if(scriptData[j]["type"]=="Default Event"){
+						var defaultEvent = scriptData[j]["responses"];
+						for(var k=0;k<defaultEvent.length;k++){
+							switch(defaultEvent[k]["type"]){
+								case "Modify Player Stats":
+									var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+									console.log("modifying stat: " + skillname);
+									SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+									SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+									SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+								break;
+							}						
+						}
+					}
+				}
+			}
+			});
+
+
+
+
 		}
 		
 	},
 
 	updateItemData:function(name,item){
 		for(var i=0;i<this.items["stored"].length;i++){
-			if(this.items["stored"][i]["name"]==name){
+			if(this.items["stored"][i] && this.items["stored"][i]["name"]==name){
 				this.items["stored"][i]=item;
 			}
 		}
@@ -454,21 +484,207 @@ PlayerCharacter = Character.extend({
 	},
 
 	useItem:function(itemnumber){
-		switch(this.items["stored"][itemnumber]["itemType"]){
-			case "book": MainScene.showBook(this.items["stored"][itemnumber]);
-			break;
-			case "wearable":
-				this.equipItem(itemnumber)
-			break;
+		var item = this.items["stored"][itemnumber];
+		var scriptData=[];
+		if(item["script"]){
+			scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
+		}
+		for(var j=0;j<scriptData.length;j++){
+			if(scriptData[j]["type"]=="Default Event"){
+				var defaultEvent = scriptData[j]["responses"];
+				for(var k=0;k<defaultEvent.length;k++){
+					switch(defaultEvent[k]["type"]){
+						case "Equip Item":
+							this.equipItem(itemnumber,defaultEvent[k]["data"]["equip"]);
+						break;
+						case "Modify Player Stats":
+							var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+							console.log("modifying stat: " + skillname);
+							SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+							SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+							SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+						break;
+						case "Read Item":
+							MainScene.showBook(item["name"],defaultEvent[k]["data"]["say"]);
+						break;
+						case "Open/Close Panel":
+							var show = defaultEvent[k]["data"]["visible"]==1?true:false;
+							switch(defaultEvent[k]["data"]["panel"]){
+								case 0: 
+									if(Inventory!=null && !Inventory._parent) Inventory=null;
+									if(show==true){
+										if(Inventory){
+											Inventory.updateTileGrid();
+										}else{
+											Inventory = new InventoryPanel();
+											Inventory.init();
+											Inventory.didBecomeActive();
+											MainScene.addChild(Inventory);
+										}
+									}else{
+										if(Inventory){
+											Inventory.willTerminate();
+											Inventory.removeFromParent();
+											Inventory=null;
+										}
+									}
+								break;
+								case 1:
+									if(Equipment!=null && !Equipment._parent) Equipment=null;
+									if(show==true){
+										if(Equipment){
+											Equipment.updateTileGrid();
+										}else{
+											Equipment = new EquipmentPanel();
+											Equipment.init();
+											Equipment.didBecomeActive();
+											MainScene.addChild(Equipment);
+										}
+									}else{
+										if(Equipment){
+											Equipment.willTerminate();
+											Equipment.removeFromParent();
+											Equipment=null;
+										}
+									}
+								break;
+								case 2:
+									if(Skills!=null && !Skills._parent) Skills=null;
+									if(show==true){
+										if(Skills){
+											Skills.updateTileGrid();
+										}else{
+											Skills = new SkillsPanel();
+											Skills.init();
+											Skills.didBecomeActive();
+											MainScene.addChild(Skills);
+										}
+									}else{
+										if(Skills){
+											Skills.willTerminate();
+											Skills.removeFromParent();
+											Skills=null;
+										}
+									}
+								break;
+							}
+						break;
+						case "Destroy":
+							this.items["stored"][itemnumber]=null;
+							if(Inventory){
+								Inventory.updateTileGrid();
+							}
+						break;
+					}						
+				}
+			}
 		}
 	},
 	
-	equipItem:function(itemnumber){
-		var temp=null;
-		if(this.items["equipped"][this.items["stored"][itemnumber]["subType"]]){
-			var temp = cloneObj(this.items["equipped"][this.items["stored"][itemnumber]["subType"]]);
+	equipItem:function(itemnumber,place){
+
+		if(place=="bothArms"){
+			place="lArm";
+			if(!this.items["equipped"]["rArm"]){
+				place="rArm";
+			}
 		}
-		this.items["equipped"][this.items["stored"][itemnumber]["subType"]]=cloneObj(this.items["stored"][itemnumber]);
+
+		var temp=null;
+		if(this.items["equipped"][place]){
+			var temp = cloneObj(this.items["equipped"][place]);
+
+			var scriptData=[];
+			if(temp["script"]){
+				scriptData = ObjectLists.getScriptList()[temp["script"]]["data"];
+			}
+			for(var j=0;j<scriptData.length;j++){
+				if(scriptData[j]["type"]=="On Dequip"){
+					var defaultEvent = scriptData[j]["responses"];
+					for(var k=0;k<defaultEvent.length;k++){
+						switch(defaultEvent[k]["type"]){
+							case "Modify Player Stats":
+								var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+								console.log("modifying stat: " + skillname);
+								SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+								SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+								SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+							break;
+							case "Open/Close Panel":
+								var show = defaultEvent[k]["data"]["visible"]==1?true:false;
+								switch(defaultEvent[k]["data"]["panel"]){
+									case 0: 
+										if(Inventory!=null && !Inventory._parent) Inventory=null;
+										if(show==true){
+											if(Inventory){
+												Inventory.updateTileGrid();
+											}else{
+												Inventory = new InventoryPanel();
+												Inventory.init();
+												Inventory.didBecomeActive();
+												MainScene.addChild(Inventory);
+											}
+										}else{
+											if(Inventory){
+												Inventory.willTerminate();
+												Inventory.removeFromParent();
+												Inventory=null;
+											}
+										}
+									break;
+									case 1:
+										if(Equipment!=null && !Equipment._parent) Equipment=null;
+										if(show==true){
+											if(Equipment){
+												Equipment.updateTileGrid();
+											}else{
+												Equipment = new EquipmentPanel();
+												Equipment.init();
+												Equipment.didBecomeActive();
+												MainScene.addChild(Equipment);
+											}
+										}else{
+											if(Equipment){
+												Equipment.willTerminate();
+												Equipment.removeFromParent();
+												Equipment=null;
+											}
+										}
+									break;
+									case 2:
+										if(Skills!=null && !Skills._parent) Skills=null;
+										if(show==true){
+											if(Skills){
+												Skills.updateTileGrid();
+											}else{
+												Skills = new SkillsPanel();
+												Skills.init();
+												Skills.didBecomeActive();
+												MainScene.addChild(Skills);
+											}
+										}else{
+											if(Skills){
+												Skills.willTerminate();
+												Skills.removeFromParent();
+												Skills=null;
+											}
+										}
+									break;
+								}
+							break;
+							case "Destroy":
+								temp=null;
+								if(Inventory){
+									Inventory.updateTileGrid();
+								}
+							break;
+						}						
+					}
+				}
+			}
+		}
+
+		this.items["equipped"][place]=cloneObj(this.items["stored"][itemnumber]);
 		this.items["stored"][itemnumber]=temp;
 		if(Inventory){
 			Inventory.updateTileGrid();
@@ -489,6 +705,99 @@ PlayerCharacter = Character.extend({
 				if(Equipment){
 					Equipment.updateTileGrid();
 				}
+
+
+				var item = this.items["stored"][i]
+				var scriptData=[];
+				if(item["script"]){
+					scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
+				}
+				for(var j=0;j<scriptData.length;j++){
+					if(scriptData[j]["type"]=="On Dequip"){
+						var defaultEvent = scriptData[j]["responses"];
+						for(var k=0;k<defaultEvent.length;k++){
+							switch(defaultEvent[k]["type"]){
+								case "Modify Player Stats":
+									var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+									SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+									SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+									SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+								break;
+								case "Open/Close Panel":
+									var show = defaultEvent[k]["data"]["visible"]==1?true:false;
+									switch(defaultEvent[k]["data"]["panel"]){
+										case 0: 
+											if(Inventory!=null && !Inventory._parent) Inventory=null;
+											if(show==true){
+												if(Inventory){
+													Inventory.updateTileGrid();
+												}else{
+													Inventory = new InventoryPanel();
+													Inventory.init();
+													Inventory.didBecomeActive();
+													MainScene.addChild(Inventory);
+												}
+											}else{
+												if(Inventory){
+													Inventory.willTerminate();
+													Inventory.removeFromParent();
+													Inventory=null;
+												}
+											}
+										break;
+										case 1:
+											if(Equipment!=null && !Equipment._parent) Equipment=null;
+											if(show==true){
+												if(Equipment){
+													Equipment.updateTileGrid();
+												}else{
+													Equipment = new EquipmentPanel();
+													Equipment.init();
+													Equipment.didBecomeActive();
+													MainScene.addChild(Equipment);
+												}
+											}else{
+												if(Equipment){
+													Equipment.willTerminate();
+													Equipment.removeFromParent();
+													Equipment=null;
+												}
+											}
+										break;
+										case 2:
+											if(Skills!=null && !Skills._parent) Skills=null;
+											if(show==true){
+												if(Skills){
+													Skills.updateTileGrid();
+												}else{
+													Skills = new SkillsPanel();
+													Skills.init();
+													Skills.didBecomeActive();
+													MainScene.addChild(Skills);
+												}
+											}else{
+												if(Skills){
+													Skills.willTerminate();
+													Skills.removeFromParent();
+													Skills=null;
+												}
+											}
+										break;
+									}
+								break;
+								case "Destroy":
+									this.items["stored"][i]=null;
+									if(Inventory){
+										Inventory.updateTileGrid();
+									}
+								break;
+							}						
+						}
+					}
+				}
+
+
+
 				return;
 			}
 		}

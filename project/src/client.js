@@ -163,9 +163,9 @@ reactToSocketMessage=function(data){
 			else if(data["savescripts"]){
 				LocalStorage.changeScript(parseInt(data["savescripts"]),data["scriptsdata"],data["updatetime"]);
 				ObjectLists.getScriptList()[parseInt(data["savescripts"])]=data["scriptsdata"];
-				if(Eventsystem){
-					Eventsystem.editList = ObjectLists.getScriptList();
-					Eventsystem.didBecomeActive();	
+				if(Scripteditor){
+					Scripteditor.editList = ObjectLists.getScriptList();
+					Scripteditor.didBecomeActive();	
 				}	
 			}
 			else if(data["savescriptswhole"]){

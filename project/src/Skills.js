@@ -212,6 +212,7 @@ var SkillBars=cc.Layer.extend({
 
 	createSkillBar:function(name,color,i){
 		var newCol = hex2rgba(color);
+		console.log(name);
 		console.log(this.skillsData[name]);
 		var bar = cc.LayerColor.create(cc.c4b(newCol.r,newCol.g,newCol.b,newCol.a),this.skillsData[name]["currenthealth"]>0 ? 300*(this.skillsData[name]["currenthealth"]/this.skillsData[name]["maxhealth"]) : 1,23);
 		bar.bar = cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/healthbar.png"));
@@ -248,7 +249,38 @@ SkillBars.modifyHealth=function(name,value){
 		SkillBarsInstance.skillsData[name]["currenthealth"]=SkillBarsInstance.skillsData[name]["maxhealth"];
 	}
 	SkillBarsInstance.updateLayoutFromSkills();
+	if(Skills){
+		Skills.prepareList();
+	}
 };
+
+SkillBars.modifyXP=function(name,value){
+	SkillBarsInstance.skillsData[name]["experience"]+=value;
+	if(SkillBarsInstance.skillsData[name]["experience"]<0){
+		SkillBarsInstance.skillsData[name]["experience"]=0;
+	}
+	/*if(SkillBarsInstance.skillsData[name]["experience"]>SkillBarsInstance.skillsData[name]["maxhealth"]){
+		SkillBarsInstance.skillsData[name]["experience"]=SkillBarsInstance.skillsData[name]["maxhealth"];
+	}*/
+	SkillBarsInstance.updateLayoutFromSkills();
+	if(Skills){
+		Skills.prepareList();
+	}
+};
+
+
+SkillBars.modifyModifier=function(name,value){
+	console.log("modifying modifier " + value);
+	SkillBarsInstance.skillsData[name]["modifier"]+=value;
+	if(SkillBarsInstance.skillsData[name]["modifier"]<0){
+		SkillBarsInstance.skillsData[name]["modifier"]=0;
+	}
+	SkillBarsInstance.updateLayoutFromSkills();
+	if(Skills){
+		Skills.prepareList();
+	}
+};
+
 
 SkillBars.getSkillData=function(){
 	return SkillBarsInstance.skillsData;

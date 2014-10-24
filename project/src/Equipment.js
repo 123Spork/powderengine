@@ -29,13 +29,13 @@ EquipmentPanel = Popup.extend({
 			size: cc.size(32,32),
 			anchorPoint:cc.p(0,1),
 		};
-		equipment_panel["larm"] = {
+		equipment_panel["lArm"] = {
 			texture:"GUI/defaultitem.png",
 			position:cc.p(48,122),
 			size: cc.size(32,32),
 			anchorPoint:cc.p(0,1),
 		};
-		equipment_panel["rarm"] = {
+		equipment_panel["rArm"] = {
 			texture:"GUI/defaultitem.png",
 			position:cc.p(128,122),
 			size: cc.size(32,32),
@@ -103,8 +103,8 @@ EquipmentPanel = Popup.extend({
 		this.panels["main_panel"]["body"].setTexture(cc.TextureCache.getInstance().addImage("GUI/defaultitem.png"));
 		this.panels["main_panel"]["legs"].setTexture(cc.TextureCache.getInstance().addImage("GUI/defaultitem.png"));
 		this.panels["main_panel"]["feet"].setTexture(cc.TextureCache.getInstance().addImage("GUI/defaultitem.png"));
-		this.panels["main_panel"]["larm"].setTexture(cc.TextureCache.getInstance().addImage("GUI/defaultitem.png"));
-		this.panels["main_panel"]["rarm"].setTexture(cc.TextureCache.getInstance().addImage("GUI/defaultitem.png"));
+		this.panels["main_panel"]["lArm"].setTexture(cc.TextureCache.getInstance().addImage("GUI/defaultitem.png"));
+		this.panels["main_panel"]["rArm"].setTexture(cc.TextureCache.getInstance().addImage("GUI/defaultitem.png"));
 		this.panels["main_panel"]["mod"].setTexture(cc.TextureCache.getInstance().addImage("GUI/defaultitem.png"));
 		for(var i in equipmentList){
 			if(equipmentList[i]){
@@ -113,16 +113,16 @@ EquipmentPanel = Popup.extend({
 						var texture=tileTextureList[j]["texture"];
 					}
 				}
-				this.panels["main_panel"][equipmentList[i]["subType"]].setAnchorPoint(0,1);
-				this.panels["main_panel"][equipmentList[i]["subType"]].setTexture(texture);
-				this.panels["main_panel"][equipmentList[i]["subType"]].setTextureRect(cc.rect(equipmentList[i]["sprite"]["position"].x*32, (equipmentList[i]["sprite"]["position"].y*32),32,32));
+				this.panels["main_panel"][i].setAnchorPoint(0,1);
+				this.panels["main_panel"][i].setTexture(texture);
+				this.panels["main_panel"][i].setTextureRect(cc.rect(equipmentList[i]["sprite"]["position"].x*32, (equipmentList[i]["sprite"]["position"].y*32),32,32));
 			}
 		}
 	},
 
 	listItemSelected:function(val){
 		switch(val){
-			case 0: PlayersController.getYou().dequipItem(this.delegate.itemContext); break;
+			case 0:PlayersController.getYou().dequipItem(this.delegate.itemContext);break;
 			case 1: PlayersController.getYou().dropItem(this.delegate.itemContext,"equipped"); break;
 		}
 	},
@@ -137,7 +137,7 @@ EquipmentPanel = Popup.extend({
 		for(var i in equipmentList){
 			if(equipmentList[i]){
 				var reducer= 32;
-				if(isTouching(this.panels["main_panel"][equipmentList[i]["subType"]],cc.p(truePos.x,truePos.y+reducer))){
+				if(isTouching(this.panels["main_panel"][i],cc.p(truePos.x,truePos.y+reducer))){
 					this.itemContext=i;
 					this.panels["item_name"].setVisible(false)
 					var firstItem = settingsData["Item Dropdown Unequip"]+"";
@@ -159,12 +159,12 @@ EquipmentPanel = Popup.extend({
 			for(var i in equipmentList){
 				if(equipmentList[i]){
 					var reducer= 32;
-					if(isTouching(this.panels["main_panel"][equipmentList[i]["subType"]],cc.p(truePos.x,truePos.y+reducer))){
+					if(isTouching(this.panels["main_panel"][i],cc.p(truePos.x,truePos.y+reducer))){
 						this.panels["item_name"]["content"].setString(equipmentList[i]["name"]);
 						this.panels["item_name"].setVisible(true);
 						this.panels["item_name"].setContentSize(this.panels["item_name"]["content"].getContentSize());
 						this.panels["item_name"]["content"].setPositionX(this.panels["item_name"]["content"].getContentSize().width/2);
-						this.panels["item_name"].setPosition(cc.p(this.panels["main_panel"][equipmentList[i]["subType"]].getPositionX()-(this.panels["item_name"]["content"].getContentSize().width/2)+16,this.panels["main_panel"][equipmentList[i]["subType"]].getPositionY()));
+						this.panels["item_name"].setPosition(cc.p(this.panels["main_panel"][i].getPositionX()-(this.panels["item_name"]["content"].getContentSize().width/2)+16,this.panels["main_panel"][i].getPositionY()));
 						return true;
 					}
 				}

@@ -256,28 +256,25 @@ socket.on('connection', function(client){
 						client.send(JSON.stringify({"login_success":playerData}));
 						names[client.id]=event["username"];
 						clients[client.id]=client;
-						mapplayers[event["username"]]=1;
-						if(playersOnMapsCount[1]==0){
-							mapMasters[1]=names[client.id];
+						mapplayers[event["username"]]=playerData["location"]["mapnumber"];
+						if(playersOnMapsCount[playerData["location"]["mapnumber"]]==0){
+							mapMasters[playerData["location"]["mapnumber"]]=names[client.id];
 							client.send(JSON.stringify({"mapmaster":true}));
 						}
-						playersOnMapsCount[1]++;
-						client.broadcast.send(JSON.stringify({"newPlayer":event["username"]}));
+						playersOnMapsCount[playerData["location"]["mapnumber"]]++;
+						client.broadcast.send(JSON.stringify({"newPlayer":1,"id":event["username"],"position":playerData["location"]["position"],"mapnumber":playerData["location"]["mapnumber"]}));
 						for(var i in clients){
 							if(i!=client.id && clients[i]){
 								if(positions[i]){
-									client.send(JSON.stringify({"moveTo":positions[i],"id":names[i]}));
-									client.send(JSON.stringify({"changemap":mapplayers[names[i]],"id":names[i],"setTo":positions[i]}));
-								} else{
-									client.send(JSON.stringify({"moveTo":"default","id":names[i]}));
+									client.send(JSON.stringify({"id":names[i],"mapnumber":mapplayers[names[i]], "position":positions[i], "setTo":1}));
 								}
 							}
 						}
-						for(var i in droppedItems[1]){
-							client.send(JSON.stringify(droppedItems[1][i]));
+						for(var i in droppedItems[playerData["location"]["mapnumber"]]){
+							client.send(JSON.stringify(droppedItems[playerData["location"]["mapnumber"]][i]));
 						}
-						for(var i in mapNPCS[1]){
-							client.send(JSON.stringify({"changeNPCPosition":mapNPCS[1][i],"npcID":i}));
+						for(var i in mapNPCS[playerData["location"]["mapnumber"]]){
+							client.send(JSON.stringify({"changeNPCPosition":mapNPCS[playerData["location"]["mapnumber"]][i],"npcID":i}));
 						}
 					}
 				}
@@ -363,7 +360,7 @@ socket.on('connection', function(client){
 
 		
 		if(event["moveTo"]){
-			client.broadcast.send(JSON.stringify({"moveTo":event["moveTo"],"id":names[client.id]}));
+			client.broadcast.send(JSON.stringify({"moveTo":1,"position":event["moveTo"],"mapnumber":mapplayers[names[client.id]],"id":names[client.id]}));
 			positions[client.id]= event["moveTo"];
 		}
 		if(event["droppeditem"]){
@@ -549,7 +546,7 @@ socket.on('connection', function(client){
 			positions[client.id]=undefined;
 		}
 		if(event["changemap"]){
-			client.broadcast.send(JSON.stringify({"id":names[client.id],"changemap":event["changemap"],"setTo":event["setTo"]}));
+			client.broadcast.send(JSON.stringify({"id":names[client.id],"position":positions[client.id],"mapnumber":event["changemap"],"setTo":1}));
 			if(playersOnMapsCount[event["changemap"]]==0){
 				client.send(JSON.stringify({"mapmaster":true}));
 				mapMasters[event["changemap"]]=names[client.id];
@@ -591,21 +588,23 @@ socket.on('connection', function(client){
     });
 
     client.on('disconnect',function(){
-       var mapNumberFrom = mapplayers[names[client.id]];
-       client.broadcast.send(JSON.stringify({"playerLeft":names[client.id]}));
-	   client.send(JSON.stringify({"disconnect":true}));
-	   console.log(names[client.id]+" HAS DISCONNECTED");
-	   playersOnMapsCount[mapplayers[names[client.id]]]--;
-	   mapplayers[names[client.id]]=undefined;
-	   clients[client.id]=undefined;
-	   names[client.id]=undefined;
-	   positions[client.id]=undefined;
-		for(var i in clients){
-			if(clients[i]){
-				if(mapplayers[names[i]]==mapNumberFrom){
-					clients[i].send(JSON.stringify({"mapmaster":true}));
-					mapMasters[mapplayers[names[i]]]=mapplayers[names[i]];
-					break;
+       if(names[client.id]){
+	       var mapNumberFrom = mapplayers[names[client.id]];
+	       client.broadcast.send(JSON.stringify({"playerLeft":names[client.id]}));
+		   client.send(JSON.stringify({"disconnect":true}));
+		   console.log(names[client.id]+" HAS DISCONNECTED");
+		   playersOnMapsCount[mapplayers[names[client.id]]]--;
+		   mapplayers[names[client.id]]=undefined;
+		   clients[client.id]=undefined;
+		   names[client.id]=undefined;
+		   positions[client.id]=undefined;
+			for(var i in clients){
+				if(clients[i]){
+					if(mapplayers[names[i]]==mapNumberFrom){
+						clients[i].send(JSON.stringify({"mapmaster":true}));
+						mapMasters[mapplayers[names[i]]]=mapplayers[names[i]];
+						break;
+					}
 				}
 			}
 		}

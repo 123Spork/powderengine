@@ -65,6 +65,9 @@ SkillsPanel = Popup.extend({
 		}
 
 		this.listPanel = this.panels["main_panel"]["list"];
+
+		console.log(this.panels);
+
 		var self=this;
 		this.listPanel.getListSize = function(){
 			var height =0;
@@ -209,6 +212,8 @@ var SkillBars=cc.Layer.extend({
 
 	createSkillBar:function(name,color,i){
 		var newCol = hex2rgba(color);
+		console.log(name);
+		console.log(this.skillsData[name]);
 		var bar = cc.LayerColor.create(cc.c4b(newCol.r,newCol.g,newCol.b,newCol.a),this.skillsData[name]["currenthealth"]>0 ? 300*(this.skillsData[name]["currenthealth"]/this.skillsData[name]["maxhealth"]) : 1,23);
 		bar.bar = cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/healthbar.png"));
 		bar.setPosition(10,(i*32)-(i*-5)-10);
@@ -265,6 +270,7 @@ SkillBars.modifyXP=function(name,value){
 
 
 SkillBars.modifyModifier=function(name,value){
+	console.log("modifying modifier " + value);
 	SkillBarsInstance.skillsData[name]["modifier"]+=value;
 	if(SkillBarsInstance.skillsData[name]["modifier"]<0){
 		SkillBarsInstance.skillsData[name]["modifier"]=0;

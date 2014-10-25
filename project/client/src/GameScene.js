@@ -582,6 +582,8 @@ var GameScene = Scene.extend({
 
 		this.panels.removeFromParent();
 		this.setTouchPriority(-20);
+		this.scheduleOnce(function(){GameMap.getInstance().setup(withData.map)});
+
 		sendMessageToServer({"moveTo":((PlayersController.getYou().getGridPosition().x) + ((PlayersController.getYou().getGridPosition().y) * gridWidth))});
 		
 		this.addChild(GameChat.create());

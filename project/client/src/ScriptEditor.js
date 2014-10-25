@@ -1159,13 +1159,13 @@ ScriptEditor = Popup.extend({
 					"expTextLower":{
 						bg:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
-						position:cc.p(12,109),
+						position:cc.p(100,109),
 						size:cc.size(75,32),
 					},
 					"expTextUpper":{
 						bg:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
-						position:cc.p(100,109),
+						position:cc.p(12,109),
 						size:cc.size(75,32),
 					},
 
@@ -1854,27 +1854,27 @@ ScriptEditor = Popup.extend({
 				if(data["skill"]!=null && data["skill"]!=='undefined'){
 					this.subEditor["skillList"].runListCallBack("Use",data["skill"]);
 				}
-				this.skillLevelBox = new EntryBox(this.subEditor["levelTextLower"],cc.size(this.subEditor["levelTextLower"].getContentSize().width,this.subEditor["levelTextLower"].getContentSize().height), cc.p(0,this.subEditor["levelTextLower"].getContentSize().height), data["levelLower"]!=null && data["levelLower"]!=='undefined' && data["levelLower"]!="" ?  data["levelLower"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillLevelBox = new EntryBox(this.subEditor["levelTextLower"],cc.size(this.subEditor["levelTextLower"].getContentSize().width,this.subEditor["levelTextLower"].getContentSize().height), cc.p(0,this.subEditor["levelTextLower"].getContentSize().height), data["levelLower"]!=null && data["levelLower"]!=='undefined' ?  data["levelLower"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.skillLevelBox.setDefaultFineFlag(true);
 				this.skillLevelBox.setNullAllowed(false);
 
-				this.skillXPBox = new EntryBox(this.subEditor["expTextLower"],cc.size(this.subEditor["expTextLower"].getContentSize().width,this.subEditor["expTextLower"].getContentSize().height), cc.p(0,this.subEditor["expTextLower"].getContentSize().height), data["xpLower"]!=null && data["xpLower"]!=='undefined' && data["xpLower"]!="" ?  data["xpLower"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillXPBox = new EntryBox(this.subEditor["expTextLower"],cc.size(this.subEditor["expTextLower"].getContentSize().width,this.subEditor["expTextLower"].getContentSize().height), cc.p(0,this.subEditor["expTextLower"].getContentSize().height), data["xpLower"]!=null && data["xpLower"]!=='undefined' ?  data["xpLower"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.skillXPBox.setDefaultFineFlag(true);
 				this.skillXPBox.setNullAllowed(false);
 
-				this.skillHealthBox = new EntryBox(this.subEditor["healthTextLower"],cc.size(this.subEditor["healthTextLower"].getContentSize().width,this.subEditor["healthTextLower"].getContentSize().height), cc.p(0,this.subEditor["healthTextLower"].getContentSize().height), data["healthLower"]!=null && data["healthLower"]!=='undefined' && data["healthLower"]!="" ?  data["healthLower"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillHealthBox = new EntryBox(this.subEditor["healthTextLower"],cc.size(this.subEditor["healthTextLower"].getContentSize().width,this.subEditor["healthTextLower"].getContentSize().height), cc.p(0,this.subEditor["healthTextLower"].getContentSize().height), data["healthLower"]!=null && data["healthLower"]!=='undefined' ?  data["healthLower"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.skillHealthBox.setDefaultFineFlag(true);
 				this.skillHealthBox.setNullAllowed(false);
 
-				this.skillLevelBoxUpper = new EntryBox(this.subEditor["levelTextUpper"],cc.size(this.subEditor["levelTextUpper"].getContentSize().width,this.subEditor["levelTextUpper"].getContentSize().height), cc.p(0,this.subEditor["levelTextUpper"].getContentSize().height), data["levelUpper"]!=null && data["levelUpper"]!=='undefined' && data["levelUpper"]!="" ?  data["levelUpper"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillLevelBoxUpper = new EntryBox(this.subEditor["levelTextUpper"],cc.size(this.subEditor["levelTextUpper"].getContentSize().width,this.subEditor["levelTextUpper"].getContentSize().height), cc.p(0,this.subEditor["levelTextUpper"].getContentSize().height), data["levelUpper"]!=null && data["levelUpper"]!=='undefined' ?  data["levelUpper"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.skillLevelBoxUpper.setDefaultFineFlag(true);
 				this.skillLevelBoxUpper.setNullAllowed(false);
 
-				this.skillXPBoxUpper = new EntryBox(this.subEditor["expTextUpper"],cc.size(this.subEditor["expTextUpper"].getContentSize().width,this.subEditor["expTextUpper"].getContentSize().height), cc.p(0,this.subEditor["expTextUpper"].getContentSize().height), data["xpUpper"]!=null && data["xpUpper"]!=='undefined' && data["xpUpper"]!="" ? data["xpUpper"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillXPBoxUpper = new EntryBox(this.subEditor["expTextUpper"],cc.size(this.subEditor["expTextUpper"].getContentSize().width,this.subEditor["expTextUpper"].getContentSize().height), cc.p(0,this.subEditor["expTextUpper"].getContentSize().height), data["xpUpper"]!=null && data["xpUpper"]!=='undefined' ?  data["xpUpper"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.skillXPBoxUpper.setDefaultFineFlag(true);
 				this.skillXPBoxUpper.setNullAllowed(false);
 
-				this.skillHealthBoxUpper = new EntryBox(this.subEditor["healthTextUpper"],cc.size(this.subEditor["healthTextUpper"].getContentSize().width,this.subEditor["healthTextUpper"].getContentSize().height), cc.p(0,this.subEditor["healthTextUpper"].getContentSize().height), data["healthUpper"]!=null && data["healthUpper"]!=='undefined' && data["healthUpper"]!="" ?  data["healthUpper"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.skillHealthBoxUpper = new EntryBox(this.subEditor["healthTextUpper"],cc.size(this.subEditor["healthTextUpper"].getContentSize().width,this.subEditor["healthTextUpper"].getContentSize().height), cc.p(0,this.subEditor["healthTextUpper"].getContentSize().height), data["healthUpper"]!=null && data["healthUpper"]!=='undefined' ?  data["healthUpper"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.skillHealthBoxUpper.setDefaultFineFlag(true);
 				this.skillHealthBoxUpper.setNullAllowed(false);
 			break;

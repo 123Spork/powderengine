@@ -87,27 +87,23 @@ PlayersController.getPlayer=function(id){
 	return this.instance.players[id];
 };
 
-PlayersController.addPlayer=function(data){
+PlayersController.addPlayer=function(id){
 		var withData ={
-			name: data["id"],
+			name: id,
 			stats: {
 				"health":{level:1,value:100,maxval:200,maxlvl:900},
 				"mana":{level:1,value:100,maxval:200,maxlvl:99},
 			},
-			map:data["location"]["mapnumber"],
+			map:1,
 			textureName: "sprites1.png",
 			spriteId: 1,
 		};
-		this.instance.players[data["id"]] = PlayerCharacter.create(withData);
-
-		var position=data["location"]["position"];
-		var x =position % gridWidth;
-		var y=Math.floor(position/gridWidth);
-		this.instance.players[data["id"]].setPosition(x*32,y*32);
+		this.instance.players[id] = PlayerCharacter.create(withData);
+		this.instance.players[id].setPosition(960,320);
 		PlayersController.showPlayersInMapOnly();
-		this.instance.addChild(this.instance.players[data["id"]]);
+		this.instance.addChild(this.instance.players[id]);
 		var playerJoinString = settingsData["Join Message"]+"";
-		playerJoinString = playerJoinString.replace("<PLAYER>",data["id"]);
+		playerJoinString = playerJoinString.replace("<PLAYER>",id);
 		GameChat.addMessage(playerJoinString);
 };
 
@@ -116,7 +112,7 @@ PlayersController.destroyPlayer=function(id){
 		this.instance.players[id].removeFromParent();
 		this.instance.players[id]=null;
 		var playerLeaveString = settingsData["Leave Message"]+"";
-		playerLeaveString = playerLeaveString.replace("<PLAYER>",id);
+		playerLeaveString = playerJoinString.replace("<PLAYER>",id);
 		GameChat.addMessage(playerLeaveString);
 		for(var i=0;i<storedClientMessages.length;i++){
 			var msg = JSON.parse(storedClientMessages[i]);
@@ -128,52 +124,50 @@ PlayersController.destroyPlayer=function(id){
 	}
 };
 
-PlayersController.movePlayer=function(data){
-	console.log(data["location"]["position"]);
-	if(this.instance.players[data["id"]]){
-		this.instance.players[data["id"]].walkToIndex(data["location"]["position"]);
+PlayersController.movePlayer=function(id,index){
+	if(this.instance.players[id] && index!="default"){
+		this.instance.players[id].walkToIndex(index);
 	} else{
 		var withData ={
-			name: data["id"],
+			name: id,
 			stats: {
 				"health":{level:1,value:100,maxval:200,maxlvl:900},
 				"mana":{level:1,value:100,maxval:200,maxlvl:99},
 			},
-			map:data["location"]["mapnumber"],
+			map:1,
 			textureName: "sprites1.png",
 			spriteId: 1,
 		};
 		this.instance.players[id] = PlayerCharacter.create(withData);
-		var index=data["location"]["position"];
+		this.instance.players[id].setPosition(960,320);
 		this.instance.players[id].setPosition(cc.p((index % gridWidth)*32,(Math.floor(index/gridWidth))*32)); 
 		PlayersController.showPlayersInMapOnly();
-		this.instance.addChild(this.instance.players[data["id"]]);
+		this.instance.addChild(this.instance.players[id]);
 		var playerJoinString = settingsData["Join Message"]+"";
-		playerJoinString = playerJoinString.replace("<PLAYER>",data["id"]);
+		playerJoinString = playerJoinString.replace("<PLAYER>",id);
 		GameChat.addMessage(playerJoinString);
 	}
 };
 	
-PlayersController.positionPlayer=function(data){
-	if(this.instance.players[data["id"]]){
-		this.instance.players[data["id"]].setPosition(cc.p((data["location"]["position"] % gridWidth)*32,(Math.floor(data["location"]["position"]/gridWidth))*32));
+PlayersController.positionPlayer=function(id,index){
+	if(this.instance.players[id] && index!="default"){
+		this.instance.players[id].setPosition(cc.p((index % gridWidth)*32,(Math.floor(index/gridWidth))*32));
 	} else{
 		var withData ={
-			name: data["id"],
+			name: id,
 			stats: {
 				"health":{level:1,value:100,maxval:200,maxlvl:900},
 				"mana":{level:1,value:100,maxval:200,maxlvl:99},
 			},
-			map:data["location"]["mapnumber"],
+			map:1,
 			textureName: "sprites1.png",
 			spriteId: 1,
 		};
-		this.instance.players[data["id"]] = PlayerCharacter.create(withData);
-		var index = data["location"]["position"];
-		this.instance.players[data["id"]].setPosition(cc.p((index % gridWidth)*32,(Math.floor(index/gridWidth))*32)); 
+		this.instance.players[id] = PlayerCharacter.create(withData);
+		this.instance.players[id].setPosition(cc.p((index % gridWidth)*32,(Math.floor(index/gridWidth))*32)); 
 		PlayersController.showPlayersInMapOnly();
-		this.instance.addChild(this.instance.players[data["id"]]);
-		GameChat.addMessage(data["id"] + strings.gameChat.playerJoin);
+		this.instance.addChild(this.instance.players[id]);
+		GameChat.addMessage(id + strings.gameChat.playerJoin);
 	}
 };
 

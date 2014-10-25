@@ -134,7 +134,6 @@ var GameMap=cc.Layer.extend({
 	},
 	
 	setup:function(mapnumber){
-		console.log("SETTING UP "+mapnumber)
 		PlayersController.getInstance().setVisible(false);
 		var data = LocalStorage.getMapData(mapnumber);
 		this.tileData={}
@@ -583,7 +582,6 @@ GameMap.setLayer=function(id,texture,frame,type){
 };
 
 GameMap.updateServer=function(){
-	PlayersController.destroyNPCs();
 	sendMessageToServer({"savemap":gameMapInstance.currentMap, "mapdata":gameMapInstance.tileData});
 };
 

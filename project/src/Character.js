@@ -347,11 +347,13 @@ PlayerCharacter = Character.extend({
 						for(var k=0;k<defaultEvent.length;k++){
 							switch(defaultEvent[k]["type"]){
 								case "Modify Player Stats":
-									var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
-									console.log("modifying stat: " + skillname);
-									SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
-									SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
-									SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+									if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
+										var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+										console.log("modifying stat: " + skillname);
+										SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+										SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+										SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+									}
 								break;
 							}						
 						}
@@ -380,235 +382,108 @@ PlayerCharacter = Character.extend({
 		var gp = this.getGridPosition();
 		var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 
-		if(item["stackable"]==true){
-			for(var i=0;i<40;i++){
-				if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
-					if(Inventory){
-						this.items["stored"][i]["amount"] +=item["amount"];
-						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
-					}
-					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
-					if(tile.getScriptObject()["temp"]){
-						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-					} else{
-						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-					}
-					console.log(this.items);
-					return;
-				}
-			}
-		}
-		
-		var added=false;
-		for(var i=0;i<40;i++){
-			if(this.items["stored"][i]==null){
-				this.items["stored"][i]=cloneObj(item);
-				if(Inventory){
-					Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
-				}
-				GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
-				if(tile.getScriptObject()["temp"]){
-					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-				} else{
-					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-				}
-				var added=true;
-				break;
-			}
-		}
-		if(added==false){
-			GameChat.addMessage(strings.gameChat.inventoryFull);
-		}
-		console.log(this.items);
-	},
-
-	pickupItemFromTile:function(item,tile){
-		var gp = cc.p(tile.getPositionX()/32,tile.getPositionY()/32);
-		if(item["stackable"]==true){
-			for(var i=0;i<40;i++){
-				if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
-					if(Inventory){
-						this.items["stored"][i]["amount"] +=item["amount"];
-						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
-					}
-					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
-					if(tile.getScriptObject()["temp"]){
-						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-					} else{
-						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-					}
-					return;
-				}
-			}
-		}
-		
-		var added=false;
-		for(var i=0;i<40;i++){
-			if(this.items["stored"][i]==null){
-				this.items["stored"][i]=cloneObj(item);
-				if(Inventory){
-					Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
-				}
-				GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
-				if(tile.getScriptObject()["temp"]){
-					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-				} else{
-					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-				}
-				var added=true;
-				break;
-			}
-		}
-		if(added==false){
-			GameChat.addMessage(strings.gameChat.inventoryFull);
-		}
-	},
-	
-	dropItem:function(itemnumber,itembox){
-		var gp = this.getGridPosition();
-		GameChat.addMessage(strings.gameChat.droppedItem + this.items[itembox][itemnumber]["name"]);
-		sendMessageToServer({"droppeditem":this.items[itembox][itemnumber],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y)});
-		
-
-		if(this.items[itembox][itemnumber]["stackable"]==true && this.items[itembox][itemnumber]["amount"]>1){
-			Inventory.setStackableLabel(itemnumber,0);
-		}
-	
-		this.items[itembox][itemnumber]=null;
-		if(Inventory){
-			Inventory.updateTileGrid();
-		}
-		if(Equipment){
-			Equipment.updateTileGrid();
-		}
-	},
-
-	useItem:function(itemnumber){
-		var item = this.items["stored"][itemnumber];
 		var scriptData=[];
 		if(item["script"]){
 			scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
 		}
 		for(var j=0;j<scriptData.length;j++){
-			if(scriptData[j]["type"]=="Default Event"){
-				var defaultEvent = scriptData[j]["responses"];
+			if(scriptData[j]["type"]=="On Pickup"){
+				var defaultEvent = scriptData[j]["requirements"];
+				var allowContinue=true;
 				for(var k=0;k<defaultEvent.length;k++){
 					switch(defaultEvent[k]["type"]){
-						case "Equip Item":
-							this.equipItem(itemnumber,defaultEvent[k]["data"]["equip"]);
-						break;
-						case "Modify Player Stats":
-							var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
-							console.log("modifying stat: " + skillname);
-							SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
-							SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
-							SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
-						break;
-						case "Read Item":
-							MainScene.showBook(item["name"],defaultEvent[k]["data"]["say"]);
-						break;
-						case "Open/Close Panel":
-							var show = defaultEvent[k]["data"]["visible"]==1?true:false;
-							switch(defaultEvent[k]["data"]["panel"]){
-								case 0: 
-									if(Inventory!=null && !Inventory._parent) Inventory=null;
-									if(show==true){
-										if(Inventory){
-											Inventory.updateTileGrid();
-										}else{
-											Inventory = new InventoryPanel();
-											Inventory.init();
-											Inventory.didBecomeActive();
-											MainScene.addChild(Inventory);
-										}
-									}else{
-										if(Inventory){
-											Inventory.willTerminate();
-											Inventory.removeFromParent();
-											Inventory=null;
+						case "Has Player Item":
+							if(defaultEvent[k]["data"]["item"]){
+								if(!defaultEvent[k]["data"]["amount"]){
+									var amount=1;
+								}else{
+									var amount=defaultEvent[k]["data"]["amount"];
+								}	
+								var count=0;
+								var itemName = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]]["name"];
+								for(var i in this.items["stored"]){
+									if(this.items["stored"][i]){
+										if(this.items["stored"][i]["name"]==itemName){
+											count++;
 										}
 									}
-								break;
-								case 1:
-									if(Equipment!=null && !Equipment._parent) Equipment=null;
-									if(show==true){
-										if(Equipment){
-											Equipment.updateTileGrid();
-										}else{
-											Equipment = new EquipmentPanel();
-											Equipment.init();
-											Equipment.didBecomeActive();
-											MainScene.addChild(Equipment);
-										}
-									}else{
-										if(Equipment){
-											Equipment.willTerminate();
-											Equipment.removeFromParent();
-											Equipment=null;
-										}
-									}
-								break;
-								case 2:
-									if(Skills!=null && !Skills._parent) Skills=null;
-									if(show==true){
-										if(Skills){
-											Skills.updateTileGrid();
-										}else{
-											Skills = new SkillsPanel();
-											Skills.init();
-											Skills.didBecomeActive();
-											MainScene.addChild(Skills);
-										}
-									}else{
-										if(Skills){
-											Skills.willTerminate();
-											Skills.removeFromParent();
-											Skills=null;
-										}
-									}
-								break;
+								}
+								if(count<amount){
+									allowContinue=false; break; break;
+								}
 							}
 						break;
-						case "Destroy":
-							this.items["stored"][itemnumber]=null;
-							if(Inventory){
-								Inventory.updateTileGrid();
+						case "Is Player Statistics":
+							var name = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+							if(!defaultEvent[k]["data"]["levelUpper"]){
+								defaultEvent[k]["data"]["levelUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["levelLower"]){
+								defaultEvent[k]["data"]["levelLower"]=0;
+							}
+							if(!defaultEvent[k]["data"]["healthUpper"]){
+								defaultEvent[k]["data"]["healthUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["healthLowe"]){
+								defaultEvent[k]["data"]["healthLower"]=0;
+							}
+							if(!defaultEvent[k]["data"]["xpUpper"]){
+								defaultEvent[k]["data"]["xpUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["xpLower"]){
+								defaultEvent[k]["data"]["xpLower"]=0;
+							}
+
+							if(defaultEvent[k]["data"]["levelUpper"]!=0 || defaultEvent[k]["data"]["levelLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["level"]+1;
+								if(valtocheck>defaultEvent[k]["data"]["levelUpper"] || valtocheck<defaultEvent[k]["data"]["levelLower"]){
+									allowContinue=false; break; break;
+								}
+							}
+							if(defaultEvent[k]["data"]["healthUpper"]!=0 || defaultEvent[k]["data"]["healthLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["currenthealth"];
+								if(valtocheck>defaultEvent[k]["data"]["healthUpper"] || valtocheck<defaultEvent[k]["data"]["healthLower"]){
+									allowContinue=false; break; break;
+								}
+							}
+
+							if(defaultEvent[k]["data"]["xpUpper"]!=0 || defaultEvent[k]["data"]["xpLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["experience"];
+								console.log(valtocheck);
+								console.log(defaultEvent[k]["data"]);
+								if(valtocheck>defaultEvent[k]["data"]["xpUpper"] || valtocheck<defaultEvent[k]["data"]["xpLower"]){
+									allowContinue=false; break; break;
+								}
 							}
 						break;
-					}						
+					}
 				}
-			}
-		}
-	},
-	
-	equipItem:function(itemnumber,place){
-
-		if(place=="bothArms"){
-			place="lArm";
-			if(!this.items["equipped"]["rArm"]){
-				place="rArm";
-			}
-		}
-
-		var temp=null;
-		if(this.items["equipped"][place]){
-			var temp = cloneObj(this.items["equipped"][place]);
-
-			var scriptData=[];
-			if(temp["script"]){
-				scriptData = ObjectLists.getScriptList()[temp["script"]]["data"];
-			}
-			for(var j=0;j<scriptData.length;j++){
-				if(scriptData[j]["type"]=="On Dequip"){
+				if(allowContinue==true){
 					var defaultEvent = scriptData[j]["responses"];
 					for(var k=0;k<defaultEvent.length;k++){
 						switch(defaultEvent[k]["type"]){
+							case "Equip Item":
+								this.equipItem(itemnumber,defaultEvent[k]["data"]["equip"]);
+							break;
 							case "Modify Player Stats":
-								var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
-								console.log("modifying stat: " + skillname);
-								SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
-								SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
-								SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+								if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
+									var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+									console.log("modifying stat: " + skillname);
+									SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+									SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+									SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+								}
+							break;
+							case "Warp Player":
+								var x=defaultEvent[k]["data"]["index"] % gridWidth;
+								var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
+								this.setPosition(x*32,y*32);
+								sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
+								GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
+								GameMap.goToOffsetFromPosition(x*32,y*32);
+							break;
+							case "Read Item":
+								MainScene.showBook(item["name"],defaultEvent[k]["data"]["say"]);
 							break;
 							case "Open/Close Panel":
 								var show = defaultEvent[k]["data"]["visible"]==1?true:false;
@@ -673,10 +548,16 @@ PlayerCharacter = Character.extend({
 								}
 							break;
 							case "Destroy":
-								temp=null;
+								item=null;
+								if(tile.getScriptObject()["temp"]){
+									sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+								} else{
+									sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+								}
 								if(Inventory){
 									Inventory.updateTileGrid();
 								}
+								k=defaultEvent.length;
 							break;
 						}						
 					}
@@ -684,8 +565,283 @@ PlayerCharacter = Character.extend({
 			}
 		}
 
-		this.items["equipped"][place]=cloneObj(this.items["stored"][itemnumber]);
-		this.items["stored"][itemnumber]=temp;
+
+		if(item){
+			if(item["stackable"]==true){
+				for(var i=0;i<40;i++){
+					if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
+						if(Inventory){
+							this.items["stored"][i]["amount"] +=item["amount"];
+							Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
+						}
+						GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+						if(tile.getScriptObject()["temp"]){
+							sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+						} else{
+							sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+						}
+						console.log(this.items);
+						return;
+					}
+				}
+			}
+			
+			var added=false;
+			for(var i=0;i<40;i++){
+				if(this.items["stored"][i]==null){
+					this.items["stored"][i]=cloneObj(item);
+					if(Inventory){
+						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
+					}
+					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+					if(tile.getScriptObject()["temp"]){
+						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+					} else{
+						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+					}
+					var added=true;
+					break;
+				}
+			}
+			if(added==false){
+				GameChat.addMessage(strings.gameChat.inventoryFull);
+			}
+		}	
+		if(Inventory){
+			Inventory.updateTileGrid();
+		}
+		if(Equipment){
+			Equipment.updateTileGrid();
+		}
+	},
+
+	pickupItemFromTile:function(item,tile){
+		var gp = cc.p(tile.getPositionX()/32,tile.getPositionY()/32);
+
+		var scriptData=[];
+		if(item["script"]){
+			scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
+		}
+		for(var j=0;j<scriptData.length;j++){
+			if(scriptData[j]["type"]=="On Pickup"){
+				var defaultEvent = scriptData[j]["requirements"];
+				var allowContinue=true;
+				for(var k=0;k<defaultEvent.length;k++){
+					switch(defaultEvent[k]["type"]){
+						case "Has Player Item":
+							if(defaultEvent[k]["data"]["item"]){
+								if(!defaultEvent[k]["data"]["amount"]){
+									var amount=1;
+								}else{
+									var amount=defaultEvent[k]["data"]["amount"];
+								}	
+								var count=0;
+								var itemName = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]]["name"];
+								for(var i in this.items["stored"]){
+									if(this.items["stored"][i]){
+										if(this.items["stored"][i]["name"]==itemName){
+											count++;
+										}
+									}
+								}
+								if(count<amount){
+									allowContinue=false; break; break;
+								}
+							}
+						break;
+						case "Is Player Statistics":
+							var name = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+							if(!defaultEvent[k]["data"]["levelUpper"]){
+								defaultEvent[k]["data"]["levelUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["levelLower"]){
+								defaultEvent[k]["data"]["levelLower"]=0;
+							}
+							if(!defaultEvent[k]["data"]["healthUpper"]){
+								defaultEvent[k]["data"]["healthUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["healthLowe"]){
+								defaultEvent[k]["data"]["healthLower"]=0;
+							}
+							if(!defaultEvent[k]["data"]["xpUpper"]){
+								defaultEvent[k]["data"]["xpUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["xpLower"]){
+								defaultEvent[k]["data"]["xpLower"]=0;
+							}
+
+							if(defaultEvent[k]["data"]["levelUpper"]!=0 || defaultEvent[k]["data"]["levelLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["level"]+1;
+								if(valtocheck>defaultEvent[k]["data"]["levelUpper"] || valtocheck<defaultEvent[k]["data"]["levelLower"]){
+									allowContinue=false; break; break;
+								}
+							}
+							if(defaultEvent[k]["data"]["healthUpper"]!=0 || defaultEvent[k]["data"]["healthLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["currenthealth"];
+								if(valtocheck>defaultEvent[k]["data"]["healthUpper"] || valtocheck<defaultEvent[k]["data"]["healthLower"]){
+									allowContinue=false; break; break;
+								}
+							}
+
+							if(defaultEvent[k]["data"]["xpUpper"]!=0 || defaultEvent[k]["data"]["xpLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["experience"];
+								console.log(valtocheck);
+								console.log(defaultEvent[k]["data"]);
+								if(valtocheck>defaultEvent[k]["data"]["xpUpper"] || valtocheck<defaultEvent[k]["data"]["xpLower"]){
+									allowContinue=false; break; break;
+								}
+							}
+						break;
+					}
+				}
+				if(allowContinue==true){
+					var defaultEvent = scriptData[j]["responses"];
+					for(var k=0;k<defaultEvent.length;k++){
+						switch(defaultEvent[k]["type"]){
+							case "Equip Item":
+								this.equipItem(itemnumber,defaultEvent[k]["data"]["equip"]);
+							break;
+							case "Modify Player Stats":
+								if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
+									var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+									console.log("modifying stat: " + skillname);
+									SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+									SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+									SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+								}
+							break;
+							case "Warp Player":
+								var x=defaultEvent[k]["data"]["index"] % gridWidth;
+								var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
+								this.setPosition(x*32,y*32);
+								sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
+								GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
+								GameMap.goToOffsetFromPosition(x*32,y*32);
+							break;
+							case "Read Item":
+								MainScene.showBook(item["name"],defaultEvent[k]["data"]["say"]);
+							break;
+							case "Open/Close Panel":
+								var show = defaultEvent[k]["data"]["visible"]==1?true:false;
+								switch(defaultEvent[k]["data"]["panel"]){
+									case 0: 
+										if(Inventory!=null && !Inventory._parent) Inventory=null;
+										if(show==true){
+											if(Inventory){
+												Inventory.updateTileGrid();
+											}else{
+												Inventory = new InventoryPanel();
+												Inventory.init();
+												Inventory.didBecomeActive();
+												MainScene.addChild(Inventory);
+											}
+										}else{
+											if(Inventory){
+												Inventory.willTerminate();
+												Inventory.removeFromParent();
+												Inventory=null;
+											}
+										}
+									break;
+									case 1:
+										if(Equipment!=null && !Equipment._parent) Equipment=null;
+										if(show==true){
+											if(Equipment){
+												Equipment.updateTileGrid();
+											}else{
+												Equipment = new EquipmentPanel();
+												Equipment.init();
+												Equipment.didBecomeActive();
+												MainScene.addChild(Equipment);
+											}
+										}else{
+											if(Equipment){
+												Equipment.willTerminate();
+												Equipment.removeFromParent();
+												Equipment=null;
+											}
+										}
+									break;
+									case 2:
+										if(Skills!=null && !Skills._parent) Skills=null;
+										if(show==true){
+											if(Skills){
+												Skills.updateTileGrid();
+											}else{
+												Skills = new SkillsPanel();
+												Skills.init();
+												Skills.didBecomeActive();
+												MainScene.addChild(Skills);
+											}
+										}else{
+											if(Skills){
+												Skills.willTerminate();
+												Skills.removeFromParent();
+												Skills=null;
+											}
+										}
+									break;
+								}
+							break;
+							case "Destroy":
+								item=null;
+								if(tile.getScriptObject()["temp"]){
+									sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+								} else{
+									sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+								}
+								if(Inventory){
+									Inventory.updateTileGrid();
+								}
+								k=defaultEvent.length;
+							break;
+						}						
+					}
+				}
+			}
+		}
+
+
+		if(item){
+			if(item["stackable"]==true){
+				for(var i=0;i<40;i++){
+					if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
+						if(Inventory){
+							this.items["stored"][i]["amount"] +=item["amount"];
+							Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
+						}
+						GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+						if(tile.getScriptObject()["temp"]){
+							sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+						} else{
+							sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+						}
+						return;
+					}
+				}
+			}
+			
+			var added=false;
+			for(var i=0;i<40;i++){
+				if(this.items["stored"][i]==null){
+					this.items["stored"][i]=cloneObj(item);
+					if(Inventory){
+						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
+					}
+					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+					if(tile.getScriptObject()["temp"]){
+						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+					} else{
+						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+					}
+					var added=true;
+					break;
+				}
+			}
+			if(added==false){
+				GameChat.addMessage(strings.gameChat.inventoryFull);
+			}
+		}
 		if(Inventory){
 			Inventory.updateTileGrid();
 		}
@@ -694,34 +850,495 @@ PlayerCharacter = Character.extend({
 		}
 	},
 	
-	dequipItem:function(itemtype){
-		for(var i=0;i<40;i++){
-			if(this.items["stored"][i]==null){
-				this.items["stored"][i] = cloneObj(this.items["equipped"][itemtype]);
-				this.items["equipped"][itemtype]=null;
-				if(Inventory){
-					Inventory.updateTileGrid();
-				}
-				if(Equipment){
-					Equipment.updateTileGrid();
-				}
+	dropItem:function(itemnumber,itembox){
+		var gp = this.getGridPosition();
+		var item = this.items[itembox][itemnumber];
+		var scriptData=[];
+		if(item["script"]){
+			scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
+		}
+		for(var j=0;j<scriptData.length;j++){
+			if(scriptData[j]["type"]=="On Drop"){
+				var defaultEvent = scriptData[j]["requirements"];
+				var allowContinue=true;
+				for(var k=0;k<defaultEvent.length;k++){
+					switch(defaultEvent[k]["type"]){
+						case "Has Player Item":
+							if(defaultEvent[k]["data"]["item"]){
+								if(!defaultEvent[k]["data"]["amount"]){
+									var amount=1;
+								}else{
+									var amount=defaultEvent[k]["data"]["amount"];
+								}	
+								var count=0;
+								var itemName = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]]["name"];
+								for(var i in this.items["stored"]){
+									if(this.items["stored"][i]){
+										if(this.items["stored"][i]["name"]==itemName){
+											count++;
+										}
+									}
+								}
+								if(count<amount){
+									allowContinue=false; break; break;
+								}
+							}
+						break;
+						case "Is Player Statistics":
+							var name = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+							if(!defaultEvent[k]["data"]["levelUpper"]){
+								defaultEvent[k]["data"]["levelUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["levelLower"]){
+								defaultEvent[k]["data"]["levelLower"]=0;
+							}
+							if(!defaultEvent[k]["data"]["healthUpper"]){
+								defaultEvent[k]["data"]["healthUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["healthLowe"]){
+								defaultEvent[k]["data"]["healthLower"]=0;
+							}
+							if(!defaultEvent[k]["data"]["xpUpper"]){
+								defaultEvent[k]["data"]["xpUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["xpLower"]){
+								defaultEvent[k]["data"]["xpLower"]=0;
+							}
 
+							if(defaultEvent[k]["data"]["levelUpper"]!=0 || defaultEvent[k]["data"]["levelLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["level"]+1;
+								if(valtocheck>defaultEvent[k]["data"]["levelUpper"] || valtocheck<defaultEvent[k]["data"]["levelLower"]){
+									allowContinue=false; break; break;
+								}
+							}
+							if(defaultEvent[k]["data"]["healthUpper"]!=0 || defaultEvent[k]["data"]["healthLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["currenthealth"];
+								if(valtocheck>defaultEvent[k]["data"]["healthUpper"] || valtocheck<defaultEvent[k]["data"]["healthLower"]){
+									allowContinue=false; break; break;
+								}
+							}
 
-				var item = this.items["stored"][i]
-				var scriptData=[];
-				if(item["script"]){
-					scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
+							if(defaultEvent[k]["data"]["xpUpper"]!=0 || defaultEvent[k]["data"]["xpLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["experience"];
+								console.log(valtocheck);
+								console.log(defaultEvent[k]["data"]);
+								if(valtocheck>defaultEvent[k]["data"]["xpUpper"] || valtocheck<defaultEvent[k]["data"]["xpLower"]){
+									allowContinue=false; break; break;
+								}
+							}
+						break;
+					}
 				}
-				for(var j=0;j<scriptData.length;j++){
-					if(scriptData[j]["type"]=="On Dequip"){
+				if(allowContinue==true){
+					var defaultEvent = scriptData[j]["responses"];
+					for(var k=0;k<defaultEvent.length;k++){
+						switch(defaultEvent[k]["type"]){
+							case "Equip Item":
+								this.equipItem(itemnumber,defaultEvent[k]["data"]["equip"]);
+							break;
+							case "Modify Player Stats":
+								if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
+									var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+									console.log("modifying stat: " + skillname);
+									SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+									SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+									SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+								}
+							break;
+							case "Warp Player":
+								var x=defaultEvent[k]["data"]["index"] % gridWidth;
+								var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
+								this.setPosition(x*32,y*32);
+								sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
+								GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
+								GameMap.goToOffsetFromPosition(x*32,y*32);
+							break;
+							case "Read Item":
+								MainScene.showBook(item["name"],defaultEvent[k]["data"]["say"]);
+							break;
+							case "Open/Close Panel":
+								var show = defaultEvent[k]["data"]["visible"]==1?true:false;
+								switch(defaultEvent[k]["data"]["panel"]){
+									case 0: 
+										if(Inventory!=null && !Inventory._parent) Inventory=null;
+										if(show==true){
+											if(Inventory){
+												Inventory.updateTileGrid();
+											}else{
+												Inventory = new InventoryPanel();
+												Inventory.init();
+												Inventory.didBecomeActive();
+												MainScene.addChild(Inventory);
+											}
+										}else{
+											if(Inventory){
+												Inventory.willTerminate();
+												Inventory.removeFromParent();
+												Inventory=null;
+											}
+										}
+									break;
+									case 1:
+										if(Equipment!=null && !Equipment._parent) Equipment=null;
+										if(show==true){
+											if(Equipment){
+												Equipment.updateTileGrid();
+											}else{
+												Equipment = new EquipmentPanel();
+												Equipment.init();
+												Equipment.didBecomeActive();
+												MainScene.addChild(Equipment);
+											}
+										}else{
+											if(Equipment){
+												Equipment.willTerminate();
+												Equipment.removeFromParent();
+												Equipment=null;
+											}
+										}
+									break;
+									case 2:
+										if(Skills!=null && !Skills._parent) Skills=null;
+										if(show==true){
+											if(Skills){
+												Skills.updateTileGrid();
+											}else{
+												Skills = new SkillsPanel();
+												Skills.init();
+												Skills.didBecomeActive();
+												MainScene.addChild(Skills);
+											}
+										}else{
+											if(Skills){
+												Skills.willTerminate();
+												Skills.removeFromParent();
+												Skills=null;
+											}
+										}
+									break;
+								}
+							break;
+							case "Destroy":
+								this.items[itembox][itemnumber]=null;
+								if(Inventory){
+									Inventory.updateTileGrid();
+								}
+								k=defaultEvent.length;
+							break;
+						}						
+					}
+				}
+			}
+		}
+
+		if(this.items[itembox][itemnumber]){
+			GameChat.addMessage(strings.gameChat.droppedItem + this.items[itembox][itemnumber]["name"]);
+			sendMessageToServer({"droppeditem":this.items[itembox][itemnumber],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y)});
+			
+			if(this.items[itembox][itemnumber]["stackable"]==true && this.items[itembox][itemnumber]["amount"]>1){
+				Inventory.setStackableLabel(itemnumber,0);
+			}
+			this.items[itembox][itemnumber]=null;
+		}
+		if(Inventory){
+			Inventory.updateTileGrid();
+		}
+		if(Equipment){
+			Equipment.updateTileGrid();
+		}
+	},
+
+	useItem:function(itemnumber){
+		var item = this.items["stored"][itemnumber];
+		var scriptData=[];
+		if(item["script"]){
+			scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
+		}
+		for(var j=0;j<scriptData.length;j++){
+			if(scriptData[j]["type"]=="Default Event"){
+				var defaultEvent = scriptData[j]["requirements"];
+				var allowContinue=true;
+				for(var k=0;k<defaultEvent.length;k++){
+					switch(defaultEvent[k]["type"]){
+						case "Has Player Item":
+							if(defaultEvent[k]["data"]["item"]){
+								if(!defaultEvent[k]["data"]["amount"]){
+									var amount=1;
+								}else{
+									var amount=defaultEvent[k]["data"]["amount"];
+								}	
+								var count=0;
+								var itemName = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]]["name"];
+								for(var i in this.items["stored"]){
+									if(this.items["stored"][i]){
+										if(this.items["stored"][i]["name"]==itemName){
+											count++;
+										}
+									}
+								}
+								if(count<amount){
+									allowContinue=false; break; break;
+								}
+							}
+						break;
+						case "Is Player Statistics":
+							var name = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+							if(!defaultEvent[k]["data"]["levelUpper"]){
+								defaultEvent[k]["data"]["levelUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["levelLower"]){
+								defaultEvent[k]["data"]["levelLower"]=0;
+							}
+							if(!defaultEvent[k]["data"]["healthUpper"]){
+								defaultEvent[k]["data"]["healthUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["healthLowe"]){
+								defaultEvent[k]["data"]["healthLower"]=0;
+							}
+							if(!defaultEvent[k]["data"]["xpUpper"]){
+								defaultEvent[k]["data"]["xpUpper"]=0;
+							}
+							if(!defaultEvent[k]["data"]["xpLower"]){
+								defaultEvent[k]["data"]["xpLower"]=0;
+							}
+
+							if(defaultEvent[k]["data"]["levelUpper"]!=0 || defaultEvent[k]["data"]["levelLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["level"]+1;
+								if(valtocheck>defaultEvent[k]["data"]["levelUpper"] || valtocheck<defaultEvent[k]["data"]["levelLower"]){
+									allowContinue=false; break; break;
+								}
+							}
+							if(defaultEvent[k]["data"]["healthUpper"]!=0 || defaultEvent[k]["data"]["healthLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["currenthealth"];
+								if(valtocheck>defaultEvent[k]["data"]["healthUpper"] || valtocheck<defaultEvent[k]["data"]["healthLower"]){
+									allowContinue=false; break; break;
+								}
+							}
+
+							if(defaultEvent[k]["data"]["xpUpper"]!=0 || defaultEvent[k]["data"]["xpLower"]!=0){
+								var valtocheck = SkillBarsInstance.skillsData[name]["experience"];
+								console.log(valtocheck);
+								console.log(defaultEvent[k]["data"]);
+								if(valtocheck>defaultEvent[k]["data"]["xpUpper"] || valtocheck<defaultEvent[k]["data"]["xpLower"]){
+									allowContinue=false; break; break;
+								}
+							}
+						break;
+					}
+				}
+				if(allowContinue==true){
+					var defaultEvent = scriptData[j]["responses"];
+					for(var k=0;k<defaultEvent.length;k++){
+						switch(defaultEvent[k]["type"]){
+							case "Equip Item":
+								this.equipItem(itemnumber,defaultEvent[k]["data"]["equip"]);
+							break;
+							case "Modify Player Stats":
+								if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
+									var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+									console.log("modifying stat: " + skillname);
+									SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+									SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+									SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+								}
+							break;
+							case "Warp Player":
+								var x=defaultEvent[k]["data"]["index"] % gridWidth;
+								var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
+								this.setPosition(x*32,y*32);
+								sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
+								GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
+								GameMap.goToOffsetFromPosition(x*32,y*32);
+							break;
+							case "Read Item":
+								MainScene.showBook(item["name"],defaultEvent[k]["data"]["say"]);
+							break;
+							case "Open/Close Panel":
+								var show = defaultEvent[k]["data"]["visible"]==1?true:false;
+								switch(defaultEvent[k]["data"]["panel"]){
+									case 0: 
+										if(Inventory!=null && !Inventory._parent) Inventory=null;
+										if(show==true){
+											if(Inventory){
+												Inventory.updateTileGrid();
+											}else{
+												Inventory = new InventoryPanel();
+												Inventory.init();
+												Inventory.didBecomeActive();
+												MainScene.addChild(Inventory);
+											}
+										}else{
+											if(Inventory){
+												Inventory.willTerminate();
+												Inventory.removeFromParent();
+												Inventory=null;
+											}
+										}
+									break;
+									case 1:
+										if(Equipment!=null && !Equipment._parent) Equipment=null;
+										if(show==true){
+											if(Equipment){
+												Equipment.updateTileGrid();
+											}else{
+												Equipment = new EquipmentPanel();
+												Equipment.init();
+												Equipment.didBecomeActive();
+												MainScene.addChild(Equipment);
+											}
+										}else{
+											if(Equipment){
+												Equipment.willTerminate();
+												Equipment.removeFromParent();
+												Equipment=null;
+											}
+										}
+									break;
+									case 2:
+										if(Skills!=null && !Skills._parent) Skills=null;
+										if(show==true){
+											if(Skills){
+												Skills.updateTileGrid();
+											}else{
+												Skills = new SkillsPanel();
+												Skills.init();
+												Skills.didBecomeActive();
+												MainScene.addChild(Skills);
+											}
+										}else{
+											if(Skills){
+												Skills.willTerminate();
+												Skills.removeFromParent();
+												Skills=null;
+											}
+										}
+									break;
+								}
+							break;
+							case "Destroy":
+								this.items["stored"][itemnumber]=null;
+								if(Inventory){
+									Inventory.updateTileGrid();
+								}
+								k=defaultEvent.length;
+							break;
+						}						
+					}
+				}
+			}
+		}
+	},
+	
+	equipItem:function(itemnumber,place){
+
+		if(place=="bothArms"){
+			place="lArm";
+			if(!this.items["equipped"]["rArm"]){
+				place="rArm";
+			}
+		}
+
+		var temp=null;
+		if(this.items["equipped"][place]){
+			var temp = cloneObj(this.items["equipped"][place]);
+
+			var scriptData=[];
+			if(temp["script"]){
+				scriptData = ObjectLists.getScriptList()[temp["script"]]["data"];
+			}
+			for(var j=0;j<scriptData.length;j++){
+				if(scriptData[j]["type"]=="On Dequip"){
+					var defaultEvent = scriptData[j]["requirements"];
+					var allowContinue=true;
+					for(var k=0;k<defaultEvent.length;k++){
+						switch(defaultEvent[k]["type"]){
+							case "Has Player Item":
+								if(defaultEvent[k]["data"]["item"]){
+									if(!defaultEvent[k]["data"]["amount"]){
+										var amount=1;
+									}else{
+										var amount=defaultEvent[k]["data"]["amount"];
+									}	
+									var count=0;
+									var itemName = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]]["name"];
+									for(var i in this.items["stored"]){
+										if(this.items["stored"][i]){
+											if(this.items["stored"][i]["name"]==itemName){
+												count++;
+											}
+										}
+									}
+									if(count<amount){
+										allowContinue=false; break; break;
+									}
+								}
+							break;
+							case "Is Player Statistics":
+								var name = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+								if(!defaultEvent[k]["data"]["levelUpper"]){
+									defaultEvent[k]["data"]["levelUpper"]=0;
+								}
+								if(!defaultEvent[k]["data"]["levelLower"]){
+									defaultEvent[k]["data"]["levelLower"]=0;
+								}
+								if(!defaultEvent[k]["data"]["healthUpper"]){
+									defaultEvent[k]["data"]["healthUpper"]=0;
+								}
+								if(!defaultEvent[k]["data"]["healthLowe"]){
+									defaultEvent[k]["data"]["healthLower"]=0;
+								}
+								if(!defaultEvent[k]["data"]["xpUpper"]){
+									defaultEvent[k]["data"]["xpUpper"]=0;
+								}
+								if(!defaultEvent[k]["data"]["xpLower"]){
+									defaultEvent[k]["data"]["xpLower"]=0;
+								}
+
+								if(defaultEvent[k]["data"]["levelUpper"]!=0 || defaultEvent[k]["data"]["levelLower"]!=0){
+									var valtocheck = SkillBarsInstance.skillsData[name]["level"]+1;
+									if(valtocheck>defaultEvent[k]["data"]["levelUpper"] || valtocheck<defaultEvent[k]["data"]["levelLower"]){
+										allowContinue=false; break; break;
+									}
+								}
+								if(defaultEvent[k]["data"]["healthUpper"]!=0 || defaultEvent[k]["data"]["healthLower"]!=0){
+									var valtocheck = SkillBarsInstance.skillsData[name]["currenthealth"];
+									if(valtocheck>defaultEvent[k]["data"]["healthUpper"] || valtocheck<defaultEvent[k]["data"]["healthLower"]){
+										allowContinue=false; break; break;
+									}
+								}
+
+								if(defaultEvent[k]["data"]["xpUpper"]!=0 || defaultEvent[k]["data"]["xpLower"]!=0){
+									var valtocheck = SkillBarsInstance.skillsData[name]["experience"];
+									console.log(valtocheck);
+									console.log(defaultEvent[k]["data"]);
+									if(valtocheck>defaultEvent[k]["data"]["xpUpper"] || valtocheck<defaultEvent[k]["data"]["xpLower"]){
+										allowContinue=false; break; break;
+									}
+								}
+							break;
+						}
+					}
+
+					if(allowContinue==true){
 						var defaultEvent = scriptData[j]["responses"];
 						for(var k=0;k<defaultEvent.length;k++){
 							switch(defaultEvent[k]["type"]){
 								case "Modify Player Stats":
-									var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
-									SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
-									SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
-									SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+									if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
+										var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+										console.log("modifying stat: " + skillname);
+										SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+										SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+										SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+									}
+								break;
+								case "Warp Player":
+									var x=defaultEvent[k]["data"]["index"] % gridWidth;
+									var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
+									this.setPosition(x*32,y*32);
+									sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
+									GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
+									GameMap.goToOffsetFromPosition(x*32,y*32);
 								break;
 								case "Open/Close Panel":
 									var show = defaultEvent[k]["data"]["visible"]==1?true:false;
@@ -786,12 +1403,212 @@ PlayerCharacter = Character.extend({
 									}
 								break;
 								case "Destroy":
-									this.items["stored"][i]=null;
+									temp=null;
 									if(Inventory){
 										Inventory.updateTileGrid();
 									}
+									k=defaultEvent.length;
 								break;
 							}						
+						}
+					}
+				}
+			}
+		}
+
+		this.items["equipped"][place]=cloneObj(this.items["stored"][itemnumber]);
+		this.items["stored"][itemnumber]=temp;
+		if(Inventory){
+			Inventory.updateTileGrid();
+		}
+		if(Equipment){
+			Equipment.updateTileGrid();
+		}
+	},
+	
+	dequipItem:function(itemtype){
+		for(var i=0;i<40;i++){
+			if(this.items["stored"][i]==null){
+				this.items["stored"][i] = cloneObj(this.items["equipped"][itemtype]);
+				this.items["equipped"][itemtype]=null;
+				if(Inventory){
+					Inventory.updateTileGrid();
+				}
+				if(Equipment){
+					Equipment.updateTileGrid();
+				}
+
+
+				var item = this.items["stored"][i]
+				var scriptData=[];
+				if(item["script"]){
+					scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
+				}
+				for(var j=0;j<scriptData.length;j++){
+					if(scriptData[j]["type"]=="On Dequip"){
+						var defaultEvent = scriptData[j]["requirements"];
+						var allowContinue=true;
+						for(var k=0;k<defaultEvent.length;k++){
+							switch(defaultEvent[k]["type"]){
+								case "Has Player Item":
+									if(defaultEvent[k]["data"]["item"]){
+										if(!defaultEvent[k]["data"]["amount"]){
+											var amount=1;
+										}else{
+											var amount=defaultEvent[k]["data"]["amount"];
+										}	
+										var count=0;
+										var itemName = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]]["name"];
+										for(var p in this.items["stored"]){
+											if(this.items["stored"][p]){
+												console.log(this.items["stored"][p]["name"]);
+												if(this.items["stored"][p]["name"]==itemName){
+													count++;
+												}
+											}
+										}
+										if(count<amount){
+											allowContinue=false; break; break;
+										}
+									}
+								break;
+								case "Is Player Statistics":
+									var name = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+									if(!defaultEvent[k]["data"]["levelUpper"]){
+										defaultEvent[k]["data"]["levelUpper"]=0;
+									}
+									if(!defaultEvent[k]["data"]["levelLower"]){
+										defaultEvent[k]["data"]["levelLower"]=0;
+									}
+									if(!defaultEvent[k]["data"]["healthUpper"]){
+										defaultEvent[k]["data"]["healthUpper"]=0;
+									}
+									if(!defaultEvent[k]["data"]["healthLowe"]){
+										defaultEvent[k]["data"]["healthLower"]=0;
+									}
+									if(!defaultEvent[k]["data"]["xpUpper"]){
+										defaultEvent[k]["data"]["xpUpper"]=0;
+									}
+									if(!defaultEvent[k]["data"]["xpLower"]){
+										defaultEvent[k]["data"]["xpLower"]=0;
+									}
+
+									if(defaultEvent[k]["data"]["levelUpper"]!=0 || defaultEvent[k]["data"]["levelLower"]!=0){
+										var valtocheck = SkillBarsInstance.skillsData[name]["level"]+1;
+										if(valtocheck>defaultEvent[k]["data"]["levelUpper"] || valtocheck<defaultEvent[k]["data"]["levelLower"]){
+											allowContinue=false; break; break;
+										}
+									}
+									if(defaultEvent[k]["data"]["healthUpper"]!=0 || defaultEvent[k]["data"]["healthLower"]!=0){
+										var valtocheck = SkillBarsInstance.skillsData[name]["currenthealth"];
+										if(valtocheck>defaultEvent[k]["data"]["healthUpper"] || valtocheck<defaultEvent[k]["data"]["healthLower"]){
+											allowContinue=false; break; break;
+										}
+									}
+
+									if(defaultEvent[k]["data"]["xpUpper"]!=0 || defaultEvent[k]["data"]["xpLower"]!=0){
+										var valtocheck = SkillBarsInstance.skillsData[name]["experience"];
+										console.log(valtocheck);
+										console.log(defaultEvent[k]["data"]);
+										if(valtocheck>defaultEvent[k]["data"]["xpUpper"] || valtocheck<defaultEvent[k]["data"]["xpLower"]){
+											allowContinue=false; break; break;
+										}
+									}
+								break;
+							}
+						}
+
+						if(allowContinue==true){
+							var defaultEvent = scriptData[j]["responses"];
+							for(var k=0;k<defaultEvent.length;k++){
+								switch(defaultEvent[k]["type"]){
+									case "Modify Player Stats":
+										if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
+											var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+											SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+											SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+											SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+										}
+									break;
+									case "Warp Player":
+										var x=defaultEvent[k]["data"]["index"] % gridWidth;
+										var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
+										this.setPosition(x*32,y*32);
+										sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
+										GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
+										GameMap.goToOffsetFromPosition(x*32,y*32);
+									break;
+									case "Open/Close Panel":
+										var show = defaultEvent[k]["data"]["visible"]==1?true:false;
+										switch(defaultEvent[k]["data"]["panel"]){
+											case 0: 
+												if(Inventory!=null && !Inventory._parent) Inventory=null;
+												if(show==true){
+													if(Inventory){
+														Inventory.updateTileGrid();
+													}else{
+														Inventory = new InventoryPanel();
+														Inventory.init();
+														Inventory.didBecomeActive();
+														MainScene.addChild(Inventory);
+													}
+												}else{
+													if(Inventory){
+														Inventory.willTerminate();
+														Inventory.removeFromParent();
+														Inventory=null;
+													}
+												}
+											break;
+											case 1:
+												if(Equipment!=null && !Equipment._parent) Equipment=null;
+												if(show==true){
+													if(Equipment){
+														Equipment.updateTileGrid();
+													}else{
+														Equipment = new EquipmentPanel();
+														Equipment.init();
+														Equipment.didBecomeActive();
+														MainScene.addChild(Equipment);
+													}
+												}else{
+													if(Equipment){
+														Equipment.willTerminate();
+														Equipment.removeFromParent();
+														Equipment=null;
+													}
+												}
+											break;
+											case 2:
+												if(Skills!=null && !Skills._parent) Skills=null;
+												if(show==true){
+													if(Skills){
+														Skills.updateTileGrid();
+													}else{
+														Skills = new SkillsPanel();
+														Skills.init();
+														Skills.didBecomeActive();
+														MainScene.addChild(Skills);
+													}
+												}else{
+													if(Skills){
+														Skills.willTerminate();
+														Skills.removeFromParent();
+														Skills=null;
+													}
+												}
+											break;
+										}
+									break;
+									case "Destroy":
+										this.items["stored"][i]=null;
+										if(Inventory){
+											Inventory.updateTileGrid();
+										}
+										k=defaultEvent.length;
+									break;
+								}						
+							}
 						}
 					}
 				}

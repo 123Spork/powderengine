@@ -49,7 +49,7 @@ window.onfocus = function () {
 		var msg = JSON.parse(storedClientMessages[i]);
 		if(msg["moveTo"] && !moveTos[msg["id"]]) {
 			moveTos[msg["id"]]=true;
-			msg["setTo"]=1;
+			msg["setTo"]=msg["moveTo"];
 			msg["moveTo"]=null;
 			storedClientMessages[i]=JSON.stringify(msg);
 		}

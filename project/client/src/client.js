@@ -91,38 +91,37 @@ reactToSocketMessage=function(data){
 		}
 		if(screen.getIdentifier()=="Game"){
 			if(data["newPlayer"]){
-				PlayersController.addPlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}});
+				PlayersController.addPlayer(data["newPlayer"]);
 			}else if(data["playerLeft"]){
 				if(PlayersController.getPlayer(data["playerLeft"]).getMap()==PlayersController.getYou().getMap()) {
 					MapMaster=false;
 				}
 				PlayersController.destroyPlayer(data["playerLeft"]);
-			} 
+			} else if(data["changemap"]){
+				for(var i=0;i<storedClientMessages.length;i++){
+					var msg = JSON.parse(storedClientMessages[i]);
+					if(msg["moveTo"] && msg["id"]==data["id"]) {
+						console.log("REMOVIN");
+						storedClientMessages.splice(i,1);
+						i--;
+					}
+				}
+				if(PlayersController.getPlayer(data["id"]).getMap()==PlayersController.getYou().getMap()) {
+					MapMaster=false;
+				}
+				PlayersController.changePlayerMap(data["id"],data["changemap"]);
+				PlayersController.positionPlayer(data["id"],data["setTo"]);
+			}
 			else if(data["setTo"]){
 				if(!PlayersController.getPlayer(data["id"])|| (PlayersController.getPlayer(data["id"]) && PlayersController.getPlayer(data["id"]).isWalking ==false)){
-					for(var i=0;i<storedClientMessages.length;i++){
-						var msg = JSON.parse(storedClientMessages[i]);
-						if(msg["moveTo"] && msg["moveTo"]!=null && msg["id"]==data["id"]) {
-							storedClientMessages.splice(i,1);
-							i--;
-						}
-					}
-
-					PlayersController.positionPlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}});
-				
-					if(PlayersController.getPlayer(data["id"]).getMap()==PlayersController.getYou().getMap()) {
-						MapMaster=false;
-					}
-					PlayersController.changePlayerMap(data["id"],data["mapnumber"]);
-
-
+					PlayersController.positionPlayer(data["id"],data["setTo"]);
 				}else{
 					storedClientMessages.push(JSON.stringify(data));
 				}
 			}
 			else if(data["moveTo"]){
 				if(!PlayersController.getPlayer(data["id"]) || (PlayersController.getPlayer(data["id"]) && PlayersController.getPlayer(data["id"]).isWalking ==false)){
-					PlayersController.movePlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}});
+					PlayersController.movePlayer(data["id"],data["moveTo"]);
 				}else{
 					storedClientMessages.push(JSON.stringify(data));
 				}
@@ -229,13 +228,11 @@ reactToSocketMessage=function(data){
 					storedClientMessages.push(JSON.stringify(data));
 				}
 			} else if(data["changeNPCPosition"]){
-				if(PlayersController.getNPC(data["npcID"])){
-					data["npcID"]=parseInt(data["npcID"]);
-					if((PlayersController.getNPC(data["npcID"]) && PlayersController.getNPC(data["npcID"]).isWalking ==false)){
-						PlayersController.repositionNPC(data["npcID"],data["changeNPCPosition"]);
-					}else{
-						storedClientMessages.push(JSON.stringify(data));
-					}
+				data["npcID"]=parseInt(data["npcID"]);
+				if((PlayersController.getNPC(data["npcID"]) && PlayersController.getNPC(data["npcID"]).isWalking ==false)){
+					PlayersController.repositionNPC(data["npcID"],data["changeNPCPosition"]);
+				}else{
+					storedClientMessages.push(JSON.stringify(data));
 				}
 			}
 

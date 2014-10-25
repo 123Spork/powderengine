@@ -116,20 +116,9 @@ InventoryPanel = Popup.extend({
 		}
 	},
 
-	scheduledupdateTileGrid:function(){
-		if(this.panels["main_panel"][(i+"")].getTexture()){
-			this.unschedule(this.scheduledupdateTileGrid);
-			this.updateTileGrid();
-		}
-	},
-
 	didBecomeActive:function(){
 		this._super();
-		if(!this.panels["main_panel"][(i+"")].getTexture()){
-			this.schedule(this.scheduledupdateTileGrid);
-		}else{
-			this.updateTileGrid();
-		}
+		this.updateTileGrid();
 	},
 
 	listItemSelected:function(val){
@@ -164,7 +153,6 @@ InventoryPanel = Popup.extend({
 					var firstItem=null;
 					for(var j=0;j<scriptData.length;j++){
 						if(scriptData[j]["type"]=="Default Event"){
-							firstItem="Use Item";
 							var defaultEvent = scriptData[j]["responses"];
 							for(var k=0;k<defaultEvent.length;k++){
 								console.log(defaultEvent[k]["type"]);

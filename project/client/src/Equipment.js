@@ -171,19 +171,8 @@ EquipmentPanel = Popup.extend({
 			}
 	},
 
-    scheduledupdateTileGrid:function(){
-		if(this.panels["main_panel"]["head"].getTexture()){
-			this.unschedule(this.scheduledupdateTileGrid);
-			this.updateTileGrid();
-		}
-	},
-
 	didBecomeActive:function(){
 		this._super();
-		if(!this.panels["main_panel"]["head"].getTexture()){
-			this.schedule(this.scheduledupdateTileGrid);
-		}else{
-			this.updateTileGrid();
-		}
+		this.updateTileGrid();
 	},
 });

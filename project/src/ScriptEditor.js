@@ -626,7 +626,7 @@ ScriptEditor = Popup.extend({
 			case 0: requireText = "Has Player Item"; break;
 			case 1: requireText = "Is Player Statistics"; break;
 			case 2: requireText = "Is Quest Point"; break;
-			case 3: requireText = "Is Panel Visbility";break;
+			case 3: requireText = "Is Panel Visibility";break;
 			case 4: requireText = "Is Player Inventory Space";break;
 		}
 		if(requireText==""){
@@ -997,7 +997,7 @@ ScriptEditor = Popup.extend({
 					},
 				};
 			break;
-			case "Is Panel Visbility": case "Open/Close Panel":
+			case "Is Panel Visibility": case "Open/Close Panel":
 				panels["panels"].children={
 					"panelsLabel":{
 						label:"Panel:",
@@ -1594,7 +1594,7 @@ ScriptEditor = Popup.extend({
 				this.skillHealthBox.setDefaultFineFlag(true);
 				this.skillHealthBox.setNullAllowed(false);
 			break;
-			case "Is Panel Visbility": case "Open/Close Panel":
+			case "Is Panel Visibility": case "Open/Close Panel":
 					var listnodes = [];
 					var callBackList=[];
 					var panelList = ["Inventory","Equipment","Skills","QuestLog"]
@@ -2036,7 +2036,7 @@ ScriptEditor = Popup.extend({
 							"health":parseInt(this.skillHealthBox.getText()),
 						}
 					break;
-					case "Is Panel Visbility": case "Open/Close Panel":
+					case "Is Panel Visibility": case "Open/Close Panel":
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"panel":this.panelContext,
 							"visible":this.visibleContext,

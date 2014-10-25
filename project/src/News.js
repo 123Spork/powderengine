@@ -14,6 +14,10 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"25th October 2014: (v0.729)":[
+					"Added scripting response logic for giving/taking items.",
+					"Added scripting requirements logic for if a panel is visible and inventory has a certain amount of slots."
+				],	
 				"25th October 2014: (v0.727)":[
 					"Fixed a bunch of persistant bugs. Game is now much much more stable than it was.",
 					"Added scripts for on pickup and on drop. Added some additional response logic for warping the player. Added requirement logic for check if player has items and if player stats are within certain ranges.",

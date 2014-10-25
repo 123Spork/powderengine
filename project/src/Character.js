@@ -344,18 +344,132 @@ PlayerCharacter = Character.extend({
 				for(var j=0;j<scriptData.length;j++){
 					if(scriptData[j]["type"]=="Default Event"){
 						var defaultEvent = scriptData[j]["responses"];
+						var allowContinue=true;
 						for(var k=0;k<defaultEvent.length;k++){
 							switch(defaultEvent[k]["type"]){
-								case "Modify Player Stats":
-									if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
-										var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
-										console.log("modifying stat: " + skillname);
-										SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
-										SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
-										SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+								case "Is Panel Visibility":
+									var visible = defaultEvent[k]["data"]["visible"]==1?true:false;
+									switch(defaultEvent[k]["data"]["panel"]){
+										case 0: 
+											if(Inventory!=null && !Inventory._parent) Inventory=null;
+											if(Inventory && !visible){
+												allowContinue=false; break; break;
+											}
+											if(!Inventory && visible){
+												allowContinue=false; break; break;
+											}
+										break;
+										case 1:
+											if(Equipment!=null && !Equipment._parent) Equipment=null;
+											if(Equipment && !visible){
+												allowContinue=false; break; break;
+											}
+											if(!Equipment && visible){
+												allowContinue=false; break; break;
+											}
+										break;
+										case 2:
+											if(Skills!=null && !Skills._parent) Skills=null;
+											if(Skills && !visible){
+												allowContinue=false; break; break;
+											}
+											if(!Skills && visible){
+												allowContinue=false; break; break;
+											}
+										break;
 									}
 								break;
-							}						
+								case "Is Player Inventory Space":
+									if(!defaultEvent[k]["data"]["space"]){
+										var space=0;
+									}else{
+										var space = defaultEvent[k]["data"]["space"]
+									}
+									var count=0;
+									for(var p=0;p<40;p++){
+										if(!this.items["stored"][p]){
+											count++;
+										}
+									}
+									if(count<space){
+										allowContinue=false; break; break;
+									}
+								break;
+								case "Has Player Item":
+									if(defaultEvent[k]["data"]["item"]){
+										if(!defaultEvent[k]["data"]["amount"]){
+											var amount=0;
+										}else{
+											var amount=defaultEvent[k]["data"]["amount"];
+										}	
+										var count=0;
+										var itemName = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]]["name"];
+										for(var i in this.items["stored"]){
+											if(this.items["stored"][i]){
+												if(this.items["stored"][i]["name"]==itemName){
+													count++;
+												}
+											}
+										}
+										if(count<amount){
+											allowContinue=false; break; break;
+										}
+									}
+								break;
+								case "Is Player Statistics":
+									var name = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+									if(!defaultEvent[k]["data"]["levelUpper"]){
+										defaultEvent[k]["data"]["levelUpper"]=0;
+									}
+									if(!defaultEvent[k]["data"]["levelLower"]){
+										defaultEvent[k]["data"]["levelLower"]=0;
+									}
+									if(!defaultEvent[k]["data"]["healthUpper"]){
+										defaultEvent[k]["data"]["healthUpper"]=0;
+									}
+									if(!defaultEvent[k]["data"]["healthLowe"]){
+										defaultEvent[k]["data"]["healthLower"]=0;
+									}
+									if(!defaultEvent[k]["data"]["xpUpper"]){
+										defaultEvent[k]["data"]["xpUpper"]=0;
+									}
+									if(!defaultEvent[k]["data"]["xpLower"]){
+										defaultEvent[k]["data"]["xpLower"]=0;
+									}
+
+									if(defaultEvent[k]["data"]["levelUpper"]!=0 || defaultEvent[k]["data"]["levelLower"]!=0){
+										var valtocheck = SkillBarsInstance.skillsData[name]["level"]+1;
+										if(valtocheck>defaultEvent[k]["data"]["levelUpper"] || valtocheck<defaultEvent[k]["data"]["levelLower"]){
+											allowContinue=false; break; break;
+										}
+									}
+									if(defaultEvent[k]["data"]["healthUpper"]!=0 || defaultEvent[k]["data"]["healthLower"]!=0){
+										var valtocheck = SkillBarsInstance.skillsData[name]["currenthealth"];
+										if(valtocheck>defaultEvent[k]["data"]["healthUpper"] || valtocheck<defaultEvent[k]["data"]["healthLower"]){
+											allowContinue=false; break; break;
+										}
+									}
+
+									if(defaultEvent[k]["data"]["xpUpper"]!=0 || defaultEvent[k]["data"]["xpLower"]!=0){
+										var valtocheck = SkillBarsInstance.skillsData[name]["experience"];
+										console.log(valtocheck);
+										console.log(defaultEvent[k]["data"]);
+										if(valtocheck>defaultEvent[k]["data"]["xpUpper"] || valtocheck<defaultEvent[k]["data"]["xpLower"]){
+											allowContinue=false; break; break;
+										}
+									}
+								break;
+							}
+							if(allowContinue==true){
+								switch(defaultEvent[k]["type"]){
+									case "Modify Player Stats":
+										if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
+											var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+											SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+										}
+									break;
+								}		
+							}				
 						}
 					}
 				}
@@ -392,10 +506,58 @@ PlayerCharacter = Character.extend({
 				var allowContinue=true;
 				for(var k=0;k<defaultEvent.length;k++){
 					switch(defaultEvent[k]["type"]){
+						case "Is Panel Visibility":
+							var visible = defaultEvent[k]["data"]["visible"]==1?true:false;
+							switch(defaultEvent[k]["data"]["panel"]){
+								case 0: 
+									if(Inventory!=null && !Inventory._parent) Inventory=null;
+									if(Inventory && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Inventory && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+								case 1:
+									if(Equipment!=null && !Equipment._parent) Equipment=null;
+									if(Equipment && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Equipment && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+								case 2:
+									if(Skills!=null && !Skills._parent) Skills=null;
+									if(Skills && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Skills && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+							}
+						break;
+						case "Is Player Inventory Space":
+							if(!defaultEvent[k]["data"]["space"]){
+								var space=0;
+							}else{
+								var space = defaultEvent[k]["data"]["space"]
+							}
+							var count=0;
+							for(var p=0;p<40;p++){
+								if(!this.items["stored"][p]){
+									count++;
+								}
+							}
+							if(count<space){
+								allowContinue=false; break; break;
+							}
+						break;
 						case "Has Player Item":
 							if(defaultEvent[k]["data"]["item"]){
 								if(!defaultEvent[k]["data"]["amount"]){
-									var amount=1;
+									var amount=0;
 								}else{
 									var amount=defaultEvent[k]["data"]["amount"];
 								}	
@@ -464,6 +626,97 @@ PlayerCharacter = Character.extend({
 						switch(defaultEvent[k]["type"]){
 							case "Equip Item":
 								this.equipItem(itemnumber,defaultEvent[k]["data"]["equip"]);
+							break;
+							case "Give /Take Item":
+								if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
+									break;
+								}
+								var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
+								if(defaultEvent[k]["data"]["amount"]>0){
+									var space = defaultEvent[k]["data"]["amount"];
+									if(contextitem["stackable"]==true){
+										for(var p=0;p<40;p++){
+											if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+												space=0;
+											}
+										}
+										if(count!=0){
+											space=1;
+										}
+									}else{
+										var count=0;
+										for(var p=0;p<40;p++){
+											if(!this.items["stored"][p]){
+												count++;
+											}
+										}
+									}
+									if(count<space){
+										break;
+									}else{
+										if(contextitem["stackable"]==true){
+											var doneAdd=false;
+											for(var p=0;p<40;p++){
+												if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+													this.items["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
+													if(Inventory){
+														Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+													}
+													doneAdd=true;
+													break;
+												}
+											}
+											if(doneAdd==false){
+												for(var p=0;p<40;p++){
+													if(!this.items["stored"][p]){
+														this.items["stored"][p]=cloneObj(contextitem);
+														this.items["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+														if(Inventory){
+															Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+														}
+														break;
+													}
+												}
+											}
+										}else{
+											for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
+												for(var p=0;p<40;p++){
+													if(!this.items["stored"][p]){
+														this.items["stored"][p]=cloneObj(contextitem);
+														break;
+													}
+												}
+											}
+										}
+									}
+								}else if(defaultEvent[k]["data"]["amount"]<0){
+									var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
+									var count=0;
+									var itemName = contextitem["name"];
+									for(var p in this.items["stored"]){
+										if(this.items["stored"][p]){
+											if(this.items["stored"][p]["name"]==itemName){
+												count++;
+											}
+										}
+									}
+									if(count<amount){
+										break;
+									}else{
+										for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
+											for(var p in this.items["stored"]){
+												if(this.items["stored"][p]){
+													if(this.items["stored"][p]["name"]==itemName){
+														console.log("gettin rid"+n);
+														this.items["stored"][p]=null;
+														break;
+													}
+												}
+											}
+										}
+									}
+										
+								}
 							break;
 							case "Modify Player Stats":
 								if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
@@ -628,10 +881,58 @@ PlayerCharacter = Character.extend({
 				var allowContinue=true;
 				for(var k=0;k<defaultEvent.length;k++){
 					switch(defaultEvent[k]["type"]){
+						case "Is Panel Visibility":
+							var visible = defaultEvent[k]["data"]["visible"]==1?true:false;
+							switch(defaultEvent[k]["data"]["panel"]){
+								case 0: 
+									if(Inventory!=null && !Inventory._parent) Inventory=null;
+									if(Inventory && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Inventory && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+								case 1:
+									if(Equipment!=null && !Equipment._parent) Equipment=null;
+									if(Equipment && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Equipment && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+								case 2:
+									if(Skills!=null && !Skills._parent) Skills=null;
+									if(Skills && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Skills && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+							}
+						break;
+						case "Is Player Inventory Space":
+							if(!defaultEvent[k]["data"]["space"]){
+								var space=0;
+							}else{
+								var space = defaultEvent[k]["data"]["space"]
+							}
+							var count=0;
+							for(var p=0;p<40;p++){
+								if(!this.items["stored"][p]){
+									count++;
+								}
+							}
+							if(count<space){
+								allowContinue=false; break; break;
+							}
+						break;
 						case "Has Player Item":
 							if(defaultEvent[k]["data"]["item"]){
 								if(!defaultEvent[k]["data"]["amount"]){
-									var amount=1;
+									var amount=0;
 								}else{
 									var amount=defaultEvent[k]["data"]["amount"];
 								}	
@@ -700,6 +1001,97 @@ PlayerCharacter = Character.extend({
 						switch(defaultEvent[k]["type"]){
 							case "Equip Item":
 								this.equipItem(itemnumber,defaultEvent[k]["data"]["equip"]);
+							break;
+							case "Give /Take Item":
+								if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
+									break;
+								}
+								var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
+								if(defaultEvent[k]["data"]["amount"]>0){
+									var space = defaultEvent[k]["data"]["amount"];
+									if(contextitem["stackable"]==true){
+										for(var p=0;p<40;p++){
+											if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+												space=0;
+											}
+										}
+										if(count!=0){
+											space=1;
+										}
+									}else{
+										var count=0;
+										for(var p=0;p<40;p++){
+											if(!this.items["stored"][p]){
+												count++;
+											}
+										}
+									}
+									if(count<space){
+										break;
+									}else{
+										if(contextitem["stackable"]==true){
+											var doneAdd=false;
+											for(var p=0;p<40;p++){
+												if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+													this.items["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
+													if(Inventory){
+														Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+													}
+													doneAdd=true;
+													break;
+												}
+											}
+											if(doneAdd==false){
+												for(var p=0;p<40;p++){
+													if(!this.items["stored"][p]){
+														this.items["stored"][p]=cloneObj(contextitem);
+														this.items["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+														if(Inventory){
+															Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+														}
+														break;
+													}
+												}
+											}
+										}else{
+											for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
+												for(var p=0;p<40;p++){
+													if(!this.items["stored"][p]){
+														this.items["stored"][p]=cloneObj(contextitem);
+														break;
+													}
+												}
+											}
+										}
+									}
+								}else if(defaultEvent[k]["data"]["amount"]<0){
+									var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
+									var count=0;
+									var itemName = contextitem["name"];
+									for(var p in this.items["stored"]){
+										if(this.items["stored"][p]){
+											if(this.items["stored"][p]["name"]==itemName){
+												count++;
+											}
+										}
+									}
+									if(count<amount){
+										break;
+									}else{
+										for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
+											for(var p in this.items["stored"]){
+												if(this.items["stored"][p]){
+													if(this.items["stored"][p]["name"]==itemName){
+														console.log("gettin rid"+n);
+														this.items["stored"][p]=null;
+														break;
+													}
+												}
+											}
+										}
+									}
+										
+								}
 							break;
 							case "Modify Player Stats":
 								if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
@@ -863,10 +1255,58 @@ PlayerCharacter = Character.extend({
 				var allowContinue=true;
 				for(var k=0;k<defaultEvent.length;k++){
 					switch(defaultEvent[k]["type"]){
+						case "Is Panel Visibility":
+							var visible = defaultEvent[k]["data"]["visible"]==1?true:false;
+							switch(defaultEvent[k]["data"]["panel"]){
+								case 0: 
+									if(Inventory!=null && !Inventory._parent) Inventory=null;
+									if(Inventory && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Inventory && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+								case 1:
+									if(Equipment!=null && !Equipment._parent) Equipment=null;
+									if(Equipment && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Equipment && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+								case 2:
+									if(Skills!=null && !Skills._parent) Skills=null;
+									if(Skills && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Skills && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+							}
+						break;
+						case "Is Player Inventory Space":
+							if(!defaultEvent[k]["data"]["space"]){
+								var space=0;
+							}else{
+								var space = defaultEvent[k]["data"]["space"]
+							}
+							var count=0;
+							for(var p=0;p<40;p++){
+								if(!this.items["stored"][p]){
+									count++;
+								}
+							}
+							if(count<space){
+								allowContinue=false; break; break;
+							}
+						break;
 						case "Has Player Item":
 							if(defaultEvent[k]["data"]["item"]){
 								if(!defaultEvent[k]["data"]["amount"]){
-									var amount=1;
+									var amount=0;
 								}else{
 									var amount=defaultEvent[k]["data"]["amount"];
 								}	
@@ -935,6 +1375,97 @@ PlayerCharacter = Character.extend({
 						switch(defaultEvent[k]["type"]){
 							case "Equip Item":
 								this.equipItem(itemnumber,defaultEvent[k]["data"]["equip"]);
+							break;
+							case "Give /Take Item":
+								if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
+									break;
+								}
+								var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
+								if(defaultEvent[k]["data"]["amount"]>0){
+									var space = defaultEvent[k]["data"]["amount"];
+									if(contextitem["stackable"]==true){
+										for(var p=0;p<40;p++){
+											if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+												space=0;
+											}
+										}
+										if(count!=0){
+											space=1;
+										}
+									}else{
+										var count=0;
+										for(var p=0;p<40;p++){
+											if(!this.items["stored"][p]){
+												count++;
+											}
+										}
+									}
+									if(count<space){
+										break;
+									}else{
+										if(contextitem["stackable"]==true){
+											var doneAdd=false;
+											for(var p=0;p<40;p++){
+												if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+													this.items["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
+													if(Inventory){
+														Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+													}
+													doneAdd=true;
+													break;
+												}
+											}
+											if(doneAdd==false){
+												for(var p=0;p<40;p++){
+													if(!this.items["stored"][p]){
+														this.items["stored"][p]=cloneObj(contextitem);
+														this.items["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+														if(Inventory){
+															Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+														}
+														break;
+													}
+												}
+											}
+										}else{
+											for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
+												for(var p=0;p<40;p++){
+													if(!this.items["stored"][p]){
+														this.items["stored"][p]=cloneObj(contextitem);
+														break;
+													}
+												}
+											}
+										}
+									}
+								}else if(defaultEvent[k]["data"]["amount"]<0){
+									var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
+									var count=0;
+									var itemName = contextitem["name"];
+									for(var p in this.items["stored"]){
+										if(this.items["stored"][p]){
+											if(this.items["stored"][p]["name"]==itemName){
+												count++;
+											}
+										}
+									}
+									if(count<amount){
+										break;
+									}else{
+										for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
+											for(var p in this.items["stored"]){
+												if(this.items["stored"][p]){
+													if(this.items["stored"][p]["name"]==itemName){
+														console.log("gettin rid"+n);
+														this.items["stored"][p]=null;
+														break;
+													}
+												}
+											}
+										}
+									}
+										
+								}
 							break;
 							case "Modify Player Stats":
 								if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
@@ -1060,10 +1591,58 @@ PlayerCharacter = Character.extend({
 				var allowContinue=true;
 				for(var k=0;k<defaultEvent.length;k++){
 					switch(defaultEvent[k]["type"]){
+						case "Is Panel Visibility":
+							var visible = defaultEvent[k]["data"]["visible"]==1?true:false;
+							switch(defaultEvent[k]["data"]["panel"]){
+								case 0: 
+									if(Inventory!=null && !Inventory._parent) Inventory=null;
+									if(Inventory && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Inventory && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+								case 1:
+									if(Equipment!=null && !Equipment._parent) Equipment=null;
+									if(Equipment && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Equipment && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+								case 2:
+									if(Skills!=null && !Skills._parent) Skills=null;
+									if(Skills && !visible){
+										allowContinue=false; break; break;
+									}
+									if(!Skills && visible){
+										allowContinue=false; break; break;
+									}
+								break;
+							}
+						break;
+						case "Is Player Inventory Space":
+							if(!defaultEvent[k]["data"]["space"]){
+								var space=0;
+							}else{
+								var space = defaultEvent[k]["data"]["space"]
+							}
+							var count=0;
+							for(var p=0;p<40;p++){
+								if(!this.items["stored"][p]){
+									count++;
+								}
+							}
+							if(count<space){
+								allowContinue=false; break; break;
+							}
+						break;
 						case "Has Player Item":
 							if(defaultEvent[k]["data"]["item"]){
 								if(!defaultEvent[k]["data"]["amount"]){
-									var amount=1;
+									var amount=0;
 								}else{
 									var amount=defaultEvent[k]["data"]["amount"];
 								}	
@@ -1132,6 +1711,97 @@ PlayerCharacter = Character.extend({
 						switch(defaultEvent[k]["type"]){
 							case "Equip Item":
 								this.equipItem(itemnumber,defaultEvent[k]["data"]["equip"]);
+							break;
+							case "Give /Take Item":
+								if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
+									break;
+								}
+								var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
+								if(defaultEvent[k]["data"]["amount"]>0){
+									var space = defaultEvent[k]["data"]["amount"];
+									if(contextitem["stackable"]==true){
+										for(var p=0;p<40;p++){
+											if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+												space=0;
+											}
+										}
+										if(count!=0){
+											space=1;
+										}
+									}else{
+										var count=0;
+										for(var p=0;p<40;p++){
+											if(!this.items["stored"][p]){
+												count++;
+											}
+										}
+									}
+									if(count<space){
+										break;
+									}else{
+										if(contextitem["stackable"]==true){
+											var doneAdd=false;
+											for(var i=0;i<40;i++){
+												if(this.items["stored"][i] && this.items["stored"][i]["name"]==contextitem["name"]){
+													this.items["stored"][i]["amount"] +=defaultEvent[k]["data"]["amount"];
+													if(Inventory){
+														Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
+													}
+													doneAdd=true;
+													break;
+												}
+											}
+											if(doneAdd==false){
+												for(var p=0;p<40;p++){
+													if(!this.items["stored"][p]){
+														this.items["stored"][p]=cloneObj(contextitem);
+														this.items["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+														if(Inventory){
+															Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+														}
+														break;
+													}
+												}
+											}
+										}else{
+											for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
+												for(var p=0;p<40;p++){
+													if(!this.items["stored"][p]){
+														this.items["stored"][p]=cloneObj(contextitem);
+														break;
+													}
+												}
+											}
+										}
+									}
+								}else if(defaultEvent[k]["data"]["amount"]<0){
+									var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
+									var count=0;
+									var itemName = contextitem["name"];
+									for(var p in this.items["stored"]){
+										if(this.items["stored"][p]){
+											if(this.items["stored"][p]["name"]==itemName){
+												count++;
+											}
+										}
+									}
+									if(count<amount){
+										break;
+									}else{
+										for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
+											for(var p in this.items["stored"]){
+												if(this.items["stored"][p]){
+													if(this.items["stored"][p]["name"]==itemName){
+														console.log("gettin rid"+n);
+														this.items["stored"][p]=null;
+														break;
+													}
+												}
+											}
+										}
+									}
+										
+								}
 							break;
 							case "Modify Player Stats":
 								if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
@@ -1227,6 +1897,12 @@ PlayerCharacter = Character.extend({
 				}
 			}
 		}
+		if(Inventory){
+			Inventory.updateTileGrid();
+		}
+		if(Equipment){
+			Equipment.updateTileGrid();
+		}
 	},
 	
 	equipItem:function(itemnumber,place){
@@ -1252,10 +1928,58 @@ PlayerCharacter = Character.extend({
 					var allowContinue=true;
 					for(var k=0;k<defaultEvent.length;k++){
 						switch(defaultEvent[k]["type"]){
+							case "Is Panel Visibility":
+								var visible = defaultEvent[k]["data"]["visible"]==1?true:false;
+								switch(defaultEvent[k]["data"]["panel"]){
+									case 0: 
+										if(Inventory!=null && !Inventory._parent) Inventory=null;
+										if(Inventory && !visible){
+											allowContinue=false; break; break;
+										}
+										if(!Inventory && visible){
+											allowContinue=false; break; break;
+										}
+									break;
+									case 1:
+										if(Equipment!=null && !Equipment._parent) Equipment=null;
+										if(Equipment && !visible){
+											allowContinue=false; break; break;
+										}
+										if(!Equipment && visible){
+											allowContinue=false; break; break;
+										}
+									break;
+									case 2:
+										if(Skills!=null && !Skills._parent) Skills=null;
+										if(Skills && !visible){
+											allowContinue=false; break; break;
+										}
+										if(!Skills && visible){
+											allowContinue=false; break; break;
+										}
+									break;
+								}
+							break;
+							case "Is Player Inventory Space":
+								if(!defaultEvent[k]["data"]["space"]){
+									var space=0;
+								}else{
+									var space = defaultEvent[k]["data"]["space"]
+								}
+								var count=0;
+								for(var p=0;p<40;p++){
+									if(!this.items["stored"][p]){
+										count++;
+									}
+								}
+								if(count<space){
+									allowContinue=false; break; break;
+								}
+							break;
 							case "Has Player Item":
 								if(defaultEvent[k]["data"]["item"]){
 									if(!defaultEvent[k]["data"]["amount"]){
-										var amount=1;
+										var amount=0;
 									}else{
 										var amount=defaultEvent[k]["data"]["amount"];
 									}	
@@ -1323,6 +2047,97 @@ PlayerCharacter = Character.extend({
 						var defaultEvent = scriptData[j]["responses"];
 						for(var k=0;k<defaultEvent.length;k++){
 							switch(defaultEvent[k]["type"]){
+								case "Give /Take Item":
+									if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
+										break;
+									}
+									var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
+									if(defaultEvent[k]["data"]["amount"]>0){
+										var space = defaultEvent[k]["data"]["amount"];
+										if(contextitem["stackable"]==true){
+											for(var p=0;p<40;p++){
+												if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+													space=0;
+												}
+											}
+											if(count!=0){
+												space=1;
+											}
+										}else{
+											var count=0;
+											for(var p=0;p<40;p++){
+												if(!this.items["stored"][p]){
+													count++;
+												}
+											}
+										}
+										if(count<space){
+											break;
+										}else{
+											if(contextitem["stackable"]==true){
+												var doneAdd=false;
+												for(var p=0;p<40;p++){
+													if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+														this.items["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
+														if(Inventory){
+															Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+														}
+														doneAdd=true;
+														break;
+													}
+												}
+												if(doneAdd==false){
+													for(var p=0;p<40;p++){
+														if(!this.items["stored"][p]){
+															this.items["stored"][p]=cloneObj(contextitem);
+															this.items["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+															if(Inventory){
+																Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+															}
+															break;
+														}
+													}
+												}
+											}else{
+												for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
+													for(var p=0;p<40;p++){
+														if(!this.items["stored"][p]){
+															this.items["stored"][p]=cloneObj(contextitem);
+															break;
+														}
+													}
+												}
+											}
+										}
+									}else if(defaultEvent[k]["data"]["amount"]<0){
+										var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
+										var count=0;
+										var itemName = contextitem["name"];
+										for(var p in this.items["stored"]){
+											if(this.items["stored"][p]){
+												if(this.items["stored"][p]["name"]==itemName){
+													count++;
+												}
+											}
+										}
+										if(count<amount){
+											break;
+										}else{
+											for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
+												for(var p in this.items["stored"]){
+													if(this.items["stored"][p]){
+														if(this.items["stored"][p]["name"]==itemName){
+															console.log("gettin rid"+n);
+															this.items["stored"][p]=null;
+															break;
+														}
+													}
+												}
+											}
+										}
+											
+									}
+								break;
 								case "Modify Player Stats":
 									if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
 										var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
@@ -1339,6 +2154,14 @@ PlayerCharacter = Character.extend({
 									sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
 									GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
 									GameMap.goToOffsetFromPosition(x*32,y*32);
+								break;
+								case "Give/ Take Item":
+									console.log(defaultEvent[k]["data"]);
+
+
+
+
+
 								break;
 								case "Open/Close Panel":
 									var show = defaultEvent[k]["data"]["visible"]==1?true:false;
@@ -1450,10 +2273,58 @@ PlayerCharacter = Character.extend({
 						var allowContinue=true;
 						for(var k=0;k<defaultEvent.length;k++){
 							switch(defaultEvent[k]["type"]){
+								case "Is Panel Visibility":
+									var visible = defaultEvent[k]["data"]["visible"]==1?true:false;
+									switch(defaultEvent[k]["data"]["panel"]){
+										case 0: 
+											if(Inventory!=null && !Inventory._parent) Inventory=null;
+											if(Inventory && !visible){
+												allowContinue=false; break; break;
+											}
+											if(!Inventory && visible){
+												allowContinue=false; break; break;
+											}
+										break;
+										case 1:
+											if(Equipment!=null && !Equipment._parent) Equipment=null;
+											if(Equipment && !visible){
+												allowContinue=false; break; break;
+											}
+											if(!Equipment && visible){
+												allowContinue=false; break; break;
+											}
+										break;
+										case 2:
+											if(Skills!=null && !Skills._parent) Skills=null;
+											if(Skills && !visible){
+												allowContinue=false; break; break;
+											}
+											if(!Skills && visible){
+												allowContinue=false; break; break;
+											}
+										break;
+									}
+								break;
+								case "Is Player Inventory Space":
+									if(!defaultEvent[k]["data"]["space"]){
+										var space=0;
+									}else{
+										var space = defaultEvent[k]["data"]["space"]
+									}
+									var count=0;
+									for(var p=0;p<40;p++){
+										if(!this.items["stored"][p]){
+											count++;
+										}
+									}	
+									if(count<space){
+										allowContinue=false; break; break;
+									}
+								break;
 								case "Has Player Item":
 									if(defaultEvent[k]["data"]["item"]){
 										if(!defaultEvent[k]["data"]["amount"]){
-											var amount=1;
+											var amount=0;
 										}else{
 											var amount=defaultEvent[k]["data"]["amount"];
 										}	
@@ -1522,6 +2393,97 @@ PlayerCharacter = Character.extend({
 							var defaultEvent = scriptData[j]["responses"];
 							for(var k=0;k<defaultEvent.length;k++){
 								switch(defaultEvent[k]["type"]){
+									case "Give /Take Item":
+										if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
+											break;
+										}
+										var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
+										if(defaultEvent[k]["data"]["amount"]>0){
+											var space = defaultEvent[k]["data"]["amount"];
+											if(contextitem["stackable"]==true){
+												for(var p=0;p<40;p++){
+													if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+														space=0;
+													}
+												}
+												if(count!=0){
+													space=1;
+												}
+											}else{
+												var count=0;
+												for(var p=0;p<40;p++){
+													if(!this.items["stored"][p]){
+														count++;
+													}
+												}
+											}
+											if(count<space){
+												break;
+											}else{
+												if(contextitem["stackable"]==true){
+													var doneAdd=false;
+													for(var p=0;p<40;p++){
+														if(this.items["stored"][p] && this.items["stored"][p]["name"]==contextitem["name"]){
+															this.items["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
+															if(Inventory){
+																Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+															}
+															doneAdd=true;
+															break;
+														}
+													}
+													if(doneAdd==false){
+														for(var p=0;p<40;p++){
+															if(!this.items["stored"][p]){
+																this.items["stored"][p]=cloneObj(contextitem);
+																this.items["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+																if(Inventory){
+																	Inventory.setStackableLabel(p,this.items["stored"][p]["amount"]);	
+																}
+																break;
+															}
+														}
+													}
+												}else{
+													for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
+														for(var p=0;p<40;p++){
+															if(!this.items["stored"][p]){
+																this.items["stored"][p]=cloneObj(contextitem);
+																break;
+															}
+														}
+													}
+												}
+											}
+										}else if(defaultEvent[k]["data"]["amount"]<0){
+											var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
+											var count=0;
+											var itemName = contextitem["name"];
+											for(var p in this.items["stored"]){
+												if(this.items["stored"][p]){
+													if(this.items["stored"][p]["name"]==itemName){
+														count++;
+													}
+												}
+											}
+											if(count<amount){
+												break;
+											}else{
+												for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
+													for(var p in this.items["stored"]){
+														if(this.items["stored"][p]){
+															if(this.items["stored"][p]["name"]==itemName){
+																console.log("gettin rid"+n);
+																this.items["stored"][p]=null;
+																break;
+															}
+														}
+													}
+												}
+											}
+												
+										}
+									break;
 									case "Modify Player Stats":
 										if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
 											var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];

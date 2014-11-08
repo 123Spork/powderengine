@@ -743,6 +743,16 @@ GameMap.getTileNodeForXY=function(x,y){
 	return gameMapInstance.tileNodes["tile"+(x + (gridHeight-y) * gridWidth)];
 };
 
+GameMap.getNPCForXY=function(x,y){
+	for(var i in PlayersController.getInstance().npcs){
+		var npcGridPos = PlayersController.getInstance().npcs[i].getGridPosition();
+		if(npcGridPos.x==x && npcGridPos.y==y){
+			return PlayersController.getInstance().npcs[i];
+		}
+	}
+	return null;
+};
+
 GameMap.getTileNodeForIndex=function(idx){
 	return gameMapInstance.tileNodes["tile"+idx];
 };

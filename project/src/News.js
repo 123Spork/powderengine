@@ -14,6 +14,11 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"8th November 2014: (v0.731)":[
+					"Fixed NPC editor.",
+					"Added talk graphic and basic logic for npc interaction",
+					"Abstracted Item script logic to a utils function...wiped a lot of duplicate code."
+				],
 				"25th October 2014: (v0.729)":[
 					"Added scripting response logic for giving/taking items.",
 					"Added scripting requirements logic for if a panel is visible and inventory has a certain amount of slots."

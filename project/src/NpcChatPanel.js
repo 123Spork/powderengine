@@ -1,6 +1,6 @@
 
-Book=null;
-BookPanel = Popup.extend({
+NpcChat=null;
+NpcChatPanel = Popup.extend({
 
 	name:null,
 	content:null,
@@ -21,32 +21,14 @@ BookPanel = Popup.extend({
 						position: cc.p(0,0),
 						size: cc.size(512,138),
 						texture: "GUI/npctalk.png",
-						/*children:{
-							"pageBackbtn" : {
-								position:cc.p(2,1),
-								size:cc.size(36,36),
-								texture:"GUI/btnLeft.png",
-								anchorPoint:cc.p(0,0),
-							},
-							"pageForwardbtn" : {
-								position:cc.p(475,1),
-								size:cc.size(36,36),
-								texture:"GUI/btnRight.png",
-								anchorPoint:cc.p(0,0),
-							},
-							"leftPage":{
-								label:this.pages[0],
+						children:{
+							"chatText":{
+								label:this.content,
 								anchorPoint:cc.p(0,1),
-								position:cc.p(4,308),
+								position:cc.p(138,134),
 								color:cc.c3b(0,0,0),
 							},
-							"rightPage":{
-								label:this.pages.length>1 ? this.pages[1] : "",
-								anchorPoint:cc.p(0,1),
-								position:cc.p(260,308),
-								color:cc.c3b(0,0,0),
-							}
-						}*/
+						}
 					},
 					"control_panel":{
 						anchorPoint:cc.p(0,0),
@@ -54,7 +36,7 @@ BookPanel = Popup.extend({
 						size: cc.size(512,32),
 						children:{
 							"header":{
-								label:"NPC TALKIN",
+								label:this.name,
 								fontSize:20,
 								anchorPoint:cc.p(0,0.5),
 								position:cc.p(8,16),
@@ -74,12 +56,13 @@ BookPanel = Popup.extend({
 
 	init:function(name,content){
 		this._super();
-		
+		this.name=name;
+		this.content=content;
 	},
 
 	didBecomeActive:function(){
 		this._super();
-	
+		this.panels["main_panel"]["chatText"].setDimensions(cc.size(350,0));
 	},
 
 	onTouchBegan:function(touch){

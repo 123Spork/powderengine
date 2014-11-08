@@ -19,6 +19,7 @@ js.project = {
     MapEditor_js : '[%project%]src/MapEditor.js',
     NPCEditor_js : '[%project%]src/NPCEditor.js',
     News_js : '[%project%]src/News.js',
+    NpcChatPanel_js : '[%project%]src/NpcChatPanel.js',
     ObjectLists_js : '[%project%]src/ObjectLists.js',
     PlayersController_js : '[%project%]src/PlayersController.js',
     Popup_js : '[%project%]src/Popup.js',

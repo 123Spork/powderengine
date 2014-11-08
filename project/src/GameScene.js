@@ -275,6 +275,20 @@ var GameScene = Scene.extend({
 			this.addChild(Book);
 		}
 	},
+
+	showNPCTalk:function(name,content){
+		if(NpcChat!=null && !NpcChat._parent) NpcChat=null;
+		if(NpcChat){
+			NpcChat.willTerminate();
+			NpcChat.removeFromParent();
+			NpcChat=null;
+		} else{
+			NpcChat = new NpcChatPanel();
+			NpcChat.init(name,content);
+			NpcChat.didBecomeActive();
+			this.addChild(NpcChat);
+		}
+	},
 	
 
 	onTouchEnded:function(touch){
@@ -555,6 +569,7 @@ var GameScene = Scene.extend({
 	
 	init:function(withData){
 		this._super();
+		MainScene=this;	
 		this.addChild(GameMap.create());
 		ObjectLists.getInstance();
 		
@@ -596,7 +611,6 @@ var GameScene = Scene.extend({
 		this.addChild(this.panels);		
 		this.schedule(this.storedMessages);	
 		this.schedule(this.serverProcess);
-		MainScene=this;	
 		this.schedule(this.saveSchedule,120);
 
 	},

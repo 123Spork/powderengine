@@ -70,8 +70,9 @@ PlayersController.addNPC=function(data,position,map){
 		},
 		map:map,
 		textureName: "sprites1.png",
-		spriteId: 2,
-		isNPC:npcID
+		spriteId: data["sprite"]["number"],
+		isNPC:npcID,
+		script:data["script"]
 	};
 	this.instance.npcs.push(NonPlayerCharacter.create(withData));
 	this.instance.npcs[npcID].setPosition(position.x*32,position.y*32);

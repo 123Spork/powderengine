@@ -112,6 +112,7 @@
                 <file name="./src/DropDownList.js"></file>
                 <file name="./src/Popup.js"></file>
                 <file name="./src/Book.js"></file>
+                <file name="./src/NpcChatPanel.js"></file>
                 <file name="./src/Equipment.js"></file>
                 <file name="./src/Inventory.js"></file>
                 <file name="./src/Sign.js"></file>

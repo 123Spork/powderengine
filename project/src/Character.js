@@ -145,8 +145,6 @@ Character = cc.Sprite.extend({
 				
 			var npc = GameMap.getNPCForXY(gp.x,gp.y);
 			if(npc){
-				console.log(npc);
-				console.log("Handling npc script");
 				handleNPCScript("Default Event",npc); return;
 			}
 			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);

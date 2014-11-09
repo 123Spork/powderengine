@@ -171,13 +171,22 @@ function isTouching(obj,pos){
 	return ((obj.isVisible && obj.isVisible())|| !obj.isVisible) && cc.rectContainsPoint(cc.rect(obj.getPositionX(),obj.getPositionY(),obj.getContentSize().width,obj.getContentSize().height),pos);
 };
 
-function cloneObj(obj) {
-    var clone = {};
 
+function cloneObj(obj) {
+	if(!obj){
+		return null;
+	}
+    var clone = null;
+    if(typeof obj == 'object'){
+    	clone={};
+    }
+    if(obj instanceof Array){
+    	clone=[];
+    }
     for (var i in obj) {
-        if (obj[i] && typeof obj[i] == 'object') {
+        if (obj[i] && (typeof obj[i] == 'object' || obj[i] instanceof Array)) {
             clone[i] = cloneObj(obj[i]);
-        } else {
+        } else{
             clone[i] = obj[i];
         }
     }
@@ -550,7 +559,12 @@ var handleItemScript = function(eventname,item,ignoreList){
 											}
 										}
 									}
-										
+								}
+								if(Inventory){
+									Inventory.updateTileGrid();
+								}
+								if(Equipment){
+									Equipment.updateTileGrid();
 								}
 							break;
 							case "Modify Player Stats":
@@ -813,7 +827,8 @@ var handleNPCScript = function(eventname,npc,ignoreList){
 								if(ignoreList && ignoreList["Talk"]){
 									break;
 								}
-								MainScene.showNPCTalk(npc["name"],defaultEvent[k]["data"]["say"]);
+								var eventnumber=parseInt(j);
+								MainScene.showNPCTalk(npc,scriptData,eventnumber,npc["name"],defaultEvent[k]["data"]["say"],defaultEvent[k]["data"]["options"]);
 							break;
 							case "Give /Take Item":
 								if(ignoreList && ignoreList["Give /Take Item"]){
@@ -902,7 +917,12 @@ var handleNPCScript = function(eventname,npc,ignoreList){
 											}
 										}
 									}
-										
+								}
+								if(Inventory){
+									Inventory.updateTileGrid();
+								}
+								if(Equipment){
+									Equipment.updateTileGrid();
 								}
 							break;
 							case "Modify Player Stats":

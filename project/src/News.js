@@ -14,6 +14,9 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"9th November 2014: (v0.731)":[
+					"Added talking and talk with option callback to the npc scripts contexts."
+				],
 				"8th November 2014: (v0.731)":[
 					"Fixed NPC editor.",
 					"Added talk graphic and basic logic for npc interaction",

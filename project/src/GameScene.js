@@ -276,18 +276,17 @@ var GameScene = Scene.extend({
 		}
 	},
 
-	showNPCTalk:function(name,content){
+	showNPCTalk:function(npc,script,eventnumber,name,content,options){
 		if(NpcChat!=null && !NpcChat._parent) NpcChat=null;
 		if(NpcChat){
 			NpcChat.willTerminate();
 			NpcChat.removeFromParent();
 			NpcChat=null;
-		} else{
-			NpcChat = new NpcChatPanel();
-			NpcChat.init(name,content);
-			NpcChat.didBecomeActive();
-			this.addChild(NpcChat);
 		}
+		NpcChat = new NpcChatPanel();
+		NpcChat.init(npc,script,eventnumber,name,content,options);
+		NpcChat.didBecomeActive();
+		this.addChild(NpcChat);
 	},
 	
 

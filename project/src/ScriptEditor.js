@@ -95,7 +95,7 @@ ScriptEditor = Popup.extend({
 			requirementsLine.setPosition(cc.p(451,4));	
 
 			var eventString = this.data["data"][i]["type"];
-			if(eventString=="On Event End"){
+			if(eventString=="On Talk Close"){
 				eventString+= (" (" +this.data["data"][i]["data"]["attachedEvent"]+":"+this.data["data"][this.data["data"][i]["data"]["attachedEvent"]]["type"]+")");
 			}
 
@@ -220,8 +220,8 @@ ScriptEditor = Popup.extend({
 											self.editPressed(this.identifier,"responses",listelement);
 										break;
 										case "Add":
-											var resArray = ["Talk","Give Talk Options","Destroy","Give/ Take Item","Set Quest Point", "Warp Player", "Wait", "Repeat Responses", "Open/Close Panel", "Modify Player Stats"];
-											var resSetup = [{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true}]
+											var resArray = ["Talk","Destroy","Give/ Take Item","Set Quest Point", "Warp Player", "Wait", "Repeat Responses", "Open/Close Panel", "Modify Player Stats"];
+											var resSetup = [{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true}]
 											for( var i=0;i<self.data["data"][this.identifier]["responses"].length;i++){
 												if(self.data["data"][this.identifier]["responses"][i]["type"]=="Repeat Responses"){
 													resSetup[7]["enabled"]=false;
@@ -418,8 +418,21 @@ ScriptEditor = Popup.extend({
 
 				break;
 				case "Add":
-					var eventArray = ["Default Interaction","On Event End","On Examine","On Talk Option Selected"];
-					var setupOptions = [{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":false}];
+					var eventArray = ["Default Interaction","On Examine","On Talk Close", "On Talk Option Selected"];
+					var setupOptions = [{"enabled":true},{"enabled":true},{"enabled":false},{"enabled":false},{"enabled":false}];
+					
+
+					for(var i in self.data["data"]){
+						if(self.data["data"][i]){
+							for(var j=0;j<self.data["data"][i]["responses"].length;j++){
+								if(self.data["data"][i]["responses"][j]["type"]=="Talk"){
+									setupOptions[2]["enabled"]=true;
+									break;break;
+								}
+							}
+						}
+					}
+
 					if(self.data["data"].length==0){
 						setupOptions[1]["enabled"]=false;
 					}
@@ -458,7 +471,7 @@ ScriptEditor = Popup.extend({
 
 	deleteChildrenOf:function(eventNumber){
 		for(var i=0;i<this.data["data"].length;i++){
-			if(this.data["data"][i]["type"]=="On Event End"){
+			if(this.data["data"][i]["type"]=="On Talk Close"){
 				if(this.data["data"][i]["data"]["attachedEvent"]==eventNumber){
 					this.deleteChildrenOf(i);
 					this.data["data"].splice(i,1);
@@ -469,7 +482,7 @@ ScriptEditor = Popup.extend({
 
 	hasChildrenOf:function(eventNumber){
 		for(var i=0;i<this.data["data"].length;i++){
-			if(this.data["data"][i]["type"]=="On Event End"){
+			if(this.data["data"][i]["type"]=="On Talk Close"){
 				if(this.data["data"][i]["data"]["attachedEvent"]==eventNumber){
 					return true;
 				}
@@ -481,7 +494,7 @@ ScriptEditor = Popup.extend({
 	eventsHaveChatOptions:function(){
 		for(var i=0;i<this.data["data"].length;i++){
 			for(var j=0;j<this.data["data"][i]["responses"].length;j++){
-				if(this.data["data"][i]["responses"][j]["type"]=="Give Talk Options"){
+				if(this.data["data"][i]["responses"][j]["type"]=="Talk"){
 					return true;
 				}
 			}
@@ -531,22 +544,62 @@ ScriptEditor = Popup.extend({
 		}
 	},
 
-	addEventEnd:function(clicknum){
-		this.delegate.data["data"].push({"type":"On Event End","responses":[],"requirements":[],"data":{"attachedEvent":clicknum}});
+	addTalkEnd:function(clicknum){
+		this.delegate.data["data"].push({"type":"On Talk Close","responses":[],"requirements":[],"data":{"attachedEvent":clicknum}});
 		this.delegate.prepareList();
 	},
+
+	addTalkOptionSelected:function(clicknum,touch){
+		this.delegate.talkoptionParent=clicknum;
+		var eventArray=[];
+		for(var j=0;j<this.delegate.data["data"][clicknum]["responses"].length;j++){
+			if(this.delegate.data["data"][clicknum]["responses"][j]["type"]=="Talk"){
+				for(var i in this.delegate.data["data"][clicknum]["responses"][j]["data"]["options"]){
+					eventArray.push(i+": " +this.delegate.data["data"][clicknum]["responses"][j]["data"]["options"][i])
+				}
+			}
+		}
+		this._parent.addChild(DropDownList.createWithListAndPosition(this.delegate,this.delegate.chooseTalkOptionSelectedCallBack,eventArray,touch._point));
+	},
+
+
+	chooseTalkOptionSelectedCallBack:function(clicknum){
+		this.delegate.data["data"].push({"type":"On Talk Option Selected for event:"+this.delegate.talkoptionParent + ", option:"+clicknum,"responses":[],"requirements":[],"data":{"attachedEvent":this.delegate.talkoptionParent,"attachedOption":clicknum}});
+		this.delegate.prepareList();
+		this.delegate.talkoptionParent=null;
+	},
+
+
+
 
 	addListElement:function(clicknum,touch){
 			var eventString="";
 			switch(clicknum){
 				case 0: eventString="Default Event"; break;
-				case 1: var eventArray=[];
-				for(var i=0;i<this.delegate.data["data"].length;i++){
-					eventArray.push(i+": " +this.delegate.data["data"][i]["type"])
-				}
-				this._parent.addChild(DropDownList.createWithListAndPosition(this.delegate,this.delegate.addEventEnd,eventArray,touch._point)); return;
-				case 2: eventString="On Examine"; break;
-				case 3: eventString="On Talk Option Selected"; break;
+				case 1: eventString="On Examine"; break;
+				case 2: var eventArray=[];
+					for(var i in this.delegate.data["data"]){
+						if(this.delegate.data["data"][i]){
+							for(var j=0;j<this.delegate.data["data"][i]["responses"].length;j++){
+								if(this.delegate.data["data"][i]["responses"][j]["type"]=="Talk"){
+									eventArray.push(i+": " +this.delegate.data["data"][i]["type"])
+								}
+							}
+						}
+					}
+				this._parent.addChild(DropDownList.createWithListAndPosition(this.delegate,this.delegate.addTalkEnd,eventArray,touch._point)); return;
+				 case 3:var eventArray=[];
+					for(var i in this.delegate.data["data"]){
+						if(this.delegate.data["data"][i]){
+							for(var j=0;j<this.delegate.data["data"][i]["responses"].length;j++){
+								if(this.delegate.data["data"][i]["responses"][j]["type"]=="Talk" && this.delegate.data["data"][i]["responses"][j]["data"]["options"].length>0){
+									eventArray.push(i+": " +this.delegate.data["data"][i]["type"])
+								}
+							}
+						}
+					}
+					this._parent.addChild(DropDownList.createWithListAndPosition(this.delegate,this.delegate.addTalkOptionSelected,eventArray,touch._point)); return;
+				 break;
 			}
 			if(eventString==""){
 				switch(this.delegate.data["specifier"]){
@@ -579,36 +632,35 @@ ScriptEditor = Popup.extend({
 		var responseText=""
 		switch(clicknum){
 			case 0: responseText ="Talk"; break;
-			case 1: responseText ="Give Talk Options"; break;
-			case 2: responseText ="Destroy"; break;
-			case 3: responseText ="Give /Take Item"; break;
-			case 4: responseText ="Set Quest Point"; break;
-			case 5: responseText ="Warp Player"; break;
-			case 6: responseText ="Wait"; break;
-			case 7: responseText = "Repeat Responses"; break;
-			case 8: responseText ="Open/Close Panel"; break;
-			case 9: responseText ="Modify Player Stats"; break
+			case 1: responseText ="Destroy"; break;
+			case 2: responseText ="Give /Take Item"; break;
+			case 3: responseText ="Set Quest Point"; break;
+			case 4: responseText ="Warp Player"; break;
+			case 5: responseText ="Wait"; break;
+			case 6: responseText = "Repeat Responses"; break;
+			case 7: responseText ="Open/Close Panel"; break;
+			case 8: responseText ="Modify Player Stats"; break
 		}
 		if(responseText==""){
 			switch(this.delegate.data["specifier"]){
 				case "NPC": 
 					switch(clicknum){
-						case 10: responseText = "Attack"; break;
-						case 11: responseText = "Run Away"; break;
-						case 12: responseText = "Defend"; break;
-						case 13: responseText = "Modify NPC Stats"
+						case 9: responseText = "Attack"; break;
+						case 10: responseText = "Run Away"; break;
+						case 11: responseText = "Defend"; break;
+						case 12: responseText = "Modify NPC Stats"
 					}
 				break;
 				case "Item": 
 					switch(clicknum){
-						case 10: responseText = "Equip Item"; break;
-						case 11: responseText = "Read Item"; break;
+						case 9: responseText = "Equip Item"; break;
+						case 10: responseText = "Read Item"; break;
 					}
 				break;
 				case "Tile":
 					switch(clicknum){
-						case 10: responseText = "Block Entry"; break;
-						case 11: responseText = "Add Layer Graphic"; break;
+						case 9: responseText = "Block Entry"; break;
+						case 10: responseText = "Add Layer Graphic"; break;
 					}
 				break;
 			}
@@ -766,6 +818,7 @@ ScriptEditor = Popup.extend({
 		this.disallowTouchForMain(true);
 		this.dataContext = {"event":event,"listtype":listtype,"id":id};
 		this.subEditorType = this.data["data"][event][listtype][id]["type"];
+		this.preEditData=cloneObj(this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"]);
 		this.showSubEditor();
 	},
 
@@ -829,7 +882,51 @@ ScriptEditor = Popup.extend({
 
 	timeBox:null,
 
+	editOption:function(context,data){
+		var panels = {
+			"panels":{
+				children:{
+					"editArea":{
+						bg:cc.c4b(127,127,127,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(0,0),
+						size:cc.size(200,250),
+					},
+					"editBox":{
+						size:cc.size(178,196),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(8,12),
+					},
+					"okbtn":{
+						position:cc.p(62,210),
+						size:cc.size(32,32),
+						texture:"GUI/tick_icon.png",
+						anchorPoint:cc.p(0,0),
+					},
+					"cancelbtn":{
+						position:cc.p(106,210),
+						size:cc.size(32,32),
+						texture:"GUI/cross_icon.png",
+						anchorPoint:cc.p(0,0),
+					},
+				}
+			}
+		};
+		this.subsubEditor = requestLayout(panels,true);
+		this.subEditor.addChild(this.subsubEditor);
+
+		this.subsubBox = new EntryBox(this.subsubEditor["editBox"],cc.size(this.subsubEditor["editBox"].getContentSize().width,this.subsubEditor["editBox"].getContentSize().height), cc.p(0,this.subsubEditor["editBox"].getContentSize().height), data ?  data : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+		this.subsubBox.setDefaultFineFlag(true);
+		this.subsubBox.setNullAllowed(false);
+		this.subsubContext=context;	
+	},
+
 	showSubEditor:function(){
+		if(this.subEditor){
+			this.subEditor.removeFromParent();
+			this.subEditor=null;
+		}
+
 		this.panels["subEditorOver"].setVisible(true);
 		this.panels["mainEditorOver"].setVisible(false);
 		var panels = {
@@ -877,7 +974,7 @@ ScriptEditor = Popup.extend({
 					},
 				}
 			break;
-			case "Talk": case "Read Item":
+			case "Read Item":
 				panels["panels"].children={
 					"sayLabel":{
 						label:"Say:",
@@ -889,6 +986,32 @@ ScriptEditor = Popup.extend({
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,50),
 						size:cc.size(174,322),
+					},
+				}
+			break;
+			case "Talk":
+				panels["panels"].children={
+					"sayLabel":{
+						label:"Say:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"sayText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,274),
+						size:cc.size(174,100),
+					},
+					"optionLabel":{
+						label:"Options:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,235),
+					},
+					"optionList":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,50),
+						size:cc.size(154,185),
 					},
 				}
 			break;
@@ -1332,10 +1455,110 @@ ScriptEditor = Popup.extend({
 				this.warpYBox = new EntryBox(this.subEditor["mapYText"],cc.size(this.subEditor["mapYText"].getContentSize().width,this.subEditor["mapYText"].getContentSize().height), cc.p(0,this.subEditor["mapYText"].getContentSize().height), y, cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.warpYBox.setDefaultFineFlag(true);
 			break;
-			case "Talk": case "Read Item":
+			case "Read Item":
 				this.sayBox = new EntryBox(this.subEditor["sayText"],cc.size(this.subEditor["sayText"].getContentSize().width,this.subEditor["sayText"].getContentSize().height), cc.p(0,this.subEditor["sayText"].getContentSize().height), data["say"] ?  data["say"] : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
 				this.sayBox.setDefaultFineFlag(true);
 				this.sayBox.setNullAllowed(false);
+			break;
+			case "Talk":
+				this.sayBox = new EntryBox(this.subEditor["sayText"],cc.size(this.subEditor["sayText"].getContentSize().width,this.subEditor["sayText"].getContentSize().height), cc.p(0,this.subEditor["sayText"].getContentSize().height), data["say"] ?  data["say"] : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.sayBox.setDefaultFineFlag(true);
+				this.sayBox.setNullAllowed(false);
+				
+				var listnodes = [];
+				var callBackList=[];
+				var optionsList = data["options"] ? data["options"]:[];
+				console.log(optionsList);
+				for(var i=0;i<optionsList.length;i++){
+					listnodes[i]=cc.Node.create();
+					var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
+					var text = cc.LabelTTF.create(optionsList[i],"Arial",15);
+					text.setColor(cc.c3b(0,0,0));
+					text.setAnchorPoint(cc.p(0,0));
+					text.setPosition(cc.p(4,4));
+					text.setDimensions(cc.size(104,0));
+					listnodes[i].setContentSize(154,text.getContentSize().height+8);
+					var useElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/edit.png"));
+					useElement.setPosition(cc.p(130,0));
+					useElement.setAnchorPoint(cc.p(0,0));
+					useElement.callBack="Edit";
+					useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+					var deleteElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/trash.png"));
+					deleteElement.setPosition(cc.p(108,0));
+					deleteElement.setAnchorPoint(cc.p(0,0));
+					deleteElement.callBack="Delete";
+					deleteElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+					callBackList.push([useElement,deleteElement]);
+					var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+					listnodes[i].addChild(highlightNode);
+					listnodes[i].highlightNode=highlightNode;
+					listnodes[i].addChild(element);
+					listnodes[i].addChild(text);
+					listnodes[i].addChild(useElement);
+					listnodes[i].addChild(deleteElement);
+				}
+				var addButton = cc.LayerColor.create(cc.c4b(70,200,70,255),90,26);
+				var plus = cc.LabelTTF.create("+","Arial",20);
+				plus.setPosition(45,13);
+				plus.setAnchorPoint(cc.p(0.5,0.5));
+				addButton.setPosition(cc.p(34,0));
+				addButton.callBack="Add";
+				addButton.addChild(plus);
+				callBackList.push([addButton]);
+				listnodes.push(addButton);
+
+				var self=this;
+				this.subEditor["optionList"].getListSize = function(){
+					var height =0;
+					for(var i=0;i<listnodes.length;i++){
+						height+=listnodes[i].getContentSize().height;
+					}
+					return cc.size(154,height);
+				};
+				this.subEditor["optionList"].getListElementAmount=function(){
+					return listnodes.length;
+				};
+				this.subEditor["optionList"].getSizeForElement=function(elementID){
+					return listnodes[elementID].getContentSize();
+				};
+				this.subEditor["optionList"].getListNodeForIndex=function(elementID){
+					return listnodes[elementID];
+				};
+				this.subEditor["optionList"].getHighlightNode = function(elementID){
+					return listnodes[elementID].highlightNode;
+				};
+				this.subEditor["optionList"].runListCallBack=function(name,listelement){
+					if(!self.subsubEditor){
+						switch(name){
+							case "Add":
+								if(!data["options"]){
+									data["options"]=[];
+								}
+								data["options"].push("<Enter Text>");
+								data["say"]=self.sayBox.getText();
+								self.subEditor["optionList"].listView.removeFromParent();
+								self.subEditor["optionList"].listView=null;
+								self.showSubEditor();
+							break;
+							case "Delete":
+								data["options"].splice(listelement,1);
+								data["say"]=self.sayBox.getText();
+								self.subEditor.removeFromParent();
+								self.subEditor=null;
+								self.showSubEditor();
+							break;
+							case "Edit":
+								data["say"]=self.sayBox.getText();
+								self.editOption(listelement,data["options"][listelement]);
+								self.subEditor["optionList"].listView.removeFromParent();
+								self.subEditor["optionList"].listView=null;
+							break;
+						}
+					}
+				};
+				this.subEditor["optionList"].listView = ListView.create(this.subEditor["optionList"]);
+				this.subEditor["optionList"].listView.setCallBackList(callBackList);
+				this.subEditor["optionList"].addChild(this.subEditor["optionList"].listView);
 			break;
 			case "Is Quest Point": case "Set Quest Point":
 				var listnodes = [];
@@ -1996,8 +2219,29 @@ ScriptEditor = Popup.extend({
 		this.prevMovPos=null;
 		var pos = touch._point;
 		
-		
-	
+		if(this.subsubEditor){
+			var truePos = this.subsubEditor.convertToNodeSpace(pos);
+			if(isTouching(this.subsubEditor["okbtn"],truePos)){
+				switch(this.subEditorType){
+					case "Talk":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"]["options"][this.subsubContext]=this.subsubBox.getText();
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"]["say"]=this.sayBox.getText();
+					break;
+				}
+				this.subsubEditor.removeFromParent();
+				this.subsubEditor=null;
+				this.subsubContext=null;
+				this.showSubEditor();
+				return;
+			}
+			if(isTouching(this.subsubEditor["cancelbtn"],truePos)){
+				this.subsubEditor.removeFromParent();
+				this.subsubEditor=null;
+				this.subsubContext=null;
+				this.showSubEditor();
+				return;
+			}
+		}
 
 		if(this.subEditor){
 			var truePos = this.subEditor.convertToNodeSpace(pos);
@@ -2011,10 +2255,13 @@ ScriptEditor = Popup.extend({
 							"index":index,
 						}
 					break
-					case "Talk": case "Read Item":
+					case "Read Item":
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"say":this.sayBox.getText(),
 						}
+					break;
+					case "Talk":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"]["say"]=this.sayBox.getText();
 					break;
 					case "Is Quest Point": case "Set Quest Point":
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
@@ -2127,6 +2374,8 @@ ScriptEditor = Popup.extend({
 			}
 
 			if (isTouching(this.subEditor["cancelbtn"],truePos)) {
+				console.log(this.preEditData);
+				this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"]=cloneObj(this.preEditData);
 				this.hideSubEditor();
 				return true;
 			}

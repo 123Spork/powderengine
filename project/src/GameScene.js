@@ -288,6 +288,15 @@ var GameScene = Scene.extend({
 		NpcChat.didBecomeActive();
 		this.addChild(NpcChat);
 	},
+
+	hideNPCTalk:function(){
+		if(NpcChat!=null && !NpcChat._parent) NpcChat=null;
+		if(NpcChat){
+			NpcChat.willTerminate();
+			NpcChat.removeFromParent();
+			NpcChat=null;
+		}
+	},
 	
 
 	onTouchEnded:function(touch){
@@ -587,6 +596,7 @@ var GameScene = Scene.extend({
 			access:withData.playerData["rank"],
 			inventory:withData.playerData["inventory"],
 			equipment:withData.playerData["equipment"],
+			extraData:withData.playerData["extraData"],
 		};
 
 		PlayersController.create(playerData);
@@ -630,6 +640,7 @@ var GameScene = Scene.extend({
 			"pmessages":[],
 			"lastchats":[],
 			"health":100,
+			"extraData":PlayersController.getYou().extraData,
 		};
 		this.panels["saving_icon"].setVisible(true);
 		this.isSaving=true;

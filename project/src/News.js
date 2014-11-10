@@ -14,7 +14,11 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
-				"9th November 2014: (v0.731)":[
+				"10th November 2014: (v0.735)":[
+					"Added user extradata content for subscripting. Allows for developers to code in specific scripting logic if needed.",
+					"Extradata updates with user login data and is purposefully not localstorage based."
+				],
+				"9th November 2014: (v0.733)":[
 					"Added talking and talk with option callback to the npc scripts contexts."
 				],
 				"8th November 2014: (v0.731)":[

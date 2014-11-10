@@ -314,16 +314,49 @@ function mergeSettings(obj1,obj2){
 var handleItemScript = function(eventname,item,ignoreList){
 	MainScene.scheduleOnce(function(){
 		var scriptData=[];
+		var storedObj={};
 		var userItems=PlayersController.getYou().items;
-		if(item && item["script"]){
-			scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
+		if(item){
+			if(item["script"]){
+				scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
+			}
+			if(item["storedobj"]){
+				storedobj=item["storedobj"];
+			}
 		}
 		for(var j=0;j<scriptData.length;j++){
 			if(scriptData[j]["type"]==eventname){
-				var defaultEvent = scriptData[j]["responses"];
+				var defaultEvent = scriptData[j]["requirements"];
 				var allowContinue=true;
 				for(var k=0;k<defaultEvent.length;k++){
 					switch(defaultEvent[k]["type"]){
+						case "Script Requirement":
+							var data=cloneObj(PlayersController.getYou().getExtraData(item["script"]));
+							var isAllow=false;
+							if(!data){
+								data={};
+							}
+							eval(defaultEvent[k]["data"]["functionContent"]);
+							PlayersController.getYou().setExtraData(item["script"],cloneObj(data));
+							if(isAllow==false){
+								allowContinue=false; break; break;
+							}
+						break;
+						case "Script Requirement":
+							var requirefunc = function(data,isAllow){
+								try{
+									eval(defaultEvent[k]["data"]["functionContent"]);
+									defaultEvent[k]["data"]["storedobj"]=data;
+									return isAllow;
+								}catch(error){
+									GameChat.addMessage("Your script did not work.");
+								}
+							};
+							var allowed = requirefunc(cloneObj(defaultEvent[k]["data"]["storedobj"]),false);
+							if(allowed==false){
+								allowContinue=false; break; break;
+							}
+						break;
 						case "Is Panel Visibility":
 							if(ignoreList && ignoreList["Is Panel Visibility"]){
 								break;
@@ -444,240 +477,247 @@ var handleItemScript = function(eventname,item,ignoreList){
 							}
 						break;
 					}
+				}
+				if(allowContinue){
 					var defaultEvent = scriptData[j]["responses"];
 					for(var k=0;k<defaultEvent.length;k++){
-						switch(defaultEvent[k]["type"]){
-							case "Equip Item":
-								if(ignoreList && ignoreList["Equip Item"]){
-									break;
-								}
-								var place = defaultEvent[k]["data"]["equip"];
-								if(place=="bothArms"){
-									place="lArm";
-									if(!userItems["equipped"]["rArm"]){
-										place="rArm";
-									}
-								}
-								var temp=null;
-								if(userItems["equipped"][place]){
-									temp = cloneObj(userItems["equipped"][place]);
-									handleItemScript("On Dequip",temp)
-								}
-								userItems["equipped"][place]=cloneObj(item);
-								item=temp;
-								if(Inventory){
-									Inventory.updateTileGrid();
-								}
-								if(Equipment){
-									Equipment.updateTileGrid();
-								}
-							break;
-							case "Give /Take Item":
-								if(ignoreList && ignoreList["Give /Take Item"]){
-									break;
-								}
-								if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
-									break;
-								}
-								var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
-								if(defaultEvent[k]["data"]["amount"]>0){
-									var space = defaultEvent[k]["data"]["amount"];
-									if(contextitem["stackable"]==true){
-										for(var p=0;p<40;p++){
-											if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
-												space=0;
-											}
-										}
-										if(count!=0){
-											space=1;
-										}
-									}else{
-										var count=0;
-										for(var p=0;p<40;p++){
-											if(!userItems["stored"][p]){
-												count++;
-											}
-										}
-									}
-									if(count<space){
+						for(var k=0;k<defaultEvent.length;k++){
+							switch(defaultEvent[k]["type"]){
+								case "Script Response":
+									functionArray.push("var data=cloneObj(PlayersController.getYou().getExtraData(item[\"script\"]));if(!data){data={};}eval(scriptData["+j+"][\"responses\"]["+k+"][\"data\"][\"functionContent\"]);PlayersController.getYou().setExtraData(item[\"script\"],cloneObj(data));");  								
+								break;
+								case "Equip Item":
+									if(ignoreList && ignoreList["Equip Item"]){
 										break;
-									}else{
+									}
+									var place = defaultEvent[k]["data"]["equip"];
+									if(place=="bothArms"){
+										place="lArm";
+										if(!userItems["equipped"]["rArm"]){
+											place="rArm";
+										}
+									}
+									var temp=null;
+									if(userItems["equipped"][place]){
+										temp = cloneObj(userItems["equipped"][place]);
+										handleItemScript("On Dequip",temp)
+									}
+									userItems["equipped"][place]=cloneObj(item);
+									item=temp;
+									if(Inventory){
+										Inventory.updateTileGrid();
+									}
+									if(Equipment){
+										Equipment.updateTileGrid();
+									}
+								break;
+								case "Give /Take Item":
+									if(ignoreList && ignoreList["Give /Take Item"]){
+										break;
+									}
+									if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
+										break;
+									}
+									var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
+									if(defaultEvent[k]["data"]["amount"]>0){
+										var space = defaultEvent[k]["data"]["amount"];
 										if(contextitem["stackable"]==true){
-											var doneAdd=false;
 											for(var p=0;p<40;p++){
 												if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
-													userItems["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
-													if(Inventory){
-														Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
-													}
-													doneAdd=true;
-													break;
+													space=0;
 												}
 											}
-											if(doneAdd==false){
+											if(count!=0){
+												space=1;
+											}
+										}else{
+											var count=0;
+											for(var p=0;p<40;p++){
+												if(!userItems["stored"][p]){
+													count++;
+												}
+											}
+										}
+										if(count<space){
+											break;
+										}else{
+											if(contextitem["stackable"]==true){
+												var doneAdd=false;
 												for(var p=0;p<40;p++){
-													if(!userItems["stored"][p]){
-														userItems["stored"][p]=cloneObj(contextitem);
-														userItems["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+													if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
+														userItems["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
 														if(Inventory){
 															Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
 														}
+														doneAdd=true;
 														break;
 													}
 												}
+												if(doneAdd==false){
+													for(var p=0;p<40;p++){
+														if(!userItems["stored"][p]){
+															userItems["stored"][p]=cloneObj(contextitem);
+															userItems["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+															if(Inventory){
+																Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
+															}
+															break;
+														}
+													}
+												}
+											}else{
+												for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
+													for(var p=0;p<40;p++){
+														if(!userItems["stored"][p]){
+															userItems["stored"][p]=cloneObj(contextitem);
+															break;
+														}
+													}
+												}
 											}
+										}
+									}else if(defaultEvent[k]["data"]["amount"]<0){
+										var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
+										var count=0;
+										var itemName = contextitem["name"];
+										for(var p in userItems["stored"]){
+											if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
+												count++;
+											}
+										}
+										if(count<amount){
+											break;
 										}else{
-											for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
-												for(var p=0;p<40;p++){
-													if(!userItems["stored"][p]){
-														userItems["stored"][p]=cloneObj(contextitem);
+											for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
+												for(var p in userItems["stored"]){
+													if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
+														console.log("gettin rid"+n);
+														user["stored"][p]=null;
 														break;
 													}
 												}
 											}
 										}
 									}
-								}else if(defaultEvent[k]["data"]["amount"]<0){
-									var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
-									var count=0;
-									var itemName = contextitem["name"];
-									for(var p in userItems["stored"]){
-										if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
-											count++;
-										}
+									if(Inventory){
+										Inventory.updateTileGrid();
 									}
-									if(count<amount){
+									if(Equipment){
+										Equipment.updateTileGrid();
+									}
+								break;
+								case "Modify Player Stats":
+									if(ignoreList && ignoreList["Modify Player Stats"]){
 										break;
-									}else{
-										for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
-											for(var p in userItems["stored"]){
-												if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
-													console.log("gettin rid"+n);
-													user["stored"][p]=null;
-													break;
+									}
+									if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
+										var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+										SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+										SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+										SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+									}
+								break;
+								case "Warp Player":
+									if(ignoreList && ignoreList["Warp Player"]){
+										break;
+									}
+									var x=defaultEvent[k]["data"]["index"] % gridWidth;
+									var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
+									PlayersController.getYou().setPosition(x*32,y*32);
+									sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
+									GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
+									GameMap.goToOffsetFromPosition(x*32,y*32);
+								break;
+								case "Read Item":
+									if(ignoreList && ignoreList["Read Item"]){
+										break;
+									}
+									MainScene.showBook(item["name"],defaultEvent[k]["data"]["say"]);
+								break;
+								case "Open/Close Panel":
+									if(ignoreList && ignoreList["Open/Close Panel"]){
+										break;
+									}
+									var show = defaultEvent[k]["data"]["visible"]==1?true:false;
+									switch(defaultEvent[k]["data"]["panel"]){
+										case 0: 
+											if(Inventory!=null && !Inventory._parent) Inventory=null;
+											if(show==true){
+												if(Inventory){
+													Inventory.updateTileGrid();
+												}else{
+													Inventory = new InventoryPanel();
+													Inventory.init();
+													Inventory.didBecomeActive();
+													MainScene.addChild(Inventory);
+												}
+											}else{
+												if(Inventory){
+													Inventory.willTerminate();
+													Inventory.removeFromParent();
+													Inventory=null;
 												}
 											}
-										}
+										break;
+										case 1:
+											if(Equipment!=null && !Equipment._parent) Equipment=null;
+											if(show==true){
+												if(Equipment){
+													Equipment.updateTileGrid();
+												}else{
+													Equipment = new EquipmentPanel();
+													Equipment.init();
+													Equipment.didBecomeActive();
+													MainScene.addChild(Equipment);
+												}
+											}else{
+												if(Equipment){
+													Equipment.willTerminate();
+													Equipment.removeFromParent();
+													Equipment=null;
+												}
+											}
+										break;
+										case 2:
+											if(Skills!=null && !Skills._parent) Skills=null;
+											if(show==true){
+												if(Skills){
+													Skills.updateTileGrid();
+												}else{
+													Skills = new SkillsPanel();
+													Skills.init();
+													Skills.didBecomeActive();
+													MainScene.addChild(Skills);
+												}
+											}else{
+												if(Skills){
+													Skills.willTerminate();
+													Skills.removeFromParent();
+													Skills=null;
+												}
+											}
+										break;
 									}
-								}
-								if(Inventory){
-									Inventory.updateTileGrid();
-								}
-								if(Equipment){
-									Equipment.updateTileGrid();
-								}
-							break;
-							case "Modify Player Stats":
-								if(ignoreList && ignoreList["Modify Player Stats"]){
-									break;
-								}
-								if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
-									var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
-									SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
-									SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
-									SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
-								}
-							break;
-							case "Warp Player":
-								if(ignoreList && ignoreList["Warp Player"]){
-									break;
-								}
-								var x=defaultEvent[k]["data"]["index"] % gridWidth;
-								var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
-								PlayersController.getYou().setPosition(x*32,y*32);
-								sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
-								GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
-								GameMap.goToOffsetFromPosition(x*32,y*32);
-							break;
-							case "Read Item":
-								if(ignoreList && ignoreList["Read Item"]){
-									break;
-								}
-								MainScene.showBook(item["name"],defaultEvent[k]["data"]["say"]);
-							break;
-							case "Open/Close Panel":
-								if(ignoreList && ignoreList["Open/Close Panel"]){
-									break;
-								}
-								var show = defaultEvent[k]["data"]["visible"]==1?true:false;
-								switch(defaultEvent[k]["data"]["panel"]){
-									case 0: 
-										if(Inventory!=null && !Inventory._parent) Inventory=null;
-										if(show==true){
-											if(Inventory){
-												Inventory.updateTileGrid();
-											}else{
-												Inventory = new InventoryPanel();
-												Inventory.init();
-												Inventory.didBecomeActive();
-												MainScene.addChild(Inventory);
-											}
-										}else{
-											if(Inventory){
-												Inventory.willTerminate();
-												Inventory.removeFromParent();
-												Inventory=null;
-											}
-										}
-									break;
-									case 1:
-										if(Equipment!=null && !Equipment._parent) Equipment=null;
-										if(show==true){
-											if(Equipment){
-												Equipment.updateTileGrid();
-											}else{
-												Equipment = new EquipmentPanel();
-												Equipment.init();
-												Equipment.didBecomeActive();
-												MainScene.addChild(Equipment);
-											}
-										}else{
-											if(Equipment){
-												Equipment.willTerminate();
-												Equipment.removeFromParent();
-												Equipment=null;
-											}
-										}
-									break;
-									case 2:
-										if(Skills!=null && !Skills._parent) Skills=null;
-										if(show==true){
-											if(Skills){
-												Skills.updateTileGrid();
-											}else{
-												Skills = new SkillsPanel();
-												Skills.init();
-												Skills.didBecomeActive();
-												MainScene.addChild(Skills);
-											}
-										}else{
-											if(Skills){
-												Skills.willTerminate();
-												Skills.removeFromParent();
-												Skills=null;
-											}
-										}
-									break;
-								}
-							break;
-							case "Destroy":
-								if(ignoreList && ignoreList["Destroy"]){
-									break;
-								}
-								item=null;
-								if(tile.getScriptObject()["temp"]){
-									sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-								} else{
-									sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-								}
-								if(Inventory){
-									Inventory.updateTileGrid();
-								}
-								k=defaultEvent.length;
-							break;
-													
-						}
-					}	
+								break;
+								case "Destroy":
+									if(ignoreList && ignoreList["Destroy"]){
+										break;
+									}
+									item=null;
+									if(tile.getScriptObject()["temp"]){
+										sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+									} else{
+										sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+									}
+									if(Inventory){
+										Inventory.updateTileGrid();
+									}
+									k=defaultEvent.length;
+								break;
+														
+							}
+						}	
+					}
 				}
 			}
 		}
@@ -688,18 +728,34 @@ var handleItemScript = function(eventname,item,ignoreList){
 
 
 var handleNPCScript = function(eventname,npc,ignoreList){
+	var functionArray=[];
 	MainScene.scheduleOnce(function(){
 		var scriptData=[];
 		var userItems=PlayersController.getYou().items;
-		if(npc && npc.script){
-			scriptData = ObjectLists.getScriptList()[npc.script]["data"];
+		if(npc){
+			if(npc["script"]){
+				scriptData = ObjectLists.getScriptList()[npc["script"]]["data"];
+			}
 		}
 		for(var j=0;j<scriptData.length;j++){
 			if(scriptData[j]["type"]==eventname){
-				var defaultEvent = scriptData[j]["responses"];
+				var defaultEvent = scriptData[j]["requirements"];
 				var allowContinue=true;
 				for(var k=0;k<defaultEvent.length;k++){
 					switch(defaultEvent[k]["type"]){
+						case "Script Requirement":
+							var data=cloneObj(PlayersController.getYou().getExtraData(npc["script"]));
+							var isAllow=false;
+							if(!data){
+								data={};
+							}
+							eval(defaultEvent[k]["data"]["functionContent"]);
+							PlayersController.getYou().setExtraData(npc["script"],cloneObj(data));
+							if(isAllow==false){
+								allowContinue=false; break; break;
+							}
+						break;
+
 						case "Is Panel Visibility":
 							if(ignoreList && ignoreList["Is Panel Visibility"]){
 								break;
@@ -820,218 +876,228 @@ var handleNPCScript = function(eventname,npc,ignoreList){
 							}
 						break;
 					}
+				}
+				if(allowContinue==true){
 					var defaultEvent = scriptData[j]["responses"];
-					for(var k=0;k<defaultEvent.length;k++){
-						switch(defaultEvent[k]["type"]){
-							case "Talk":
-								if(ignoreList && ignoreList["Talk"]){
-									break;
-								}
-								var eventnumber=parseInt(j);
-								MainScene.showNPCTalk(npc,scriptData,eventnumber,npc["name"],defaultEvent[k]["data"]["say"],defaultEvent[k]["data"]["options"]);
-							break;
-							case "Give /Take Item":
-								if(ignoreList && ignoreList["Give /Take Item"]){
-									break;
-								}
-								if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
-									break;
-								}
-								var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
-								if(defaultEvent[k]["data"]["amount"]>0){
-									var space = defaultEvent[k]["data"]["amount"];
-									if(contextitem["stackable"]==true){
-										for(var p=0;p<40;p++){
-											if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
-												space=0;
-											}
-										}
-										if(count!=0){
-											space=1;
-										}
-									}else{
-										var count=0;
-										for(var p=0;p<40;p++){
-											if(!userItems["stored"][p]){
-												count++;
-											}
-										}
-									}
-									if(count<space){
+						for(var k=0;k<defaultEvent.length;k++){
+							switch(defaultEvent[k]["type"]){
+								case "Script Response":
+									functionArray.push("var data=cloneObj(PlayersController.getYou().getExtraData(npc[\"script\"]));if(!data){data={};}eval(scriptData["+j+"][\"responses\"]["+k+"][\"data\"][\"functionContent\"]);PlayersController.getYou().setExtraData(npc[\"script\"],cloneObj(data));"); 
+								break;
+								case "Talk":
+									if(ignoreList && ignoreList["Talk"]){
 										break;
-									}else{
+									}
+									var eventnumber=parseInt(j);
+									MainScene.showNPCTalk(npc,scriptData,eventnumber,npc["name"],defaultEvent[k]["data"]["say"],defaultEvent[k]["data"]["options"]);
+								break;
+								case "Give /Take Item":
+									if(ignoreList && ignoreList["Give /Take Item"]){
+										break;
+									}
+									if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
+										break;
+									}
+									var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
+									if(defaultEvent[k]["data"]["amount"]>0){
+										var space = defaultEvent[k]["data"]["amount"];
 										if(contextitem["stackable"]==true){
-											var doneAdd=false;
 											for(var p=0;p<40;p++){
 												if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
-													userItems["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
-													if(Inventory){
-														Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
-													}
-													doneAdd=true;
-													break;
+													space=0;
 												}
 											}
-											if(doneAdd==false){
+											if(count!=0){
+												space=1;
+											}
+										}else{
+											var count=0;
+											for(var p=0;p<40;p++){
+												if(!userItems["stored"][p]){
+													count++;
+												}
+											}
+										}
+										if(count<space){
+											break;
+										}else{
+											if(contextitem["stackable"]==true){
+												var doneAdd=false;
 												for(var p=0;p<40;p++){
-													if(!userItems["stored"][p]){
-														userItems["stored"][p]=cloneObj(contextitem);
-														userItems["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+													if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
+														userItems["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
 														if(Inventory){
 															Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
 														}
+														doneAdd=true;
 														break;
 													}
 												}
+												if(doneAdd==false){
+													for(var p=0;p<40;p++){
+														if(!userItems["stored"][p]){
+															userItems["stored"][p]=cloneObj(contextitem);
+															userItems["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+															if(Inventory){
+																Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
+															}
+															break;
+														}
+													}
+												}
+											}else{
+												for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
+													for(var p=0;p<40;p++){
+														if(!userItems["stored"][p]){
+															userItems["stored"][p]=cloneObj(contextitem);
+															break;
+														}
+													}
+												}
 											}
+										}
+									}else if(defaultEvent[k]["data"]["amount"]<0){
+										var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
+										var count=0;
+										var itemName = contextitem["name"];
+										for(var p in userItems["stored"]){
+											if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
+												count++;
+											}
+										}
+										if(count<amount){
+											break;
 										}else{
-											for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
-												for(var p=0;p<40;p++){
-													if(!userItems["stored"][p]){
-														userItems["stored"][p]=cloneObj(contextitem);
+											for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
+												for(var p in userItems["stored"]){
+													if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
+														console.log("gettin rid"+n);
+														user["stored"][p]=null;
 														break;
 													}
 												}
 											}
 										}
 									}
-								}else if(defaultEvent[k]["data"]["amount"]<0){
-									var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
-									var count=0;
-									var itemName = contextitem["name"];
-									for(var p in userItems["stored"]){
-										if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
-											count++;
-										}
+									if(Inventory){
+										Inventory.updateTileGrid();
 									}
-									if(count<amount){
+									if(Equipment){
+										Equipment.updateTileGrid();
+									}
+								break;
+								case "Modify Player Stats":
+									if(ignoreList && ignoreList["Modify Player Stats"]){
 										break;
-									}else{
-										for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
-											for(var p in userItems["stored"]){
-												if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
-													console.log("gettin rid"+n);
-													user["stored"][p]=null;
-													break;
+									}
+									if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
+										var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+										SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
+										SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
+										SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
+									}
+								break;
+								case "Warp Player":
+									if(ignoreList && ignoreList["Warp Player"]){
+										break;
+									}
+									var x=defaultEvent[k]["data"]["index"] % gridWidth;
+									var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
+									PlayersController.getYou().setPosition(x*32,y*32);
+									sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
+									GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
+									GameMap.goToOffsetFromPosition(x*32,y*32);
+								break;
+								case "Open/Close Panel":
+									if(ignoreList && ignoreList["Open/Close Panel"]){
+										break;
+									}
+									var show = defaultEvent[k]["data"]["visible"]==1?true:false;
+									switch(defaultEvent[k]["data"]["panel"]){
+										case 0: 
+											if(Inventory!=null && !Inventory._parent) Inventory=null;
+											if(show==true){
+												if(Inventory){
+													Inventory.updateTileGrid();
+												}else{
+													Inventory = new InventoryPanel();
+													Inventory.init();
+													Inventory.didBecomeActive();
+													MainScene.addChild(Inventory);
+												}
+											}else{
+												if(Inventory){
+													Inventory.willTerminate();
+													Inventory.removeFromParent();
+													Inventory=null;
 												}
 											}
-										}
+										break;
+										case 1:
+											if(Equipment!=null && !Equipment._parent) Equipment=null;
+											if(show==true){
+												if(Equipment){
+													Equipment.updateTileGrid();
+												}else{
+													Equipment = new EquipmentPanel();
+													Equipment.init();
+													Equipment.didBecomeActive();
+													MainScene.addChild(Equipment);
+												}
+											}else{
+												if(Equipment){
+													Equipment.willTerminate();
+													Equipment.removeFromParent();
+													Equipment=null;
+												}
+											}
+										break;
+										case 2:
+											if(Skills!=null && !Skills._parent) Skills=null;
+											if(show==true){
+												if(Skills){
+													Skills.updateTileGrid();
+												}else{
+													Skills = new SkillsPanel();
+													Skills.init();
+													Skills.didBecomeActive();
+													MainScene.addChild(Skills);
+												}
+											}else{
+												if(Skills){
+													Skills.willTerminate();
+													Skills.removeFromParent();
+													Skills=null;
+												}
+											}
+										break;
 									}
-								}
-								if(Inventory){
-									Inventory.updateTileGrid();
-								}
-								if(Equipment){
-									Equipment.updateTileGrid();
-								}
-							break;
-							case "Modify Player Stats":
-								if(ignoreList && ignoreList["Modify Player Stats"]){
-									break;
-								}
-								if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
-									var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
-									SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
-									SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
-									SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
-								}
-							break;
-							case "Warp Player":
-								if(ignoreList && ignoreList["Warp Player"]){
-									break;
-								}
-								var x=defaultEvent[k]["data"]["index"] % gridWidth;
-								var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
-								PlayersController.getYou().setPosition(x*32,y*32);
-								sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
-								GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
-								GameMap.goToOffsetFromPosition(x*32,y*32);
-							break;
-							case "Open/Close Panel":
-								if(ignoreList && ignoreList["Open/Close Panel"]){
-									break;
-								}
-								var show = defaultEvent[k]["data"]["visible"]==1?true:false;
-								switch(defaultEvent[k]["data"]["panel"]){
-									case 0: 
-										if(Inventory!=null && !Inventory._parent) Inventory=null;
-										if(show==true){
-											if(Inventory){
-												Inventory.updateTileGrid();
-											}else{
-												Inventory = new InventoryPanel();
-												Inventory.init();
-												Inventory.didBecomeActive();
-												MainScene.addChild(Inventory);
-											}
-										}else{
-											if(Inventory){
-												Inventory.willTerminate();
-												Inventory.removeFromParent();
-												Inventory=null;
-											}
-										}
-									break;
-									case 1:
-										if(Equipment!=null && !Equipment._parent) Equipment=null;
-										if(show==true){
-											if(Equipment){
-												Equipment.updateTileGrid();
-											}else{
-												Equipment = new EquipmentPanel();
-												Equipment.init();
-												Equipment.didBecomeActive();
-												MainScene.addChild(Equipment);
-											}
-										}else{
-											if(Equipment){
-												Equipment.willTerminate();
-												Equipment.removeFromParent();
-												Equipment=null;
-											}
-										}
-									break;
-									case 2:
-										if(Skills!=null && !Skills._parent) Skills=null;
-										if(show==true){
-											if(Skills){
-												Skills.updateTileGrid();
-											}else{
-												Skills = new SkillsPanel();
-												Skills.init();
-												Skills.didBecomeActive();
-												MainScene.addChild(Skills);
-											}
-										}else{
-											if(Skills){
-												Skills.willTerminate();
-												Skills.removeFromParent();
-												Skills=null;
-											}
-										}
-									break;
-								}
-							break;
-							/*case "Destroy":
-								if(ignoreList && ignoreList["Destroy"]){
-									break;
-								}
-								npc=null;
-								if(tile.getScriptObject()["temp"]){
-									sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-								} else{
-									sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-								}
-								if(Inventory){
-									Inventory.updateTileGrid();
-								}
-								k=defaultEvent.length;
-							break;*/
-													
-						}
-					}	
+								break;
+								/*case "Destroy":
+									if(ignoreList && ignoreList["Destroy"]){
+										break;
+									}
+									npc=null;
+									if(tile.getScriptObject()["temp"]){
+										sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
+									} else{
+										sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+									}
+									if(Inventory){
+										Inventory.updateTileGrid();
+									}
+									k=defaultEvent.length;
+								break;*/
+														
+							}
+						}	
 				}
 			}
+		}
+		for(var i=0;i<functionArray.length;i++){
+			eval(functionArray[i]);
+			functionArray.splice(i,1);
+			i--;
 		}
 	});
 };

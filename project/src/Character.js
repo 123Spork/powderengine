@@ -323,8 +323,10 @@ Character = cc.Sprite.extend({
 PlayerCharacter = Character.extend({
 	items:null,
 	access:3,
+	extraData:null,
 	init:function(withData){
 		this._super(withData);
+		this.extraData=[];
 		if(withData.access){
 			this.access=withData.access;
 		}
@@ -340,6 +342,9 @@ PlayerCharacter = Character.extend({
 		if(withData.inventory){
 			this.items["stored"]=withData.inventory;
 		}
+		if(withData.extraData){
+			this.extraData=withData.extraData;
+		}
 		if(withData.equipment){
 			this.items["equipped"]=withData.equipment;
 			for(var i in this.items["equipped"]){
@@ -347,8 +352,33 @@ PlayerCharacter = Character.extend({
 				handleItemScript("Default Event",item,{"Equip Item":true,"Give /Take Item":true,"Warp Player":true,"Read Item":true,"Open/Close Panel":true,"Destroy":true});
 			}
 		}
+		//this.clearExtraData();
 		
 	},
+
+	clearExtraData:function(){
+		this.extraData=[];
+		sendMessageToServer({
+			"saveUserExtra":[],
+			"name":this.getName(),
+		});
+	},
+
+	setExtraData:function(scriptID,data){
+		this.extraData[scriptID]=data;
+		sendMessageToServer({
+			"saveUserExtra":this.extraData,
+			"name":this.getName(),
+		});
+	},
+
+	getExtraData:function(scriptID){
+		if(this.extraData[scriptID]){
+			return this.extraData[scriptID];
+		}
+		return null;
+	},
+
 
 	updateItemData:function(name,item){
 		for(var i=0;i<this.items["stored"].length;i++){

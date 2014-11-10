@@ -189,7 +189,8 @@ socket.on('connection', function(client){
 					"pmessages":[],
 					"lastchats":[],
 					"inventory":[],
-					"equipment":{}
+					"equipment":{},
+					"extraData":[],
 				}
 				saveNewPlayer(client,event["name"],newPlayerData);
 			}
@@ -201,6 +202,7 @@ socket.on('connection', function(client){
 				playerData["location"]=event["location"];
 				playerData["inventory"]=event["inventory"];
 				playerData["equipment"]=event["equipment"];
+				playerData["extraData"]=event["extraData"];
 
 				console.log(playerData);
 
@@ -208,6 +210,13 @@ socket.on('connection', function(client){
 			}
 		}
 
+		if(event["saveUserExtra"]){
+			if(fs.existsSync("users/"+event["name"]+".json")){
+				var playerData = require("./users/"+event["name"]+".json");
+				playerData["extraData"]=event["saveUserExtra"];
+				savePlayer(client,event["name"],playerData);
+			}
+		}
 
 		if(event["login"]){
 			for(var i in names){
@@ -252,6 +261,7 @@ socket.on('connection', function(client){
 							"location":playerData["location"],
 							"inventory":playerData["inventory"],
 							"equipment":playerData["equipment"],
+							"extraData":playerData["extraData"],
 						};
 						client.send(JSON.stringify({"login_success":playerData}));
 						names[client.id]=event["username"];

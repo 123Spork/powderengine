@@ -220,8 +220,8 @@ ScriptEditor = Popup.extend({
 											self.editPressed(this.identifier,"responses",listelement);
 										break;
 										case "Add":
-											var resArray = ["Talk","Destroy","Give/ Take Item","Set Quest Point", "Warp Player", "Wait", "Repeat Responses", "Open/Close Panel", "Modify Player Stats"];
-											var resSetup = [{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true}]
+											var resArray = ["Talk","Destroy","Give/ Take Item","Set Quest Point", "Warp Player", "Wait", "Repeat Responses", "Open/Close Panel", "Modify Player Stats","Script Response"];
+											var resSetup = [{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true}]
 											for( var i=0;i<self.data["data"][this.identifier]["responses"].length;i++){
 												if(self.data["data"][this.identifier]["responses"][i]["type"]=="Repeat Responses"){
 													resSetup[7]["enabled"]=false;
@@ -337,7 +337,7 @@ ScriptEditor = Popup.extend({
 											self.editPressed(this.identifier,"requirements",listelement);
 										break;
 										case "Add":
-											var reqArr = ["Has Player Item","Is Player Statistics","Is Quest Point","Is Panel Visibility","Is Player Inventory Space"];						
+											var reqArr = ["Has Player Item","Is Player Statistics","Is Quest Point","Is Panel Visibility","Is Player Inventory Space","Script Requirement"];						
 																			
 											switch(self.data["specifier"]){
 												case "Tile": 
@@ -419,7 +419,7 @@ ScriptEditor = Popup.extend({
 				break;
 				case "Add":
 					var eventArray = ["Default Interaction","On Examine","On Talk Close", "On Talk Option Selected"];
-					var setupOptions = [{"enabled":true},{"enabled":true},{"enabled":false},{"enabled":false},{"enabled":false}];
+					var setupOptions = [{"enabled":true},{"enabled":false},{"enabled":false},{"enabled":false}];
 					
 
 					for(var i in self.data["data"]){
@@ -592,7 +592,7 @@ ScriptEditor = Popup.extend({
 					for(var i in this.delegate.data["data"]){
 						if(this.delegate.data["data"][i]){
 							for(var j=0;j<this.delegate.data["data"][i]["responses"].length;j++){
-								if(this.delegate.data["data"][i]["responses"][j]["type"]=="Talk" && this.delegate.data["data"][i]["responses"][j]["data"]["options"].length>0){
+								if(this.delegate.data["data"][i]["responses"][j]["type"]=="Talk" && this.delegate.data["data"][i]["responses"][j]["data"]["options"] && this.delegate.data["data"][i]["responses"][j]["data"]["options"].length>0){
 									eventArray.push(i+": " +this.delegate.data["data"][i]["type"])
 								}
 							}
@@ -637,30 +637,31 @@ ScriptEditor = Popup.extend({
 			case 3: responseText ="Set Quest Point"; break;
 			case 4: responseText ="Warp Player"; break;
 			case 5: responseText ="Wait"; break;
-			case 6: responseText = "Repeat Responses"; break;
+			case 6: responseText ="Repeat Responses"; break;
 			case 7: responseText ="Open/Close Panel"; break;
 			case 8: responseText ="Modify Player Stats"; break
+			case 9: responseText ="Script Response";break;
 		}
 		if(responseText==""){
 			switch(this.delegate.data["specifier"]){
 				case "NPC": 
 					switch(clicknum){
-						case 9: responseText = "Attack"; break;
-						case 10: responseText = "Run Away"; break;
-						case 11: responseText = "Defend"; break;
-						case 12: responseText = "Modify NPC Stats"
+						case 10: responseText = "Attack"; break;
+						case 11: responseText = "Run Away"; break;
+						case 12: responseText = "Defend"; break;
+						case 13: responseText = "Modify NPC Stats"
 					}
 				break;
 				case "Item": 
 					switch(clicknum){
-						case 9: responseText = "Equip Item"; break;
-						case 10: responseText = "Read Item"; break;
+						case 10: responseText = "Equip Item"; break;
+						case 11: responseText = "Read Item"; break;
 					}
 				break;
 				case "Tile":
 					switch(clicknum){
-						case 9: responseText = "Block Entry"; break;
-						case 10: responseText = "Add Layer Graphic"; break;
+						case 10: responseText = "Block Entry"; break;
+						case 11: responseText = "Add Layer Graphic"; break;
 					}
 				break;
 			}
@@ -680,18 +681,19 @@ ScriptEditor = Popup.extend({
 			case 2: requireText = "Is Quest Point"; break;
 			case 3: requireText = "Is Panel Visibility";break;
 			case 4: requireText = "Is Player Inventory Space";break;
+			case 5: requireText = "Script Requirement"; break;
 		}
 		if(requireText==""){
 			switch(this.delegate.data["specifier"]){
 				case "Tile":
 					switch(clicknum){
-						case 5: requireText = "Is Event Fired By"; break;
+						case 6: requireText = "Is Event Fired By"; break;
 					}
 				break;
 				case "NPC":
 					switch(clicknum){
-						case 5: requireText = "Is NPC Statistics"; break;
-						case 6: requireText = "Is NPC Actioning"; break;
+						case 6: requireText = "Is NPC Statistics"; break;
+						case 7: requireText = "Is NPC Actioning"; break;
 					}
 				break;
 			}
@@ -971,6 +973,50 @@ ScriptEditor = Popup.extend({
 						anchorPoint:cc.p(0,0),
 						position:cc.p(100,276),
 						size:cc.size(80,32),
+					},
+				}
+			break;
+			case "Script Response":
+				panels["panels"].children={
+					"sayLabelPre":{
+						label:"Script:\n\nfunction resp(data){\n//data is { }",
+						anchorPoint:cc.p(0,1),
+						position:cc.p(12,374),
+						color:cc.c3b(255,0,0),
+					},
+					"sayLabelPost":{
+						label:"};",
+						anchorPoint:cc.p(0,1),
+						position:cc.p(12,95),
+						color:cc.c3b(255,0,0),
+					},
+					"sayText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,100),
+						size:cc.size(174,200),
+					},
+				}
+			break;
+			case "Script Requirement":
+				panels["panels"].children={
+					"sayLabelPre":{
+						label:"Script:\n\nfunction req(data,isAllow){\n//data is { }\n//isAllow defaults false",
+						anchorPoint:cc.p(0,1),
+						position:cc.p(12,374),
+						color:cc.c3b(255,0,0),
+					},
+					"sayLabelPost":{
+						label:"return isAllow;\n};",
+						anchorPoint:cc.p(0,1),
+						position:cc.p(12,95),
+						color:cc.c3b(255,0,0),
+					},
+					"sayText":{
+						bg:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,100),
+						size:cc.size(174,190),
 					},
 				}
 			break;
@@ -1457,6 +1503,16 @@ ScriptEditor = Popup.extend({
 			break;
 			case "Read Item":
 				this.sayBox = new EntryBox(this.subEditor["sayText"],cc.size(this.subEditor["sayText"].getContentSize().width,this.subEditor["sayText"].getContentSize().height), cc.p(0,this.subEditor["sayText"].getContentSize().height), data["say"] ?  data["say"] : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.sayBox.setDefaultFineFlag(true);
+				this.sayBox.setNullAllowed(false);
+			break;
+			case "Script Response":
+				this.sayBox = new EntryBox(this.subEditor["sayText"],cc.size(this.subEditor["sayText"].getContentSize().width,this.subEditor["sayText"].getContentSize().height), cc.p(0,this.subEditor["sayText"].getContentSize().height), data["functionContent"] ?  data["functionContent"] : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.sayBox.setDefaultFineFlag(true);
+				this.sayBox.setNullAllowed(false);
+			break;
+			case "Script Requirement":
+				this.sayBox = new EntryBox(this.subEditor["sayText"],cc.size(this.subEditor["sayText"].getContentSize().width,this.subEditor["sayText"].getContentSize().height), cc.p(0,this.subEditor["sayText"].getContentSize().height), data["functionContent"] ?  data["functionContent"] : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
 				this.sayBox.setDefaultFineFlag(true);
 				this.sayBox.setNullAllowed(false);
 			break;
@@ -2259,6 +2315,9 @@ ScriptEditor = Popup.extend({
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"say":this.sayBox.getText(),
 						}
+					break;
+					case "Script Response": case "Script Requirement":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"]["functionContent"]=this.sayBox.getText();
 					break;
 					case "Talk":
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"]["say"]=this.sayBox.getText();

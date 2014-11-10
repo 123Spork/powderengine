@@ -20,6 +20,7 @@ var socket = io.connect(host,{
 
 socket.on('connect',function() {
     LocalStorage.Create();
+//    LocalStorage.Clear();
     LocalStorage.Sync();
    
     console.log('Client has connected to the server!');

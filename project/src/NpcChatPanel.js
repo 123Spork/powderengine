@@ -27,7 +27,7 @@ NpcChatPanel = Popup.extend({
 						texture: "GUI/npctalk.png",
 						children:{
 							"chatText":{
-								label:this.content,
+								label:this.content?this.content:"",
 								anchorPoint:cc.p(0,1),
 								position:cc.p(138,134),
 								color:cc.c3b(0,0,0),
@@ -45,7 +45,7 @@ NpcChatPanel = Popup.extend({
 						size: cc.size(512,32),
 						children:{
 							"header":{
-								label:this.name,
+								label:this.name?this.name:"",
 								fontSize:20,
 								anchorPoint:cc.p(0,0.5),
 								position:cc.p(8,16),
@@ -111,12 +111,8 @@ NpcChatPanel = Popup.extend({
 		this.listPanel.runListCallBack=function(name,listelement,touch){
 			switch(name){
 				case "Use":
-					for(var i in self.script){
-						if(self.script[i]["type"]=="On Talk Option Selected for event:"+self.eventnumber + ", option:"+listelement){
-							handleNPCScript("On Talk Option Selected for event:"+self.eventnumber + ", option:"+listelement,self.npccontext);
-						}
-					}
-					MainScene.showNPCTalk();
+					handleNPCScript("On Talk Option Selected for event:"+self.eventnumber + ", option:"+listelement,self.npccontext);
+					MainScene.hideNPCTalk();
 				break;
 			}
 

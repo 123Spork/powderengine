@@ -164,6 +164,11 @@ var GameScene = Scene.extend({
 			Skills.removeFromParent();
 			Skills=null;
 		}
+		if(Quests!=null){
+			Quests.willTerminate();
+			Quests.removeFromParent();
+			Quests=null;
+		}
 		SkillBarsInstance.removeFromParent();
 		PlayersController.destroy();
 		PlayersController.setInstanceNull();
@@ -363,6 +368,19 @@ var GameScene = Scene.extend({
 					Skills.init();
 					Skills.didBecomeActive();
 					this.addChild(Skills);
+				}
+			break;
+			case "Q":
+				if(Quests!=null && !Quests._parent) Quests=null;
+				if(Quests){
+					Quests.willTerminate();
+					Quests.removeFromParent();
+					Quests=null;
+				} else{
+					Quests = new QuestsPanel();
+					Quests.init();
+					Quests.didBecomeActive();
+					this.addChild(Quests);
 				}
 			break;
 		}
@@ -596,6 +614,7 @@ var GameScene = Scene.extend({
 			access:withData.playerData["rank"],
 			inventory:withData.playerData["inventory"],
 			equipment:withData.playerData["equipment"],
+			quests:withData.playerData["quests"],
 			extraData:withData.playerData["extraData"],
 		};
 
@@ -634,7 +653,7 @@ var GameScene = Scene.extend({
 			"skills":[],
 			"clan":"",
 			"guilds":[],
-			"quests":[],
+			"quests":PlayersController.getYou().quests,
 			"friends":[],
 			"pets":[],
 			"pmessages":[],

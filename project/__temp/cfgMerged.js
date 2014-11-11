@@ -30,6 +30,7 @@ var res = {
     mapeditor_icon_png : 'GUI/mapeditor_icon.png',
     npceditor_icon_png : 'GUI/npceditor_icon.png',
     npctalk_png : 'GUI/npctalk.png',
+    quest_panel_png : 'GUI/quest_panel.png',
     questeditor_icon_png : 'GUI/questeditor_icon.png',
     quickedit_closed_icon_png : 'GUI/quickedit_closed_icon.png',
     quickedit_opened_icon_png : 'GUI/quickedit_opened_icon.png',
@@ -37,6 +38,7 @@ var res = {
     quickmenu_opened_icon_png : 'GUI/quickmenu_opened_icon.png',
     save_icon_png : 'GUI/save_icon.png',
     scripteditor_icon_png : 'GUI/scripteditor_icon.png',
+    selected_png : 'GUI/selected.png',
     settings_icon_png : 'GUI/settings_icon.png',
     shopeditor_icon_png : 'GUI/shopeditor_icon.png',
     signeditor_bg_png : 'GUI/signeditor_bg.png',
@@ -653,6 +655,7 @@ js.project = {
     Popup_js : './src/Popup.js',
     PopupList_js : './src/PopupList.js',
     QuestEditor_js : './src/QuestEditor.js',
+    Quests_js : './src/Quests.js',
     Scene_js : './src/Scene.js',
     SceneManager_js : './src/SceneManager.js',
     ScriptEditor_js : './src/ScriptEditor.js',
@@ -678,7 +681,7 @@ resCfg["project"] = {
 cc.gameModules = [jsRes.SceneManager_js];//Game modules
 
 resCfg[jsRes.SceneManager_js] = {
-    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.ListView_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js, jsRes.DropDownList_js, jsRes.Popup_js, jsRes.Book_js, jsRes.NpcChatPanel_js, jsRes.Equipment_js, jsRes.Inventory_js, jsRes.Sign_js, jsRes.Skills_js, jsRes.ScriptEditor_js, jsRes.ItemEditor_js, jsRes.SettingsEditor_js, jsRes.QuestEditor_js, jsRes.MapEditor_js, jsRes.NPCEditor_js,jsRes.SkillsEditor_js, jsRes.PopupList_js, jsRes.WarpEditor_js, jsRes.SignEditor_js, jsRes.MainScene_js, jsRes.News_js, jsRes.Credits_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
+    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.ListView_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js, jsRes.DropDownList_js, jsRes.Popup_js, jsRes.Book_js, jsRes.NpcChatPanel_js, jsRes.Equipment_js, jsRes.Inventory_js, jsRes.Sign_js, jsRes.Quests_js, jsRes.Skills_js, jsRes.ScriptEditor_js, jsRes.ItemEditor_js, jsRes.SettingsEditor_js, jsRes.QuestEditor_js, jsRes.MapEditor_js, jsRes.NPCEditor_js,jsRes.SkillsEditor_js, jsRes.PopupList_js, jsRes.WarpEditor_js, jsRes.SignEditor_js, jsRes.MainScene_js, jsRes.News_js, jsRes.Credits_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
 };
 exports.res = res;
 exports.resCfg = resCfg;

@@ -22,7 +22,7 @@ QuestEditor = Popup.extend({
 
 	init:function(withData){
 		this._super();
-		this.data={"name":"", "objectiveList":["Initial Objective. Click edit to change this first objective. Click the '+' to add another object. You cannot delete every objective (you need at least one)"]};
+		this.data={"name":"", "objectiveList":["Unstarted","Initial Objective. Click edit to change this first objective. Click the '+' to add another object. You cannot delete every objective (you need at least one)","Finished"]};
 		this.delegate=withData.delegate;
 		if(withData && withData.data){
 			this.data=withData.data;
@@ -52,7 +52,9 @@ QuestEditor = Popup.extend({
 		var callBackList=[];
 		var tc = cc.TextureCache.getInstance();
 		this.defaultPositions={};
-		for(var i in this.data["objectiveList"]){
+		var i;
+		console.log(this.data["objectiveList"])
+		for(i=0;i<this.data["objectiveList"].length-1;i++){
 			listnodes[i]=cc.Node.create();
 			listnodes[i].setContentSize(324,32);
 			if(this.data["objectiveList"][i]==null){
@@ -76,11 +78,12 @@ QuestEditor = Popup.extend({
 			text.setDimensions(cc.size(246,0));
 			text.setColor(cc.c3b(0,0,0));
 
-
-			editElement.callBack = "Edit";
-			var touchableNodes =[];
-			touchableNodes.push(editElement);
-			if(i!=0){
+			if(i>0){
+				editElement.callBack = "Edit";
+				var touchableNodes =[];
+				touchableNodes.push(editElement);
+			}
+			if(i>1){
 				delElement.callBack = "Delete";
 				touchableNodes.push(delElement);
 			}
@@ -88,8 +91,10 @@ QuestEditor = Popup.extend({
 
 
 			listnodes[i].addChild(element);
-			listnodes[i].addChild(editElement);
-			if(i!=0){
+			if(i>0){
+				listnodes[i].addChild(editElement);
+			}
+			if(i>1){
 				listnodes[i].addChild(delElement);	
 			}
 			listnodes[i].addChild(text);
@@ -107,6 +112,25 @@ QuestEditor = Popup.extend({
 		addButton.addChild(plus);
 		callBackList.push([addButton]);
 		listnodes.push(addButton);
+
+		listnodes[i+1]=cc.Node.create();
+		listnodes[i+1].setContentSize(324,32);
+		var element= cc.LayerColor.create(cc.c4b(0,0,0,127),316,1);
+		element.setPosition(cc.p(4,0));			
+		console.log(this.data["objectiveList"][i]);
+		var text = cc.LabelTTF.create(this.data["objectiveList"][i],"Arial",15);
+		text.setAnchorPoint(cc.p(0,0));
+		text.setPosition(cc.p(4,4));
+		text.setDimensions(cc.size(246,0));
+		text.setColor(cc.c3b(0,0,0));
+		callBackList.push([]);
+		listnodes[i+1].addChild(element);
+		listnodes[i+1].addChild(text);
+		listnodes[i+1].setContentSize(324,text.getContentSize().height+8);
+		editElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+		delElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+
+		delete i;
 
 		this.listPanel = this.panels["main_panel"]["list"];
 		var self=this;
@@ -266,7 +290,7 @@ QuestEditor = Popup.extend({
 	},
 
 	addNewElement:function(){
-		this.data["objectiveList"].push("Blank Objective");
+		this.data["objectiveList"].splice(this.data["objectiveList"].length-1,0,"Blank Objective");
 		this.prepareList();
 	},
 

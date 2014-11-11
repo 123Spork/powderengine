@@ -116,6 +116,7 @@
                 <file name="./src/Equipment.js"></file>
                 <file name="./src/Inventory.js"></file>
                 <file name="./src/Sign.js"></file>
+                <file name="./src/Quests.js"></file>
                 <file name="./src/Skills.js"></file>
                 <file name="./src/ScriptEditor.js"></file>
                 <file name="./src/ItemEditor.js"></file>

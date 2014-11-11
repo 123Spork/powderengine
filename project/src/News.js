@@ -14,6 +14,10 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"11th November 2014: (v0.74)":[
+					"Added quest log (hotkey Q).",
+					"Implemented quest response logic. Added 2 additional 'quest unstarted' and 'quest finished' parameters"
+				],
 				"10th November 2014: (v0.735)":[
 					"Added user extradata content for subscripting. Allows for developers to code in specific scripting logic if needed.",
 					"Extradata updates with user login data and is purposefully not localstorage based."

@@ -617,6 +617,12 @@ var handleItemScript = function(eventname,item,ignoreList){
 										SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
 									}
 								break;
+								case "Set Quest Point":
+									if(ignoreList && ignoreList["Set Quest Point"]){
+										break;
+									}
+									PlayersController.getYou().setQuestData(defaultEvent[k]["data"]["quest"],defaultEvent[k]["data"]["objective"]);								
+								break;
 								case "Warp Player":
 									if(ignoreList && ignoreList["Warp Player"]){
 										break;
@@ -996,6 +1002,12 @@ var handleNPCScript = function(eventname,npc,ignoreList){
 										SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
 										SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
 									}
+								break;
+								case "Set Quest Point":
+									if(ignoreList && ignoreList["Set Quest Point"]){
+										break;
+									}
+									PlayersController.getYou().setQuestData(defaultEvent[k]["data"]["quest"],defaultEvent[k]["data"]["objective"]);								
 								break;
 								case "Warp Player":
 									if(ignoreList && ignoreList["Warp Player"]){

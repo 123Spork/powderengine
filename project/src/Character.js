@@ -324,9 +324,11 @@ PlayerCharacter = Character.extend({
 	items:null,
 	access:3,
 	extraData:null,
+	quests:null,
 	init:function(withData){
 		this._super(withData);
 		this.extraData=[];
+		this.quests=[];
 		if(withData.access){
 			this.access=withData.access;
 		}
@@ -345,6 +347,9 @@ PlayerCharacter = Character.extend({
 		if(withData.extraData){
 			this.extraData=withData.extraData;
 		}
+		if(withData.quests){
+			this.quests=withData.quests;
+		}
 		if(withData.equipment){
 			this.items["equipped"]=withData.equipment;
 			for(var i in this.items["equipped"]){
@@ -352,7 +357,7 @@ PlayerCharacter = Character.extend({
 				handleItemScript("Default Event",item,{"Equip Item":true,"Give /Take Item":true,"Warp Player":true,"Read Item":true,"Open/Close Panel":true,"Destroy":true});
 			}
 		}
-		//this.clearExtraData();
+		this.clearExtraData();
 		
 	},
 
@@ -379,6 +384,13 @@ PlayerCharacter = Character.extend({
 		return null;
 	},
 
+	setQuestData:function(questID,objectiveID){
+		this.quests[questID]=objectiveID;
+	},
+
+	getQuestData:function(questID){
+		return this.quests[questID];
+	},
 
 	updateItemData:function(name,item){
 		for(var i=0;i<this.items["stored"].length;i++){

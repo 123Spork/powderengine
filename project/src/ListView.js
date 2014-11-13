@@ -88,8 +88,11 @@ onTouchBegan:function(touch){
 			nodePos.x+=this.delegate.getPositionX();
 			var isInScene = isTouching(this.delegate,nodePos)
 			if(isTouching(this.callbacklist[i][j],truePos)){ //&& isInScene==true){
-				this.delegate.runListCallBack(this.callbacklist[i][j].callBack,i,touch);
-				this.returningFromDelTouch=true;
+				var self=this;
+				(function(index){
+					self.delegate.runListCallBack(self.callbacklist[index][j].callBack,index,touch);
+					self.returningFromDelTouch=true;
+				})(i)
 				return true;
 			}
 		}

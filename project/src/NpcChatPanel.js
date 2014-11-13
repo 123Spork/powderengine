@@ -111,11 +111,10 @@ NpcChatPanel = Popup.extend({
 		this.listPanel.runListCallBack=function(name,listelement,touch){
 			switch(name){
 				case "Use":
-					handleNPCScript("On Talk Option Selected for event:"+self.eventnumber + ", option:"+listelement,self.npccontext);
 					MainScene.hideNPCTalk();
+					handleNPCScript("On Talk Option Selected for event:"+self.eventnumber + ", option:"+listelement,self.npccontext);
 				break;
 			}
-
 		};
 		this.listPanel.listView = ListView.create(this.listPanel);
 		this.listPanel.listView.setCallBackList(callBackList);

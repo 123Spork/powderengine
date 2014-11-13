@@ -301,6 +301,14 @@ function merge_objects(obj1,obj2){
 	return obj3;
 };
 
+function merge_objects_withoutclone(obj1,obj2){
+	var obj3 = {};
+	for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+	for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+	return obj3;
+};
+
+
 function mergeSettings(obj1,obj2){
 	var obj3 = {};
 	for (var attrname in obj1) { obj3[attrname] = obj1[attrname]+""; }
@@ -309,9 +317,8 @@ function mergeSettings(obj1,obj2){
 };
 
 
-
-
 var handleItemScript = function(eventname,item,ignoreList){
+	var functionArray=[];
 	MainScene.scheduleOnce(function(){
 		var scriptData=[];
 		var storedObj={};
@@ -330,30 +337,49 @@ var handleItemScript = function(eventname,item,ignoreList){
 				var allowContinue=true;
 				for(var k=0;k<defaultEvent.length;k++){
 					switch(defaultEvent[k]["type"]){
+						case "Is Quest Point":
+							var questData = PlayersController.getYou().getQuestData(defaultEvent[k]["data"]["quest"]);
+							if(!questData){
+								questData=0;
+							}
+							if(questData!=defaultEvent[k]["data"]["objective"]){
+								allowContinue=false; break; break;
+							}			
+						break;
 						case "Script Requirement":
 							var data=cloneObj(PlayersController.getYou().getExtraData(item["script"]));
-							var isAllow=false;
+							var isAllow=true;
 							if(!data){
 								data={};
 							}
-							eval(defaultEvent[k]["data"]["functionContent"]);
-							PlayersController.getYou().setExtraData(item["script"],cloneObj(data));
-							if(isAllow==false){
-								allowContinue=false; break; break;
-							}
-						break;
-						case "Script Requirement":
-							var requirefunc = function(data,isAllow){
-								try{
-									eval(defaultEvent[k]["data"]["functionContent"]);
-									defaultEvent[k]["data"]["storedobj"]=data;
-									return isAllow;
-								}catch(error){
-									GameChat.addMessage("Your script did not work.");
+							try{
+								var unparsedDataOriginal = defaultEvent[k]["data"]["functionContent"].replace(/,/g,'')
+								var unparsedData = unparsedDataOriginal.split(':');
+								var string = "{";
+								for(var i in unparsedData){
+									if(i%2==0){
+										string+="\""+unparsedData[i]+"\":";
+									}else if(i!=unparsedData.length-1){
+										string+="\""+unparsedData[i]+"\",";
+									}else{
+										string+="\""+unparsedData[i]+"\""
+									}	
 								}
-							};
-							var allowed = requirefunc(cloneObj(defaultEvent[k]["data"]["storedobj"]),false);
-							if(allowed==false){
+								string+="}";
+								var tempDat = JSON.parse(string);
+								for(var i in tempDat){
+									if(!data[i]){
+										data[i]="null";
+									}
+									if(data[i]!=tempDat[i]){
+										isAllow=false;
+									}
+								}
+								if(isAllow==false){
+									allowContinue=false; break; break;
+								}
+							}catch(e){
+								GameChat.addMessage("your custom require script failed");
 								allowContinue=false; break; break;
 							}
 						break;
@@ -481,16 +507,45 @@ var handleItemScript = function(eventname,item,ignoreList){
 				if(allowContinue){
 					var defaultEvent = scriptData[j]["responses"];
 					for(var k=0;k<defaultEvent.length;k++){
-						for(var k=0;k<defaultEvent.length;k++){
-							switch(defaultEvent[k]["type"]){
-								case "Script Response":
-									functionArray.push("var data=cloneObj(PlayersController.getYou().getExtraData(item[\"script\"]));if(!data){data={};}eval(scriptData["+j+"][\"responses\"]["+k+"][\"data\"][\"functionContent\"]);PlayersController.getYou().setExtraData(item[\"script\"],cloneObj(data));");  								
-								break;
-								case "Equip Item":
-									if(ignoreList && ignoreList["Equip Item"]){
-										break;
-									}
-									var place = defaultEvent[k]["data"]["equip"];
+
+						switch(defaultEvent[k]["type"]){
+							case "Script Response":
+								var newJ = (function(index) {return index;})(j);
+								var newK = (function(index) {return index;})(k);
+								functionArray.push(
+									[function(newJ,newK){
+										var data=cloneObj(PlayersController.getYou().getExtraData(item["script"]));
+										if(!data){data={};} 
+										try{
+											var unparsedDataOriginal = scriptData[newJ]["responses"][newK]["data"]["functionContent"].replace(/,/g,'')
+											var unparsedData = unparsedDataOriginal.split(':');
+											var string = "{";
+											for(var i in unparsedData){
+												if(i%2==0){
+													string+="\""+unparsedData[i]+"\":";
+												}else if(i!=unparsedData.length-1){
+													string+="\""+unparsedData[i]+"\",";
+												}else{
+													string+="\""+unparsedData[i]+"\""
+												}	
+											}
+											string+="}";
+											var tempData = JSON.parse(string)
+											data=merge_objects_withoutclone(data,tempData);
+											PlayersController.getYou().setExtraData(item["script"],cloneObj(data));
+										}catch(e){
+											GameChat.addMessage("Your custom response script failed");
+										}
+								},newJ,newK]);
+							case "Equip Item":
+								if(ignoreList && ignoreList["Equip Item"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									var place = defaultEvent["data"]["equip"];
 									if(place=="bothArms"){
 										place="lArm";
 										if(!userItems["equipped"]["rArm"]){
@@ -510,17 +565,22 @@ var handleItemScript = function(eventname,item,ignoreList){
 									if(Equipment){
 										Equipment.updateTileGrid();
 									}
-								break;
-								case "Give /Take Item":
-									if(ignoreList && ignoreList["Give /Take Item"]){
-										break;
-									}
-									if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
-										break;
-									}
-									var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
-									if(defaultEvent[k]["data"]["amount"]>0){
-										var space = defaultEvent[k]["data"]["amount"];
+								},newJ,newK]);
+							break;
+							case "Give /Take Item":
+								if(ignoreList && ignoreList["Give /Take Item"]){
+									break;
+								}
+								if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									var contextitem = ObjectLists.getItemList()[defaultEvent["data"]["item"]];
+									if(defaultEvent["data"]["amount"]>0){
+										var space = defaultEvent["data"]["amount"];
 										if(contextitem["stackable"]==true){
 											for(var p=0;p<40;p++){
 												if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
@@ -539,13 +599,13 @@ var handleItemScript = function(eventname,item,ignoreList){
 											}
 										}
 										if(count<space){
-											break;
+											return;
 										}else{
 											if(contextitem["stackable"]==true){
 												var doneAdd=false;
 												for(var p=0;p<40;p++){
 													if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
-														userItems["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
+														userItems["stored"][p]["amount"] +=defaultEvent["data"]["amount"];
 														if(Inventory){
 															Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
 														}
@@ -557,7 +617,7 @@ var handleItemScript = function(eventname,item,ignoreList){
 													for(var p=0;p<40;p++){
 														if(!userItems["stored"][p]){
 															userItems["stored"][p]=cloneObj(contextitem);
-															userItems["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+															userItems["stored"][p]["amount"]=defaultEvent["data"]["amount"];
 															if(Inventory){
 																Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
 															}
@@ -566,7 +626,7 @@ var handleItemScript = function(eventname,item,ignoreList){
 													}
 												}
 											}else{
-												for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
+												for(var n=0;n<defaultEvent["data"]["amount"];n++){
 													for(var p=0;p<40;p++){
 														if(!userItems["stored"][p]){
 															userItems["stored"][p]=cloneObj(contextitem);
@@ -576,8 +636,8 @@ var handleItemScript = function(eventname,item,ignoreList){
 												}
 											}
 										}
-									}else if(defaultEvent[k]["data"]["amount"]<0){
-										var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
+									}else if(defaultEvent["data"]["amount"]<0){
+										var amount=Math.abs(defaultEvent["data"]["amount"]);
 										var count=0;
 										var itemName = contextitem["name"];
 										for(var p in userItems["stored"]){
@@ -586,9 +646,9 @@ var handleItemScript = function(eventname,item,ignoreList){
 											}
 										}
 										if(count<amount){
-											break;
+											return;
 										}else{
-											for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
+											for(var n=0;n<Math.abs(defaultEvent["data"]["amount"]);n++){
 												for(var p in userItems["stored"]){
 													if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
 														console.log("gettin rid"+n);
@@ -605,47 +665,72 @@ var handleItemScript = function(eventname,item,ignoreList){
 									if(Equipment){
 										Equipment.updateTileGrid();
 									}
-								break;
-								case "Modify Player Stats":
-									if(ignoreList && ignoreList["Modify Player Stats"]){
-										break;
+								},newJ,newK]);
+							break;
+							case "Modify Player Stats":
+								if(ignoreList && ignoreList["Modify Player Stats"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									if(ObjectLists.getSkillsList()[defaultEvent["data"]["skill"]]){
+										var skillname = ObjectLists.getSkillsList()[defaultEvent["data"]["skill"]]["name"];
+										SkillBars.modifyModifier(skillname,defaultEvent["data"]["level"]);
+										SkillBars.modifyHealth(skillname,defaultEvent["data"]["health"]);
+										SkillBars.modifyXP(skillname,defaultEvent["data"]["xp"]);
 									}
-									if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
-										var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
-										SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
-										SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
-										SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
-									}
-								break;
-								case "Set Quest Point":
-									if(ignoreList && ignoreList["Set Quest Point"]){
-										break;
-									}
-									PlayersController.getYou().setQuestData(defaultEvent[k]["data"]["quest"],defaultEvent[k]["data"]["objective"]);								
-								break;
-								case "Warp Player":
-									if(ignoreList && ignoreList["Warp Player"]){
-										break;
-									}
-									var x=defaultEvent[k]["data"]["index"] % gridWidth;
-									var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
+								},newJ,newK]);
+							break;
+							case "Set Quest Point":
+								if(ignoreList && ignoreList["Set Quest Point"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									PlayersController.getYou().setQuestData(defaultEvent["data"]["quest"],defaultEvent["data"]["objective"]);								
+								},newJ,newK]);
+							break;
+							case "Warp Player":
+								if(ignoreList && ignoreList["Warp Player"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									var x=defaultEvent["data"]["index"] % gridWidth;
+									var y=Math.floor(defaultEvent["data"]["index"]/gridWidth);
 									PlayersController.getYou().setPosition(x*32,y*32);
-									sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
-									GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
+									sendMessageToServer({"changemap":defaultEvent["data"]["mapnum"], "setTo":defaultEvent["data"]["index"]});
+									GameMap.goToMap(defaultEvent["data"]["mapnum"]);
 									GameMap.goToOffsetFromPosition(x*32,y*32);
-								break;
-								case "Read Item":
-									if(ignoreList && ignoreList["Read Item"]){
-										break;
-									}
-									MainScene.showBook(item["name"],defaultEvent[k]["data"]["say"]);
-								break;
-								case "Open/Close Panel":
-									if(ignoreList && ignoreList["Open/Close Panel"]){
-										break;
-									}
-									var show = defaultEvent[k]["data"]["visible"]==1?true:false;
-									switch(defaultEvent[k]["data"]["panel"]){
+								},newJ,newK]);
+							break;
+							case "Read Item":
+								if(ignoreList && ignoreList["Read Item"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									MainScene.showBook(item["name"],defaultEvent["data"]["say"]);
+								},newJ,newK]);
+							break;
+							case "Open/Close Panel":
+								if(ignoreList && ignoreList["Open/Close Panel"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									var show = defaultEvent["data"]["visible"]==1?true:false;
+									switch(defaultEvent["data"]["panel"]){
 										case 0: 
 											if(Inventory!=null && !Inventory._parent) Inventory=null;
 											if(show==true){
@@ -704,28 +789,29 @@ var handleItemScript = function(eventname,item,ignoreList){
 											}
 										break;
 									}
-								break;
-								case "Destroy":
-									if(ignoreList && ignoreList["Destroy"]){
-										break;
-									}
-									item=null;
-									if(tile.getScriptObject()["temp"]){
-										sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-									} else{
-										sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-									}
-									if(Inventory){
-										Inventory.updateTileGrid();
-									}
-									k=defaultEvent.length;
-								break;
-														
-							}
-						}	
-					}
+								},newJ,newK]);
+							break;
+							case "Destroy":
+								if(ignoreList && ignoreList["Destroy"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								item=null;
+								if(Inventory){
+									Inventory.updateTileGrid();
+								}
+								k=defaultEvent.length;
+							break;
+													
+						}
+					}	
 				}
 			}
+		}
+		for(var i=0;i<functionArray.length;i++){
+			functionArray[i][0](functionArray[i][1],functionArray[i][2]);
+			functionArray.splice(i,1);
+			i--;
 		}
 	});
 };
@@ -739,25 +825,62 @@ var handleNPCScript = function(eventname,npc,ignoreList){
 		var scriptData=[];
 		var userItems=PlayersController.getYou().items;
 		if(npc){
-			if(npc["script"]){
-				scriptData = ObjectLists.getScriptList()[npc["script"]]["data"];
+			if(npc.script){
+				scriptData = ObjectLists.getScriptList()[npc.script]["data"];
 			}
 		}
+		console.log(eventname);
 		for(var j=0;j<scriptData.length;j++){
 			if(scriptData[j]["type"]==eventname){
 				var defaultEvent = scriptData[j]["requirements"];
 				var allowContinue=true;
 				for(var k=0;k<defaultEvent.length;k++){
 					switch(defaultEvent[k]["type"]){
+						case "Is Quest Point":
+						console.log("Is Quest Point");
+							var questData = PlayersController.getYou().getQuestData(defaultEvent[k]["data"]["quest"]);
+							if(!questData){
+								questData=0;
+							}
+							if(questData!=defaultEvent[k]["data"]["objective"]){
+								allowContinue=false; break; break;
+							}			
+						break;
 						case "Script Requirement":
-							var data=cloneObj(PlayersController.getYou().getExtraData(npc["script"]));
-							var isAllow=false;
+							console.log("SCRIPT REQUIRE);")
+							var data=cloneObj(PlayersController.getYou().getExtraData(npc.script));
+							var isAllow=true;
 							if(!data){
 								data={};
 							}
-							eval(defaultEvent[k]["data"]["functionContent"]);
-							PlayersController.getYou().setExtraData(npc["script"],cloneObj(data));
-							if(isAllow==false){
+							try{
+								var unparsedDataOriginal = defaultEvent[k]["data"]["functionContent"].replace(/,/g,'')
+								var unparsedData = unparsedDataOriginal.split(':');
+								var string = "{";
+								for(var i in unparsedData){
+									if(i%2==0){
+										string+="\""+unparsedData[i]+"\":";
+									}else if(i!=unparsedData.length-1){
+										string+="\""+unparsedData[i]+"\",";
+									}else{
+										string+="\""+unparsedData[i]+"\""
+									}	
+								}
+								string+="}";
+								var tempDat = JSON.parse(string);
+								for(var i in tempDat){
+									if(!data[i]){
+										data[i]="null";
+									}
+									if(data[i]!=tempDat[i]){
+										isAllow=false;
+									}
+								}
+								if(isAllow==false){
+									allowContinue=false; break; break;
+								}
+							}catch(e){
+								GameChat.addMessage("your custom require script failed");
 								allowContinue=false; break; break;
 							}
 						break;
@@ -888,14 +1011,47 @@ var handleNPCScript = function(eventname,npc,ignoreList){
 						for(var k=0;k<defaultEvent.length;k++){
 							switch(defaultEvent[k]["type"]){
 								case "Script Response":
-									functionArray.push("var data=cloneObj(PlayersController.getYou().getExtraData(npc[\"script\"]));if(!data){data={};}eval(scriptData["+j+"][\"responses\"]["+k+"][\"data\"][\"functionContent\"]);PlayersController.getYou().setExtraData(npc[\"script\"],cloneObj(data));"); 
+									if(ignoreList && ignoreList["Script Response"]){
+										break;
+									}
+									var newJ = (function(index) {return index;})(j);
+									var newK = (function(index) {return index;})(k);
+									functionArray.push(
+										[function(newJ,newK){
+											var data=cloneObj(PlayersController.getYou().getExtraData(npc.script));
+											if(!data){data={};} 
+											try{
+												var unparsedDataOriginal = scriptData[newK]["responses"][newJ]["data"]["functionContent"].replace(/,/g,'')
+												var unparsedData = unparsedDataOriginal.split(':');
+												var string = "{";
+												for(var i in unparsedData){
+													if(i%2==0){
+														string+="\""+unparsedData[i]+"\":";
+													}else if(i!=unparsedData.length-1){
+														string+="\""+unparsedData[i]+"\",";
+													}else{
+														string+="\""+unparsedData[i]+"\""
+													}	
+												}
+												string+="}";
+												var tempData = JSON.parse(string)
+												data=merge_objects_withoutclone(data,tempData);
+												PlayersController.getYou().setExtraData(npc.script,cloneObj(data));
+											}catch(e){
+												GameChat.addMessage("Your custom response script failed");
+											}
+									},newJ,newK]);
 								break;
 								case "Talk":
 									if(ignoreList && ignoreList["Talk"]){
 										break;
 									}
-									var eventnumber=parseInt(j);
-									MainScene.showNPCTalk(npc,scriptData,eventnumber,npc["name"],defaultEvent[k]["data"]["say"],defaultEvent[k]["data"]["options"]);
+									var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+									functionArray.push(
+									[function(newJ,newK){
+										var defaultEvent=scriptData[newJ]["responses"][newK];
+										MainScene.showNPCTalk(npc,scriptData,newJ,npc["name"],defaultEvent["data"]["say"],defaultEvent["data"]["options"]);
+									},newJ,newK]);
 								break;
 								case "Give /Take Item":
 									if(ignoreList && ignoreList["Give /Take Item"]){
@@ -904,186 +1060,211 @@ var handleNPCScript = function(eventname,npc,ignoreList){
 									if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
 										break;
 									}
-									var contextitem = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]];
-									if(defaultEvent[k]["data"]["amount"]>0){
-										var space = defaultEvent[k]["data"]["amount"];
-										if(contextitem["stackable"]==true){
-											for(var p=0;p<40;p++){
-												if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
-													space=0;
-												}
-											}
-											if(count!=0){
-												space=1;
-											}
-										}else{
-											var count=0;
-											for(var p=0;p<40;p++){
-												if(!userItems["stored"][p]){
-													count++;
-												}
-											}
-										}
-										if(count<space){
-											break;
-										}else{
+									var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+									functionArray.push(
+									[function(newJ,newK){
+										var defaultEvent=scriptData[newJ]["responses"][newK];
+										var contextitem = ObjectLists.getItemList()[defaultEvent["data"]["item"]];
+										if(defaultEvent["data"]["amount"]>0){
+											var space = defaultEvent["data"]["amount"];
 											if(contextitem["stackable"]==true){
-												var doneAdd=false;
 												for(var p=0;p<40;p++){
 													if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
-														userItems["stored"][p]["amount"] +=defaultEvent[k]["data"]["amount"];
-														if(Inventory){
-															Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
-														}
-														doneAdd=true;
-														break;
+														space=0;
 													}
 												}
-												if(doneAdd==false){
+												if(count!=0){
+													space=1;
+												}
+											}else{
+												var count=0;
+												for(var p=0;p<40;p++){
+													if(!userItems["stored"][p]){
+														count++;
+													}
+												}
+											}
+											if(count<space){
+												return;
+											}else{
+												if(contextitem["stackable"]==true){
+													var doneAdd=false;
 													for(var p=0;p<40;p++){
-														if(!userItems["stored"][p]){
-															userItems["stored"][p]=cloneObj(contextitem);
-															userItems["stored"][p]["amount"]=defaultEvent[k]["data"]["amount"];
+														if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
+															userItems["stored"][p]["amount"] +=defaultEvent["data"]["amount"];
 															if(Inventory){
 																Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
 															}
+															doneAdd=true;
 															break;
 														}
 													}
+													if(doneAdd==false){
+														for(var p=0;p<40;p++){
+															if(!userItems["stored"][p]){
+																userItems["stored"][p]=cloneObj(contextitem);
+																userItems["stored"][p]["amount"]=defaultEvent["data"]["amount"];
+																if(Inventory){
+																	Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
+																}
+																break;
+															}
+														}
+													}
+												}else{
+													for(var n=0;n<defaultEvent["data"]["amount"];n++){
+														for(var p=0;p<40;p++){
+															if(!userItems["stored"][p]){
+																userItems["stored"][p]=cloneObj(contextitem);
+																break;
+															}
+														}
+													}
 												}
+											}
+										}else if(defaultEvent["data"]["amount"]<0){
+											var amount=Math.abs(defaultEvent["data"]["amount"]);
+											var count=0;
+											var itemName = contextitem["name"];
+											for(var p in userItems["stored"]){
+												if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
+													count++;
+												}
+											}
+											if(count<amount){
+												return;
 											}else{
-												for(var n=0;n<defaultEvent[k]["data"]["amount"];n++){
-													for(var p=0;p<40;p++){
-														if(!userItems["stored"][p]){
-															userItems["stored"][p]=cloneObj(contextitem);
+												for(var n=0;n<Math.abs(defaultEvent["data"]["amount"]);n++){
+													for(var p in userItems["stored"]){
+														if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
+															console.log("gettin rid"+n);
+															user["stored"][p]=null;
 															break;
 														}
 													}
 												}
 											}
 										}
-									}else if(defaultEvent[k]["data"]["amount"]<0){
-										var amount=Math.abs(defaultEvent[k]["data"]["amount"]);
-										var count=0;
-										var itemName = contextitem["name"];
-										for(var p in userItems["stored"]){
-											if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
-												count++;
-											}
+										if(Inventory){
+											Inventory.updateTileGrid();
 										}
-										if(count<amount){
-											break;
-										}else{
-											for(var n=0;n<Math.abs(defaultEvent[k]["data"]["amount"]);n++){
-												for(var p in userItems["stored"]){
-													if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
-														console.log("gettin rid"+n);
-														user["stored"][p]=null;
-														break;
-													}
-												}
-											}
+										if(Equipment){
+											Equipment.updateTileGrid();
 										}
-									}
-									if(Inventory){
-										Inventory.updateTileGrid();
-									}
-									if(Equipment){
-										Equipment.updateTileGrid();
-									}
+									},newJ,newK]);
 								break;
 								case "Modify Player Stats":
 									if(ignoreList && ignoreList["Modify Player Stats"]){
 										break;
 									}
-									if(ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]){
-										var skillname = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
-										SkillBars.modifyModifier(skillname,defaultEvent[k]["data"]["level"]);
-										SkillBars.modifyHealth(skillname,defaultEvent[k]["data"]["health"]);
-										SkillBars.modifyXP(skillname,defaultEvent[k]["data"]["xp"]);
-									}
+									var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+									functionArray.push(
+									[function(newJ,newK){
+										var defaultEvent=scriptData[newJ]["responses"][newK];
+										if(ObjectLists.getSkillsList()[defaultEvent["data"]["skill"]]){
+											var skillname = ObjectLists.getSkillsList()[defaultEvent["data"]["skill"]]["name"];
+											SkillBars.modifyModifier(skillname,defaultEvent["data"]["level"]);
+											SkillBars.modifyHealth(skillname,defaultEvent["data"]["health"]);
+											SkillBars.modifyXP(skillname,defaultEvent["data"]["xp"]);
+										}
+									},newJ,newK]);
 								break;
 								case "Set Quest Point":
 									if(ignoreList && ignoreList["Set Quest Point"]){
 										break;
 									}
-									PlayersController.getYou().setQuestData(defaultEvent[k]["data"]["quest"],defaultEvent[k]["data"]["objective"]);								
+									var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+									functionArray.push(
+									[function(newJ,newK){
+										var defaultEvent=scriptData[newJ]["responses"][newK];
+										PlayersController.getYou().setQuestData(defaultEvent["data"]["quest"],defaultEvent["data"]["objective"]);								
+									},newJ,newK]);
 								break;
 								case "Warp Player":
 									if(ignoreList && ignoreList["Warp Player"]){
 										break;
 									}
-									var x=defaultEvent[k]["data"]["index"] % gridWidth;
-									var y=Math.floor(defaultEvent[k]["data"]["index"]/gridWidth);
-									PlayersController.getYou().setPosition(x*32,y*32);
-									sendMessageToServer({"changemap":defaultEvent[k]["data"]["mapnum"], "setTo":defaultEvent[k]["data"]["index"]});
-									GameMap.goToMap(defaultEvent[k]["data"]["mapnum"]);
-									GameMap.goToOffsetFromPosition(x*32,y*32);
+									var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+									functionArray.push(
+									[function(newJ,newK){
+										var defaultEvent=scriptData[newJ]["responses"][newK];
+										var x=defaultEvent["data"]["index"] % gridWidth;
+										var y=Math.floor(defaultEvent["data"]["index"]/gridWidth);
+										PlayersController.getYou().setPosition(x*32,y*32);
+										sendMessageToServer({"changemap":defaultEvent["data"]["mapnum"], "setTo":defaultEvent["data"]["index"]});
+										GameMap.goToMap(defaultEvent["data"]["mapnum"]);
+										GameMap.goToOffsetFromPosition(x*32,y*32);
+									},newJ,newK]);
 								break;
 								case "Open/Close Panel":
 									if(ignoreList && ignoreList["Open/Close Panel"]){
 										break;
 									}
-									var show = defaultEvent[k]["data"]["visible"]==1?true:false;
-									switch(defaultEvent[k]["data"]["panel"]){
-										case 0: 
-											if(Inventory!=null && !Inventory._parent) Inventory=null;
-											if(show==true){
-												if(Inventory){
-													Inventory.updateTileGrid();
+									var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+									functionArray.push(
+									[function(newJ,newK){
+										var defaultEvent=scriptData[newJ]["responses"][newK];
+										var show = defaultEvent["data"]["visible"]==1?true:false;
+										switch(defaultEvent["data"]["panel"]){
+											case 0: 
+												if(Inventory!=null && !Inventory._parent) Inventory=null;
+												if(show==true){
+													if(Inventory){
+														Inventory.updateTileGrid();
+													}else{
+														Inventory = new InventoryPanel();
+														Inventory.init();
+														Inventory.didBecomeActive();
+														MainScene.addChild(Inventory);
+													}
 												}else{
-													Inventory = new InventoryPanel();
-													Inventory.init();
-													Inventory.didBecomeActive();
-													MainScene.addChild(Inventory);
+													if(Inventory){
+														Inventory.willTerminate();
+														Inventory.removeFromParent();
+														Inventory=null;
+													}
 												}
-											}else{
-												if(Inventory){
-													Inventory.willTerminate();
-													Inventory.removeFromParent();
-													Inventory=null;
-												}
-											}
-										break;
-										case 1:
-											if(Equipment!=null && !Equipment._parent) Equipment=null;
-											if(show==true){
-												if(Equipment){
-													Equipment.updateTileGrid();
+											break;
+											case 1:
+												if(Equipment!=null && !Equipment._parent) Equipment=null;
+												if(show==true){
+													if(Equipment){
+														Equipment.updateTileGrid();
+													}else{
+														Equipment = new EquipmentPanel();
+														Equipment.init();
+														Equipment.didBecomeActive();
+														MainScene.addChild(Equipment);
+													}
 												}else{
-													Equipment = new EquipmentPanel();
-													Equipment.init();
-													Equipment.didBecomeActive();
-													MainScene.addChild(Equipment);
+													if(Equipment){
+														Equipment.willTerminate();
+														Equipment.removeFromParent();
+														Equipment=null;
+													}
 												}
-											}else{
-												if(Equipment){
-													Equipment.willTerminate();
-													Equipment.removeFromParent();
-													Equipment=null;
-												}
-											}
-										break;
-										case 2:
-											if(Skills!=null && !Skills._parent) Skills=null;
-											if(show==true){
-												if(Skills){
-													Skills.updateTileGrid();
+											break;
+											case 2:
+												if(Skills!=null && !Skills._parent) Skills=null;
+												if(show==true){
+													if(Skills){
+														Skills.updateTileGrid();
+													}else{
+														Skills = new SkillsPanel();
+														Skills.init();
+														Skills.didBecomeActive();
+														MainScene.addChild(Skills);
+													}
 												}else{
-													Skills = new SkillsPanel();
-													Skills.init();
-													Skills.didBecomeActive();
-													MainScene.addChild(Skills);
+													if(Skills){
+														Skills.willTerminate();
+														Skills.removeFromParent();
+														Skills=null;
+													}
 												}
-											}else{
-												if(Skills){
-													Skills.willTerminate();
-													Skills.removeFromParent();
-													Skills=null;
-												}
-											}
-										break;
-									}
+											break;
+										}
+									},newJ,newK]);
 								break;
 								/*case "Destroy":
 									if(ignoreList && ignoreList["Destroy"]){
@@ -1107,7 +1288,7 @@ var handleNPCScript = function(eventname,npc,ignoreList){
 			}
 		}
 		for(var i=0;i<functionArray.length;i++){
-			eval(functionArray[i]);
+			functionArray[i][0](functionArray[i][1],functionArray[i][2]);
 			functionArray.splice(i,1);
 			i--;
 		}

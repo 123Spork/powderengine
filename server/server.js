@@ -227,11 +227,11 @@ socket.on('connection', function(client){
 			}
 			if(names.indexOf(event["username"])==-1){
 				if(!fs.existsSync("users/"+event["username"]+".json")){
-					client.send(JSON.stringify({"login_fail":"Login failed, Username or Password is incorrect."}));
+					client.send(JSON.stringify({"login_fail":"Login failed, Username doesn't exist."}));
 				}else{
 					var playerData = require("./users/"+event["username"]+".json");
 					if(event["password"]!=playerData["pass"]){
-						client.send(JSON.stringify({"login_fail":"Login failed, Username or Password is incorrect."}))
+						client.send(JSON.stringify({"login_fail":"Login failed, password is incorrect."}))
 					}else{
 
 						var skillLevels = {};

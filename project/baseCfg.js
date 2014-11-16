@@ -3,7 +3,6 @@ var baseCfg = {
     resPath : "cfg/res.js",
     modluesPathMap : {
         "project" : "./",
-        "socketioclient" : "../node_modules/socketioclient/",
         "cocos2d-html5" : "../node_modules/cocos2d-html5/",
         "cctouch" : "../node_modules/cctouch/",
         "cceditbox" : "../node_modules/cceditbox/",
@@ -15,9 +14,6 @@ var baseCfg = {
         "ccprogress" : "../node_modules/ccprogress/"
     },
     baseJsList : [
-        "../node_modules/socketioclient/cfg/jsRes.js",
-        "../node_modules/socketioclient/cfg/resCfg.js",
-        "../node_modules/socketioclient/src/socketioclient.js",
         "../node_modules/cocos2d-html5/cfg/jsRes.js",
         "../node_modules/cocos2d-html5/cfg/resCfg.js",
         "../node_modules/cocos2d-html5/lib/platform/CCClass.js",

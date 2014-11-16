@@ -1,4 +1,9 @@
 var res = {
+    TOWNBOT2_bmp : '2D Circle Graphic/TOWNBOT2.bmp',
+    TOWNBOT2_png : '2D Circle Graphic/TOWNBOT2.png',
+    TOWNJNT2_bmp : '2D Circle Graphic/TOWNJNT2.bmp',
+    _BACKUP__bmp : '2D Circle Graphic/_BACKUP_.bmp',
+    _40x40Tiles_png : '40x40Tiles.png',
     bankeditor_icon_png : 'GUI/bankeditor_icon.png',
     book_png : 'GUI/book.png',
     btnDown_png : 'GUI/btnDown.png',
@@ -64,26 +69,6 @@ var res = {
     tiles0_png : 'tiles0.png',
     tiles1_png : 'tiles1.png'
 };
-var js = js || {};
-js.socketioclient = {
-  socketioclient_js : '../node_modules/socketioclient/src/socketioclient.js',
-};
-var cc = cc || {};
-cc.resCfg = cc.resCfg || {};
-var js = js || {};
-var resCfg = cc.resCfg;
-var jsRes = js.socketioclient;
-var TEST_BASE = "__testBase";
-
-resCfg.socketioclient = {
-    ref : [
-		jsRes.socketioclient_js
-    ]
-};
-exports.res = res;
-exports.resCfg = resCfg;
-exports.gameModules = cc.gameModules;
-exports.jsRes = js;
 var js = js || {};
 js.cocos2d_html5 = {
     CCActionManager_js : '../node_modules/cocos2d-html5/lib/CCActionManager.js',
@@ -630,46 +615,47 @@ exports.gameModules = cc.gameModules;
 exports.jsRes = js;
 var js = js || {};
 js.project = {
-    Book_js : './src/Book.js',
-    Character_js : './src/Character.js',
-    ChatBox_js : './src/ChatBox.js',
-    Credits_js : './src/Credits.js',
-    DropDownList_js : './src/DropDownList.js',
-    EntryBox_js : './src/EntryBox.js',
-    Equipment_js : './src/Equipment.js',
-    GameScene_js : './src/GameScene.js',
-    GameTile_js : './src/GameTile.js',
-    InputBox_js : './src/InputBox.js',
-    Inventory_js : './src/Inventory.js',
-    ItemEditor_js : './src/ItemEditor.js',
-    ListView_js : './src/ListView.js',
-    LocalStorage_js : './src/LocalStorage.js',
-    Login_js : './src/Login.js',
-    MainScene_js : './src/MainScene.js',
-    MapEditor_js : './src/MapEditor.js',
-    NPCEditor_js : './src/NPCEditor.js',
-    News_js : './src/News.js',
-    NpcChatPanel_js : './src/NpcChatPanel.js',
-    ObjectLists_js : './src/ObjectLists.js',
-    PlayersController_js : './src/PlayersController.js',
-    Popup_js : './src/Popup.js',
-    PopupList_js : './src/PopupList.js',
-    QuestEditor_js : './src/QuestEditor.js',
-    Quests_js : './src/Quests.js',
-    Scene_js : './src/Scene.js',
-    SceneManager_js : './src/SceneManager.js',
-    ScriptEditor_js : './src/ScriptEditor.js',
-    SettingsEditor_js : './src/SettingsEditor.js',
-    Sign_js : './src/Sign.js',
-    SignEditor_js : './src/SignEditor.js',
-    Skills_js : './src/Skills.js',
-    SkillsEditor_js : './src/SkillsEditor.js',
-    StatsController_js : './src/StatsController.js',
-    Strings_js : './src/Strings.js',
-    Utils_js : './src/Utils.js',
-    WarpEditor_js : './src/WarpEditor.js',
-    client_js : './src/client.js',
-    map_js : './src/map.js'
+    Character_js : './src/classes/Character.js',
+    ChatBox_js : './src/classes/ChatBox.js',
+    DropDownList_js : './src/classes/DropDownList.js',
+    EntryBox_js : './src/classes/EntryBox.js',
+    GameTile_js : './src/classes/GameTile.js',
+    InputBox_js : './src/classes/InputBox.js',
+    ListView_js : './src/classes/ListView.js',
+    LocalStorage_js : './src/classes/LocalStorage.js',
+    MultiLineBox_js : './src/classes/MultiLineBox.js',
+    ObjectLists_js : './src/classes/ObjectLists.js',
+    PlayersController_js : './src/classes/PlayersController.js',
+    SingleLineBox_js : './src/classes/SingleLineBox.js',
+    StatsController_js : './src/classes/StatsController.js',
+    client_js : './src/classes/client.js',
+    map_js : './src/classes/map.js',
+    ItemEditor_js : './src/editors/ItemEditor.js',
+    MapEditor_js : './src/editors/MapEditor.js',
+    NPCEditor_js : './src/editors/NPCEditor.js',
+    QuestEditor_js : './src/editors/QuestEditor.js',
+    ScriptEditor_js : './src/editors/ScriptEditor.js',
+    SettingsEditor_js : './src/editors/SettingsEditor.js',
+    SignEditor_js : './src/editors/SignEditor.js',
+    SkillsEditor_js : './src/editors/SkillsEditor.js',
+    Book_js : './src/popups/Book.js',
+    Credits_js : './src/popups/Credits.js',
+    Equipment_js : './src/popups/Equipment.js',
+    Inventory_js : './src/popups/Inventory.js',
+    News_js : './src/popups/News.js',
+    NpcChatPanel_js : './src/popups/NpcChatPanel.js',
+    Popup_js : './src/popups/Popup.js',
+    PopupList_js : './src/popups/PopupList.js',
+    Quests_js : './src/popups/Quests.js',
+    Sign_js : './src/popups/Sign.js',
+    Skills_js : './src/popups/Skills.js',
+    GameScene_js : './src/scenes/GameScene.js',
+    Login_js : './src/scenes/Login.js',
+    MainScene_js : './src/scenes/MainScene.js',
+    Scene_js : './src/scenes/Scene.js',
+    SceneManager_js : './src/scenes/SceneManager.js',
+    Strings_js : './src/utils/Strings.js',
+    Utils_js : './src/utils/Utils.js'
 };
 var resCfg = cc.resCfg;
 var jsRes = js.project;
@@ -681,7 +667,48 @@ resCfg["project"] = {
 cc.gameModules = [jsRes.SceneManager_js];//Game modules
 
 resCfg[jsRes.SceneManager_js] = {
-    ref : [jsRes.client_js,jsRes.Strings_js, jsRes.Utils_js, jsRes.LocalStorage_js, jsRes.ListView_js, jsRes.GameTile_js, jsRes.StatsController_js, jsRes.ObjectLists_js, jsRes.map_js, jsRes.PlayersController_js, jsRes.Character_js, jsRes.Scene_js, jsRes.DropDownList_js, jsRes.Popup_js, jsRes.Book_js, jsRes.NpcChatPanel_js, jsRes.Equipment_js, jsRes.Inventory_js, jsRes.Sign_js, jsRes.Quests_js, jsRes.Skills_js, jsRes.ScriptEditor_js, jsRes.ItemEditor_js, jsRes.SettingsEditor_js, jsRes.QuestEditor_js, jsRes.MapEditor_js, jsRes.NPCEditor_js,jsRes.SkillsEditor_js, jsRes.PopupList_js, jsRes.WarpEditor_js, jsRes.SignEditor_js, jsRes.MainScene_js, jsRes.News_js, jsRes.Credits_js, jsRes.Login_js, jsRes.GameScene_js, jsRes.InputBox_js, jsRes.ChatBox_js, jsRes.EntryBox_js]
+    ref : [
+    	jsRes.SingleLineBox_js,
+	    jsRes.MultiLineBox_js,
+	    jsRes.Strings_js,
+	    jsRes.Utils_js,
+	    jsRes.LocalStorage_js,
+	    jsRes.ListView_js,
+	    jsRes.GameTile_js,
+	    jsRes.StatsController_js,
+	    jsRes.ObjectLists_js,
+	    jsRes.map_js,
+	    jsRes.PlayersController_js,
+	    jsRes.Character_js,
+	    jsRes.Scene_js,
+	    jsRes.DropDownList_js,
+	    jsRes.Popup_js,
+	    jsRes.Book_js,
+	    jsRes.NpcChatPanel_js,
+	    jsRes.Equipment_js,
+	    jsRes.Inventory_js,
+	    jsRes.Sign_js,
+	    jsRes.Quests_js,
+	    jsRes.Skills_js,
+	    jsRes.ScriptEditor_js,
+	    jsRes.ItemEditor_js,
+	    jsRes.SettingsEditor_js,
+	    jsRes.QuestEditor_js,
+	    jsRes.MapEditor_js,
+	    jsRes.NPCEditor_js,
+	    jsRes.SkillsEditor_js,
+	    jsRes.PopupList_js,
+	    jsRes.SignEditor_js,
+	    jsRes.MainScene_js,
+	    jsRes.News_js,
+	    jsRes.Credits_js,
+	    jsRes.Login_js,
+	    jsRes.GameScene_js,
+	    jsRes.InputBox_js,
+	    jsRes.ChatBox_js,
+	    jsRes.EntryBox_js,
+	    jsRes.client_js,
+    ]
 };
 exports.res = res;
 exports.resCfg = resCfg;

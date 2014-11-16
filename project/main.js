@@ -4,18 +4,16 @@ var cocos2dApp = cc.Application.extend({
     ctor : function(){
         this._super();
         cc.COCOS2D_DEBUG = this.config["COCOS2D_DEBUG"];
-        cc.initDebugSetting();
         cc.setup(this.config["tag"]);
         cc.AppController.shareAppController().didFinishLaunchingWithOptions();
     },
 
     applicationDidFinishLaunching : function(){
-        var config = this.config;
+        var cfg = this.config;
         // initialize director
         var director = cc.Director.getInstance();
-		
         var eglView = cc.EGLView.getInstance();
-        eglView._adjustSizeToBrowser(true);		
+        eglView.resizeWithBrowserSize(true);	
         screenSize = eglView.getFrameSize();
         var resourceSize = cc.size(screenSize.width, screenSize.height);
         var designSize = cc.size(screenSize.width,screenSize.height);
@@ -24,19 +22,18 @@ var cocos2dApp = cc.Application.extend({
         fileUtils.setSearchPaths(["res/Graphics"]);
         if(cc.AudioEngine) cc.AudioEngine.getInstance().setResPath("res/Audio");
         director.setContentScaleFactor(1);
-
         eglView.setDesignResolutionSize(designSize.width, designSize.height, cc.RESOLUTION_POLICY.SHOW_ALL);
 
         // turn on display FPS
        // director.setDisplayStats(config['showFPS']);
 
         // set FPS. the default value is 1.0/60 if you don't call this
-        director.setAnimationInterval(1.0 / config['frameRate']);
+        director.setAnimationInterval(1.0 / cfg['frameRate']);
 
 //        config.test = js.project.MyTest_js;//config which js you want to test
 
 
-        if(config["test"]) cc.test(config["test"]);//
+        if(cfg["test"]) cc.test(cfg["test"]);//
         else{
             //TODO enter point for game
             cc.log("++++++++++++++++entry for game++++++++++++");

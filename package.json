@@ -33,7 +33,8 @@
         "ccgui" : "*",
         "ccpluginx" : "*",
         "ccbox2d" : "*",
-        "ccchipmunk" : "*"
+        "ccchipmunk" : "*",
+        "socket.io":"0.9.16"
     },
     "repository" : {},
     "readme" : {}

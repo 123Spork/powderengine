@@ -1,7 +1,6 @@
 {
     "engineDir" : "../node_modules/",
     "dependencies" : [
-		"socketioclient",
         "cocos2d-html5",
 		"cctouch",
 		"cceditbox"

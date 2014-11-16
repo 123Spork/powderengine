@@ -1,0 +1,9 @@
+Alias /bitnami/ "/opt/lampp/apache2/htdocs/"
+Alias /bitnami "/opt/lampp/apache2/htdocs"
+
+<Directory "/opt/lampp/apache2/htdocs">
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Order allow,deny
+    Allow from all
+</Directory>

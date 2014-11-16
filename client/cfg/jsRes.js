@@ -13,7 +13,6 @@ js.client = {
     PlayersController_js : '[%client%]src/classes/PlayersController.js',
     SingleLineBox_js : '[%client%]src/classes/SingleLineBox.js',
     StatsController_js : '[%client%]src/classes/StatsController.js',
-    cc_js : '[%client%]src/classes/cc.js',
     client_js : '[%client%]src/classes/client.js',
     map_js : '[%client%]src/classes/map.js',
     ItemEditor_js : '[%client%]src/editors/ItemEditor.js',

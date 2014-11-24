@@ -39,7 +39,7 @@ resCfg[jsRes.SceneManager_js] = {
 	    jsRes.NPCEditor_js,
 	    jsRes.SkillsEditor_js,
 	    jsRes.PopupList_js,
-	    jsRes.SignEditor_js,
+	    jsRes.ScriptingList_js,
 	    jsRes.MainScene_js,
 	    jsRes.News_js,
 	    jsRes.Credits_js,

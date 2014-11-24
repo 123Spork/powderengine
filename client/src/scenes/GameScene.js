@@ -94,12 +94,6 @@ var GameScene = Scene.extend({
 					size:cc.size(48,48),
 					texture:"GUI/skilleditor_icon.png",
 				},
-				"signedit_button":{
-					position:cc.p(34,Math.floor(screenSize.height/2)-108),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/signeditor_icon.png",
-				},
 				"scriptedit_button":{
 					position:cc.p(90,Math.floor(screenSize.height/2)-108),
 					anchorPoint:cc.p(0,0),
@@ -222,10 +216,6 @@ var GameScene = Scene.extend({
 		}	
 		if(cc.rectContainsPoint(this.panels["skilledit_button"].getBoundingBox(),touch._point) && this.panels["skilledit_button"].isVisible()){
 			this.runCommand("/editskill");
-			return true;
-		}
-		if(cc.rectContainsPoint(this.panels["signedit_button"].getBoundingBox(),touch._point) && this.panels["signedit_button"].isVisible()){
-			this.runCommand("/editsign");
 			return true;
 		}
 		if(cc.rectContainsPoint(this.panels["scriptedit_button"].getBoundingBox(),touch._point) && this.panels["scriptedit_button"].isVisible()){
@@ -406,7 +396,6 @@ var GameScene = Scene.extend({
 		this.panels["npcedit_button"].setVisible(visible);
 		this.panels["itemedit_button"].setVisible(visible);
 		this.panels["skilledit_button"].setVisible(visible);
-		this.panels["signedit_button"].setVisible(visible);
 		this.panels["scriptedit_button"].setVisible(visible);
 		this.panels["settings_button"].setVisible(visible);
 		this.panels["shopedit_button"].setVisible(visible);
@@ -428,7 +417,7 @@ var GameScene = Scene.extend({
 						Scripteditor.removeFromParent();
 						Scripteditor=null;
 					} else{
-						Scripteditor = new PopupList();
+						Scripteditor = new ScriptingList();
 						Scripteditor.init({delegate:null,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
 						Scripteditor.didBecomeActive();
 						this.addChild(Scripteditor);
@@ -460,19 +449,6 @@ var GameScene = Scene.extend({
 						Settingseditor.init();
 						Settingseditor.didBecomeActive();
 						this.addChild(Settingseditor);
-					}
-				break;
-				case "/editsign": 
-					if(Signeditor!=null && !Signeditor._parent) Signeditor=null;
-					if(Signeditor){
-						Signeditor.willTerminate();
-						Signeditor.removeFromParent();
-						Signeditor=null;
-					} else{
-						Signeditor = new PopupList();
-						Signeditor.init({delegate:null,editor:new SignEditor(),list:ObjectLists.getSignsList(),name:"Sign List"});
-						Signeditor.didBecomeActive();
-						this.addChild(Signeditor);
 					}
 				break;
 				case "/editskill": 

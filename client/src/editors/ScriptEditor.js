@@ -45,6 +45,9 @@ ScriptEditor = Popup.extend({
 		if(withData.data){
 			this.data=withData.data;
 		}
+		if(withData.scriptDelegate){
+			this.data["specifier"]=withData.scriptDelegate;
+		}
 		this.delegate=withData.delegate;
 	},
 
@@ -238,8 +241,8 @@ ScriptEditor = Popup.extend({
 													resSetup.push({"enabled":true},{"enabled":true});
 												break;
 												case "Tile":
-													resArray.push("Block Entry","Add Layer Graphic");
-													resSetup.push({"enabled":true},{"enabled":true});
+													resArray.push("Block Entry","Add Layer Graphic","Show Sign");
+													resSetup.push({"enabled":true},{"enabled":true},{"enabled":true});
 												break;
 											}
 
@@ -662,6 +665,7 @@ ScriptEditor = Popup.extend({
 					switch(clicknum){
 						case 10: responseText = "Block Entry"; break;
 						case 11: responseText = "Add Layer Graphic"; break;
+						case 12: responseText = "Show Sign"; break;	
 					}
 				break;
 			}
@@ -734,36 +738,6 @@ ScriptEditor = Popup.extend({
 								texture:"GUI/cross_icon.png",
 								anchorPoint:cc.p(0,0),
 							},
-							"defaultsbtn" : {
-								position:cc.p(542,364),
-								size:cc.size(64,32),
-								color:cc.c4b(0,255,0,255),
-								anchorPoint:cc.p(0,0),
-								children:{
-									"contents":{
-										label:"Defaults",
-										position:cc.p(32,16),
-										anchorPoint:cc.p(0.5,0.5),
-										color:cc.c3b(0,0,0),
-									}
-								}
-							},
-
-							"specifier" : {
-								position:cc.p(620,364),
-								size:cc.size(128,32),
-								color:cc.c4b(0,255,0,255),
-								anchorPoint:cc.p(0,0),
-								children:{
-									"contents":{
-										label:"Includes: None",
-										position:cc.p(64,16),
-										anchorPoint:cc.p(0.5,0.5),
-										color:cc.c3b(0,0,0),
-									}
-								}
-							},
-
 
 							"namelbl" : {
 								label:"Name:",
@@ -836,14 +810,6 @@ ScriptEditor = Popup.extend({
 		this.dataContext=null;
 	},
 
-	defaultSelected:function(clicknum,touch){
-		if(this.delegate.data["data"].length>0){
-			this.delegate.defaultContext=clicknum;
-			this._parent.addChild(DropDownList.createWithListAndPosition(this.delegate,this.delegate.destroyForDefault,["Cancel","Clear Script (Required)"],touch._point));
-			return;
-		}
-		this.delegate.setDefault(clicknum)		
-	},
 
 	disallowTouchForMain:function(value){
 
@@ -1030,6 +996,32 @@ ScriptEditor = Popup.extend({
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,50),
 						size:cc.size(174,322),
+					},
+				}
+			break;
+			case "Show Sign":
+				panels["panels"].children={
+					"signLabel":{
+						label:"Sign Title:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,376),
+					},
+					"signText":{
+						color:cc.c3b(255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,340),
+						size:cc.size(174,32),
+					},
+					"sayLabel":{
+						label:"Sign Content:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,318),
+					},
+					"sayText":{
+						color:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,50),
+						size:cc.size(174,258),
 					},
 				}
 			break;
@@ -1498,6 +1490,14 @@ ScriptEditor = Popup.extend({
 				this.warpXBox.setDefaultFineFlag(true);
 				this.warpYBox = new EntryBox(this.subEditor["mapYText"],cc.size(this.subEditor["mapYText"].getContentSize().width,this.subEditor["mapYText"].getContentSize().height), cc.p(0,this.subEditor["mapYText"].getContentSize().height), y, cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.warpYBox.setDefaultFineFlag(true);
+			break;
+			case "Show Sign":
+				this.sayBox = new EntryBox(this.subEditor["sayText"],cc.size(this.subEditor["sayText"].getContentSize().width,this.subEditor["sayText"].getContentSize().height), cc.p(0,this.subEditor["sayText"].getContentSize().height), data["content"] ?  data["content"] : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.sayBox.setDefaultFineFlag(true);
+				this.sayBox.setNullAllowed(false);
+				this.signTitle = new EntryBox(this.subEditor["signText"],cc.size(this.subEditor["signText"].getContentSize().width,this.subEditor["signText"].getContentSize().height), cc.p(0,this.subEditor["signText"].getContentSize().height), data["title"] ?  data["title"] : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+				this.signTitle.setDefaultFineFlag(true);
+				this.signTitle.setNullAllowed(false);
 			break;
 			case "Read Item":
 				this.sayBox = new EntryBox(this.subEditor["sayText"],cc.size(this.subEditor["sayText"].getContentSize().width,this.subEditor["sayText"].getContentSize().height), cc.p(0,this.subEditor["sayText"].getContentSize().height), data["say"] ?  data["say"] : "<Enter text>", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
@@ -2174,42 +2174,6 @@ ScriptEditor = Popup.extend({
 		this.subEditor=null;
 	},
 
-	setDefault:function(val){
-		switch(val){
-			case 0: this.setSpecifier(1,true); this.data["data"] = [{"type":"Will Enter","responses":[{"type":"Block Entry",data:{}}],"requirements":[],"data":{}}]; break;
-			case 1: this.setSpecifier(1,true); this.data["data"] = [{"type":"On Enter","responses":[{"type":"Warp Player",data:{}}],"requirements":[],"data":{}}]; break;
-			case 2: this.setSpecifier(1,true); this.data["data"] = [{"type":"Default Event","responses":[{"type":"Show Sign",data:{}}],"requirements":[],"data":{}}]; break;
-			case 3: this.setSpecifier(1,true); this.data["data"] = [{"type":"Will Enter","responses":[{"type":"Block Entry",data:{}}],"requirements":[{"objectType":"NPC"}],"data":{}}]; break;
-			case 4: this.setSpecifier(1,true); this.data["data"] = [{"type":"On Enter","responses":[{"type":"Allow PVP",data:{}}],"requirements":[],"data":{}}]; break;
-		}
-		this.prepareList();
-	},
-
-	setSpecifier:function(val,ignoreReset){
-		switch(val){
-			case 0: this.data["specifier"]="Item"; this.panels["main_panel"]["specifier"]["contents"].setString("Includes: Item"); break;
-			case 1: this.data["specifier"]="Tile"; this.panels["main_panel"]["specifier"]["contents"].setString("Includes: Tile"); break;
-			case 2: this.data["specifier"]="NPC"; this.panels["main_panel"]["specifier"]["contents"].setString("Includes: NPC"); break;
-			case 3: this.data["specifier"]="None"; this.panels["main_panel"]["specifier"]["contents"].setString("Includes: None"); break;
-		}
-		this.data["data"]=[];
-		if(!ignoreReset){
-			this.prepareList();
-		}
-	},
-
-	destroyForSpecifier:function(clicknum){
-		if(clicknum==1){
-			this.delegate.setSpecifier(this.delegate.specifierContext);	
-		}
-	},
-
-	destroyForDefault:function(clicknum){
-		if(clicknum==1){
-			this.delegate.setDefault(this.delegate.defaultContext)
-		}
-	},
-
 	setEquippableTo:function(type){
 		this.subEditor["headButton"].setColor(cc.c4b(255,255,255,255));
 		this.subEditor["bodyButton"].setColor(cc.c4b(255,255,255,255));
@@ -2256,14 +2220,6 @@ ScriptEditor = Popup.extend({
 		}
 	},
 
-	specifierSelected:function(clicknum,touch){
-		if(this.delegate.data["data"].length>0){
-			this.delegate.specifierContext = clicknum;
-			this._parent.addChild(DropDownList.createWithListAndPosition(this.delegate,this.delegate.destroyForSpecifier,["Cancel","Clear Script (Required)"],touch._point));
-			return false;
-		}
-		this.delegate.setSpecifier(clicknum);
-	},
 
 	onTouchBegan:function(touch){
 		if(this._super(touch)){
@@ -2305,6 +2261,12 @@ ScriptEditor = Popup.extend({
 							"index":index,
 						}
 					break
+					case "Show Sign":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"content":this.sayBox.getText(),
+							"title":this.signTitle.getText(),
+						}
+					break;
 					case "Read Item":
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"say":this.sayBox.getText(),
@@ -2433,15 +2395,6 @@ ScriptEditor = Popup.extend({
 
 		} else{
 			var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
-			if(isTouching(this.panels["main_panel"]["defaultsbtn"],truePos)){
-				this._parent.addChild(DropDownList.createWithListAndPosition(this,this.defaultSelected,["Block Player","Warp Player","Show Sign","Spawn NPC","Spawn Item","Block NPC","PVP Area"],touch._point));
-				return;
-			}
-
-			if(isTouching(this.panels["main_panel"]["specifier"],truePos)){
-				this._parent.addChild(DropDownList.createWithListAndPosition(this,this.specifierSelected,["Item","Tile","NPC","None"],touch._point));
-				return;
-			}
 
 			if(isTouching(this.panels["main_panel"]["okbtn"],truePos)){
 				if(this.nameBox.getText()==null || this.nameBox.getText()==""){

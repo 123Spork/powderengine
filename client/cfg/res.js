@@ -43,6 +43,7 @@ var res = {
     quickmenu_opened_icon_png : 'GUI/quickmenu_opened_icon.png',
     save_icon_png : 'GUI/save_icon.png',
     scripteditor_icon_png : 'GUI/scripteditor_icon.png',
+    scripting_list_png : 'GUI/scripting_list.png',
     selected_png : 'GUI/selected.png',
     settings_icon_png : 'GUI/settings_icon.png',
     shopeditor_icon_png : 'GUI/shopeditor_icon.png',

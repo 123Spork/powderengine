@@ -15,7 +15,7 @@ MapEditor = Popup.extend({
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,0),
-						size: cc.size(420,380),
+						size: cc.size(420,400),
 						color: cc.c4b(0,0,100,120),
 						children: {
 							"tab1":{
@@ -25,41 +25,37 @@ MapEditor = Popup.extend({
 										position:cc.p(16,336),
 										texture:tileTextureList[0]["name"],
 									},
-									
-									"textureleftbtn" : {
-										position:cc.p(360,344),
-										size:cc.size(16,32),
+									"scriptbtn" : {
+										position:cc.p(360,360),
+										size:cc.size(128,26),
 										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
-												label:"<<",
+												label:"Script",
 												fontSize:12,
 												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(8,16),
+												position:cc.p(64,13),
 												color:cc.c3b(0,0,0),
 											}
 										}
+									},
+									"textureleftbtn" : {
+										position:cc.p(200,360),
+										size:cc.size(16,32),
+										texture:"GUI/texture_change_left.png",
+										anchorPoint:cc.p(0,0),
 									},
 									"texturerightbtn" : {
-										position:cc.p(472,344),
+										position:cc.p(310,360),
 										size:cc.size(16,32),
-										color: WHITE,
+										texture:"GUI/texture_change_right.png",
 										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:">>",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(8,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
 									},
 									"textureName" : {
-										position:cc.p(376,344),
+										position:cc.p(214,360),
 										size:cc.size(96,32),
-										color: cc.c4b(255,255,255,170),
+										texture:"GUI/texture_change_middle.png",
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -329,81 +325,6 @@ MapEditor = Popup.extend({
 							},
 							"tab2":{
 								children:{
-									"blockbtn" : {
-										position:cc.p(8,320),
-										size:cc.size(60,32),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Block",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(32,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"itembtn" : {
-										position:cc.p(8,240),
-										size:cc.size(60,32),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Item",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(32,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"signbtn" : {
-										position:cc.p(8,200),
-										size:cc.size(60,32),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Sign",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(32,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"npcbtn" : {
-										position:cc.p(8,160),
-										size:cc.size(60,32),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"NPC",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(32,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"amountLabelHead":{
-										visible:false,
-										label:"Item Amount",
-										fontSize:12,
-										anchorPoint:cc.p(0,0),
-										position: cc.p(100,342),
-									},
-									"amountLabel":{
-										size: cc.size(60,32),
-										position: cc.p(98,-1000000),
-									},
-								}
-							},
-							"tab3":{
-								children:{
 									"saveBack":{
 										position:cc.p(0,78),
 										size:cc.size(200,60),
@@ -597,7 +518,7 @@ MapEditor = Popup.extend({
 								}
 							},
 							"tab1Clickable":{
-								position:cc.p(0,360),
+								position:cc.p(0,380),
 								size:cc.size(60,20),
 								color: WHITE,
 								anchorPoint:cc.p(0,0),
@@ -612,22 +533,7 @@ MapEditor = Popup.extend({
 								}
 							},
 							"tab2Clickable":{
-								position:cc.p(64,360),
-								size:cc.size(60,20),
-								color: WHITE,
-								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"Scripts",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(32,10),
-										color:cc.c3b(0,0,0),
-									}
-								}
-							},
-							"tab3Clickable":{
-								position:cc.p(128,360),
+								position:cc.p(62,380),
 								size:cc.size(60,20),
 								color: WHITE,
 								anchorPoint:cc.p(0,0),
@@ -645,7 +551,7 @@ MapEditor = Popup.extend({
 					},
 					"control_panel":{
 						anchorPoint:cc.p(0,0),
-						position: cc.p(0,380),
+						position: cc.p(0,400),
 						size: cc.size(420,32),
 						color: cc.c4b(255,0,0,200),
 						children:{	
@@ -685,7 +591,6 @@ MapEditor = Popup.extend({
 	mapDownBox:null,
 	mapLeftBox:null,
 	mapRightBox:null,
-	itemAmountBox:null,
 	tabWidths:null,
 	currentTab:0,
 	typeData:null,
@@ -694,28 +599,25 @@ MapEditor = Popup.extend({
 		this._super();
 		this.map =_map;
 		this.mapOffset=cc.p(0,0);
-		this.tabWidths=[null,496,200,200];
+		this.tabWidths=[null,496,200];
 	},
 	
 	didBecomeActive:function(){
 		this._super();
 		this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
 		this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(0);
-		this.mapUpBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapUp_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapUp_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapUp_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapUp_entry"].getContentSize().height), GameMap.hasMapUp() ? GameMap.getMapUp():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.mapUpBox = new EntryBox(this.panels["main_panel"]["tab2"]["mapUp_entry"],cc.size(this.panels["main_panel"]["tab2"]["mapUp_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["mapUp_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["mapUp_entry"].getContentSize().height), GameMap.hasMapUp() ? GameMap.getMapUp():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapUpBox.setDefaultFineFlag(true);
 		this.mapUpBox.setNullAllowed(true);
-		this.mapDownBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapDown_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapDown_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapDown_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapDown_entry"].getContentSize().height), GameMap.hasMapDown() ? GameMap.getMapDown():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.mapDownBox = new EntryBox(this.panels["main_panel"]["tab2"]["mapDown_entry"],cc.size(this.panels["main_panel"]["tab2"]["mapDown_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["mapDown_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["mapDown_entry"].getContentSize().height), GameMap.hasMapDown() ? GameMap.getMapDown():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapDownBox.setDefaultFineFlag(true);
 	    this.mapDownBox.setNullAllowed(true);
-		this.mapLeftBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapLeft_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapLeft_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapLeft_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapLeft_entry"].getContentSize().height), GameMap.hasMapLeft() ? GameMap.getMapLeft():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.mapLeftBox = new EntryBox(this.panels["main_panel"]["tab2"]["mapLeft_entry"],cc.size(this.panels["main_panel"]["tab2"]["mapLeft_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["mapLeft_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["mapLeft_entry"].getContentSize().height), GameMap.hasMapLeft() ? GameMap.getMapLeft():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapLeftBox.setDefaultFineFlag(true);
 		this.mapLeftBox.setNullAllowed(true);
-		this.mapRightBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapRight_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapRight_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapRight_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapRight_entry"].getContentSize().height), GameMap.hasMapRight() ? GameMap.getMapRight():"" , cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.mapRightBox = new EntryBox(this.panels["main_panel"]["tab2"]["mapRight_entry"],cc.size(this.panels["main_panel"]["tab2"]["mapRight_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["mapRight_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["mapRight_entry"].getContentSize().height), GameMap.hasMapRight() ? GameMap.getMapRight():"" , cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapRightBox.setDefaultFineFlag(true);
 		this.mapRightBox.setNullAllowed(true);
-		this.itemAmountBox = new EntryBox(this.panels["main_panel"]["tab2"]["amountLabel"],cc.size(this.panels["main_panel"]["tab2"]["amountLabel"].getContentSize().width,this.panels["main_panel"]["tab2"]["amountLabel"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["amountLabel"].getContentSize().height), GameMap.hasMapRight() ? GameMap.getMapRight():"1" , cc.c4b(100,100,100), cc.c3b(255,255,255));
-		this.itemAmountBox.setDefaultFineFlag(true);
-		this.itemAmountBox.setNullAllowed(true);
 		this.showAreYouSureClear(false);
 		this.showAreYouSureSave(false);
 		this.saveOnExit=LocalStorage.getMapSaveOnExit();
@@ -726,22 +628,11 @@ MapEditor = Popup.extend({
 	},
 	
 	setTypeData:function(value,data){
-		if(Signeditor){
-			Signeditor.willTerminate();
-			this.scheduleOnce(function(){Signeditor.removeFromParent(); Signeditor=null;});
-			this.typeData=value;
-			this.setTouchEnabled(true);
-		}
 		if(Itemeditor){
 			Itemeditor.willTerminate();
 			this.scheduleOnce(function(){Itemeditor.removeFromParent(); Itemeditor=null;});
 			this.typeData=value;
 			this.setTouchEnabled(true);
-			this.itemAmountBox.inputBox.setText("1");
-			if(data["stackable"]==true){
-				this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(true);
-				this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(98,308);
-			}
 		}
 		if(NPCeditor){
 			NPCeditor.willTerminate();
@@ -781,10 +672,10 @@ MapEditor = Popup.extend({
 			this.panels["main_panel"].setContentSize(this.tabWidths[value],this.panels["main_panel"].getContentSize().height);
 			this.panels["control_panel"].setContentSize(this.tabWidths[value],this.panels["control_panel"].getContentSize().height);
 			if(this.currentTab==3 || this.currentTab==0){
-				this.panels["main_panel"]["tab3"]["mapUp_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapUp_entry"].getPositionX()-1000);
-				this.panels["main_panel"]["tab3"]["mapLeft_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapLeft_entry"].getPositionX()-1000);
-				this.panels["main_panel"]["tab3"]["mapDown_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapDown_entry"].getPositionX()-1000);
-				this.panels["main_panel"]["tab3"]["mapRight_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapRight_entry"].getPositionX()-1000);
+				this.panels["main_panel"]["tab2"]["mapUp_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapUp_entry"].getPositionX()-1000);
+				this.panels["main_panel"]["tab2"]["mapLeft_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapLeft_entry"].getPositionX()-1000);
+				this.panels["main_panel"]["tab2"]["mapDown_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapDown_entry"].getPositionX()-1000);
+				this.panels["main_panel"]["tab2"]["mapRight_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapRight_entry"].getPositionX()-1000);
 			}
 			if(this.currentTab==1){
 				if(this.editMode=="erasing" || this.editMode=="tiles"){
@@ -798,18 +689,16 @@ MapEditor = Popup.extend({
 			}
 			this.currentTab=value;
 			this.panels["main_panel"]["tab1"].setVisible(false);
-			this.panels["main_panel"]["tab2"].setVisible(false)
-			this.panels["main_panel"]["tab3"].setVisible(false);
+			this.panels["main_panel"]["tab2"].setVisible(false);
 			this.panels["main_panel"]["tab1Clickable"].setColor(WHITE);
 			this.panels["main_panel"]["tab2Clickable"].setColor(WHITE);
-			this.panels["main_panel"]["tab3Clickable"].setColor(WHITE);
 			this.panels["main_panel"]["tab"+value].setVisible(true);
 			this.panels["main_panel"]["tab"+value+"Clickable"].setColor(cc.c4b(255,255,0,255));
 			if(value==3){
-				this.panels["main_panel"]["tab3"]["mapUp_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapUp_entry"].getPositionX()+1000);
-				this.panels["main_panel"]["tab3"]["mapLeft_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapLeft_entry"].getPositionX()+1000);
-				this.panels["main_panel"]["tab3"]["mapDown_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapDown_entry"].getPositionX()+1000);
-				this.panels["main_panel"]["tab3"]["mapRight_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapRight_entry"].getPositionX()+1000);
+				this.panels["main_panel"]["tab2"]["mapUp_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapUp_entry"].getPositionX()+1000);
+				this.panels["main_panel"]["tab2"]["mapLeft_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapLeft_entry"].getPositionX()+1000);
+				this.panels["main_panel"]["tab2"]["mapDown_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapDown_entry"].getPositionX()+1000);
+				this.panels["main_panel"]["tab2"]["mapRight_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapRight_entry"].getPositionX()+1000);
 			}
 			this.panels["control_panel"]["exitBtn"].setPositionX(this.tabWidths[value]-29);
 		}
@@ -818,11 +707,11 @@ MapEditor = Popup.extend({
 	setSaveMapOnExit:function(value){
 		LocalStorage.setMapSaveOnExit(value);
 		this.saveOnExit=value;
-		this.panels["main_panel"]["tab3"]["saveOnExit"].setColor(cc.c3b(255,0,0));
-		this.panels["main_panel"]["tab3"]["saveOnExit"]["content"].setString("Save on exit: NO");
+		this.panels["main_panel"]["tab2"]["saveOnExit"].setColor(cc.c3b(255,0,0));
+		this.panels["main_panel"]["tab2"]["saveOnExit"]["content"].setString("Save on exit: NO");
 		if(value=="true" || value==true){
-			this.panels["main_panel"]["tab3"]["saveOnExit"].setColor(cc.c3b(0,255,0));
-			this.panels["main_panel"]["tab3"]["saveOnExit"]["content"].setString("Save on exit: YES");
+			this.panels["main_panel"]["tab2"]["saveOnExit"].setColor(cc.c3b(0,255,0));
+			this.panels["main_panel"]["tab2"]["saveOnExit"]["content"].setString("Save on exit: YES");
 		}
 	},
 	
@@ -846,14 +735,9 @@ MapEditor = Popup.extend({
 			this.setTab(1);
 			return true;
 		}		
-		
+	
 		if(isTouching(this.panels["main_panel"]["tab2Clickable"],truePos)){
 			this.setTab(2);
-			return true;
-		}	
-	
-		if(isTouching(this.panels["main_panel"]["tab3Clickable"],truePos)){
-			this.setTab(3);
 			return true;
 		}	
 		
@@ -950,113 +834,27 @@ MapEditor = Popup.extend({
 		
 		}
 		if(this.currentTab==2){
-			if(isTouching(this.panels["main_panel"]["tab2"]["blockbtn"],truePos)){
-				this.panels["main_panel"]["tab2"]["signbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["npcbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["itembtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["blockbtn"].setColor(WHITE);
-				this.editMode = this.editMode=="blocking" ? "tiles" : "blocking";
-				if(this.editMode=="blocking"){
-					this.panels["main_panel"]["tab2"]["blockbtn"].setColor(RED);
-					this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
-					this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-100000);
-				}
-				return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["signbtn"],truePos)){
-				this.panels["main_panel"]["tab2"]["signbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["npcbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["itembtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["blockbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
-				this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-1000000);
-				this.editMode = this.editMode=="signs" ? "tiles" : "signs";
-				if(this.editMode=="signs"){
-					if(Signeditor!=null && !Signeditor._parent) Signeditor=null;
-					if(Signeditor){
-						Signeditor.willTerminate();
-						Signeditor.removeFromParent();
-						Signeditor=null;
-					}
-					Signeditor = new PopupList();
-					Signeditor.init({delegate:this,editor:new SignEditor(),list:ObjectLists.getSignsList(),name:"Sign List"});
-					Signeditor.didBecomeActive();
-					this._parent.addChild(Signeditor);
-					this.setTouchEnabled(false);
-					this.panels["main_panel"]["tab2"]["signbtn"].setColor(RED);
-				} 
-				return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["npcbtn"],truePos)){
-				this.panels["main_panel"]["tab2"]["signbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["npcbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["itembtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["blockbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
-				this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-1000000);
-				this.editMode = this.editMode=="npcs" ? "tiles" : "npcs";
-				if(this.editMode=="npcs"){
-					if(NPCeditor!=null && !NPCeditor._parent) NPCeditor=null;
-					if(NPCeditor){
-						NPCeditor.willTerminate();
-						NPCeditor.removeFromParent();
-						NPCeditor=null;
-					}
-					NPCeditor = new PopupList();
-					NPCeditor.init({delegate:this,editor:new NPCEditor(),list:ObjectLists.getNPCList(),name:"NPC List"});
-					NPCeditor.didBecomeActive();
-					this._parent.addChild(NPCeditor);
-					this.setTouchEnabled(false);
-					this.panels["main_panel"]["tab2"]["npcbtn"].setColor(RED);
-				} 
-				return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["itembtn"],truePos)){
-				this.panels["main_panel"]["tab2"]["itembtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["npcbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["blockbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
-				this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-1000000);
-				this.editMode = this.editMode=="items" ? "tiles" : "items";
-				if(this.editMode=="items"){
-					if(Itemeditor!=null && !Itemeditor._parent) Itemeditor=null;
-					if(Itemeditor){
-						Itemeditor.willTerminate();
-						Itemeditor.removeFromParent();
-						Itemeditor=null;
-					}
-					Itemeditor = new PopupList();
-					Itemeditor.init({delegate:this,editor:new ItemEditor(),list:ObjectLists.getItemList(),name:"Item List"});
-					Itemeditor.didBecomeActive();
-					this._parent.addChild(Itemeditor);
-					this.setTouchEnabled(false);
-					this.panels["main_panel"]["tab2"]["itembtn"].setColor(RED);
-				} 
-				return true;
-			}
-		}
-		if(this.currentTab==3){
-			if(isTouching(this.panels["main_panel"]["tab3"]["clearbtn"],truePos)){
+			if(isTouching(this.panels["main_panel"]["tab2"]["clearbtn"],truePos)){
 				this.showAreYouSureClear(true); return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab3"]["clearbtnNo"],truePos)){
+			if(isTouching(this.panels["main_panel"]["tab2"]["clearbtnNo"],truePos)){
 				this.showAreYouSureClear(false); return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab3"]["clearbtnYes"],truePos)){
+			if(isTouching(this.panels["main_panel"]["tab2"]["clearbtnYes"],truePos)){
 				GameMap.destroy(); this.showAreYouSureClear(false); return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab3"]["savebtn"],truePos)){
+			if(isTouching(this.panels["main_panel"]["tab2"]["savebtn"],truePos)){
 				this.showAreYouSureSave(true); return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab3"]["savebtnNo"],truePos)){
+			if(isTouching(this.panels["main_panel"]["tab2"]["savebtnNo"],truePos)){
 				this.showAreYouSureSave(false); return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab3"]["savebtnYes"],truePos)){
+			if(isTouching(this.panels["main_panel"]["tab2"]["savebtnYes"],truePos)){
 				GameMap.setMapInfo({"up": this.mapUpBox.getText(),"down":this.mapDownBox.getText(),"left":this.mapLeftBox.getText(),"right":this.mapRightBox.getText()});
 				GameMap.updateServer(); this.showAreYouSureSave(false); return true;
 			}
 			
-			if(isTouching(this.panels["main_panel"]["tab3"]["saveOnExit"],truePos)){
+			if(isTouching(this.panels["main_panel"]["tab2"]["saveOnExit"],truePos)){
 				this.setSaveMapOnExit(!this.saveOnExit); return true;
 			}
 		}
@@ -1104,17 +902,17 @@ MapEditor = Popup.extend({
 	},
 	
 	showAreYouSureClear:function(visible){
-		this.panels["main_panel"]["tab3"]["clearbtnYes"].setVisible(visible);
-		this.panels["main_panel"]["tab3"]["clearbtnNo"].setVisible(visible);	
-		this.panels["main_panel"]["tab3"]["clear_text"].setVisible(visible);	
-		this.panels["main_panel"]["tab3"]["clearbtn"].setVisible(!visible);
+		this.panels["main_panel"]["tab2"]["clearbtnYes"].setVisible(visible);
+		this.panels["main_panel"]["tab2"]["clearbtnNo"].setVisible(visible);	
+		this.panels["main_panel"]["tab2"]["clear_text"].setVisible(visible);	
+		this.panels["main_panel"]["tab2"]["clearbtn"].setVisible(!visible);
 	},
 	
 	showAreYouSureSave:function(visible){
-		this.panels["main_panel"]["tab3"]["savebtnYes"].setVisible(visible);
-		this.panels["main_panel"]["tab3"]["savebtnNo"].setVisible(visible);	
-		this.panels["main_panel"]["tab3"]["save_text"].setVisible(visible);	
-		this.panels["main_panel"]["tab3"]["savebtn"].setVisible(!visible);
+		this.panels["main_panel"]["tab2"]["savebtnYes"].setVisible(visible);
+		this.panels["main_panel"]["tab2"]["savebtnNo"].setVisible(visible);	
+		this.panels["main_panel"]["tab2"]["save_text"].setVisible(visible);	
+		this.panels["main_panel"]["tab2"]["savebtn"].setVisible(!visible);
 	},
 	
 	tilePressed:function(tiles,tilenum,touchtype){
@@ -1127,40 +925,6 @@ MapEditor = Popup.extend({
 				if(this.panels["main_panel"]["tab1"]["selectednode"].getOpacity()!=0){
 					var ySize = Math.floor(320/cellsize)-1;
 					GameMap.setLayer(tilenum,tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/cellsize)+this.mapOffset.x,(ySize-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/cellsize))+this.mapOffset.y),this.currentLayer);
-				}
-			break;
-			case "blocking":
-				if(tiles[tilenum].getType()!=1){
-					GameMap.setTileInfo(tilenum,1);
-					break;
-				}
-				GameMap.setTileInfo(tilenum,0);
-			break;
-			case "signs":
-				if(Signeditor==null || !Signeditor._parent){
-					if(tiles[tilenum].getType()!=7){
-						GameMap.setTileInfo(tilenum,7,this.typeData);
-						break;
-					} 
-					GameMap.setTileInfo(tilenum,0,null);
-				}
-			break;
-			case "items":
-				if(Itemeditor==null || !Itemeditor._parent){
-					if(tiles[tilenum].getType()!=4){
-						GameMap.setTileInfo(tilenum,4,this.typeData,{"amount":this.itemAmountBox.getText()});
-						break;
-					}
-					GameMap.setTileInfo(tilenum,0,null);
-				}
-			break;
-			case "npcs":
-				if(NPCeditor==null || !NPCeditor._parent){
-					if(tiles[tilenum].getType()!=5){
-						GameMap.setTileInfo(tilenum,5,this.typeData);
-						break;
-					}
-					GameMap.setTileInfo(tilenum,0,null);
 				}
 			break;
 			case "erasing":

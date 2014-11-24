@@ -39,16 +39,13 @@ var cocos2dApp = cc.Application.extend({
         if(cfg["test"]) cc.test(cfg["test"]);//
         else{
             //TODO enter point for game
-            cc.log("++++++++++++++++entry for game++++++++++++");
             cc.loadGameModule(js.client.SceneManager_js, function(resArr){
-			 
                 cc.LoaderScene.preload(resArr, function(){
 					document.getElementById("gameCanvas").setAttribute('tabindex','0');
 					document.getElementById("gameCanvas").focus();
 					var sM = SceneManager.getInstance();
                     cc.Director.getInstance().replaceScene(sM);
 					sM.init();
-					
                 });
             });
         }

@@ -96,7 +96,6 @@
                 <file name="../node_modules/ccgui/lib/CCScrollView/CCTableView.js"></file>
                 <file name="../node_modules/cceditbox/lib/CCdomNode.js"></file>
                 <file name="../node_modules/cceditbox/lib/CCEditBox.js"></file>
-                <file name="./src/classes/cc.js"></file>
                 <file name="./src/classes/SingleLineBox.js"></file>
                 <file name="./src/classes/MultiLineBox.js"></file>
                 <file name="./src/utils/Strings.js"></file>

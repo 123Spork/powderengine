@@ -29,20 +29,20 @@ var InputBox = cc.Class.extend({
 		cc.log("Ovveride inputbox init call if necessary");
 	},
 	
-	ctor:function(parent, size, position, defaultText, bgColor, fontColor, type){
+	ctor:function(parent, size, position, defaultText, bgColor, fontColor, type,filename){
 		if(!type || type==false){
-			this.inputBox = SingleLineBox.create(cc.size(size.width, size.height),cc.Scale9Sprite.create());
+			this.inputBox = SingleLineBox.create(cc.size(size.width, size.height),filename? cc.Scale9Sprite.create(filename) : cc.Scale9Sprite.create());
 			var hex = rgbToHex(bgColor.r,bgColor.g,bgColor.b);
 			this.inputBox._edTxt.style.background=hex;
 		}else{
-			this.inputBox = MultiLineBox.create(cc.size(size.width, size.height),cc.Scale9Sprite.create());
+			this.inputBox = MultiLineBox.create(cc.size(size.width, size.height),filename? cc.Scale9Sprite.create(filename) : cc.Scale9Sprite.create());
 			this.inputBox.setBackgroundColor(cc.c3b(bgColor.r,bgColor.g,bgColor.b));
 		}
 		this.inputBox.setText(defaultText);
 		this.inputBox.defaultText=defaultText;
 		this.inputBox.setFontColor(cc.c3b(fontColor.r,fontColor.g,fontColor.b));
-		this.inputBox.setPosition(cc.p(position.x,position.y));
-		this.inputBox.setAnchorPoint(0,0);
+		this.inputBox.setPosition(position.x,position.y);
+		this.inputBox.setAnchorPoint(cc.p(0,1));
 		this.inputBox.setDelegate(this);
 		parent.addChild(this.inputBox);
 		this.init();

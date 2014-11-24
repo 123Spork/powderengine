@@ -448,7 +448,6 @@ GameMap.updateOffset=function(x,y){
 	if(gameGridSize.width<screenSize.width){
 		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
 	}
-
 	gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
 };
 
@@ -480,12 +479,12 @@ GameMap.goToOffsetFromPosition=function(x,y){
 		offsetFromPositionScheduledY=0;
 		gameMapInstance.unschedule(GameMap.scheduledOffsetFromPosition);
 
-		if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
-	}
-	if(gameGridSize.width<screenSize.width){
-		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
-	}
+	    if(gameGridSize.height<screenSize.height){
+			gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+		}
+		if(gameGridSize.width<screenSize.width){
+			gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
+		}
 		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
 	}
 };

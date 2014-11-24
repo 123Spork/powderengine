@@ -169,7 +169,7 @@ SettingsEditor = Popup.extend({
 						children: {
 							"savebtn":{
 								size:cc.size(64,32),
-								bg:cc.c4b(0,255,0,255),
+								color:cc.c4b(0,255,0,255),
 								position:cc.p(241,292),
 								anchorPoint:cc.p(0,0),
 								children:{
@@ -184,7 +184,7 @@ SettingsEditor = Popup.extend({
 
 							"list":{
 								size:cc.size(324,284),
-								bg:cc.c4b(0,200,200,200),
+								color:cc.c4b(0,200,200,200),
 								position:cc.p(0,0),
 								anchorPoint:cc.p(0,0),
 							},

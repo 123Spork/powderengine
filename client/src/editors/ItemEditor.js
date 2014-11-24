@@ -45,7 +45,7 @@ ItemEditor = Popup.extend({
 							"name_entry":{
 								position:cc.p(74,292),
 								size:cc.size(266,32),
-								bg:cc.c4b(255,255,255,255),
+								color:cc.c4b(255,255,255,255),
 							},
 						
 							"tiles" : {
@@ -84,7 +84,7 @@ ItemEditor = Popup.extend({
 							"leftbtn" : {
 								position:cc.p(0,16),
 								size:cc.size(16,256),
-								bg: cc.c4b(0,0,255,255),
+								color: cc.c4b(0,0,255,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -99,7 +99,7 @@ ItemEditor = Popup.extend({
 							"rightbtn" : {
 								position:cc.p(336,16),
 								size:cc.size(16,256),
-								bg: cc.c4b(0,0,255,255),
+								color: cc.c4b(0,0,255,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -114,7 +114,7 @@ ItemEditor = Popup.extend({
 							"upbtn" : {
 								position:cc.p(16,272),
 								size:cc.size(320,16),
-								bg: cc.c4b(0,0,255,255),
+								color: cc.c4b(0,0,255,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -129,7 +129,7 @@ ItemEditor = Popup.extend({
 							"downbtn" : {
 								position:cc.p(16,0),
 								size:cc.size(320,16),
-								bg: cc.c4b(0,0,255,255),
+								color: cc.c4b(0,0,255,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -152,7 +152,7 @@ ItemEditor = Popup.extend({
 							"stackbtn" : {
 								position:cc.p(360,176),
 								size:cc.size(128,26),
-								bg: RED,
+								color: RED,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -175,7 +175,7 @@ ItemEditor = Popup.extend({
 							"scriptbtn" : {
 								position:cc.p(360,232),
 								size:cc.size(128,26),
-								bg: RED,
+								color: RED,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -192,13 +192,13 @@ ItemEditor = Popup.extend({
 								anchorPoint:cc.p(0,0),
 								position:cc.p(0,0),
 								size:cc.size(32,32),
-								bg:cc.c4b(255,100,100,255),
+								color:cc.c4b(255,100,100,255),
 							},
 							"selectednode" : {
 								anchorPoint:cc.p(0,0),
 								position:cc.p(0,0),
 								size:cc.size(32,32),
-								bg:cc.c4b(100,255,100,255),
+								color:cc.c4b(100,255,100,255),
 							},
 								
 							

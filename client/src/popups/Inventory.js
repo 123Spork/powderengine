@@ -21,7 +21,7 @@ InventoryPanel = Popup.extend({
 							position: cc.p(1,1),
 							size: cc.size(10,6),
 							anchorPoint:cc.p(0,0),
-							bg: cc.c4b(255,255,255,200),
+							color: cc.c4b(255,255,255,200),
 							children:{
 								"stacklabel":{
 									label:"",
@@ -68,7 +68,7 @@ InventoryPanel = Popup.extend({
 					},
 					"item_name":{
 						position:cc.p(0,0),
-						bg:cc.c4b(200,200,200,200),
+						color:cc.c4b(200,200,200,200),
 						size:cc.size(64,16),
 						visible:false,
 						children:{

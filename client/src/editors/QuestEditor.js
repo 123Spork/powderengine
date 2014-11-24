@@ -61,7 +61,10 @@ QuestEditor = Popup.extend({
 				this.data["objectiveList"].splice(i,1);
 				continue;
 			}
-			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),316,1);
+			var element= cc.Sprite.create();
+			element.setTextureRect(cc.rect(0,0,316,1));
+			element.setColor(cc.c4b(0,0,0,127));
+			element.setAnchorPoint(cc.p(0,0));
 			element.setPosition(cc.p(4,0));			
 
 			var editElement=cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
@@ -103,7 +106,10 @@ QuestEditor = Popup.extend({
 			delElement.setPositionY(((text.getContentSize().height+8)/2)-10);
 		}
 
-		var addButton = cc.LayerColor.create(cc.c4b(70,200,70,255),90,26);
+		var addButton = cc.Sprite.create();
+		addButton.setTextureRect(cc.rect(0,0,90,26));
+		addButton.setColor(cc.c4b(70,200,70,255));
+		addButton.setAnchorPoint(cc.p(0,0));
 		var plus = cc.LabelTTF.create("+","Arial",20);
 		plus.setPosition(45,13);
 		plus.setAnchorPoint(cc.p(0.5,0.5));
@@ -115,9 +121,11 @@ QuestEditor = Popup.extend({
 
 		listnodes[i+1]=cc.Node.create();
 		listnodes[i+1].setContentSize(324,32);
-		var element= cc.LayerColor.create(cc.c4b(0,0,0,127),316,1);
-		element.setPosition(cc.p(4,0));			
-		console.log(this.data["objectiveList"][i]);
+		var element= cc.Sprite.create();
+		element.setTextureRect(cc.rect(0,0,316,1));
+		element.setColor(cc.c4b(0,0,0,127));
+		element.setAnchorPoint(cc.p(0,0));
+		element.setPosition(cc.p(4,0));		;
 		var text = cc.LabelTTF.create(this.data["objectiveList"][i],"Arial",15);
 		text.setAnchorPoint(cc.p(0,0));
 		text.setPosition(cc.p(4,4));
@@ -204,13 +212,13 @@ QuestEditor = Popup.extend({
 							},
 							"nameBox":{
 								size:cc.size(150,32),
-								bg:cc.c4b(255,255,255,255),
+								color:cc.c4b(255,255,255,255),
 								position:cc.p(8,277),
 								anchorPoint:cc.p(0,0),
 							},
 							"savebtn":{
 								size:cc.size(64,32),
-								bg:cc.c4b(0,255,0,255),
+								color:cc.c4b(0,255,0,255),
 								position:cc.p(175,277),
 								anchorPoint:cc.p(0,0),
 								children:{
@@ -225,7 +233,7 @@ QuestEditor = Popup.extend({
 
 							"exitbtn":{
 								size:cc.size(64,32),
-								bg:cc.c4b(255,0,0,255),
+								color:cc.c4b(255,0,0,255),
 								position:cc.p(253,277),
 								anchorPoint:cc.p(0,0),
 								children:{
@@ -246,7 +254,7 @@ QuestEditor = Popup.extend({
 							},
 							"list":{
 								size:cc.size(324,250),
-								bg:cc.c4b(0,200,200,200),
+								color:cc.c4b(0,200,200,200),
 								position:cc.p(0,0),
 								anchorPoint:cc.p(0,0),
 							},
@@ -305,7 +313,10 @@ QuestEditor = Popup.extend({
 			this.editBox=null;
 			this.elementContext =null;
 		}
-		this.editBox = cc.LayerColor.create(cc.c4b(255,255,255,200),200,200);
+		this.editBox = cc.Sprite.create()
+		this.editBox.setTextureRect(cc.rect(0,0,200,200));
+		this.editBox.setColor(cc.c4b(255,255,255,200));
+		this.editBox.setAnchorPoint(cc.p(0,0));
 		this.editBox.setPosition(cc.p((this.panels["main_panel"].getContentSize().width-200)/2,((this.panels["main_panel"].getContentSize().height-200)/2)));
 		this.entryBox = new EntryBox(this.editBox,cc.size(190,150), cc.p(0,this.editBox.getContentSize().height), this.data["objectiveList"][elementNum], cc.c4b(100,100,100), cc.c3b(255,255,255),true);
 		this.entryBox.setDefaultFineFlag(true);
@@ -335,9 +346,7 @@ QuestEditor = Popup.extend({
 		if(this._super(touch)){
 			return true;
 		}
-	
-		this.prevMovPos=null;
-		var pos = touch._point;
+		var pos = cc.p(touch._point.x,touch._point.y);
 		if(this.editBox!=null){
 			var truePos = this.editBox.convertToNodeSpace(pos);
 			if(isTouching(this.editBox.ok,truePos)){

@@ -10,7 +10,10 @@ var GameScene = Scene.extend({
 	},
 
 	onOrientationChanged:function(){
+		var pos = PlayersController.getYou().getGridPosition();
+		GameMap.goToOffsetFromPosition(pos.x*32,pos.y*32);
 		resetLayoutsFromObject(this.getLayoutObject(),this.panels);
+		SkillBarsInstance.updateLayoutFromSkills();
 	},
 	
 	getLayoutObject:function(){
@@ -96,12 +99,6 @@ var GameScene = Scene.extend({
 					anchorPoint:cc.p(0,0),
 					size:cc.size(48,48),
 					texture:"GUI/signeditor_icon.png",
-				},
-				"warpedit_button":{
-					position:cc.p(4,Math.floor(screenSize.height/2)-164),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/warpeditor_icon.png",
 				},
 				"scriptedit_button":{
 					position:cc.p(90,Math.floor(screenSize.height/2)-108),
@@ -235,10 +232,6 @@ var GameScene = Scene.extend({
 			this.runCommand("/editscript");
 			return true;
 		}		
-		if(cc.rectContainsPoint(this.panels["warpedit_button"].getBoundingBox(),touch._point) && this.panels["warpedit_button"].isVisible()){
-			this.runCommand("/editwarp");
-			return true;
-		}	
 		if(cc.rectContainsPoint(this.panels["settings_button"].getBoundingBox(),touch._point) && this.panels["settings_button"].isVisible()){
 			this.runCommand("/editsettings");
 			return true;
@@ -305,11 +298,6 @@ var GameScene = Scene.extend({
 			NpcChat.removeFromParent();
 			NpcChat=null;
 		}
-	},
-	
-
-	onTouchEnded:function(touch){
-		
 	},
 	
 	onKeyUp:function(key){
@@ -420,7 +408,6 @@ var GameScene = Scene.extend({
 		this.panels["skilledit_button"].setVisible(visible);
 		this.panels["signedit_button"].setVisible(visible);
 		this.panels["scriptedit_button"].setVisible(visible);
-		this.panels["warpedit_button"].setVisible(visible);
 		this.panels["settings_button"].setVisible(visible);
 		this.panels["shopedit_button"].setVisible(visible);
 		this.panels["bankedit_button"].setVisible(visible);
@@ -473,19 +460,6 @@ var GameScene = Scene.extend({
 						Settingseditor.init();
 						Settingseditor.didBecomeActive();
 						this.addChild(Settingseditor);
-					}
-				break;
-				case "/editwarp": 
-					if(Warpeditor!=null && !Warpeditor._parent) Warpeditor=null;
-					if(Warpeditor){
-						Warpeditor.willTerminate();
-						Warpeditor.removeFromParent();
-						Warpeditor=null;
-					} else{
-						Warpeditor = new PopupList();
-						Warpeditor.init({delegate:null,editor:new WarpEditor(),list:ObjectLists.getWarpList(),name:"Warp List"});
-						Warpeditor.didBecomeActive();
-						this.addChild(Warpeditor);
 					}
 				break;
 				case "/editsign": 
@@ -599,10 +573,10 @@ var GameScene = Scene.extend({
 	
 	init:function(withData){
 		this._super();
-		var bgLayer = cc.LayerColor.create(cc.c3b(0,0,0),screenSize.width,screenSize.height);
-		bgLayer.setAnchorPoint(cc.p(0,0));
-		bgLayer.setPosition(cc.p(0,0));
-		this.addChild(bgLayer);
+	//	var bgLayer = cc.LayerColor.create(cc.c3b(0,0,0),screenSize.width,screenSize.height);
+	//	bgLayer.setAnchorPoint(cc.p(0,0));
+	//	bgLayer.setPosition(cc.p(0,0));
+	//	this.addChild(bgLayer);
 		MainScene=this;	
 		this.addChild(GameMap.create());
 		ObjectLists.getInstance();

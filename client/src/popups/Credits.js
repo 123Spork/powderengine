@@ -137,7 +137,7 @@ Credits = Popup.extend({
 						children: {
 							"list":{
 								size:cc.size(324,328),
-								bg:cc.c4b(0,200,200,200),
+								color:cc.c4b(0,200,200,200),
 								position:cc.p(0,0),
 								anchorPoint:cc.p(0,0),
 							},

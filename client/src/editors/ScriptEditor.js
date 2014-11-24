@@ -707,20 +707,18 @@ ScriptEditor = Popup.extend({
 	getLayoutObject:function(){
 			return { 
 			"panels":{
-				position:cc.p(0,60),
 				children:{	
 					"background_image":{
 						texture:"GUI/event_panel.png",
 						anchorPoint:cc.p(0,0),
 					},
-
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
 						size: cc.size(1000,400),
 						children: {
 							"list":{
 								size:cc.size(758,360),
-								bg:cc.c4b(0,200,200,200),
+								color:cc.c4b(0,200,200,200),
 								position:cc.p(0,0),
 								anchorPoint:cc.p(0,0),
 							},
@@ -739,7 +737,7 @@ ScriptEditor = Popup.extend({
 							"defaultsbtn" : {
 								position:cc.p(542,364),
 								size:cc.size(64,32),
-								bg:cc.c4b(0,255,0,255),
+								color:cc.c4b(0,255,0,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"contents":{
@@ -754,7 +752,7 @@ ScriptEditor = Popup.extend({
 							"specifier" : {
 								position:cc.p(620,364),
 								size:cc.size(128,32),
-								bg:cc.c4b(0,255,0,255),
+								color:cc.c4b(0,255,0,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"contents":{
@@ -777,7 +775,7 @@ ScriptEditor = Popup.extend({
 							"nameEntry":{
 								position:cc.p(180,364),
 								size:cc.size(340,32),
-								bg:cc.c4b(255,255,255,255),
+								color:cc.c4b(255,255,255,255),
 							},
 						},
 					},
@@ -802,12 +800,12 @@ ScriptEditor = Popup.extend({
 					},
 					"subEditorOver":{
 						visible:false,
-						bg:cc.c4b(0,0,0,127),
+						color:cc.c4b(0,0,0,127),
 						position:cc.p(0,0),
 						size:cc.size(800,400),
 					},
 					"mainEditorOver":{
-						bg:cc.c4b(0,0,0,127),
+						color:cc.c4b(0,0,0,127),
 						position:cc.p(800,0),
 						size:cc.size(200,400),
 					},
@@ -889,7 +887,7 @@ ScriptEditor = Popup.extend({
 			"panels":{
 				children:{
 					"editArea":{
-						bg:cc.c4b(127,127,127,255),
+						color:cc.c4b(127,127,127,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(0,0),
 						size:cc.size(200,250),
@@ -947,7 +945,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"mapNumberText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,340),
 						size:cc.size(100,32),
@@ -958,7 +956,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,310),
 					},
 					"mapXText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,276),
 						size:cc.size(80,32),
@@ -969,7 +967,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(100,310),
 					},
 					"mapYText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(100,276),
 						size:cc.size(80,32),
@@ -991,7 +989,7 @@ ScriptEditor = Popup.extend({
 						color:cc.c3b(255,0,0),
 					},
 					"sayText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,100),
 						size:cc.size(174,200),
@@ -1013,7 +1011,7 @@ ScriptEditor = Popup.extend({
 						color:cc.c3b(255,0,0),
 					},
 					"sayText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,100),
 						size:cc.size(174,190),
@@ -1028,7 +1026,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"sayText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,50),
 						size:cc.size(174,322),
@@ -1043,7 +1041,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"sayText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,274),
 						size:cc.size(174,100),
@@ -1054,7 +1052,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,235),
 					},
 					"optionList":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,50),
 						size:cc.size(154,185),
@@ -1069,7 +1067,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"questList":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,230),
 						size:cc.size(154,135),
@@ -1080,7 +1078,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,189),
 					},
 					"objectiveList":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,50),
 						size:cc.size(154,135),
@@ -1095,7 +1093,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"itemList":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,230),
 						size:cc.size(154,135),
@@ -1106,7 +1104,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,189),
 					},
 					"amountText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,153),
 						size:cc.size(154,32),
@@ -1126,7 +1124,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"skillList":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,230),
 						size:cc.size(154,135),
@@ -1137,7 +1135,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,205),
 					},
 					"levelText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,169),
 						size:cc.size(154,32),
@@ -1148,7 +1146,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,145),
 					},
 					"expText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,109),
 						size:cc.size(154,32),
@@ -1159,7 +1157,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,85),
 					},
 					"healthText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,49),
 						size:cc.size(154,32),
@@ -1174,7 +1172,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"panelList":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,230),
 						size:cc.size(154,135),
@@ -1185,7 +1183,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,205),
 					},
 					"visibleButton":{
-						bg:cc.c4b(255,0,0,255),
+						color:cc.c4b(255,0,0,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,169),
 						size:cc.size(154,32),
@@ -1208,7 +1206,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"objectList":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,230),
 						size:cc.size(154,135),
@@ -1223,7 +1221,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"actionList":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,230),
 						size:cc.size(154,135),
@@ -1238,7 +1236,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"spaceText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,340),
 						size:cc.size(100,32),
@@ -1253,7 +1251,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"timeText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,340),
 						size:cc.size(100,32),
@@ -1268,7 +1266,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"amountText":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,340),
 						size:cc.size(100,32),
@@ -1288,7 +1286,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"skillList":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,230),
 						size:cc.size(154,135),
@@ -1304,13 +1302,13 @@ ScriptEditor = Popup.extend({
 						position:cc.p(91,174),
 					},
 					"levelTextLower":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,169),
 						size:cc.size(75,32),
 					},
 					"levelTextUpper":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(100,169),
 						size:cc.size(75,32),
@@ -1326,13 +1324,13 @@ ScriptEditor = Popup.extend({
 						position:cc.p(91,114),
 					},
 					"expTextLower":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,109),
 						size:cc.size(75,32),
 					},
 					"expTextUpper":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(100,109),
 						size:cc.size(75,32),
@@ -1349,13 +1347,13 @@ ScriptEditor = Popup.extend({
 						position:cc.p(91,54),
 					},
 					"healthTextLower":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(12,49),
 						size:cc.size(75,32),
 					},
 					"healthTextUpper":{
-						bg:cc.c4b(255,255,255,255),
+						color:cc.c4b(255,255,255,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(100,49),
 						size:cc.size(75,32),
@@ -1370,7 +1368,7 @@ ScriptEditor = Popup.extend({
 						position:cc.p(12,374),
 					},
 					"headButton":{
-						bg:cc.c4b(255,0,0,255),
+						color:cc.c4b(255,0,0,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(69,320),
 						size:cc.size(55,32),
@@ -1384,7 +1382,7 @@ ScriptEditor = Popup.extend({
 						}
 					},
 					"bodyButton":{
-						bg:cc.c4b(255,0,0,255),
+						color:cc.c4b(255,0,0,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(69,280),
 						size:cc.size(55,32),
@@ -1398,7 +1396,7 @@ ScriptEditor = Popup.extend({
 						}
 					},
 					"legButton":{
-						bg:cc.c4b(255,0,0,255),
+						color:cc.c4b(255,0,0,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(69,240),
 						size:cc.size(55,32),
@@ -1412,7 +1410,7 @@ ScriptEditor = Popup.extend({
 						}
 					},
 					"feetButton":{
-						bg:cc.c4b(255,0,0,255),
+						color:cc.c4b(255,0,0,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(69,200),
 						size:cc.size(55,32),
@@ -1426,7 +1424,7 @@ ScriptEditor = Popup.extend({
 						}
 					},
 					"lArmButton":{
-						bg:cc.c4b(255,0,0,255),
+						color:cc.c4b(255,0,0,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(10,280),
 						size:cc.size(55,32),
@@ -1440,7 +1438,7 @@ ScriptEditor = Popup.extend({
 						}
 					},
 					"rArmButton":{
-						bg:cc.c4b(255,0,0,255),
+						color:cc.c4b(255,0,0,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(128,280),
 						size:cc.size(55,32),
@@ -1454,7 +1452,7 @@ ScriptEditor = Popup.extend({
 						}
 					},
 					"modButton":{
-						bg:cc.c4b(255,0,0,255),
+						color:cc.c4b(255,0,0,255),
 						anchorPoint:cc.p(0,0),
 						position:cc.p(10,160),
 						size:cc.size(55,32),
@@ -2271,10 +2269,7 @@ ScriptEditor = Popup.extend({
 		if(this._super(touch)){
 			return true;
 		}
-	
-		this.prevMovPos=null;
-		var pos = touch._point;
-		
+		var pos = cc.p(touch._point.x,touch._point.y);
 		if(this.subsubEditor){
 			var truePos = this.subsubEditor.convertToNodeSpace(pos);
 			if(isTouching(this.subsubEditor["okbtn"],truePos)){
@@ -2302,7 +2297,6 @@ ScriptEditor = Popup.extend({
 		if(this.subEditor){
 			var truePos = this.subEditor.convertToNodeSpace(pos);
 			if(isTouching(this.subEditor["okbtn"],truePos)){
-
 				switch(this.subEditorType){
 					case "Warp Player":
 						var index = indexFromPos(parseInt(this.warpXBox.getText()),(gridHeight)-parseInt(this.warpYBox.getText()));
@@ -2391,86 +2385,84 @@ ScriptEditor = Popup.extend({
 					break;
 				}
 				this.hideSubEditor();
-				return true;
-
+				return;
 			}
 
 
 			if (this.subEditor["headButton"] && isTouching(this.subEditor["headButton"],truePos)) {
 				this.setEquippableTo("head");
-				return true;
+				return;
 			}
 			if (this.subEditor["bodyButton"] && isTouching(this.subEditor["bodyButton"],truePos)) {
 				this.setEquippableTo("body");
-				return true;
+				return;
 			}
 			if (this.subEditor["legButton"] && isTouching(this.subEditor["legButton"],truePos)) {
 				this.setEquippableTo("legs");
-				return true;
+				return;
 			}
 			if (this.subEditor["feetButton"] && isTouching(this.subEditor["feetButton"],truePos)) {
 				this.setEquippableTo("feet");
-				return true;
+				return;
 			}
 			if (this.subEditor["lArmButton"] && isTouching(this.subEditor["lArmButton"],truePos)) {
 				this.setEquippableTo("lArm");
-				return true;
+				return;
 			}
 			if (this.subEditor["rArmButton"] && isTouching(this.subEditor["rArmButton"],truePos)) {
 				this.setEquippableTo("rArm");
-				return true;
+				return;
 			}
 			if (this.subEditor["modButton"] && isTouching(this.subEditor["modButton"],truePos)) {
 				this.setEquippableTo("mod");
-				return true;
+				return;
 			}
 
 			if (this.subEditor["visibleButton"] && isTouching(this.subEditor["visibleButton"],truePos)) {
 				this.visibleContext = this.visibleContext==0?1:0;
 				this.subEditor["visibleButton"].setColor(this.visibleContext==0?cc.c4b(255,0,0,255):cc.c4b(0,255,0,255));
 				this.subEditor["visibleButton"]["content"].setString(this.visibleContext==0?"Invisible":"Visible");
-				return true;
+				return;
 			}
 
 			if (isTouching(this.subEditor["cancelbtn"],truePos)) {
-				console.log(this.preEditData);
 				this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"]=cloneObj(this.preEditData);
 				this.hideSubEditor();
-				return true;
+				return;
 			}
 
 		} else{
 			var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
 			if(isTouching(this.panels["main_panel"]["defaultsbtn"],truePos)){
 				this._parent.addChild(DropDownList.createWithListAndPosition(this,this.defaultSelected,["Block Player","Warp Player","Show Sign","Spawn NPC","Spawn Item","Block NPC","PVP Area"],touch._point));
-				return true;
+				return;
 			}
 
 			if(isTouching(this.panels["main_panel"]["specifier"],truePos)){
 				this._parent.addChild(DropDownList.createWithListAndPosition(this,this.specifierSelected,["Item","Tile","NPC","None"],touch._point));
-				return true;
+				return;
 			}
 
 			if(isTouching(this.panels["main_panel"]["okbtn"],truePos)){
 				if(this.nameBox.getText()==null || this.nameBox.getText()==""){
-					return true;
+					return;
 				}
 				this.data["name"]=this.nameBox.getText();
 				this.ignoreTerminate=true;
 				this.delegate.endedEdit(this.data);
-				return true;
+				return;
 			}
 			if(isTouching(this.panels["main_panel"]["cancelbtn"],truePos)){
 				this.ignoreTerminate=true;
 				var self= this.delegate;
 				this.delegate.scheduleOnce(function(){self.endedEdit(null)});
-				return true;
+				return;
 			}
 
 			if(isTouching(this.panels["main_panel"],truePos)){
-				return true;
+				return;
 			}
-			return false;
+			return;
 		}
 	},
 

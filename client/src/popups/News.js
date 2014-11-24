@@ -14,6 +14,12 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"24th November 2014: (v0.75)":[
+					"Re-introduced dependancies so that I can added orientation change logic to the project. Clicking and dragging a client window now correctly resizes the game."
+				],
+				"16th November 2014: (v0.75)":[
+					"Cleaned up project dependancies, removed dependancy on socket.io and cocos-utils changes."
+				],
 				"11th November 2014: (v0.74)":[
 					"Added quest log (hotkey Q).",
 					"Implemented quest response logic. Added 2 additional 'quest unstarted' and 'quest finished' parameters"
@@ -189,7 +195,7 @@ News = Popup.extend({
 						children: {
 							"list":{
 								size:cc.size(324,328),
-								bg:cc.c4b(0,200,200,200),
+								color:cc.c4b(0,200,200,200),
 								position:cc.p(0,0),
 								anchorPoint:cc.p(0,0),
 							},

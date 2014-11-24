@@ -175,13 +175,13 @@ QuestsPanel = Popup.extend({
 						children: {
 							"list":{
 								size:cc.size(216,328),
-								bg:cc.c4b(0,200,200,0),
+								color:cc.c4b(0,200,200,0),
 								position:cc.p(0,0),
 								anchorPoint:cc.p(0,0),
 							},
 							"sublist":{
 								size:cc.size(212,328),
-								bg:cc.c4b(0,200,200,0),
+								color:cc.c4b(0,200,200,0),
 								position:cc.p(258,0),
 								anchorPoint:cc.p(0,0),
 							},

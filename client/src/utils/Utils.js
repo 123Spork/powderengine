@@ -244,21 +244,22 @@ function getLayoutNodes(nodes,request,parent){
 		}
 		if(typeof(data.isGameTile)!='undefined'){
 			var node = GameTile.Create(data.tileXY);
-		}else if(typeof(data.bg)!='undefined'){
-			var layerSize = data.size ? data.size : cc.size(100,100);
-			var node = cc.LayerColor.create(data.bg,layerSize.width,layerSize.height);
-		}else if(typeof(data.isSprite)!='undefined'){
-			var node = cc.Sprite.create();
-		} else if(typeof(data.texture)!='undefined'){
+		}
+		else if(typeof(data.texture)!='undefined'){
 			var node = cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage(data.texture));
 		} else if(typeof(data.label)!='undefined'){
 			var font = data.font ? data.fontFace : "Arial";
 			var size = data.fontSize ? data.fontSize : 14;
 			var node = cc.LabelTTF.create(data.label,font,size);
 		} else {
-			var node = cc.Node.create();
+			if(typeof(data.color)!='undefined' && typeof(data.size)!='undefined'){
+				var node = cc.Sprite.create();
+				node.setTextureRect(cc.rect(0,0,data.size.width,data.size.height));
+				node.setAnchorPoint(cc.p(0,0));
+			}else{
+				var node = cc.Node.create();
+			}
 		}
-		
 		if(typeof(data.size)!='undefined'){
 			node.setContentSize(Math.floor(data.size.width),Math.floor(data.size.height));
 		}
@@ -271,14 +272,14 @@ function getLayoutNodes(nodes,request,parent){
 		if(typeof(data.anchorPoint)!='undefined'){
 			node.setAnchorPoint(data.anchorPoint);
 		}
+		if(typeof(data.color)!='undefined'){
+			node.setColor(data.color);
+			if(data.color.a){
+				node.setOpacity(data.color.a);
+			}
+		}
 		if(typeof(data.opacity)!='undefined'){
 			node.setOpacity(data.opacity);
-		}
-		if(typeof(data.color)!='undefined'){
-			if(!node.setColor){
-				console.log(data)
-			}
-			node.setColor(data.color);
 		}
 		if(typeof(data.children)!='undefined'){
 			for(var i in data.children){
@@ -317,9 +318,6 @@ function updateLayoutNodes(nodes,request,current,parent){
 			current.setOpacity(data.opacity);
 		}
 		if(typeof(data.color)!='undefined'){
-			if(!node.setColor){
-				console.log(data)
-			}
 			current.setColor(data.color);
 		}
 		if(typeof(data.children)!='undefined'){

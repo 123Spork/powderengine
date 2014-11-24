@@ -16,7 +16,7 @@ MapEditor = Popup.extend({
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,0),
 						size: cc.size(420,380),
-						bg: cc.c4b(0,0,100,120),
+						color: cc.c4b(0,0,100,120),
 						children: {
 							"tab1":{
 								children:{
@@ -29,7 +29,7 @@ MapEditor = Popup.extend({
 									"textureleftbtn" : {
 										position:cc.p(360,344),
 										size:cc.size(16,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -44,7 +44,7 @@ MapEditor = Popup.extend({
 									"texturerightbtn" : {
 										position:cc.p(472,344),
 										size:cc.size(16,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -59,7 +59,7 @@ MapEditor = Popup.extend({
 									"textureName" : {
 										position:cc.p(376,344),
 										size:cc.size(96,32),
-										bg: cc.c4b(255,255,255,170),
+										color: cc.c4b(255,255,255,170),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -75,7 +75,7 @@ MapEditor = Popup.extend({
 									"deletebtn" : {
 										position:cc.p(360,308),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -90,7 +90,7 @@ MapEditor = Popup.extend({
 									"leftbtn" : {
 										position:cc.p(0,16),
 										size:cc.size(16,320),
-										bg: cc.c4b(0,0,255,255),
+										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -105,7 +105,7 @@ MapEditor = Popup.extend({
 									"rightbtn" : {
 										position:cc.p(336,16),
 										size:cc.size(16,320),
-										bg: cc.c4b(0,0,255,255),
+										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -120,7 +120,7 @@ MapEditor = Popup.extend({
 									"upbtn" : {
 										position:cc.p(16,336),
 										size:cc.size(320,16),
-										bg: cc.c4b(0,0,255,255),
+										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -135,7 +135,7 @@ MapEditor = Popup.extend({
 									"downbtn" : {
 										position:cc.p(16,0),
 										size:cc.size(320,16),
-										bg: cc.c4b(0,0,255,255),
+										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -150,7 +150,7 @@ MapEditor = Popup.extend({
 									"fillbtn" : {
 										position:cc.p(428,308),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -165,7 +165,7 @@ MapEditor = Popup.extend({
 									"ground1btn" : {
 										position:cc.p(360,278),
 										size:cc.size(128,26),
-										bg: GREEN,
+										color: GREEN,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -180,7 +180,7 @@ MapEditor = Popup.extend({
 									"ground2btn" : {
 										position:cc.p(360,248),
 										size:cc.size(128,26),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -195,7 +195,7 @@ MapEditor = Popup.extend({
 									"groundShadowbtn" : {
 										position:cc.p(360,218),
 										size:cc.size(128,26),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -210,7 +210,7 @@ MapEditor = Popup.extend({
 									"mask1btn" : {
 										position:cc.p(360,188),
 										size:cc.size(128,26),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -225,7 +225,7 @@ MapEditor = Popup.extend({
 									"mask2btn" : {
 										position:cc.p(360,158),
 										size:cc.size(128,26),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -240,7 +240,7 @@ MapEditor = Popup.extend({
 									"mask3btn" : {
 										position:cc.p(360,128),
 										size:cc.size(128,26),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -255,7 +255,7 @@ MapEditor = Popup.extend({
 									"fringe1btn" : {
 										position:cc.p(360,98),
 										size:cc.size(128,26),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -270,7 +270,7 @@ MapEditor = Popup.extend({
 									"fringe2btn" : {
 										position:cc.p(360,68),
 										size:cc.size(128,26),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -285,7 +285,7 @@ MapEditor = Popup.extend({
 									"fringeShadowbtn" : {
 										position:cc.p(360,38),
 										size:cc.size(128,26),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -300,7 +300,7 @@ MapEditor = Popup.extend({
 									"fringe3btn" : {
 										position:cc.p(360,8),
 										size:cc.size(128,26),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -317,13 +317,13 @@ MapEditor = Popup.extend({
 										anchorPoint:cc.p(0,0),
 										position:cc.p(0,0),
 										size:cc.size(cellsize,cellsize),
-										bg:cc.c4b(255,100,100,255),
+										color:cc.c4b(255,100,100,255),
 									},
 									"selectednode" : {
 										anchorPoint:cc.p(0,0),
 										position:cc.p(0,0),
 										size:cc.size(cellsize,cellsize),
-										bg:cc.c4b(100,255,100,255),
+										color:cc.c4b(100,255,100,255),
 									},
 								}
 							},
@@ -332,7 +332,7 @@ MapEditor = Popup.extend({
 									"blockbtn" : {
 										position:cc.p(8,320),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -344,25 +344,10 @@ MapEditor = Popup.extend({
 											}
 										}
 									},
-									"warpbtn" : {
-										position:cc.p(8,280),
-										size:cc.size(60,32),
-										bg: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Warp",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(32,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
 									"itembtn" : {
 										position:cc.p(8,240),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -377,7 +362,7 @@ MapEditor = Popup.extend({
 									"signbtn" : {
 										position:cc.p(8,200),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -392,7 +377,7 @@ MapEditor = Popup.extend({
 									"npcbtn" : {
 										position:cc.p(8,160),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -422,19 +407,19 @@ MapEditor = Popup.extend({
 									"saveBack":{
 										position:cc.p(0,78),
 										size:cc.size(200,60),
-										bg: cc.c4b(0,255,0,100),
+										color: cc.c4b(0,255,0,100),
 										anchorPoint:cc.p(0,0),
 									},
 									"deleteback":{
 										position:cc.p(0,138),
 										size:cc.size(200,60),
-										bg: cc.c4b(255,0,0,100),
+										color: cc.c4b(255,0,0,100),
 										anchorPoint:cc.p(0,0),
 									},
 									"mapnumsback":{
 										position:cc.p(0,198),
 										size:cc.size(200,162),
-										bg: cc.c4b(0,0,0,170),
+										color: cc.c4b(0,0,0,170),
 										anchorPoint:cc.p(0,0),
 									},
 									"mapUp_text":{
@@ -480,7 +465,7 @@ MapEditor = Popup.extend({
 									"this_map":{
 										position:cc.p(70,248),
 										size:cc.size(60,60),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -495,7 +480,7 @@ MapEditor = Popup.extend({
 									"clearbtn" : {
 										position:cc.p(70,150),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -516,7 +501,7 @@ MapEditor = Popup.extend({
 									"clearbtnNo" : {
 										position:cc.p(10,150),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -531,7 +516,7 @@ MapEditor = Popup.extend({
 									"clearbtnYes" : {
 										position:cc.p(130,150),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -546,7 +531,7 @@ MapEditor = Popup.extend({
 									"savebtn" : {
 										position:cc.p(70,90),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -567,7 +552,7 @@ MapEditor = Popup.extend({
 									"savebtnNo" : {
 										position:cc.p(10,90),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -582,7 +567,7 @@ MapEditor = Popup.extend({
 									"savebtnYes" : {
 										position:cc.p(130,90),
 										size:cc.size(60,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -597,7 +582,7 @@ MapEditor = Popup.extend({
 									"saveOnExit" : {
 										position:cc.p(40,30),
 										size:cc.size(120,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0.5,0),
 										children:{
 											"content":{
@@ -614,7 +599,7 @@ MapEditor = Popup.extend({
 							"tab1Clickable":{
 								position:cc.p(0,360),
 								size:cc.size(60,20),
-								bg: WHITE,
+								color: WHITE,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -629,7 +614,7 @@ MapEditor = Popup.extend({
 							"tab2Clickable":{
 								position:cc.p(64,360),
 								size:cc.size(60,20),
-								bg: WHITE,
+								color: WHITE,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -644,7 +629,7 @@ MapEditor = Popup.extend({
 							"tab3Clickable":{
 								position:cc.p(128,360),
 								size:cc.size(60,20),
-								bg: WHITE,
+								color: WHITE,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -662,7 +647,7 @@ MapEditor = Popup.extend({
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,380),
 						size: cc.size(420,32),
-						bg: cc.c4b(255,0,0,200),
+						color: cc.c4b(255,0,0,200),
 						children:{	
 							"header":{
 								label:"Map Editor - Map #" + GameMap.getMapNumber(),
@@ -674,7 +659,7 @@ MapEditor = Popup.extend({
 								position: cc.p(391,3),
 								size: cc.size(26,26),
 								anchorPoint:cc.p(0,0),
-								bg: cc.c4b(255,255,255,200),
+								color: cc.c4b(255,255,255,200),
 								children:{	
 								"content":{
 									label:"X",
@@ -741,12 +726,6 @@ MapEditor = Popup.extend({
 	},
 	
 	setTypeData:function(value,data){
-		if(Warpeditor){
-			Warpeditor.willTerminate();
-			this.scheduleOnce(function(){Warpeditor.removeFromParent(); Warpeditor=null;});
-			this.typeData=value;
-			this.setTouchEnabled(true);
-		}
 		if(Signeditor){
 			Signeditor.willTerminate();
 			this.scheduleOnce(function(){Signeditor.removeFromParent(); Signeditor=null;});
@@ -972,7 +951,6 @@ MapEditor = Popup.extend({
 		}
 		if(this.currentTab==2){
 			if(isTouching(this.panels["main_panel"]["tab2"]["blockbtn"],truePos)){
-				this.panels["main_panel"]["tab2"]["warpbtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["signbtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["npcbtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["itembtn"].setColor(WHITE);
@@ -985,36 +963,8 @@ MapEditor = Popup.extend({
 				}
 				return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["warpbtn"],truePos)){
-				this.panels["main_panel"]["tab2"]["warpbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["signbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["npcbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["itembtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["blockbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
-				this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-1000000);
-				this.editMode = this.editMode=="warping" ? "tiles" : "warping";
-				if(this.editMode=="warping"){
-					if(Warpeditor!=null && !Warpeditor._parent) Warpeditor=null;
-					if(Warpeditor){
-						Warpeditor.willTerminate();
-						Warpeditor.removeFromParent();
-						Warpeditor=null;
-					}
-					Warpeditor = new PopupList();
-					Warpeditor.init({delegate:this,editor:new WarpEditor(),list:ObjectLists.getWarpList(),name:"Warp List"});
-					Warpeditor.didBecomeActive();
-					this._parent.addChild(Warpeditor);
-					this.setTouchEnabled(false);
-					this.panels["main_panel"]["tab2"]["warpbtn"].setColor(RED);
-					this.panels["main_panel"]["tab2"]["amountLabelHead"].setVisible(false);
-					this.panels["main_panel"]["tab2"]["amountLabel"].setPosition(68,-100000);
-				} 
-				return true;
-			}
 			if(isTouching(this.panels["main_panel"]["tab2"]["signbtn"],truePos)){
 				this.panels["main_panel"]["tab2"]["signbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["warpbtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["npcbtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["itembtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["blockbtn"].setColor(WHITE);
@@ -1039,7 +989,6 @@ MapEditor = Popup.extend({
 			}
 			if(isTouching(this.panels["main_panel"]["tab2"]["npcbtn"],truePos)){
 				this.panels["main_panel"]["tab2"]["signbtn"].setColor(WHITE);
-				this.panels["main_panel"]["tab2"]["warpbtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["npcbtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["itembtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["blockbtn"].setColor(WHITE);
@@ -1063,7 +1012,6 @@ MapEditor = Popup.extend({
 				return true;
 			}
 			if(isTouching(this.panels["main_panel"]["tab2"]["itembtn"],truePos)){
-				this.panels["main_panel"]["tab2"]["warpbtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["itembtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["npcbtn"].setColor(WHITE);
 				this.panels["main_panel"]["tab2"]["blockbtn"].setColor(WHITE);
@@ -1187,15 +1135,6 @@ MapEditor = Popup.extend({
 					break;
 				}
 				GameMap.setTileInfo(tilenum,0);
-			break;
-			case "warping":
-				if(Warpeditor==null || !Warpeditor._parent){
-					if(tiles[tilenum].getType()!=3){
-						GameMap.setTileInfo(tilenum,3,this.typeData);
-						break;
-					} 
-					GameMap.setTileInfo(tilenum,0,null);
-				}
 			break;
 			case "signs":
 				if(Signeditor==null || !Signeditor._parent){

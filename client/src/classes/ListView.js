@@ -37,9 +37,15 @@ reloadData:function(){
 	this.setTouchMode(0);
 
 	if(this.noScroll==false){
-		this.scrollBarBack = cc.LayerColor.create(cc.c4b(0,0,0,255),1,this.delegate.getContentSize().height);
+		this.scrollBarBack = cc.Sprite.create();
+		this.scrollBarBack.setTextureRect(cc.rect(0,0,1,this.delegate.getContentSize().height));
+		this.scrollBarBack.setColor(cc.c4b(0,0,0,255));
+		this.scrollBarBack.setAnchorPoint(cc.p(0,0));
 		this.scrollBarBack.setPosition(cc.p(this.delegate.getContentSize().width+20,0))
-		this.scrollBar = cc.LayerColor.create(cc.c4b(90,90,255,255),20,this.delegate.getContentSize().height/5);
+		this.scrollBar = cc.Sprite.create();
+		this.scrollBar.setAnchorPoint(cc.p(0,0));
+		this.scrollBar.setTextureRect(cc.rect(0,0,20,this.delegate.getContentSize().height/5));
+		this.scrollBar.setColor(cc.c4b(90,90,255,255));
 		this.scrollBar.setPosition(cc.p(this.delegate.getContentSize().width+10,0));
 		this.delegate.addChild(this.scrollBarBack);
 		this.delegate.addChild(this.scrollBar);

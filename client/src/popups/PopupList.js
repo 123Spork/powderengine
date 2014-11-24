@@ -226,20 +226,6 @@ PopupList = Popup.extend({
 		}
 	},
 
-	onTouchBegan:function(touch){
-		if(this._super(touch)){
-			return true;
-		}
-		
-		this.prevMovPos=null;
-		var pos = touch._point;
-		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
-		if(isTouching(this.panels["main_panel"],truePos)){
-			return true;
-		}
-		return false;
-	},
-
 	endedEdit:function(addData){
 		if(addData){
 			this.childEditor.runSaveNewData(this.saveNewDataID);

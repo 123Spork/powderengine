@@ -8,7 +8,9 @@ var SceneManager = cc.Layer.extend({
 	    updateScreenSize();
 		cc.EGLView.getInstance().setResizeCallback(this.orientationChange);
 		var screenSize = cc.EGLView.getInstance().getFrameSize();
-		this.background_node = cc.LayerColor.create(cc.c4b(255,255,255,255),parseInt(screenSize.width*4),parseInt(screenSize.height*4));
+		this.background_node = cc.Sprite.create();
+		this.background_node.setColor(cc.c3b(0,0,0));
+		this.background_node.setTextureRect(cc.rect(0,0,screenSize.width,screenSize.height));
 		this.background_node.setAnchorPoint(cc.p(0,0));
 		this.addChild(this.background_node);
 
@@ -24,13 +26,10 @@ var SceneManager = cc.Layer.extend({
 	},
 
 	orientationChange:function(){
-	//	var egl = cc.EGLView.getInstance();
-	//	screenSize = egl.getFrameSize();
-	/*	var canvas = cc.canvas;
-		context = canvas.getContext('2d');
-		context.canvas.width=screenSize.width;
-*/
-	//	MainScene.onOrientationChanged();
+		var egl = cc.EGLView.getInstance();
+        screenSize=cc.size(egl.getFrameSize().width,egl.getFrameSize().height);
+        SceneManager.getInstance().background_node.setTextureRect(cc.rect(0,0,screenSize.width,screenSize.height));
+		SceneManager.getInstance().currentScene.onOrientationChanged();
 	},
 
 	initGameWhenLocalStorage:function(){

@@ -6,8 +6,7 @@ Popup = Scene.extend({
 		this.sceneIdentifier = this.getIdentifier();
 		this._super();	
 		SceneManager.setActiveScene(this);
-		this.setupPopup();
-		this.setTouchPriority(-50);
+		this.setTouchPriority(-300);
 	},
 
 	exitButtonPressed:function(){
@@ -34,27 +33,22 @@ Popup = Scene.extend({
 	onTouchMoved:function(touch){
 		if(this.prevMovPos){
 			var pt=touch._point;
-			this.panels.setPosition(cc.p(pt.x-this.prevMovPos.x,pt.y-this.prevMovPos.y));
+			this.panels.setPosition(pt.x-this.prevMovPos.x,pt.y-this.prevMovPos.y);
 			return true;
 		}
 		return false;
 	},
 
-	removeFromParent:function(){
+	onTouchEnded:function(touch){
+		if(this.prevMovPos){
+			this.prevMovPos=null;
+		}
 		LocalStorage.setPanelPosition(this.getIdentifier(),this.panels.getPosition());
-		this._super();
-	},
-
-	setupPopup:function(){
-		cc.log("Ovveride setupPopup");
 	},
 
 	getIdentifier:function(){
 		cc.log("No id given... using default 'Popup'");
 		return "Popup";
-	},
-
-	onTouchEnded:function(touch){
 	},
 
 	didBecomeActive:function(){

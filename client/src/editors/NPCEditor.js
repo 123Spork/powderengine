@@ -43,7 +43,7 @@ NPCEditor = Popup.extend({
 							"name_entry":{
 								position:cc.p(74,292),
 								size:cc.size(266,32),
-								bg:cc.c4b(255,255,255,255),
+								color:cc.c4b(255,255,255,255),
 							},
 
 							"tiles" : {
@@ -83,7 +83,7 @@ NPCEditor = Popup.extend({
 							"upbtn" : {
 								position:cc.p(374,236),
 								size:cc.size(96,16),
-								bg: cc.c4b(0,0,255,255),
+								color: cc.c4b(0,0,255,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -98,7 +98,7 @@ NPCEditor = Popup.extend({
 							"downbtn" : {
 								position:cc.p(374,86),
 								size:cc.size(96,16),
-								bg: cc.c4b(0,0,255,255),
+								color: cc.c4b(0,0,255,255),
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -121,7 +121,7 @@ NPCEditor = Popup.extend({
 							"scriptbtn" : {
 								position:cc.p(8,232),
 								size:cc.size(128,26),
-								bg: RED,
+								color: RED,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{

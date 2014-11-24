@@ -11,7 +11,7 @@ SkillsEditor = Popup.extend({
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,0),
 						size: cc.size(420,396),
-						bg: cc.c4b(0,0,100,120),
+						color: cc.c4b(0,0,100,120),
 						children: {
 							"tab1":{
 								children:{
@@ -24,7 +24,7 @@ SkillsEditor = Popup.extend({
 									"textureleftbtn" : {
 										position:cc.p(208,340),
 										size:cc.size(16,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -39,7 +39,7 @@ SkillsEditor = Popup.extend({
 									"texturerightbtn" : {
 										position:cc.p(320,340),
 										size:cc.size(16,32),
-										bg: WHITE,
+										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -54,7 +54,7 @@ SkillsEditor = Popup.extend({
 									"textureName" : {
 										position:cc.p(224,340),
 										size:cc.size(96,32),
-										bg: cc.c4b(255,255,255,170),
+										color: cc.c4b(255,255,255,170),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -69,7 +69,7 @@ SkillsEditor = Popup.extend({
 									"leftbtn" : {
 										position:cc.p(0,64),
 										size:cc.size(16,252),
-										bg: cc.c4b(0,0,255,255),
+										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -84,7 +84,7 @@ SkillsEditor = Popup.extend({
 									"rightbtn" : {
 										position:cc.p(336,64),
 										size:cc.size(16,252),
-										bg: cc.c4b(0,0,255,255),
+										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -99,7 +99,7 @@ SkillsEditor = Popup.extend({
 									"upbtn" : {
 										position:cc.p(16,320),
 										size:cc.size(320,16),
-										bg: cc.c4b(0,0,255,255),
+										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -114,7 +114,7 @@ SkillsEditor = Popup.extend({
 									"downbtn" : {
 										position:cc.p(16,48),
 										size:cc.size(320,16),
-										bg: cc.c4b(0,0,255,255),
+										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -131,13 +131,13 @@ SkillsEditor = Popup.extend({
 										anchorPoint:cc.p(0,0),
 										position:cc.p(0,0),
 										size:cc.size(32,32),
-										bg:cc.c4b(255,100,100,255),
+										color:cc.c4b(255,100,100,255),
 									},
 									"selectednode" : {
 										anchorPoint:cc.p(0,0),
 										position:cc.p(0,0),
 										size:cc.size(32,32),
-										bg:cc.c4b(100,255,100,255),
+										color:cc.c4b(100,255,100,255),
 									},
 								}
 							},
@@ -171,7 +171,7 @@ SkillsEditor = Popup.extend({
 									"healthbtn" : {
 										position:cc.p(8,265),
 										size:cc.size(128,26),
-										bg: RED,
+										color: RED,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
@@ -188,7 +188,7 @@ SkillsEditor = Popup.extend({
 							"tab1Clickable":{
 								position:cc.p(0,376),
 								size:cc.size(60,20),
-								bg: WHITE,
+								color: WHITE,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -203,7 +203,7 @@ SkillsEditor = Popup.extend({
 							"tab2Clickable":{
 								position:cc.p(64,376),
 								size:cc.size(60,20),
-								bg: WHITE,
+								color: WHITE,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -218,7 +218,7 @@ SkillsEditor = Popup.extend({
 							"okbtn" : {
 								position:cc.p(76,8),
 								size:cc.size(60,32),
-								bg: WHITE,
+								color: WHITE,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -233,7 +233,7 @@ SkillsEditor = Popup.extend({
 							"cancelbtn" : {
 								position:cc.p(8,8),
 								size:cc.size(60,32),
-								bg: WHITE,
+								color: WHITE,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
@@ -251,7 +251,7 @@ SkillsEditor = Popup.extend({
 						anchorPoint:cc.p(0,0),
 						position: cc.p(0,396),
 						size: cc.size(420,32),
-						bg: cc.c4b(255,0,0,200),
+						color: cc.c4b(255,0,0,200),
 						children:{	
 							"header":{
 								label:"Skill Editor",
@@ -263,7 +263,7 @@ SkillsEditor = Popup.extend({
 								position: cc.p(391,3),
 								size: cc.size(26,26),
 								anchorPoint:cc.p(0,0),
-								bg: cc.c4b(255,255,255,200),
+								color: cc.c4b(255,255,255,200),
 								children:{	
 								"content":{
 									label:"X",

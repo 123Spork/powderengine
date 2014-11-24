@@ -1,13 +1,5 @@
 var screenSize;
 
-document["ccConfig"] = {
-    COCOS2D_DEBUG: 2,
-    showFPS : true,
-    frameRate : 60,
-    tag : "gameCanvas",
-    renderMode:1       //Choose of RenderMode: 0(default), 1(Canvas only), 2(WebGL only)
-};
-
 var cocos2dApp = cc.Application.extend({
     config : document["ccConfig"],
     ctor : function(){
@@ -22,8 +14,10 @@ var cocos2dApp = cc.Application.extend({
         // initialize director
         var director = cc.Director.getInstance();
         var eglView = cc.EGLView.getInstance();
+        eglView._adjustSizeToBrowser();
         eglView.resizeWithBrowserSize(true);	
         screenSize = eglView.getFrameSize();
+        
         var resourceSize = cc.size(screenSize.width, screenSize.height);
         var designSize = cc.size(screenSize.width,screenSize.height);
         var fileUtils = cc.FileUtils.getInstance();

@@ -79,7 +79,7 @@ EquipmentPanel = Popup.extend({
 					},
 					"item_name":{
 						position:cc.p(0,0),
-						bg:cc.c4b(200,200,200,200),
+						color:cc.c4b(200,200,200,200),
 						size:cc.size(64,16),
 						visible:false,
 						children:{

@@ -2,12 +2,18 @@ Login = Scene.extend({
 serverActive:false,
 waitingOnServer:false,
 
+onOrientationChanged:function(){
+	resetLayoutsFromObject(this.getLayoutObject(),this.panels);
+},
+
+
 init:function(withData){
 	settingsData = mergeSettings(settingsData,LocalStorage.getSettingsData());
 	this._super();
 	SceneManager.setActiveScene(this);
 	this.isRegisterMode=false;
 	this.isRegistering=false;
+
 	this.namebox = new EntryBox(this.panels["name_entry"],cc.size(this.panels["name_entry"].getContentSize().width,this.panels["name_entry"].getContentSize().height), cc.p(0,this.panels["name_entry"].getContentSize().height), "Username", cc.c4b(100,100,100), cc.c3b(255,255,255));
 	this.passbox = new EntryBox(this.panels["password_entry"],cc.size(this.panels["password_entry"].getContentSize().width,this.panels["password_entry"].getContentSize().height), cc.p(0,this.panels["password_entry"].getContentSize().height), "Password", cc.c4b(100,100,100), cc.c3b(255,255,255));
 	this.passbox.setInputFlag(0)
@@ -185,7 +191,7 @@ getLayoutObject:function(){
 					"go_button":{
 						position: cc.p(325,240),
 						size: cc.size(120,40),
-						bg: cc.c4b(0,0,0,255),
+						color: cc.c4b(0,0,0,255),
 						children:{
 							"label":{
 								label:"Play",
@@ -199,8 +205,7 @@ getLayoutObject:function(){
 					"register_button":{
 						position: cc.p(505,240),
 						size: cc.size(120,40),
-						bg: cc.c4b(0,0,0,255),
-						anchorPoint:cc.p(0,1),
+						color: cc.c4b(0,0,0,255),
 						children:{
 							"label":{
 								label:"Register",
@@ -216,7 +221,7 @@ getLayoutObject:function(){
 					"new_user_back":{
 						position: cc.p(325,240),
 						size: cc.size(120,40),
-						bg: cc.c4b(0,0,0,255),
+						color: cc.c4b(0,0,0,255),
 						children:{
 							"label":{
 								label:"Go Back",
@@ -230,7 +235,7 @@ getLayoutObject:function(){
 					"new_user_confirm":{
 						position: cc.p(505,240),
 						size: cc.size(120,40),
-						bg: cc.c4b(0,0,0,255),
+						color: cc.c4b(0,0,0,255),
 						anchorPoint:cc.p(0,1),
 						children:{
 							"label":{
@@ -247,7 +252,7 @@ getLayoutObject:function(){
 					"credits_button":{
 						position: cc.p(30,400),
 						size: cc.size(120,40),
-						bg: cc.c4b(0,0,0,255),
+						color: cc.c4b(0,0,0,255),
 						children:{
 							"label":{
 								label:"Credits",
@@ -262,7 +267,7 @@ getLayoutObject:function(){
 					"news_button":{
 						position: cc.p(30,340),
 						size: cc.size(120,40),
-						bg: cc.c4b(0,0,0,255),
+						color: cc.c4b(0,0,0,255),
 						anchorPoint:cc.p(0,1),
 						children:{
 							"label":{
@@ -510,14 +515,6 @@ onLoginFailed:function(message){
 
 setInfoMessage:function(message){
 	this.panels["server_message"].setString(message);
-},
-
-
-onTouchMoved:function(touch){
-
-},
-
-onTouchEnded:function(touch){
 },
 
 logInWithData:function(data){

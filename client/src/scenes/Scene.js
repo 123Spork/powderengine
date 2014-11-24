@@ -53,8 +53,4 @@ var Scene = cc.Layer.extend({
 	getIdentifier:function(){
 		return this.sceneIdentifier;
 	},
-
-	//onTouchBegan:function(touch){
-		//SceneManager.setActiveScene(this);
-	//},
 });

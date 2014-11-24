@@ -63,7 +63,7 @@ var GameChat=cc.Layer.extend({
 						"chatbar":{
 							size:cc.size(390,22),
 							position:cc.p(5,124),
-							bg:cc.c4b(255,255,255,255),
+							color:cc.c4b(255,255,255,255),
 						},
 						"label7":{
 							label:"",
@@ -127,7 +127,7 @@ GameChat.create=function(){
 		gameChatInstance = new GameChat();
 		gameChatInstance.panels = requestLayout(gameChatInstance);
 		gameChatInstance.addChild(gameChatInstance.panels);
-		gameChatInstance.chatbox = new ChatBox(gameChatInstance.panels["chat_panel"]["chatbar"],cc.size(gameChatInstance.panels["chat_panel"]["chatbar"].getContentSize().width-4,gameChatInstance.panels["chat_panel"]["chatbar"].getContentSize().height-2),cc.p(gameChatInstance.panels["chat_panel"]["chatbar"].getPositionX()+2,gameChatInstance.panels["chat_panel"]["chatbar"].getPositionY()), settingsData["Default ChatBar Message"], cc.c3b(255,255,255), cc.c3b(0,0,0));
+		gameChatInstance.chatbox = new ChatBox(gameChatInstance.panels["chat_panel"]["chatbar"],cc.size(gameChatInstance.panels["chat_panel"]["chatbar"].getContentSize().width-4,gameChatInstance.panels["chat_panel"]["chatbar"].getContentSize().height),cc.p(2,gameChatInstance.panels["chat_panel"]["chatbar"].getContentSize().height), settingsData["Default ChatBar Message"], cc.c3b(255,255,255), cc.c3b(0,0,0));
 		GameChat.hide();
 		GameChat.showWelcome();
 	}

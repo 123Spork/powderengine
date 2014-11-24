@@ -61,9 +61,9 @@ DropDownList = Scene.extend({
 			}
 		}
 		for(var i =0;i<this.list.length;i++){
-			this.panels["control_menu"][i+""].changeWidth(biggest+8)
+			this.panels["control_menu"][i+""].setContentSize(biggest+8,	this.panels["control_menu"][i+""].getContentSize().height);
 		}
-		this.panels["control_menu"].changeWidth(biggest+8);
+					this.panels["control_menu"].setContentSize(biggest+8,this.panels["control_menu"].getContentSize().height);
 	},
 
 	getLayoutObject:function(){
@@ -73,7 +73,7 @@ DropDownList = Scene.extend({
 				position: cc.p(0,((this.list.length-1)*24)-(i*24)),
 				size: cc.size(96,24),
 				anchorPoint:cc.p(0,0),
-				bg: cc.c4b(200,200,200,200),
+				color: cc.c4b(200,200,200,200),
 				children:{	
 					"content":{
 						label:this.list[i],
@@ -92,7 +92,7 @@ DropDownList = Scene.extend({
 			 children:{	
 					"control_menu":{
 						position:cc.p(0,0),
-						bg:cc.c4b(200,200,200,0),
+						color:cc.c4b(200,200,200,0),
 						size:cc.size(96,48),
 						children:listOptions,
 					}

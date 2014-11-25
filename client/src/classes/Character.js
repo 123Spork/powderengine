@@ -201,7 +201,7 @@ Character = cc.Sprite.extend({
 		}
 		if(pos.y==this.toPosition.y && pos.x==this.toPosition.x){
 			this.isWalking=false;
-			handleTileScript("On Leave",GameMap.getTileNodeForXY(this.leavePosition.x,leavePosition.y));
+			handleTileScript("On Leave",GameMap.getTileNodeForXY(this.leavePosition.x,this.leavePosition.y));
 			this.leavePosition=null;
 			handleTileScript("On Enter",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y));
 			this.unschedule(this.walk);

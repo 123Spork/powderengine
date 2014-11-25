@@ -580,6 +580,14 @@ var handleTileScript = function(eventname,tile,ignoreList){
 					var defaultEvent = scriptData[j]["responses"];
 					for(var k=0;k<defaultEvent.length;k++){
 						switch(defaultEvent[k]["type"]){
+							case "Spawn NPC":
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									PlayersController.addNPC(ObjectLists.getNPCList()[defaultEvent["data"]["npc"]],cc.p(tile.getPosition().x/cellsize,tile.getPosition().y/cellsize),GameMap.getMapNumber());
+								},newJ,newK]);
+							break;
 							case "Script Response":
 								var newJ = (function(index) {return index;})(j);
 								var newK = (function(index) {return index;})(k);

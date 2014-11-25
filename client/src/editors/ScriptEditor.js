@@ -1131,6 +1131,21 @@ ScriptEditor = Popup.extend({
 					},
 				};
 			break;
+			case "Spawn NPC":
+			panels["panels"].children={
+					"npcLabel":{
+						label:"NPC:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"npcList":{
+						color:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,230),
+						size:cc.size(154,135),
+					},
+				};
+			break;
 			case "Modify Player Stats": case "Modify NPC Stats":
 				panels["panels"].children={
 					"skillsLabel":{
@@ -1759,6 +1774,66 @@ ScriptEditor = Popup.extend({
 					}
 				}
 			break;
+			case "Spawn NPC":
+				var listnodes = [];
+				var callBackList=[];
+				var itemList = ObjectLists.getNPCList();
+				for(var i=0;i<itemList.length;i++){
+					listnodes[i]=cc.Node.create();
+					var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
+					var text = cc.LabelTTF.create(itemList[i]["name"],"Arial",15);
+					text.setColor(cc.c3b(0,0,0));
+					text.setAnchorPoint(cc.p(0,0));
+					text.setPosition(cc.p(4,4));
+					text.setDimensions(cc.size(126,0));
+					var useElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/use.png"));
+					useElement.setPosition(cc.p(130,0));
+					useElement.setAnchorPoint(cc.p(0,0));
+					useElement.callBack="Use";
+					listnodes[i].setContentSize(154,text.getContentSize().height+8);
+					useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+					callBackList.push([useElement]);
+
+					var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+					listnodes[i].addChild(highlightNode);
+					listnodes[i].highlightNode=highlightNode;
+					listnodes[i].addChild(element);
+					listnodes[i].addChild(text);
+					listnodes[i].addChild(useElement);
+				}
+				var self=this;
+				this.subEditor["npcList"].getListSize = function(){
+					var height =0;
+					for(var i=0;i<listnodes.length;i++){
+						height+=listnodes[i].getContentSize().height;
+					}
+					return cc.size(154,height);
+				};
+				this.subEditor["npcList"].getListElementAmount=function(){
+					return listnodes.length;
+				};
+				this.subEditor["npcList"].getSizeForElement=function(elementID){
+					return listnodes[elementID].getContentSize();
+				};
+				this.subEditor["npcList"].getListNodeForIndex=function(elementID){
+					return listnodes[elementID];
+				};
+				this.subEditor["npcList"].getHighlightNode = function(elementID){
+					return listnodes[elementID].highlightNode;
+				};
+				this.subEditor["npcList"].runListCallBack=function(name,listelement){
+					if(name== "Use"){
+						this.listView.highlightNode(listelement);
+						self.itemContext=listelement;
+					}
+				};
+				this.subEditor["npcList"].listView = ListView.create(this.subEditor["npcList"]);
+				this.subEditor["npcList"].listView.setCallBackList(callBackList);
+				this.subEditor["npcList"].addChild(this.subEditor["npcList"].listView);
+				if(data["npc"]!=null && data["npc"]!=='undefined'){
+					this.subEditor["npcList"].runListCallBack("Use",data["npc"]);
+				}
+			break;
 			case "Give /Take Item": case "Has Player Item":
 				this.subEditor["amountNote"].setDimensions(cc.size(180,0));
 				var listnodes = [];
@@ -2305,6 +2380,11 @@ ScriptEditor = Popup.extend({
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"quest":this.questContext,
 							"objective":this.objectiveContext,
+						}
+					break;
+					case "Spawn NPC":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"npc":this.itemContext,
 						}
 					break;
 					case "Give /Take Item": case "Has Player Item":

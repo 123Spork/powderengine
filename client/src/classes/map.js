@@ -145,7 +145,7 @@ var GameMap=cc.Layer.extend({
 							//this.tileNodes[i].setType(data[i][j]["type"]);
 							if(data[i][j]["script"]!=null && data[i][j]["script"]!=='undefined'){
 								this.tileNodes[i].setScript(data[i][j]["script"]);
-								handleTileScript("On Game Load",tileNodes[i]);
+								handleTileScript("On Game load",this.tileNodes[i]);
 							}/*
 							if(data[i][j]["type"]==4 && this.tileNodes[i].getScriptData()){
 								this.tileNodes[i].setLayer(this.tileNodes[i].getScriptData()["sprite"]["texture"],this.tileNodes[i].getScriptData()["sprite"]["position"],"item");
@@ -191,7 +191,7 @@ var GameMap=cc.Layer.extend({
 						} else{
 							if(data[i][j]["script"]!=null && data[i][j]["script"]!=='undefined'){
 								this.tileNodes[i].setScript(data[i][j]["script"]);
-								handleTileScript("On Game Load",tileNodes[i]);
+								handleTileScript("On Game load",this.tileNodes[i]);
 							}
 						/*	if(data[i][j]["type"]==4 && this.tileNodes[i].getScriptData()){
 								this.tileNodes[i].setLayer(this.tileNodes[i].getScriptData()["sprite"]["texture"],this.tileNodes[i].getScriptData()["sprite"]["position"],"item");

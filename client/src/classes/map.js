@@ -434,9 +434,8 @@ var GameMap=cc.Layer.extend({
 					this.tileNodes[i].mask2.setVisible(false);
 				 if(this.tileNodes[i].mask3!=null) 
 					this.tileNodes[i].mask3.setVisible(false);
-				for(var j=0;j<this.tileNodes[i].item.length;j++){
-					this.tileNodes[i].item[j].setVisible(false);
-				}
+				 if(this.tileNodes[i].item!=null)
+					this.tileNodes[i].item.setVisible(false);
 				this.tileNodes[i].visit();
 				 if(this.tileNodes[i].ground1!=null)
 					this.tileNodes[i].ground1.setVisible(true);
@@ -450,9 +449,8 @@ var GameMap=cc.Layer.extend({
 					this.tileNodes[i].mask2.setVisible(true);
 				 if(this.tileNodes[i].mask3!=null) 
 					this.tileNodes[i].mask3.setVisible(true);
-				for(var j=0;j<this.tileNodes[i].item.length;j++){
-					this.tileNodes[i].item[j].setVisible(true);
-				}
+				 if(this.tileNodes[i].item!=null)
+					this.tileNodes[i].item.setVisible(true);
 				this.tileNodes[i].setVisible(false);
 				}
 			}

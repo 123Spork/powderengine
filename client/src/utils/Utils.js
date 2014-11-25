@@ -585,7 +585,17 @@ var handleTileScript = function(eventname,tile,ignoreList){
 								functionArray.push(
 								[function(newJ,newK){
 									var defaultEvent=scriptData[newJ]["responses"][newK];
-									PlayersController.addNPC(ObjectLists.getNPCList()[defaultEvent["data"]["npc"]],cc.p(tile.getPosition().x/cellsize,tile.getPosition().y/cellsize),GameMap.getMapNumber());
+									if(defaultEvent["data"]["npc"]){
+										PlayersController.addNPC(ObjectLists.getNPCList()[defaultEvent["data"]["npc"]],cc.p(tile.getPosition().x/cellsize,tile.getPosition().y/cellsize),GameMap.getMapNumber());
+									}
+								},newJ,newK]);
+							break;
+							case "Spawn Item":
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									tile.addItem(defaultEvent["data"]["item"],defaultEvent["data"]["amount"]);
 								},newJ,newK]);
 							break;
 							case "Script Response":

@@ -1100,7 +1100,7 @@ ScriptEditor = Popup.extend({
 					},
 				}
 			break;
-			case "Give /Take Item": case "Has Player Item":
+			case "Give /Take Item": case "Has Player Item": case "Spawn Item":
 			panels["panels"].children={
 					"itemsLabel":{
 						label:"Item:",
@@ -1834,7 +1834,7 @@ ScriptEditor = Popup.extend({
 					this.subEditor["npcList"].runListCallBack("Use",data["npc"]);
 				}
 			break;
-			case "Give /Take Item": case "Has Player Item":
+			case "Give /Take Item": case "Has Player Item": case "Spawn Item":
 				this.subEditor["amountNote"].setDimensions(cc.size(180,0));
 				var listnodes = [];
 				var callBackList=[];
@@ -2387,7 +2387,7 @@ ScriptEditor = Popup.extend({
 							"npc":this.itemContext,
 						}
 					break;
-					case "Give /Take Item": case "Has Player Item":
+					case "Give /Take Item": case "Has Player Item": case "Spawn Item":
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"item":this.itemContext,
 							"amount":parseInt(this.itemAmountBox.getText()),

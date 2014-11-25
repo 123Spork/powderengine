@@ -268,7 +268,13 @@ reactToSocketMessage=function(data){
 			else if(data["droppeditem"]){
 				if(data["mapnumber"] == GameMap.getMapNumber() && GameMap.getInstance().isMapDirty==false){
 					var tile = GameMap.getTileNodeForIndex(data["index"]);
-					tile.addDroppedItem(data["droppeditem"]);
+					var itemlist=ObjectLists.getItemList();
+					for(var i in itemlist){
+						if(itemlist[i]["name"]==data["droppeditem"]["name"]){
+							tile.addItem(i,data["droppeditem"]["amount"]);
+							break;
+						}
+					}
 					GameMap.updateMap();
 				} else{
 					storedClientMessages.push(JSON.stringify(data));
@@ -277,7 +283,7 @@ reactToSocketMessage=function(data){
 			else if(data["pickupitem"]){
 				if(data["mapnumber"] == GameMap.getMapNumber()){
 					var tile = GameMap.getTileNodeForIndex(data["pickupitem"]);
-					tile.pickupItem();
+					tile.removeItem();
 					GameMap.updateMap();
 				}
 			}

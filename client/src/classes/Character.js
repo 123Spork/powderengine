@@ -29,7 +29,6 @@ Character = cc.Sprite.extend({
 		} if(withData.map){
 			this.onMap=withData.map;
 		} if(withData.isNPC!=null && withData.isNPC!=="undefined"){
-			console.log(this.isNPC);
 			this.isNPC=withData.isNPC;
 		}
 		this.setAnchorPoint(0,1);
@@ -116,6 +115,9 @@ Character = cc.Sprite.extend({
 			var gp = this.getGridPosition();
 			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 			if(tile){
+				if(tile.getTopItem()){
+					this.pickupItem(tile.getTopItem());
+				}
 				if(tile.getScript()){
 					handleTileScript("Interact On",tile);
 				}
@@ -130,6 +132,10 @@ Character = cc.Sprite.extend({
 		if(!this.isWalking){
 			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 			if(tile){
+				if(tile.getTopItem()){
+					this.pickupItem(tile.getTopItem());
+					return;
+				}
 				if(tile.getScript()){
 					handleTileScript("Interact On");
 				}
@@ -409,7 +415,9 @@ PlayerCharacter = Character.extend({
 		console.log(this.items);
 	},
 	
-	pickupItem:function(item){
+	pickupItem:function(ref){
+		item=ObjectLists.getItemList()[ref.number];
+		item["amount"]=ref.amount;
 		var gp = this.getGridPosition();
 		var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 		handleItemScript("On Pickup",item);
@@ -441,11 +449,7 @@ PlayerCharacter = Character.extend({
 						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
 					}
 					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
-					if(tile.getScriptObject()["temp"]){
-						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-					} else{
-						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-					}
+					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 					var added=true;
 					break;
 				}
@@ -462,7 +466,10 @@ PlayerCharacter = Character.extend({
 		}
 	},
 
-	pickupItemFromTile:function(item,tile){
+	pickupItemFromTile:function(ref,tile){
+		item=ObjectLists.getItemList()[ref.number];
+		item["amount"]=ref.amount;
+
 		var gp = cc.p(tile.getPositionX()/cellsize,tile.getPositionY()/cellsize);
 		handleItemScript("On Pickup",tile);
 		var scriptData=[];
@@ -476,11 +483,7 @@ PlayerCharacter = Character.extend({
 							Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
 						}
 						GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
-						if(tile.getScriptObject()["temp"]){
-							sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-						} else{
-							sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-						}
+						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 						return;
 					}
 				}

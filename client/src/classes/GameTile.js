@@ -6,6 +6,7 @@ var GameTile = cc.Node.extend({
 	mask2:null,
 	mask3:null,
 	item:null,
+	itemData:null,
 	fringe1:null,
 	fringe2:null,
 	fringe3:null,
@@ -26,27 +27,40 @@ var GameTile = cc.Node.extend({
 		this.string.setOpacity(0);
 		this.string.setColor(cc.c3b(0,0,0));
 		this.addChild(this.string,900);
-		this.item=[];
+		this.itemData=[];
 	},
 	
-	addDroppedItem:function(data){
+	addItem:function(number,amount){
+		if(!amount){
+			var amount=1;
+		}
+		var data = ObjectLists.getItemList()[number];
 		var texture = data["sprite"]["texture"];
 		var pos = data["sprite"]["position"];
 		this.setLayer(texture,pos,"item");
-		for(var i=0;i<ObjectLists.getItemList().length;i++){
-			if(data["name"]==ObjectLists.getItemList()[i]["name"]){
-			//	this.setScript({"id":i,"data":{"amount":data["amount"]}},true);
-				break;
-			}
-		}
+		this.itemData.push({number:number,amount:amount});
 	},	
 
-	pickupItem:function(){
-		if(this.script[this.script.length-1]["temp"]){
-			this.item[this.item.length-1].removeFromParent();
-			this.item.splice(this.item.length-1,1);
-			this.popScript();
+	removeItem:function(){
+		if(this.itemData.length>0){
+			this.itemData.splice(this.itemData.length-1,1);
 		}
+		if(this.itemData.length>0){
+			var data = ObjectLists.getItemList()[this.itemData[this.itemData.length-1].number];
+			var texture = data["sprite"]["texture"];
+			var pos = data["sprite"]["position"];
+			this.setLayer(texture,pos,"item");
+		}else{
+			this.item.removeFromParent();
+			this.item=null;
+		}
+	},
+
+	getTopItem:function(){
+		if(this.itemData.length==0){
+			return null;
+		}
+		return this.itemData[this.itemData.length-1];
 	},
 
 
@@ -99,8 +113,11 @@ var GameTile = cc.Node.extend({
 				this.addChild(this.mask3,5);
 			break;
 			case "item": 
-				this.item.push(sprite);
-				this.addChild(this.item[this.item.length-1],6);
+				if(this.item!=null){
+					this.item.removeFromParent();
+				}
+				this.item = sprite;
+				this.addChild(this.item,6);
 			break;
 			case "fringe1":
 				if(this.fringe1!=null){
@@ -140,12 +157,8 @@ var GameTile = cc.Node.extend({
 			loaded=false;
 		}else if(this.mask3!=null && this.mask3.getTexture() && this.mask3.getTexture()._isLoaded==false){
 			loaded=false;
-		}else if(this.item.length>0){
-			for(var i in this.item){
-				if(this.item[i].getTexture() && this.item[i].getTexture()._isLoaded==false){
-					loaded=false;
-				}
-			}
+		}else if(this.item!=null && this.item.getTexture() && this.item.getTexture()._isLoaded==false){
+			loaded=false;
 		}else if(this.fringe1!=null && this.fringe1.getTexture() && this.fringe1.getTexture()._isLoaded==false){
 			loaded=false;
 		}else if(this.fringe2!=null && this.fringe2.getTexture() && this.fringe2.getTexture()._isLoaded==false){
@@ -181,13 +194,11 @@ var GameTile = cc.Node.extend({
 			this.mask3.removeFromParent();
 		}
 		this.mask3 = null;
-
-		for(var i=0;i<this.item.length;i++){
-			this.item[i].removeFromParent();
+		if(this.item!=null){
+			this.item.removeFromParent();
 		}
-		this.item=[];
-			
-		this.mask3 = null;
+		this.item = null;
+		this.itemData=[];
 		if(this.fringe1!=null){
 			this.fringe1.removeFromParent();
 		}
@@ -201,7 +212,6 @@ var GameTile = cc.Node.extend({
 		}
 		this.fringe3 = null;
 		this.script=null;
-		this.item=[];
 	},
 	
 	destroyLayer:function(_type){
@@ -243,12 +253,11 @@ var GameTile = cc.Node.extend({
 				this.mask3 = null;
 			break;
 			case "item": 
-				for(var i=0;i<this.item.length;i++){
-					this.item[i].removeFromParent();
-					this.item[i].splice(i,1);
-					i--;
+				if(this.item!=null){
+					this.item.removeFromParent();
 				}
-				this.item = [];
+				this.item = null;
+				this.itemData=[];
 			break;
 			case "fringe1":
 				if(this.fringe1!=null){

@@ -128,6 +128,7 @@ ScriptingList = Popup.extend({
 			listnodes[i]=cc.Node.create();
 			if(this.editList[i]["specifier"]==currentSpecifier){			
 				listnodes[i].setContentSize(286,32);
+				console.log(this.editList[i]);
 				if(this.editList[i]==null){
 					this.editList.splice(i,1);
 					continue;
@@ -141,35 +142,44 @@ ScriptingList = Popup.extend({
 				text.setDimensions(cc.size(208,0));
 				listnodes[i].setContentSize(286,text.getContentSize().height+8);
 
-				if(this.delegate!=null){
+				if(this.delegate!=null && !this.editList[i]["isTemplate"]){
 					var useElement=cc.Sprite.createWithTexture(tc.addImage("GUI/use.png"));
 					useElement.setPosition(cc.p(212,(listnodes[i].getContentSize().height-20)/2));
 					useElement.setAnchorPoint(cc.p(0,0));
 				}
-
-				var editElement=cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
-				editElement.setPosition(cc.p(236,(listnodes[i].getContentSize().height-20)/2));
-				editElement.setAnchorPoint(cc.p(0,0));
-				
-				var delElement=cc.Sprite.createWithTexture(tc.addImage("GUI/trash.png"));
-				delElement.setPosition(cc.p(260,(listnodes[i].getContentSize().height-20)/2));
-				delElement.setAnchorPoint(cc.p(0,0));		
-
-				editElement.callBack = "Edit";
 				var touchableNodes =[];
-				touchableNodes.push(editElement);
-				delElement.callBack = "Delete";
-				touchableNodes.push(delElement);
-				if(this.delegate!=null){
+				if(currentSpecifier!="Default"){
+					var editElement=cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
+					editElement.setPosition(cc.p(236,(listnodes[i].getContentSize().height-20)/2));
+					editElement.setAnchorPoint(cc.p(0,0));
+					
+					var delElement=cc.Sprite.createWithTexture(tc.addImage("GUI/trash.png"));
+					delElement.setPosition(cc.p(260,(listnodes[i].getContentSize().height-20)/2));
+					delElement.setAnchorPoint(cc.p(0,0));		
+					
+					touchableNodes.push(editElement);
+					delElement.callBack = "Delete";
+					editElement.callBack="Edit";
+					touchableNodes.push(delElement);
+					listnodes[i].addChild(editElement);
+					listnodes[i].addChild(delElement);	
+				}
+				if(this.delegate!=null && !this.editList[i]["isTemplate"]){
 					useElement.callBack="Use";
 					touchableNodes.push(useElement);
 				}
+
+				var copyElement=cc.Sprite.createWithTexture(tc.addImage("GUI/copy.png"));
+				copyElement.setPosition(cc.p(188,(listnodes[i].getContentSize().height-20)/2));
+				copyElement.setAnchorPoint(cc.p(0,0));
+				copyElement.callBack="Copy";
+				touchableNodes.push(copyElement);
+				listnodes[i].addChild(copyElement);
+
 				callBackList.push(touchableNodes);
 
 				listnodes[i].addChild(element);
 				listnodes[i].addChild(text);
-				listnodes[i].addChild(editElement);
-				listnodes[i].addChild(delElement);	
 				if(this.delegate!=null){
 					listnodes[i].addChild(useElement);
 				}
@@ -238,6 +248,9 @@ ScriptingList = Popup.extend({
 				case "Use":
 					self.delegate.setTypeData(listelement,self.editList[listelement]);
 					self.hasChosen=true;
+				break;
+				case "Copy":
+					self.copyScript(listelement);
 				break;
 			}
 		};
@@ -336,6 +349,25 @@ ScriptingList = Popup.extend({
 		if(this.selectedScriptType){
 			this.prepareSubList(this.selectedScriptType);
 		}
+	},
+
+	copyScript:function(number){
+		this.addingNew=true;
+		this.showingEditor=true;
+		this.saveNewDataID=this.editList.length;
+		var clonedData = cloneObj(this.editList[number]);
+		if(clonedData["implementsAs"]){
+			clonedData["specifier"]=clonedData["implementsAs"];
+			clonedData["implementsAs"]=null;
+		}
+		if(clonedData["isTemplate"]){
+			clonedData["isTemplate"]=null;
+		}
+		var currentSpecifier=clonedData["specifier"];
+		this.childEditor.init({delegate:this, data:clonedData, scriptDelegate:currentSpecifier});
+		this.setTouchEnabled(false);
+		this._parent.addChild(this.childEditor);
+		this.childEditor.didBecomeActive();
 	},
 	
 });

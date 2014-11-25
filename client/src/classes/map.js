@@ -14,15 +14,48 @@ var GameMap=cc.Layer.extend({
 	mapOffset:cc.p(0,0),
 	currentMap:1,
 	
+	isTileBlocked:function(tileid){
+		if(typeof tileid ==='string'){
+			if(this.tileNodes[tileid].getScriptID()==0){
+				return true;
+			}
+			var script = this.tileNodes[tileid].getScript();
+		}else{
+			if(tileid.getScriptID()==0){
+				return true;
+			}
+			var script = tileid.getScript();
+		}
+		if(!script){
+			return false;
+		}
+		else{
+			var checkers = ["Will Enter","On Enter"];
+			for(var j=0;j<script["data"].length;j++){
+				if(checkers.indexOf(script["data"][j]["type"])>-1){
+					if(checkTileRequirements(script["data"][j]["requirements"])){
+						var responses = script["data"][j]["responses"];
+						for(var i=0;i<responses.length;i++){
+							if(responses[i]["type"]=="Block Entry"){
+								return true;
+							}
+						}
+					}
+				}
+			}
+			return false;
+		}
+	},
+
 	findPath:function(pathStart, pathEnd){
 		var findNeighbours = function(){};
 		var self=this;
 		var Neighbours=function(x, y){
 			var	N = y - 1,S = y + 1,E = x + 1,W = x - 1,
-			myN = N > -1 && self.tileNodes["tile"+indexFromPos(x,N)] && (self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,N)].getType()!=7)
-			myS = S < gridWidth && self.tileNodes["tile"+indexFromPos(x,S)] && (self.tileNodes["tile"+ indexFromPos(x,S)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(x,S)].getType()!=7)
-			myE = E < gridWidth && self.tileNodes["tile"+indexFromPos(E,y)] && (self.tileNodes["tile"+ indexFromPos(E,y)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(E,y)].getType()!=7)
-			myW = W > -1 && self.tileNodes["tile"+indexFromPos(W,y)] && (self.tileNodes["tile"+ indexFromPos(W,y)].getType()!=1 && self.tileNodes["tile"+ indexFromPos(W,y)].getType()!=7)
+			myN = N > -1 && self.tileNodes["tile"+indexFromPos(x,N)] && !self.isTileBlocked("tile"+ indexFromPos(x,N));
+			myS = S < gridWidth && self.tileNodes["tile"+indexFromPos(x,S)] && !self.isTileBlocked("tile"+ indexFromPos(x,S));
+			myE = E < gridWidth && self.tileNodes["tile"+indexFromPos(E,y)] && !self.isTileBlocked("tile"+ indexFromPos(E,y));
+			myW = W > -1 && self.tileNodes["tile"+indexFromPos(W,y)] && !self.isTileBlocked("tile"+ indexFromPos(W,y));
 			result = [];
 			if(myN)
 				result.push({x:x, y:N});
@@ -109,16 +142,17 @@ var GameMap=cc.Layer.extend({
 								this.tileNodes[i].setLayer(data[i][j]["texture"],data[i][j]["frame"],j);
 							}
 						} else{
-							this.tileNodes[i].setType(data[i][j]["type"]);
-							if(data[i][j]["script"]){
+							//this.tileNodes[i].setType(data[i][j]["type"]);
+							if(data[i][j]["script"]!=null && data[i][j]["script"]!=='undefined'){
 								this.tileNodes[i].setScript(data[i][j]["script"]);
-							}
+								handleTileScript("On Game Load",tileNodes[i]);
+							}/*
 							if(data[i][j]["type"]==4 && this.tileNodes[i].getScriptData()){
 								this.tileNodes[i].setLayer(this.tileNodes[i].getScriptData()["sprite"]["texture"],this.tileNodes[i].getScriptData()["sprite"]["position"],"item");
 							}
 							if(data[i][j]["type"]==5 && this.tileNodes[i].getScriptData()){
 								PlayersController.addNPC(this.tileNodes[i].getScriptData(),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize),this.currentMap);
-							}
+							}*/
 						}
 					}
 				}
@@ -155,17 +189,16 @@ var GameMap=cc.Layer.extend({
 								this.tileNodes[i].setLayer(data[i][j]["texture"],data[i][j]["frame"],j);
 							}
 						} else{
-							this.tileNodes[i].setType(data[i][j]["type"]);
-							if(data[i][j]["script"]){
-
+							if(data[i][j]["script"]!=null && data[i][j]["script"]!=='undefined'){
 								this.tileNodes[i].setScript(data[i][j]["script"]);
+								handleTileScript("On Game Load",tileNodes[i]);
 							}
-							if(data[i][j]["type"]==4 && this.tileNodes[i].getScriptData()){
+						/*	if(data[i][j]["type"]==4 && this.tileNodes[i].getScriptData()){
 								this.tileNodes[i].setLayer(this.tileNodes[i].getScriptData()["sprite"]["texture"],this.tileNodes[i].getScriptData()["sprite"]["position"],"item");
 							}
 							if(data[i][j]["type"]==5 && this.tileNodes[i].getScriptData()){
 								PlayersController.addNPC(this.tileNodes[i].getScriptData(),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize),this.currentMap);
-							}
+							}*/
 						}
 					}
 				}
@@ -238,7 +271,7 @@ var GameMap=cc.Layer.extend({
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){
 					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+cellsize-this.mapOffset.y))){
-						if(this.tileNodes[i].getType()==4){
+						/*if(this.tileNodes[i].getType()==4){
 							var pickupString = settingsData["Item Dropdown Pick Up"]+"";
 							var walktoString = settingsData["Item Dropdown Walk To"]+"";
 							pickupString = pickupString.replace("<ITEM>",this.tileNodes[i].getScriptData()["name"]);
@@ -251,9 +284,9 @@ var GameMap=cc.Layer.extend({
 							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.signClicked,[readSignString],touch._point));
 							this.clickContext=i;
 						} else if(this.tileNodes[i].getType()!=1 && this.tileNodes[i].getType()!=7 && this.tileNodes[i].getType()!=4){
-							var gp = PlayersController.getYou().getGridPosition();
+						*/	var gp = PlayersController.getYou().getGridPosition();
 							PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize)));
-						}
+						/*}*/
 					}
 				}
 			}
@@ -348,11 +381,9 @@ var GameMap=cc.Layer.extend({
 		else{
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){
-					if(this.tileNodes[i].getType()!=1 && this.tileNodes[i].getType()!=7 && this.tileNodes[i].getType()!=4){
-						if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+cellsize-this.mapOffset.y))){
-							var gp = PlayersController.getYou().getGridPosition();
-							PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize)));
-						}
+					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+cellsize-this.mapOffset.y))){
+						var gp = PlayersController.getYou().getGridPosition();
+						PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize)));
 					}
 				}
 			}
@@ -630,15 +661,23 @@ GameMap.destroyLayer=function(id,type){
 	gameMapInstance.tileNodes[id].destroyLayer(type);
 };
 
-GameMap.setTileInfo=function(id,type,scriptID,scriptData){
-	gameMapInstance.tileNodes[id].setType(type);
+GameMap.setTileScript=function(id,scriptID){
 	if(scriptID!=null && scriptID!=='undefined'){
-		gameMapInstance.tileNodes[id].setScript(scriptID,scriptData);
-		gameMapInstance.tileData[id]["info"]={"type":type, "script":{"id":scriptID+"","data":scriptData!=null && scriptData!=='undefined'?scriptData:null}};
+		gameMapInstance.tileNodes[id].setScript(scriptID);
+		gameMapInstance.tileData[id]["info"]={"script":scriptID};
 		return;
 	}
-	gameMapInstance.tileData[id]["info"]={"type":type};
 };
+
+GameMap.getTileScript=function(id,scriptID){
+		return gameMapInstance.tileNodes[id].getScript();
+};
+
+GameMap.destroyTileScript=function(id,scriptID){
+		return gameMapInstance.tileNodes[id].destroyScript();
+		gameMapInstance.tileData[id]["info"]={"script":null};
+};
+
 
 GameMap.setMapInfo=function(data){
 	gameMapInstance.tileData["mapdata"]["mapConnectors"] = data;

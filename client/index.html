@@ -2,45 +2,68 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>project</title>
-    <link rel="icon" type="image/GIF" href="res/favicon.ico"/>
-    <meta name="viewport" content="width=960,user-scalable=no" />
-    <meta name="apple-mobile-web-app-capable" content="yes"/>
-    <meta name="full-screen" content="yes"/>
-    <meta name="screen-orientation" content="landscape"/>
-    <meta name="x5-fullscreen" content="true"/>
-    <meta name="360-fullscreen" content="true"/>
+    <title>Sample Game - Powder engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         body, canvas, div {
-            -moz-user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            -khtml-user-select: none;
-            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+           margin: 0px;
+           border: 0px;
+           -webkit-text-size-adjust: none;
+           -moz-user-select: none;
+           -webkit-user-select: none;
+           -ms-user-select: none;
+           -khtml-user-select: none;
+           -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        }
+
+        @media (orientation:landscape) {
+           html.ipad.ios7 > body {
+              position: fixed;
+              bottom: 0;
+              width:100%;
+              height: 691px !important;
+           }
         }
     </style>
+
+    <script>
+            window.onload = function () {
+               
+               // iOS
+               var eventCallback = (typeof iosEventCallback === 'function') ? iosEventCallback : null;
+               if (!eventCallback) {
+                  // Android
+                  if ((typeof Android !== 'undefined') && Android.pmlEventCallback) {
+                     eventCallback = function (name, data) {
+                        var to_json = {
+                           "name": name,
+                           "data": data
+                        };
+                        Android.pmlEventCallback (JSON.stringify(to_json));
+                     };
+                  }
+               }
+
+               // User agent check for Safari (but not Chrome) on iOS 7, in order to apply the height fix CSS
+               var matches = navigator.userAgent.match(/^.*(iPhone|iPad).*(OS\s[0-9]).*(CriOS|Version)\/[.0-9]*\sMobile.*$/i);
+               if (matches && matches[2] === 'OS 7' && matches[3] !== 'CriOS') {
+                  document.documentElement.className += " ipad ios7";
+               }
+            };
+    </script>
 </head>
-<body style="padding:0; margin: 0; background: #000;">
-    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<!-- PowderEngineAd -->
-<ins class="adsbygoogle"
-     style="display:block;width:960px;height:90px;margin-left:auto;margin-right: auto;"
-     data-ad-client="ca-pub-8844497685596173"
-     data-ad-slot="9638334582"></ins>
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-<canvas id="gameCanvas" width="960" height="640"></canvas>
+<body style="background: white;">
+    <!-- 
+      -- Note that there is no need to set the width or height for the canvas element here.  The Javascript code sets the
+      -- canvas to the full screen size when startGame is called.
+      -->
+    <canvas id="gameCanvas"></canvas>
+<script src="config.js"></script>
+<script>document.write("<script type='text/javascript' src="+  gameConfig()["SERVER:PORT"]+"/socket.io/socket.io.js" + "><\/script>");</script>
 <script src="cocos2d.js"></script>
 <script src="mini.js"></script>
-<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<!-- PowderEngineAd -->
-<ins class="adsbygoogle"
-     style="display:block;width:960px;height:90px;margin-left:auto;margin-right: auto;"
-     data-ad-client="ca-pub-8844497685596173"
-     data-ad-slot="9638334582"></ins>
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+
 </body>
 </html>

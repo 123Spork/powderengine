@@ -15,6 +15,7 @@ var res = {
     checkbox_checked_png : 'GUI/checkbox_checked.png',
     checkbox_uncheck_png : 'GUI/checkbox_uncheck.png',
     close_png : 'GUI/close.png',
+    copy_png : 'GUI/copy.png',
     cross_icon_png : 'GUI/cross_icon.png',
     defaultitem_png : 'GUI/defaultitem.png',
     edit_png : 'GUI/edit.png',

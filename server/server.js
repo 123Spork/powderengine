@@ -66,7 +66,16 @@ fs.readdirSync("./additionals").forEach(function(file) {
 	settings =require("./additionals/settings.json");
   }
   if(file=="scripts.json"){
-	scripts =require("./additionals/scripts.json");
+  	scripts=[
+		{"data":[{"type":"Will Enter","responses":[{"type":"Block Entry","data":{}}],"requirements":[],"data":{}}],"name":"Block","specifier":"Default","implementsAs":"Tile","abbr":"BLK"},
+		{"data":[{"type":"On Game load","responses":[{"type":"Spawn NPC","data":{}}],"requirements":[],"data":{}}],"name":"Spawn NPC","specifier":"Default","implementsAs":"Tile","isTemplate":"1","abbr":"NPC"},
+		{"data":[{"type":"On Game load","responses":[{"type":"Spawn Item","data":{}}],"requirements":[],"data":{}}],"name":"Spawn Item","specifier":"Default","implementsAs":"Tile","isTemplate":"1","abbr":"ITM"},
+		{"data":[{"type":"On Enter","responses":[{"type":"Warp Player","data":{}}],"requirements":[],"data":{}}],"name":"Warp Player","specifier":"Default","implementsAs":"Tile","isTemplate":"1","abbr":"WRP"}
+  	];
+	var userscripts =require("./additionals/scripts.json");
+	for(var i in userscripts){
+		scripts.push(userscripts[i]);
+	}
   }
 });
 

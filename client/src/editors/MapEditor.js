@@ -188,14 +188,14 @@ MapEditor = Popup.extend({
 											}
 										}
 									},
-									"groundShadowbtn" : {
+									"ground3btn" : {
 										position:cc.p(360,218),
 										size:cc.size(128,26),
 										color: WHITE,
 										anchorPoint:cc.p(0,0),
 										children:{
 											"text":{
-												label:"Ground Shadow",
+												label:"Ground 3",
 												fontSize:12,
 												anchorPoint:cc.p(0.5,0.5),
 												position:cc.p(64,13),
@@ -271,21 +271,6 @@ MapEditor = Popup.extend({
 										children:{
 											"text":{
 												label:"Fringe 2",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"fringeShadowbtn" : {
-										position:cc.p(360,38),
-										size:cc.size(128,26),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Fringe Shadow",
 												fontSize:12,
 												anchorPoint:cc.p(0.5,0.5),
 												position:cc.p(64,13),
@@ -627,16 +612,10 @@ MapEditor = Popup.extend({
 		GameMap.setStringsVisible(true);
 	},
 	
-	setTypeData:function(value,data){
-		if(Itemeditor){
-			Itemeditor.willTerminate();
-			this.scheduleOnce(function(){Itemeditor.removeFromParent(); Itemeditor=null;});
-			this.typeData=value;
-			this.setTouchEnabled(true);
-		}
-		if(NPCeditor){
-			NPCeditor.willTerminate();
-			this.scheduleOnce(function(){NPCeditor.removeFromParent(); NPCeditor=null;});
+	setTypeData:function(value){
+		if(Scripteditor){
+			Scripteditor.willTerminate();
+			this.scheduleOnce(function(){Scripteditor.removeFromParent(); Scripteditor=null;});
 			this.typeData=value;
 			this.setTouchEnabled(true);
 		}
@@ -742,6 +721,27 @@ MapEditor = Popup.extend({
 		}	
 		
 		if(this.currentTab==1){
+
+			if(isTouching(this.panels["main_panel"]["tab1"]["scriptbtn"],truePos)){
+				this.editMode = this.editMode=="script" ? "tiles" : "script";
+				if(this.editMode=="script"){
+					if(Scripteditor!=null && !Scripteditor._parent) Scripteditor=null;
+					if(Scripteditor){
+						Scripteditor.willTerminate();
+						Scripteditor.removeFromParent();
+						Scripteditor=null;
+					}
+					Scripteditor = new ScriptingList();
+					Scripteditor.init({delegate:this,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
+					Scripteditor.didBecomeActive();
+					this._parent.addChild(Scripteditor);
+					this.setTouchEnabled(false);
+					this.panels["main_panel"]["tab1"]["scriptbtn"].setColor(RED);
+				} 
+				return true;
+			}
+
+
 			if(isTouching(this.panels["main_panel"]["tab1"]["leftbtn"],truePos)){
 				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>320 && this.mapOffset.x>0){
 					this.mapOffset.x--; this.updateMapOffset();
@@ -772,8 +772,8 @@ MapEditor = Popup.extend({
 			if(isTouching(this.panels["main_panel"]["tab1"]["ground2btn"],truePos)){
 				this.updateCurrentLayer("ground2");	return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["groundShadowbtn"],truePos)){
-				this.updateCurrentLayer("groundShadow"); return true;
+			if(isTouching(this.panels["main_panel"]["tab1"]["ground3btn"],truePos)){
+				this.updateCurrentLayer("ground3"); return true;
 			}
 			if(isTouching(this.panels["main_panel"]["tab1"]["mask1btn"],truePos)){
 				this.updateCurrentLayer("mask1"); return true;
@@ -789,9 +789,6 @@ MapEditor = Popup.extend({
 			}
 			if(isTouching(this.panels["main_panel"]["tab1"]["fringe2btn"],truePos)){
 				this.updateCurrentLayer("fringe2"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["fringeShadowbtn"],truePos)){
-				this.updateCurrentLayer("fringeShadow"); return true;
 			}
 			if(isTouching(this.panels["main_panel"]["tab1"]["fringe3btn"],truePos)){
 				this.updateCurrentLayer("fringe3"); return true;
@@ -865,13 +862,12 @@ MapEditor = Popup.extend({
 	updateCurrentLayer:function(layerName){
 		this.panels["main_panel"]["tab1"]["ground1btn"].setColor(WHITE);
 		this.panels["main_panel"]["tab1"]["ground2btn"].setColor(WHITE);
-		this.panels["main_panel"]["tab1"]["groundShadowbtn"].setColor(WHITE);
+		this.panels["main_panel"]["tab1"]["ground3btn"].setColor(WHITE);
 		this.panels["main_panel"]["tab1"]["mask1btn"].setColor(WHITE);
 		this.panels["main_panel"]["tab1"]["mask2btn"].setColor(WHITE);
 		this.panels["main_panel"]["tab1"]["mask3btn"].setColor(WHITE);
 		this.panels["main_panel"]["tab1"]["fringe1btn"].setColor(WHITE);
 		this.panels["main_panel"]["tab1"]["fringe2btn"].setColor(WHITE);
-		this.panels["main_panel"]["tab1"]["fringeShadowbtn"].setColor(WHITE);
 		this.panels["main_panel"]["tab1"]["fringe3btn"].setColor(WHITE);
 		this.panels["main_panel"]["tab1"][layerName+"btn"].setColor(GREEN);
 		this.currentLayer=layerName;
@@ -925,6 +921,13 @@ MapEditor = Popup.extend({
 				if(this.panels["main_panel"]["tab1"]["selectednode"].getOpacity()!=0){
 					var ySize = Math.floor(320/cellsize)-1;
 					GameMap.setLayer(tilenum,tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/cellsize)+this.mapOffset.x,(ySize-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/cellsize))+this.mapOffset.y),this.currentLayer);
+				}
+			break;
+			case "script":
+				if(GameMap.getTileScript(tilenum)){
+					GameMap.destroyTileScript(tilenum)
+				}else{
+					GameMap.setTileScript(tilenum,this.typeData);
 				}
 			break;
 			case "erasing":

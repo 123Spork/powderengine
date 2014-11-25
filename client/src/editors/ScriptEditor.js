@@ -55,6 +55,10 @@ ScriptEditor = Popup.extend({
 		this._super();
 		this.nameBox = new EntryBox(this.panels["main_panel"]["nameEntry"],cc.size(this.panels["main_panel"]["nameEntry"].getContentSize().width,this.panels["main_panel"]["nameEntry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["nameEntry"].getContentSize().height), this.data["name"], cc.c4b(255,255,255), cc.c3b(0,0,0));
 		this.nameBox.setDefaultFineFlag(true);
+		if(this.panels["main_panel"]["abbrEntry"]){
+			this.abbrBox = new EntryBox(this.panels["main_panel"]["abbrEntry"],cc.size(this.panels["main_panel"]["abbrEntry"].getContentSize().width,this.panels["main_panel"]["abbrEntry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["abbrEntry"].getContentSize().height), this.data["abbr"], cc.c4b(255,255,255), cc.c3b(0,0,0));
+			this.abbrBox.setDefaultFineFlag(true);
+		}
 		this.prepareList();
 	},
 
@@ -241,8 +245,8 @@ ScriptEditor = Popup.extend({
 													resSetup.push({"enabled":true},{"enabled":true});
 												break;
 												case "Tile":
-													resArray.push("Block Entry","Add Layer Graphic","Show Sign");
-													resSetup.push({"enabled":true},{"enabled":true},{"enabled":true});
+													resArray.push("Block Entry","Add Layer Graphic","Show Sign","Spawn NPC","Spawn Item");
+													resSetup.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true});
 												break;
 											}
 
@@ -421,8 +425,8 @@ ScriptEditor = Popup.extend({
 
 				break;
 				case "Add":
-					var eventArray = ["Default Interaction","On Examine","On Talk Close", "On Talk Option Selected"];
-					var setupOptions = [{"enabled":true},{"enabled":false},{"enabled":false},{"enabled":false}];
+					var eventArray = ["Default Interaction","On Examine","On Talk Close", "On Talk Option Selected", "On Game Load"];
+					var setupOptions = [{"enabled":true},{"enabled":false},{"enabled":false},{"enabled":false},{"enabled":true}];
 					
 
 					for(var i in self.data["data"]){
@@ -603,26 +607,27 @@ ScriptEditor = Popup.extend({
 					}
 					this._parent.addChild(DropDownList.createWithListAndPosition(this.delegate,this.delegate.addTalkOptionSelected,eventArray,touch._point)); return;
 				 break;
+				case 4: eventString = "On Game load";
 			}
 			if(eventString==""){
 				switch(this.delegate.data["specifier"]){
 					case "Item": 
 						switch(clicknum){
-							case 4: eventString = "On Pickup"; break;
-							case 5: eventString = "On Drop"; break;
-							case 6: eventString = "On Dequip"; break;
-							case 7: eventString = "On Trade"; break;
+							case 5: eventString = "On Pickup"; break;
+							case 6: eventString = "On Drop"; break;
+							case 7: eventString = "On Dequip"; break;
+							case 8: eventString = "On Trade"; break;
 						}
 					break;
 					case "Tile":
 						switch(clicknum){
-							case 4:  eventString = "Interact On"; break;
-							case 5:  eventString = "Interact Facing"; break;
-							case 6: eventString = "Will Enter"; break;
-							case 7: eventString = "On Enter"; break;
-							case 8: eventString = "Will Leave"; break;
-							case 9: eventString = "On Leave"; break;
-							case 10: eventString = "On Come Near"; break;
+							case 5:  eventString = "Interact On"; break;
+							case 6:  eventString = "Interact Facing"; break;
+							case 7: eventString = "Will Enter"; break;
+							case 8: eventString = "On Enter"; break;
+							case 9: eventString = "Will Leave"; break;
+							case 10: eventString = "On Leave"; break;
+							case 11: eventString = "On Come Near"; break;
 						}
 					break;
 				}
@@ -666,6 +671,8 @@ ScriptEditor = Popup.extend({
 						case 10: responseText = "Block Entry"; break;
 						case 11: responseText = "Add Layer Graphic"; break;
 						case 12: responseText = "Show Sign"; break;	
+						case 13: responseText = "Spawn NPC"; break;
+						case 14: responseText = "Spawn Item"; break;
 					}
 				break;
 			}
@@ -738,6 +745,22 @@ ScriptEditor = Popup.extend({
 								texture:"GUI/cross_icon.png",
 								anchorPoint:cc.p(0,0),
 							},
+
+
+							"abbrlbl":this.data["specifier"]=="Tile"?{
+								label:"Abbr",
+								fontSize:20,
+								anchorPoint:cc.p(0,0),
+								position:cc.p(550,368),
+								size:cc.size(36,32),
+								color:cc.c3b(0,0,0),
+							}:null,
+
+							"abbrEntry":this.data["specifier"]=="Tile"?{
+								position:cc.p(595,364),
+								size:cc.size(36,32),
+								color:cc.c3b(255,255,255),
+							}:null,
 
 							"namelbl" : {
 								label:"Name:",
@@ -2397,10 +2420,16 @@ ScriptEditor = Popup.extend({
 			var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
 
 			if(isTouching(this.panels["main_panel"]["okbtn"],truePos)){
+				if(this.panels["main_panel"]["abbrEntry"] && (this.abbrBox.getText()==null || this.abbrBox.getText()=="")){
+					return;
+				}
 				if(this.nameBox.getText()==null || this.nameBox.getText()==""){
 					return;
 				}
 				this.data["name"]=this.nameBox.getText();
+				if(this.panels["main_panel"]["abbrEntry"]){
+					this.data["abbr"]=this.abbrBox.getText();
+				}
 				this.ignoreTerminate=true;
 				this.delegate.endedEdit(this.data);
 				return;

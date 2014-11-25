@@ -1,14 +1,13 @@
 var GameTile = cc.Node.extend({
 	ground1:null,
 	ground2:null,
-	groundShadow:null,
+	ground3:null,
 	mask1:null,
 	mask2:null,
 	mask3:null,
 	item:null,
 	fringe1:null,
 	fringe2:null,
-	fringeShadow:null,
 	fringe3:null,
 	position:null,
 	string:null,
@@ -28,9 +27,6 @@ var GameTile = cc.Node.extend({
 		this.string.setColor(cc.c3b(0,0,0));
 		this.addChild(this.string,900);
 		this.item=[];
-		this.script=[];
-
-		this.setType(0);
 	},
 	
 	addDroppedItem:function(data){
@@ -39,11 +35,10 @@ var GameTile = cc.Node.extend({
 		this.setLayer(texture,pos,"item");
 		for(var i=0;i<ObjectLists.getItemList().length;i++){
 			if(data["name"]==ObjectLists.getItemList()[i]["name"]){
-				this.setScript({"id":i,"data":{"amount":data["amount"]}},true);
+			//	this.setScript({"id":i,"data":{"amount":data["amount"]}},true);
 				break;
 			}
 		}
-		this.setType(4);
 	},	
 
 	pickupItem:function(){
@@ -75,12 +70,12 @@ var GameTile = cc.Node.extend({
 				this.ground2 = sprite;
 				this.addChild(this.ground2,1);
 			break;
-			case "groundShadow":
-				if(this.groundShadow!=null){
-					this.groundShadow.removeFromParent();
+			case "ground3":
+				if(this.ground3!=null){
+					this.ground3.removeFromParent();
 				}
-				this.groundShadow = sprite;
-				this.addChild(this.groundShadow,2);
+				this.ground3 = sprite;
+				this.addChild(this.ground3,2);
 			break;
 			case "mask1":
 				if(this.mask1!=null){
@@ -121,13 +116,6 @@ var GameTile = cc.Node.extend({
 				this.fringe2 = sprite;
 				this.addChild(this.fringe2,8);
 			break;
-			case "fringeShadow": 
-				if(this.fringeShadow!=null){
-					this.fringeShadow.removeFromParent();
-				}
-				this.fringeShadow = sprite;
-				this.addChild(this.fringeShadow,9);
-			break;
 			case "fringe3":
 				if(this.fringe3!=null){
 					this.fringe3.removeFromParent();
@@ -144,7 +132,7 @@ var GameTile = cc.Node.extend({
 			loaded=false;
 		}else if(this.ground2!=null && this.ground2.getTexture() && this.ground2.getTexture()._isLoaded==false){
 			loaded=false;
-		}else if(this.groundShadow!=null && this.groundShadow.getTexture()  && this.groundShadow.getTexture_isLoaded==false){
+		}else if(this.ground3!=null && this.ground3.getTexture()  && this.ground3.getTexture_isLoaded==false){
 			loaded=false;
 		}else if(this.mask1!=null && this.mask1.getTexture() && this.mask1.getTexture()._isLoaded==false){
 			loaded=false;
@@ -162,8 +150,6 @@ var GameTile = cc.Node.extend({
 			loaded=false;
 		}else if(this.fringe2!=null && this.fringe2.getTexture() && this.fringe2.getTexture()._isLoaded==false){
 			loaded=false;
-		}else if(this.fringeShadow!=null && this.fringeShadow.getTexture() && this.fringeShadow.getTexture()._isLoaded==false){
-			loaded=false;
 		}else if(this.fringe3!=null && this.fringe3.getTexture() && this.fringe3.getTexture()._isLoaded==false){
 			loaded=false;
 		}
@@ -179,10 +165,10 @@ var GameTile = cc.Node.extend({
 			this.ground2.removeFromParent();
 		}
 		this.ground2 = null;
-		if(this.groundShadow!=null){
-			this.groundShadow.removeFromParent();
+		if(this.ground3!=null){
+			this.ground3.removeFromParent();
 		}
-		this.groundShadow = null;
+		this.ground3 = null;
 		if(this.mask1!=null){
 			this.mask1.removeFromParent();
 		}
@@ -210,16 +196,11 @@ var GameTile = cc.Node.extend({
 			this.fringe2.removeFromParent();
 		}
 		this.fringe2 = null;
-		if(this.fringeShadow!=null){
-			this.fringeShadow.removeFromParent();
-		}
-		this.fringeShadow = null;
 		if(this.fringe3!=null){
 			this.fringe3.removeFromParent();
 		}
 		this.fringe3 = null;
-		this.setType(0);
-		this.script=[];
+		this.script=null;
 		this.item=[];
 	},
 	
@@ -237,11 +218,11 @@ var GameTile = cc.Node.extend({
 				}
 				this.ground2 = null;
 			break;
-			case "groundShadow":
-				if(this.groundShadow!=null){
-					this.groundShadow.removeFromParent();
+			case "ground3":
+				if(this.ground3!=null){
+					this.ground3.removeFromParent();
 				}
-				this.groundShadow = null;
+				this.ground3 = null;
 			break;
 			case "mask1":
 				if(this.mask1!=null){
@@ -281,12 +262,6 @@ var GameTile = cc.Node.extend({
 				}
 				this.fringe2 = null;
 			break;
-			case "fringeShadow": 
-				if(this.fringeShadow!=null){
-					this.fringeShadow.removeFromParent();
-				}
-				this.fringeShadow = null;
-			break;
 			case "fringe3":
 				if(this.fringe3!=null){
 					this.fringe3.removeFromParent();
@@ -295,66 +270,35 @@ var GameTile = cc.Node.extend({
 			break;
 		}
 	},
-	
-	setType:function(_in){
-		this.type=_in;
-		switch(this.type){
-			case 0: this.string.setString(""); break;
-			case 1: this.string.setString("BLK"); break;
-			case 2: this.string.setString("SPW"); break;	
-			case 3: this.string.setString("WRP"); break;	
-			case 4: this.string.setString("ITM"); break;	
-			case 5: this.string.setString("NPC"); break;	
-			case 6: this.string.setString("SKL"); break;
-			case 7: this.string.setString("SGN"); break;
-		}
-	},
-	
-	setScript:function(_in,isTemp){
+
+	setScript:function(_in){
 		if(!isTemp){
 			var isTemp=false;
 		}
-		this.script.push({"num":parseInt(_in["id"]),"data":_in["data"],"temp":isTemp});
-	},
-
-	popScript:function(_){
-		this.script.splice(this.script.length-1,1);
-		if(this.script.length==0){
-			this.setType(0);
+		this.script=_in;
+		if(ObjectLists.getScriptList()[_in]){
+			this.string.setString(ObjectLists.getScriptList()[_in]["abbr"]);
+		}else{
+			this.string.setString("_");
 		}
 	},
 
-	getScriptObject:function(){
-		return this.script[this.script.length-1];
+	destroyScript:function(_){
+		this.script=null;
+		this.string.setString("");
 	},
 
 	getScript:function(){
-		switch(this.type){
-			case 3: return ObjectLists.getWarpList()[this.script[this.script.length-1]["num"]];
-			case 4: var itemData = ObjectLists.getItemList()[this.script[this.script.length-1]["num"]];
-					itemData["amount"]=parseInt(this.script[this.script.length-1]["data"]["amount"]);
-					return itemData;
-			case 7: return ObjectLists.getSignsList()[this.script[this.script.length-1]["num"]];
-			case 5: return ObjectLists.getNPCList()[this.script[this.script.length-1]["num"]];
-		}
+		return ObjectLists.getScriptList()[this.script];
 	},
-	
-	getScriptData:function(){
-		switch(this.type){
-			case 3: return ObjectLists.getWarpList()[this.script[this.script.length-1]["num"]] ? ObjectLists.getWarpList()[this.script[this.script.length-1]["num"]] : null;
-			case 4: return ObjectLists.getItemList()[this.script[this.script.length-1]["num"]] ? ObjectLists.getItemList()[this.script[this.script.length-1]["num"]] : null;
-			case 5: return ObjectLists.getNPCList()[this.script[this.script.length-1]["num"]] ? ObjectLists.getNPCList()[this.script[this.script.length-1]["num"]] : null;
-		}
+
+	getScriptID:function(){
+		return this.script;
 	},
 	
 	setStringVisible:function(_in){
 		this.string.setOpacity(_in==true?255:0);
-	},
-	
-	getType:function(){
-		return this.type;
-	},
-	
+	},	
 });
 
 GameTile.Create=function(x,y){

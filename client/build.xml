@@ -126,7 +126,7 @@
                 <file name="./src/editors/NPCEditor.js"></file>
                 <file name="./src/editors/SkillsEditor.js"></file>
                 <file name="./src/popups/PopupList.js"></file>
-                <file name="./src/editors/SignEditor.js"></file>
+                <file name="./src/popups/ScriptingList.js"></file>
                 <file name="./src/scenes/MainScene.js"></file>
                 <file name="./src/popups/News.js"></file>
                 <file name="./src/popups/Credits.js"></file>

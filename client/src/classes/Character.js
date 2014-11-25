@@ -115,8 +115,10 @@ Character = cc.Sprite.extend({
 		if(!this.isWalking){
 			var gp = this.getGridPosition();
 			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
-			switch(tile.getType()){
-				case 4: this.pickupItem(tile.getScript()); return;
+			if(tile){
+				if(tile.getScript()){
+					handleTileScript("Interact On",tile);
+				}
 			}
 		}
 	},
@@ -126,9 +128,11 @@ Character = cc.Sprite.extend({
 			return;
 		}
 		if(!this.isWalking){
-			switch(tile.getType()){
-				case 4: this.pickupItemFromTile(tile.getScript(),tile); return;
-				case 7: MainScene.showSign(tile.getScript()); return;
+			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
+			if(tile){
+				if(tile.getScript()){
+					handleTileScript("Interact On");
+				}
 			}
 		}
 	},
@@ -149,8 +153,8 @@ Character = cc.Sprite.extend({
 			}
 			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 			if(tile){
-				switch(tile.getType()){
-					case 7: MainScene.showSign(tile.getScript()); return;
+				if(tile.getScript()){
+					handleTileScript("Interact Facing",tile);
 				}
 			}
 
@@ -197,6 +201,9 @@ Character = cc.Sprite.extend({
 		}
 		if(pos.y==this.toPosition.y && pos.x==this.toPosition.x){
 			this.isWalking=false;
+			handleTileScript("On Leave",GameMap.getTileNodeForXY(this.leavePosition.x,leavePosition.y));
+			this.leavePosition=null;
+			handleTileScript("On Enter",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y));
 			this.unschedule(this.walk);
 			if(this.path!=null){
 				this.beginPathWalk();
@@ -250,13 +257,14 @@ Character = cc.Sprite.extend({
 			return;
 		}
 		if(this.isWalking==false && tile){	
-			switch(tile.getType()){
-				case 0: break;
-				case 1: case 7: return;
-				case 3: this.warpPlayer(tile.getScriptData()); return;
+			if(gameMapInstance.isTileBlocked(tile)){
+				return;
 			}
+			handleTileScript("Will Leave",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y));
+			this.leavePosition=cc.p(this.getGridPosition().x,this.getGridPosition().y);
 			this.toPosition = cc.p(cellsize*x,cellsize*y);
 			this.isWalking=true;
+			handleTileScript("Will Enter",GameMap.getTileNodeForXY(x,y));
 			this.schedule(this.walk);
 			this.walk(0);
 			if(this.isPlayer){

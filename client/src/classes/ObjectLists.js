@@ -19,7 +19,6 @@ ObjectLists.getInstance=function(){
 		ObjectListInstance.npclist=LocalStorage.getNPCData();
 		ObjectListInstance.questlist=LocalStorage.getQuestData();
 		ObjectListInstance.scriptlist=LocalStorage.getScriptData();
-
 	} 
 	return ObjectListInstance;
 };

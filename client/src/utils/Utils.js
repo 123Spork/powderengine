@@ -242,6 +242,9 @@ function getLayoutNodes(nodes,request,parent){
 		} else{
 			var data = nodes[request];
 		}
+		if(!data){
+			return;
+		}
 		if(typeof(data.isGameTile)!='undefined'){
 			var node = GameTile.Create(data.tileXY);
 		}
@@ -273,9 +276,11 @@ function getLayoutNodes(nodes,request,parent){
 			node.setAnchorPoint(data.anchorPoint);
 		}
 		if(typeof(data.color)!='undefined'){
-			node.setColor(data.color);
-			if(data.color.a){
-				node.setOpacity(data.color.a);
+			if(node.setColor){
+				node.setColor(data.color);
+				if(data.color.a){
+					node.setOpacity(data.color.a);
+				}
 			}
 		}
 		if(typeof(data.opacity)!='undefined'){
@@ -284,7 +289,9 @@ function getLayoutNodes(nodes,request,parent){
 		if(typeof(data.children)!='undefined'){
 			for(var i in data.children){
 				node[i] = getLayoutNodes(nodes,i,data.children);
-				node.addChild(node[i]);
+				if(node[i]){
+					node.addChild(node[i]);
+				}
 			}
 		}
 		return node;
@@ -376,6 +383,480 @@ function mergeSettings(obj1,obj2){
 };
 
 
+var checkTileRequirements = function(requirements,ignoreList){
+	if(requirements.length==0){
+		return true;
+	}else{
+		var defaultEvent=requirements;
+		for(var k=0;k<defaultEvent.length;k++){
+			var allowContinue=true;
+			switch(defaultEvent[k]["type"]){
+				case "Is Quest Point":
+					var questData = PlayersController.getYou().getQuestData(defaultEvent[k]["data"]["quest"]);
+					if(!questData){
+						questData=0;
+					}
+					if(questData!=defaultEvent[k]["data"]["objective"]){
+						return false;
+					}			
+				break;
+				case "Script Requirement":
+					var data=cloneObj(PlayersController.getYou().getExtraData(item["script"]));
+					var isAllow=true;
+					if(!data){
+						data={};
+					}
+					try{
+						var unparsedDataOriginal = defaultEvent[k]["data"]["functionContent"].replace(/,/g,'')
+						var unparsedData = unparsedDataOriginal.split(':');
+						var string = "{";
+						for(var i in unparsedData){
+							if(i%2==0){
+								string+="\""+unparsedData[i]+"\":";
+							}else if(i!=unparsedData.length-1){
+								string+="\""+unparsedData[i]+"\",";
+							}else{
+								string+="\""+unparsedData[i]+"\""
+							}	
+						}
+						string+="}";
+						var tempDat = JSON.parse(string);
+						for(var i in tempDat){
+							if(!data[i]){
+								data[i]="null";
+							}
+							if(data[i]!=tempDat[i]){
+								isAllow=false;
+							}
+						}
+						if(isAllow==false){
+							return false;
+						}
+					}catch(e){
+						GameChat.addMessage("your custom require script failed");
+						allowContinue=false; break; break;
+					}
+				break;
+				case "Is Panel Visibility":
+					if(ignoreList && ignoreList["Is Panel Visibility"]){
+						break;
+					}
+					var visible = defaultEvent[k]["data"]["visible"]==1?true:false;
+					switch(defaultEvent[k]["data"]["panel"]){
+						case 0: 
+							if(Inventory!=null && !Inventory._parent) Inventory=null;
+							if(Inventory && !visible){
+								return false;
+							}
+							if(!Inventory && visible){
+								return false;
+							}
+						break;
+						case 1:
+							if(Equipment!=null && !Equipment._parent) Equipment=null;
+							if(Equipment && !visible){
+								return false;
+							}
+							if(!Equipment && visible){
+								return false;
+							}
+						break;
+						case 2:
+							if(Skills!=null && !Skills._parent) Skills=null;
+							if(Skills && !visible){
+								return false;
+							}
+							if(!Skills && visible){
+								return false;
+							}
+						break;
+					}
+				break;
+				case "Is Player Inventory Space":
+					if(ignoreList && ignoreList["Is Player Inventory Space"]){
+						break;
+					}
+					if(!defaultEvent[k]["data"]["space"]){
+						var space=0;
+					}else{
+						var space = defaultEvent[k]["data"]["space"]
+					}
+					var count=0;
+					for(var p=0;p<40;p++){
+						if(!userItems["stored"][p]){
+							count++;
+						}
+					}
+					if(count<space){
+						return false;
+					}
+				break;
+				case "Has Player Item":
+					if(ignoreList && ignoreList["Has Player Item"]){
+						break;
+					}
+					if(defaultEvent[k]["data"]["item"]){
+						if(!defaultEvent[k]["data"]["amount"]){
+							var amount=0;
+						}else{
+							var amount=defaultEvent[k]["data"]["amount"];
+						}	
+						var count=0;
+						var itemName = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]]["name"];
+						for(var i in userItems["stored"]){
+							if(userItems["stored"][i] && userItems["stored"][i]["name"]==itemName){
+								count++;
+							}
+						}
+						if(count<amount){
+							return false;
+						}
+					}
+				break;
+				case "Is Player Statistics":
+					if(ignoreList && ignoreList["Is Player Statistics"]){
+						break;
+					}
+					var name = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+					if(!defaultEvent[k]["data"]["levelUpper"]){
+						defaultEvent[k]["data"]["levelUpper"]=0;
+					}
+					if(!defaultEvent[k]["data"]["levelLower"]){
+						defaultEvent[k]["data"]["levelLower"]=0;
+					}
+					if(!defaultEvent[k]["data"]["healthUpper"]){
+						defaultEvent[k]["data"]["healthUpper"]=0;
+					}
+					if(!defaultEvent[k]["data"]["healthLowe"]){
+						defaultEvent[k]["data"]["healthLower"]=0;
+					}
+					if(!defaultEvent[k]["data"]["xpUpper"]){
+						defaultEvent[k]["data"]["xpUpper"]=0;
+					}
+					if(!defaultEvent[k]["data"]["xpLower"]){
+						defaultEvent[k]["data"]["xpLower"]=0;
+					}
+					if(defaultEvent[k]["data"]["levelUpper"]!=0 || defaultEvent[k]["data"]["levelLower"]!=0){
+						var valtocheck = SkillBarsInstance.skillsData[name]["level"]+1;
+						if(valtocheck>defaultEvent[k]["data"]["levelUpper"] || valtocheck<defaultEvent[k]["data"]["levelLower"]){
+							return false;
+						}
+					}
+					if(defaultEvent[k]["data"]["healthUpper"]!=0 || defaultEvent[k]["data"]["healthLower"]!=0){
+						var valtocheck = SkillBarsInstance.skillsData[name]["currenthealth"];
+						if(valtocheck>defaultEvent[k]["data"]["healthUpper"] || valtocheck<defaultEvent[k]["data"]["healthLower"]){
+							allowContinue=false; break; break;
+						}
+					}
+
+					if(defaultEvent[k]["data"]["xpUpper"]!=0 || defaultEvent[k]["data"]["xpLower"]!=0){
+						var valtocheck = SkillBarsInstance.skillsData[name]["experience"];
+						if(valtocheck>defaultEvent[k]["data"]["xpUpper"] || valtocheck<defaultEvent[k]["data"]["xpLower"]){
+							return false;
+						}
+					}
+				break;
+			}
+		}
+		return true;
+	}
+};
+
+
+var handleTileScript = function(eventname,tile,ignoreList){
+	var functionArray=[];
+	MainScene.scheduleOnce(function(){
+		var scriptData=[];
+		var storedObj={};
+		var userItems=PlayersController.getYou().items;
+		if(tile){
+			if(tile.getScript()){
+				scriptData = tile.getScript()["data"];
+			}
+		}
+		for(var j=0;j<scriptData.length;j++){
+			if(scriptData[j]["type"]==eventname){
+				if(checkTileRequirements(scriptData[j]["requirements"],ignoreList)){
+					var defaultEvent = scriptData[j]["responses"];
+					for(var k=0;k<defaultEvent.length;k++){
+						switch(defaultEvent[k]["type"]){
+							case "Script Response":
+								var newJ = (function(index) {return index;})(j);
+								var newK = (function(index) {return index;})(k);
+								functionArray.push(
+									[function(newJ,newK){
+										var data=cloneObj(PlayersController.getYou().getExtraData(tile.getScriptID()));
+										if(!data){data={};} 
+										try{
+											var unparsedDataOriginal = scriptData[newJ]["responses"][newK]["data"]["functionContent"].replace(/,/g,'')
+											var unparsedData = unparsedDataOriginal.split(':');
+											var string = "{";
+											for(var i in unparsedData){
+												if(i%2==0){
+													string+="\""+unparsedData[i]+"\":";
+												}else if(i!=unparsedData.length-1){
+													string+="\""+unparsedData[i]+"\",";
+												}else{
+													string+="\""+unparsedData[i]+"\""
+												}	
+											}
+											string+="}";
+											var tempData = JSON.parse(string)
+											data=merge_objects_withoutclone(data,tempData);
+											PlayersController.getYou().setExtraData(tile.getScriptID(),cloneObj(data));
+										}catch(e){
+											GameChat.addMessage("Your custom response script failed");
+										}
+								},newJ,newK]);
+							case "Give /Take Item":
+								if(ignoreList && ignoreList["Give /Take Item"]){
+									break;
+								}
+								if(!defaultEvent[k]["data"]["amount"] || defaultEvent[k]["data"]["item"]==null || defaultEvent[k]["data"]["item"]=='undefined'){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									var contextitem = ObjectLists.getItemList()[defaultEvent["data"]["item"]];
+									if(defaultEvent["data"]["amount"]>0){
+										var space = defaultEvent["data"]["amount"];
+										if(contextitem["stackable"]==true){
+											for(var p=0;p<40;p++){
+												if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
+													space=0;
+												}
+											}
+											if(count!=0){
+												space=1;
+											}
+										}else{
+											var count=0;
+											for(var p=0;p<40;p++){
+												if(!userItems["stored"][p]){
+													count++;
+												}
+											}
+										}
+										if(count<space){
+											return;
+										}else{
+											if(contextitem["stackable"]==true){
+												var doneAdd=false;
+												for(var p=0;p<40;p++){
+													if(userItems["stored"][p] && userItems["stored"][p]["name"]==contextitem["name"]){
+														userItems["stored"][p]["amount"] +=defaultEvent["data"]["amount"];
+														if(Inventory){
+															Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
+														}
+														doneAdd=true;
+														break;
+													}
+												}
+												if(doneAdd==false){
+													for(var p=0;p<40;p++){
+														if(!userItems["stored"][p]){
+															userItems["stored"][p]=cloneObj(contextitem);
+															userItems["stored"][p]["amount"]=defaultEvent["data"]["amount"];
+															if(Inventory){
+																Inventory.setStackableLabel(p,userItems["stored"][p]["amount"]);	
+															}
+															break;
+														}
+													}
+												}
+											}else{
+												for(var n=0;n<defaultEvent["data"]["amount"];n++){
+													for(var p=0;p<40;p++){
+														if(!userItems["stored"][p]){
+															userItems["stored"][p]=cloneObj(contextitem);
+															break;
+														}
+													}
+												}
+											}
+										}
+									}else if(defaultEvent["data"]["amount"]<0){
+										var amount=Math.abs(defaultEvent["data"]["amount"]);
+										var count=0;
+										var itemName = contextitem["name"];
+										for(var p in userItems["stored"]){
+											if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
+												count++;
+											}
+										}
+										if(count<amount){
+											return;
+										}else{
+											for(var n=0;n<Math.abs(defaultEvent["data"]["amount"]);n++){
+												for(var p in userItems["stored"]){
+													if(userItems["stored"][p] && userItems["stored"][p]["name"]==itemName){
+														console.log("gettin rid"+n);
+														user["stored"][p]=null;
+														break;
+													}
+												}
+											}
+										}
+									}
+									if(Inventory){
+										Inventory.updateTileGrid();
+									}
+									if(Equipment){
+										Equipment.updateTileGrid();
+									}
+								},newJ,newK]);
+							break;
+							case "Modify Player Stats":
+								if(ignoreList && ignoreList["Modify Player Stats"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									if(ObjectLists.getSkillsList()[defaultEvent["data"]["skill"]]){
+										var skillname = ObjectLists.getSkillsList()[defaultEvent["data"]["skill"]]["name"];
+										SkillBars.modifyModifier(skillname,defaultEvent["data"]["level"]);
+										SkillBars.modifyHealth(skillname,defaultEvent["data"]["health"]);
+										SkillBars.modifyXP(skillname,defaultEvent["data"]["xp"]);
+									}
+								},newJ,newK]);
+							break;
+							case "Show Sign":
+								if(ignoreList && ignoreList["Show Sign"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									MainScene.showSign(defaultEvent["data"]["title"],defaultEvent["data"]["content"]);								
+								},newJ,newK]);
+							break;
+							case "Set Quest Point":
+								if(ignoreList && ignoreList["Set Quest Point"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									PlayersController.getYou().setQuestData(defaultEvent["data"]["quest"],defaultEvent["data"]["objective"]);								
+								},newJ,newK]);
+							break;
+							case "Warp Player":
+								if(ignoreList && ignoreList["Warp Player"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									var x=defaultEvent["data"]["index"] % gridWidth;
+									var y=Math.floor(defaultEvent["data"]["index"]/gridWidth);
+									PlayersController.getYou().setPosition(x*32,y*32);
+									sendMessageToServer({"changemap":defaultEvent["data"]["mapnum"], "setTo":defaultEvent["data"]["index"]});
+									GameMap.goToMap(defaultEvent["data"]["mapnum"]);
+									GameMap.goToOffsetFromPosition(x*32,y*32);
+								},newJ,newK]);
+							break;
+							case "Open/Close Panel":
+								if(ignoreList && ignoreList["Open/Close Panel"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								functionArray.push(
+								[function(newJ,newK){
+									var defaultEvent=scriptData[newJ]["responses"][newK];
+									var show = defaultEvent["data"]["visible"]==1?true:false;
+									switch(defaultEvent["data"]["panel"]){
+										case 0: 
+											if(Inventory!=null && !Inventory._parent) Inventory=null;
+											if(show==true){
+												if(Inventory){
+													Inventory.updateTileGrid();
+												}else{
+													Inventory = new InventoryPanel();
+													Inventory.init();
+													Inventory.didBecomeActive();
+													MainScene.addChild(Inventory);
+												}
+											}else{
+												if(Inventory){
+													Inventory.willTerminate();
+													Inventory.removeFromParent();
+													Inventory=null;
+												}
+											}
+										break;
+										case 1:
+											if(Equipment!=null && !Equipment._parent) Equipment=null;
+											if(show==true){
+												if(Equipment){
+													Equipment.updateTileGrid();
+												}else{
+													Equipment = new EquipmentPanel();
+													Equipment.init();
+													Equipment.didBecomeActive();
+													MainScene.addChild(Equipment);
+												}
+											}else{
+												if(Equipment){
+													Equipment.willTerminate();
+													Equipment.removeFromParent();
+													Equipment=null;
+												}
+											}
+										break;
+										case 2:
+											if(Skills!=null && !Skills._parent) Skills=null;
+											if(show==true){
+												if(Skills){
+													Skills.updateTileGrid();
+												}else{
+													Skills = new SkillsPanel();
+													Skills.init();
+													Skills.didBecomeActive();
+													MainScene.addChild(Skills);
+												}
+											}else{
+												if(Skills){
+													Skills.willTerminate();
+													Skills.removeFromParent();
+													Skills=null;
+												}
+											}
+										break;
+									}
+								},newJ,newK]);
+							break;
+							case "Destroy":
+								if(ignoreList && ignoreList["Destroy"]){
+									break;
+								}
+								var newJ = (function(index) {return index;})(j); var newK = (function(index) {return index;})(k); 
+								item=null;
+								if(Inventory){
+									Inventory.updateTileGrid();
+								}
+								k=defaultEvent.length;
+							break;			
+						}
+					}	
+				}
+			}
+		}
+		for(var i=0;i<functionArray.length;i++){
+			functionArray[i][0](functionArray[i][1],functionArray[i][2]);
+			functionArray.splice(i,1);
+			i--;
+		}
+	});
+};
+
+
 var handleItemScript = function(eventname,item,ignoreList){
 	var functionArray=[];
 	MainScene.scheduleOnce(function(){
@@ -383,7 +864,7 @@ var handleItemScript = function(eventname,item,ignoreList){
 		var storedObj={};
 		var userItems=PlayersController.getYou().items;
 		if(item){
-			if(item["script"]){
+			if(item["script"] && ObjectLists.getScriptList()[item["script"]]){
 				scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
 			}
 			if(item["storedobj"]){

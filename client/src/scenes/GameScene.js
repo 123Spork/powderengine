@@ -240,7 +240,7 @@ var GameScene = Scene.extend({
 		}	
 	},
 	
-	showSign:function(data){
+	showSign:function(name,content){
 		if(Sign!=null && !Sign._parent) Sign=null;
 		if(Sign){
 			Sign.willTerminate();
@@ -248,7 +248,7 @@ var GameScene = Scene.extend({
 			Sign=null;
 		} else{
 			Sign = new SignPanel();
-			Sign.init(data);
+			Sign.init(name,content);
 			Sign.didBecomeActive();
 			this.addChild(Sign);
 		}

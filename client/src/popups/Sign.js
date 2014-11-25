@@ -1,6 +1,7 @@
 Sign=null;
 SignPanel = Popup.extend({
-	data:null,
+	title:null,
+	content:null,
 
 	getIdentifier:function(){
 		return "Sign";
@@ -16,7 +17,7 @@ SignPanel = Popup.extend({
 						texture:"GUI/signpost.png",
 						children:{
 							"content":{
-								label:this.data["label"],
+								label:this.content,
 								fontSize:12,
 								color:cc.c3b(255,255,255),
 								anchorPoint:cc.p(0,1),
@@ -36,9 +37,9 @@ SignPanel = Popup.extend({
 		};
 	},
 
-	init:function(data){
+	init:function(title,content){
 		this._super();
-		this.data=data;
+		this.content=content;
 	},
 	
 

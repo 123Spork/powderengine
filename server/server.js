@@ -150,7 +150,11 @@ var setQuestData = function(data){
 
 var setScriptData = function(data){
 	var outputFilename = './additionals/scripts.json';
-	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+	var newData = [];
+	for(var i=4;i<data.length;i++){
+		newData.push(data[i]);
+	}
+	fs.writeFile(outputFilename, JSON.stringify(newData), function(err) {});
 };
 
 

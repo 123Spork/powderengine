@@ -128,7 +128,6 @@ ScriptingList = Popup.extend({
 			listnodes[i]=cc.Node.create();
 			if(this.editList[i]!={} &&this.editList[i]["specifier"]==currentSpecifier){			
 				listnodes[i].setContentSize(286,32);
-				console.log(this.editList[i]);
 				var element= cc.LayerColor.create(cc.c4b(0,0,0,127),286,1);
 				element.setPosition(cc.p(0,0));			
 				var text = cc.LabelTTF.create(this.editList[i].name,"Arial",20);
@@ -235,7 +234,7 @@ ScriptingList = Popup.extend({
 				case "Add":
 					self.addingNew=true;
 					self.showingEditor=true;
-					self.saveNewDataID=self.editList.length;
+					self.saveNewDataID=self.editList.length+"";
 					self.childEditor.init({delegate:self, data:null, scriptDelegate:currentSpecifier});
 					self.setTouchEnabled(false);
 					self._parent.addChild(self.childEditor);
@@ -348,9 +347,10 @@ ScriptingList = Popup.extend({
 	},
 
 	copyScript:function(number){
+		console.log("DUPLICATING");
 		this.addingNew=true;
 		this.showingEditor=true;
-		this.saveNewDataID=this.editList.length;
+		this.saveNewDataID=this.editList.length+"";
 		var clonedData = cloneObj(this.editList[number]);
 		if(clonedData["implementsAs"]){
 			clonedData["specifier"]=clonedData["implementsAs"];

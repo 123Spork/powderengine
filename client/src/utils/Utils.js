@@ -574,6 +574,9 @@ var handleTileScript = function(eventname,tile,ignoreList){
 				scriptData = tile.getScript()["data"];
 			}
 		}
+		if(!scriptData){
+			return null;
+		}
 		for(var j=0;j<scriptData.length;j++){
 			if(scriptData[j]["type"]==eventname){
 				if(checkTileRequirements(scriptData[j]["requirements"],ignoreList)){
@@ -585,7 +588,7 @@ var handleTileScript = function(eventname,tile,ignoreList){
 								functionArray.push(
 								[function(newJ,newK){
 									var defaultEvent=scriptData[newJ]["responses"][newK];
-									if(defaultEvent["data"]["npc"]){
+									if(defaultEvent["data"]["npc"]!=null && defaultEvent["data"]["npc"]!=='undefined'){
 										PlayersController.addNPC(ObjectLists.getNPCList()[defaultEvent["data"]["npc"]],cc.p(tile.getPosition().x/cellsize,tile.getPosition().y/cellsize),GameMap.getMapNumber());
 									}
 								},newJ,newK]);

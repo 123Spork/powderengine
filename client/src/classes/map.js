@@ -672,7 +672,7 @@ GameMap.getTileScript=function(id,scriptID){
 };
 
 GameMap.destroyTileScript=function(id,scriptID){
-		return gameMapInstance.tileNodes[id].destroyScript();
+		gameMapInstance.tileNodes[id].destroyScript();
 		gameMapInstance.tileData[id]["info"]={"script":null};
 };
 

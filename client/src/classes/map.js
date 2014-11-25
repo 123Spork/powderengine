@@ -47,6 +47,62 @@ var GameMap=cc.Layer.extend({
 		}
 	},
 
+	isTileSign:function(tileid){
+		if(typeof tileid ==='string'){
+			if(this.tileNodes[tileid].getScriptID()==0){
+				return true;
+			}
+			var script = this.tileNodes[tileid].getScript();
+		}else{
+			if(tileid.getScriptID()==0){
+				return true;
+			}
+			var script = tileid.getScript();
+		}
+		if(!script){
+			return false;
+		}
+		else{
+			var checkers = ["Interact On","Interact Facing"];
+			for(var j=0;j<script["data"].length;j++){
+				if(checkers.indexOf(script["data"][j]["type"])>-1){
+					if(checkTileRequirements(script["data"][j]["requirements"])){
+						var responses = script["data"][j]["responses"];
+						for(var i=0;i<responses.length;i++){
+							if(responses[i]["type"]=="Show Sign"){
+								return true;
+							}
+						}
+					}
+				}
+			}
+			return false;
+		}
+	},
+
+	isNPCTalk:function(npc){
+		var script = ObjectLists.getScriptList()[npc.script];
+		if(!script){
+			return false;
+		}
+		else{
+			var checkers = ["Default Event"];
+			for(var j=0;j<script["data"].length;j++){
+				if(checkers.indexOf(script["data"][j]["type"])>-1){
+					if(checkNPCRequirements(script["data"][j]["requirements"])){
+						var responses = script["data"][j]["responses"];
+						for(var i=0;i<responses.length;i++){
+							if(responses[i]["type"]=="Talk"){
+								return true;
+							}
+						}
+					}
+				}
+			}
+			return false;
+		}
+	},
+
 	findPath:function(pathStart, pathEnd){
 		var findNeighbours = function(){};
 		var self=this;
@@ -271,22 +327,40 @@ var GameMap=cc.Layer.extend({
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){
 					if(cc.rectContainsPoint(this.tileNodes[i].getBoundingBox(),cc.p(touch._point.x-this.mapOffset.x,touch._point.y+cellsize-this.mapOffset.y))){
-						/*if(this.tileNodes[i].getType()==4){
+						var npc = GameMap.getNPCForXY(this.tileNodes[i].getPositionX()/cellsize,this.tileNodes[i].getPositionY()/cellsize);
+						var sign = this.isTileSign(i);
+						if(this.tileNodes[i].getTopItem()){
+							var item=ObjectLists.getItemList()[this.tileNodes[i].getTopItem()["number"]];
 							var pickupString = settingsData["Item Dropdown Pick Up"]+"";
 							var walktoString = settingsData["Item Dropdown Walk To"]+"";
-							pickupString = pickupString.replace("<ITEM>",this.tileNodes[i].getScriptData()["name"]);
-							walktoString = walktoString.replace("<ITEM>",this.tileNodes[i].getScriptData()["name"]);
+							pickupString = pickupString.replace("<ITEM>",item["name"]);
+							walktoString = walktoString.replace("<ITEM>",item["name"]);
 							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.itemClicked,[pickupString,walktoString],touch._point));
 							this.clickContext=i;
-						} else if(this.tileNodes[i].getType()==7){
+						}else if(npc){
+							if(this.isNPCTalk(npc)){
+								var talktoString = settingsData["NPC Dropdown Talk"]+"";
+								talktoString = talktoString.replace("<NPC>",npc["name"]);
+							}
+							var walktoString = settingsData["NPC Dropdown Walk To"]+"";
+							
+							walktoString = walktoString.replace("<NPC>",npc["name"]);
+							if(talktoString){
+								this._parent.addChild(DropDownList.createWithListAndPosition(this,this.npcClicked,[talktoString,walktoString],touch._point,null,{npc:npc}));
+							}else{
+								this._parent.addChild(DropDownList.createWithListAndPosition(this,this.npcClicked,[walktoString],touch._point));
+							}
+							this.clickContext=i;
+						}else if(sign){
 							var readSignString = settingsData["Sign Dropdown list Read"]+"";
 							readSignString = readSignString.replace("<SIGN>",this.tileNodes[i].getScript()["name"]);
 							this._parent.addChild(DropDownList.createWithListAndPosition(this,this.signClicked,[readSignString],touch._point));
 							this.clickContext=i;
-						} else if(this.tileNodes[i].getType()!=1 && this.tileNodes[i].getType()!=7 && this.tileNodes[i].getType()!=4){
-						*/	var gp = PlayersController.getYou().getGridPosition();
+						}
+						else{
+							var gp = PlayersController.getYou().getGridPosition();
 							PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize)));
-						/*}*/
+						}
 					}
 				}
 			}
@@ -298,6 +372,7 @@ var GameMap=cc.Layer.extend({
 
 	itemClicked:function(val){
 		if(this.delegate.clickContext!=null){
+			var item = ObjectLists.getItemList()[this.delegate.tileNodes[gameMapInstance.clickContext].getTopItem()["number"]];
 			var gp = PlayersController.getYou().getGridPosition();
 			var itemPosition = cc.p(gameMapInstance.tileNodes[gameMapInstance.clickContext].getPosition().x/cellsize,gameMapInstance.tileNodes[gameMapInstance.clickContext].getPosition().y/cellsize);
 			switch(val){
@@ -319,7 +394,7 @@ var GameMap=cc.Layer.extend({
 						PlayersController.getYou().interactWithGivenTile(gameMapInstance.tileNodes[gameMapInstance.clickContext]);
 					}else{
 						var pickupFailString = settingsData["Item Out-of-range"]+"";
-						pickupFailString = pickupFailString.replace("<ITEM>",this.delegate.tileNodes[gameMapInstance.clickContext].getScriptData()["name"]);
+						pickupFailString = pickupFailString.replace("<ITEM>",item["name"]);
 						GameChat.addMessage(pickupFailString);
 					}
 				break;
@@ -329,6 +404,49 @@ var GameMap=cc.Layer.extend({
 					PlayersController.getYou().setWalkingPath(gameMapInstance.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),itemPosition));
 					this.delegate.clickContext=null;
 				break;
+			}
+		}
+	},
+
+
+	npcClicked:function(val,touch,list,extras){
+		if(this.delegate.clickContext!=null){
+			var gp = PlayersController.getYou().getGridPosition();
+			if(list.length==1){
+				PlayersController.getYou().setWalkingPath(gameMapInstance.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),itemPosition));
+				this.delegate.clickContext=null;
+				return;
+			}else{
+				var npcPosition = cc.p(extras.npc.getPosition().x/cellsize,extras.npc.getPosition().y/cellsize);
+				switch(val){
+				case 0:
+					if(gp.x>npcPosition.x){
+						var xSize=gp.x-npcPosition.x;
+					} else{
+						var xSize=npcPosition.x-gp.x;
+					}
+					if(gp.y>npcPosition.y){
+						var ySize=gp.y-npcPosition.y;
+					} else{
+						var ySize=npcPosition.y-gp.y;
+					}
+					xSize*=xSize;
+					ySize*=ySize;
+					var distance = Math.sqrt(xSize+ySize);
+					if(distance<5){
+						handleNPCScript("Default Event",extras.npc);
+						this.delegate.clickContext=null;
+					}else{
+						var talkFailString = settingsData["NPC Out-of-range"]+"";
+						talkFailString = talkFailString.replace("<NPC>",extras.npc["name"]);
+						GameChat.addMessage(talkFailString);
+					}
+					break;
+					case 1:
+						PlayersController.getYou().setWalkingPath(gameMapInstance.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),itemPosition));
+						this.delegate.clickContext=null;
+					break;
+				}
 			}
 		}
 	},
@@ -353,7 +471,8 @@ var GameMap=cc.Layer.extend({
 					ySize*=ySize;
 					var distance = Math.sqrt(xSize+ySize);
 					if(distance<5){
-						PlayersController.getYou().interactWithGivenTile(gameMapInstance.tileNodes[gameMapInstance.clickContext]);
+						handleTileScript("Interact Facing",this.delegate.tileNodes[gameMapInstance.clickContext]);
+						this.delegate.clickContext=null;
 					}else{
 						var readFailString = settingsData["Sign Out-of-range"]+"";
 						readFailString = readFailString.replace("<SIGN>",this.delegate.tileNodes[gameMapInstance.clickContext].getScript()["name"]);

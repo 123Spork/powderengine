@@ -75,7 +75,7 @@ PlayersController.addNPC=function(data,position,map){
 		script:data["script"]
 	};
 	this.instance.npcs.push(NonPlayerCharacter.create(withData));
-	this.instance.npcs[npcID].setPosition(position.x*32,position.y*32);
+	this.instance.npcs[npcID].setPosition(position.x*cellsize,position.y*cellsize);
 	this.instance.addChild(this.instance.npcs[npcID]);
 };
 
@@ -104,7 +104,7 @@ PlayersController.addPlayer=function(data){
 		var position=data["location"]["position"];
 		var x =position % gridWidth;
 		var y=Math.floor(position/gridWidth);
-		this.instance.players[data["id"]].setPosition(x*32,y*32);
+		this.instance.players[data["id"]].setPosition(x*cellsize,y*cellsize);
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[data["id"]]);
 		var playerJoinString = settingsData["Join Message"]+"";
@@ -146,7 +146,7 @@ PlayersController.movePlayer=function(data){
 		};
 		this.instance.players[id] = PlayerCharacter.create(withData);
 		var index=data["location"]["position"];
-		this.instance.players[id].setPosition(cc.p((index % gridWidth)*32,(Math.floor(index/gridWidth))*32)); 
+		this.instance.players[id].setPosition(cc.p((index % gridWidth)*cellsize,(Math.floor(index/gridWidth))*cellsize)); 
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[data["id"]]);
 		var playerJoinString = settingsData["Join Message"]+"";
@@ -157,7 +157,7 @@ PlayersController.movePlayer=function(data){
 	
 PlayersController.positionPlayer=function(data){
 	if(this.instance.players[data["id"]]){
-		this.instance.players[data["id"]].setPosition(cc.p((data["location"]["position"] % gridWidth)*32,(Math.floor(data["location"]["position"]/gridWidth))*32));
+		this.instance.players[data["id"]].setPosition(cc.p((data["location"]["position"] % gridWidth)*cellsize,(Math.floor(data["location"]["position"]/gridWidth))*cellsize));
 	} else{
 		var withData ={
 			name: data["id"],

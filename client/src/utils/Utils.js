@@ -136,10 +136,12 @@ var settingsData = {
 	"NPCS":"ISSECTION",
 	"NPC Dropdown Examine": "Examine",
 	"NPC Dropdown Attack": "Attack",
-	"NPC Dropdown Talk": "Talk To",
+	"NPC Dropdown Talk": "Talk To <NPC>",
+	"NPC Dropdown Walk To": "Walk To <NPC>",
 	"NPC Dropdown Follow": "Follow",
 	"NPC Dropdown Trade": "Trade",
 	"NPC Dropdown Bank": "Open Bank",
+	"NPC Out-of-range": "<NPC> is too far away!",
 
 	"SIGNS":"ISSECTION",
 	"Sign Dropdown list Read": "Read sign <SIGN>",
@@ -777,10 +779,10 @@ var handleTileScript = function(eventname,tile,ignoreList){
 									var defaultEvent=scriptData[newJ]["responses"][newK];
 									var x=defaultEvent["data"]["index"] % gridWidth;
 									var y=Math.floor(defaultEvent["data"]["index"]/gridWidth);
-									PlayersController.getYou().setPosition(x*32,y*32);
+									PlayersController.getYou().setPosition(x*cellsize,y*cellsize);
 									sendMessageToServer({"changemap":defaultEvent["data"]["mapnum"], "setTo":defaultEvent["data"]["index"]});
 									GameMap.goToMap(defaultEvent["data"]["mapnum"]);
-									GameMap.goToOffsetFromPosition(x*32,y*32);
+									GameMap.goToOffsetFromPosition(x*cellsize,y*cellsize);
 								},newJ,newK]);
 							break;
 							case "Open/Close Panel":
@@ -1271,10 +1273,10 @@ var handleItemScript = function(eventname,item,ignoreList,itemnumber){
 									var defaultEvent=scriptData[newJ]["responses"][newK];
 									var x=defaultEvent["data"]["index"] % gridWidth;
 									var y=Math.floor(defaultEvent["data"]["index"]/gridWidth);
-									PlayersController.getYou().setPosition(x*32,y*32);
+									PlayersController.getYou().setPosition(x*cellsize,y*cellsize);
 									sendMessageToServer({"changemap":defaultEvent["data"]["mapnum"], "setTo":defaultEvent["data"]["index"]});
 									GameMap.goToMap(defaultEvent["data"]["mapnum"]);
-									GameMap.goToOffsetFromPosition(x*32,y*32);
+									GameMap.goToOffsetFromPosition(x*cellsize,y*cellsize);
 								},newJ,newK]);
 							break;
 							case "Read Item":
@@ -1384,7 +1386,184 @@ var handleItemScript = function(eventname,item,ignoreList,itemnumber){
 };
 
 
+var checkNPCRequirements = function(requirements,ignoreList){
+	if(requirements.length==0){
+		return true;
+	}else{
+		var defaultEvent = requirements;
+		for(var k=0;k<defaultEvent.length;k++){
+			switch(defaultEvent[k]["type"]){
+				case "Is Quest Point":
+					var questData = PlayersController.getYou().getQuestData(defaultEvent[k]["data"]["quest"]);
+					if(!questData){
+						questData=0;
+					}
+					if(questData!=defaultEvent[k]["data"]["objective"]){
+						return false;
+					}			
+				break;
+				case "Script Requirement":
+					console.log("SCRIPT REQUIRE);")
+					var data=cloneObj(PlayersController.getYou().getExtraData(npc.script));
+					var isAllow=true;
+					if(!data){
+						data={};
+					}
+					try{
+						var unparsedDataOriginal = defaultEvent[k]["data"]["functionContent"].replace(/,/g,'')
+						var unparsedData = unparsedDataOriginal.split(':');
+						var string = "{";
+						for(var i in unparsedData){
+							if(i%2==0){
+								string+="\""+unparsedData[i]+"\":";
+							}else if(i!=unparsedData.length-1){
+								string+="\""+unparsedData[i]+"\",";
+							}else{
+								string+="\""+unparsedData[i]+"\""
+							}	
+						}
+						string+="}";
+						var tempDat = JSON.parse(string);
+						for(var i in tempDat){
+							if(!data[i]){
+								data[i]="null";
+							}
+							if(data[i]!=tempDat[i]){
+								isAllow=false;
+							}
+						}
+						if(isAllow==false){
+							return false;
+						}
+					}catch(e){
+						GameChat.addMessage("your custom require script failed");
+						return false;
+					}
+				break;
 
+				case "Is Panel Visibility":
+					if(ignoreList && ignoreList["Is Panel Visibility"]){
+						break;
+					}
+					var visible = defaultEvent[k]["data"]["visible"]==1?true:false;
+					switch(defaultEvent[k]["data"]["panel"]){
+						case 0: 
+							if(Inventory!=null && !Inventory._parent) Inventory=null;
+							if(Inventory && !visible){
+								return false;
+							}
+							if(!Inventory && visible){
+								return false;
+							}
+						break;
+						case 1:
+							if(Equipment!=null && !Equipment._parent) Equipment=null;
+							if(Equipment && !visible){
+								return false;
+							}
+							if(!Equipment && visible){
+								return false;
+							}
+						break;
+						case 2:
+							if(Skills!=null && !Skills._parent) Skills=null;
+							if(Skills && !visible){
+								return false;
+							}
+							if(!Skills && visible){
+								return false;
+							}
+						break;
+					}
+				break;
+				case "Is Player Inventory Space":
+					if(ignoreList && ignoreList["Is Player Inventory Space"]){
+						break;
+					}
+					if(!defaultEvent[k]["data"]["space"]){
+						var space=0;
+					}else{
+						var space = defaultEvent[k]["data"]["space"]
+					}
+					var count=0;
+					for(var p=0;p<40;p++){
+						if(!userItems["stored"][p]){
+							count++;
+						}
+					}
+					if(count<space){
+						return false;
+					}
+				break;
+				case "Has Player Item":
+					if(ignoreList && ignoreList["Has Player Item"]){
+						break;
+					}
+					if(defaultEvent[k]["data"]["item"]){
+						if(!defaultEvent[k]["data"]["amount"]){
+							var amount=0;
+						}else{
+							var amount=defaultEvent[k]["data"]["amount"];
+						}	
+						var count=0;
+						var itemName = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]]["name"];
+						for(var i in userItems["stored"]){
+							if(userItems["stored"][i] && userItems["stored"][i]["name"]==itemName){
+								count++;
+							}
+						}
+						if(count<amount){
+							return false;
+						}
+					}
+				break;
+				case "Is Player Statistics":
+					if(ignoreList && ignoreList["Is Player Statistics"]){
+						break;
+					}
+					var name = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
+					if(!defaultEvent[k]["data"]["levelUpper"]){
+						defaultEvent[k]["data"]["levelUpper"]=0;
+					}
+					if(!defaultEvent[k]["data"]["levelLower"]){
+						defaultEvent[k]["data"]["levelLower"]=0;
+					}
+					if(!defaultEvent[k]["data"]["healthUpper"]){
+						defaultEvent[k]["data"]["healthUpper"]=0;
+					}
+					if(!defaultEvent[k]["data"]["healthLowe"]){
+						defaultEvent[k]["data"]["healthLower"]=0;
+					}
+					if(!defaultEvent[k]["data"]["xpUpper"]){
+						defaultEvent[k]["data"]["xpUpper"]=0;
+					}
+					if(!defaultEvent[k]["data"]["xpLower"]){
+						defaultEvent[k]["data"]["xpLower"]=0;
+					}
+					if(defaultEvent[k]["data"]["levelUpper"]!=0 || defaultEvent[k]["data"]["levelLower"]!=0){
+						var valtocheck = SkillBarsInstance.skillsData[name]["level"]+1;
+						if(valtocheck>defaultEvent[k]["data"]["levelUpper"] || valtocheck<defaultEvent[k]["data"]["levelLower"]){
+						return false;
+						}
+					}
+					if(defaultEvent[k]["data"]["healthUpper"]!=0 || defaultEvent[k]["data"]["healthLower"]!=0){
+						var valtocheck = SkillBarsInstance.skillsData[name]["currenthealth"];
+						if(valtocheck>defaultEvent[k]["data"]["healthUpper"] || valtocheck<defaultEvent[k]["data"]["healthLower"]){
+							return false;
+						}
+					}
+
+					if(defaultEvent[k]["data"]["xpUpper"]!=0 || defaultEvent[k]["data"]["xpLower"]!=0){
+						var valtocheck = SkillBarsInstance.skillsData[name]["experience"];
+						if(valtocheck>defaultEvent[k]["data"]["xpUpper"] || valtocheck<defaultEvent[k]["data"]["xpLower"]){
+							return false;
+						}
+					}
+				break;
+			}
+		}
+	}
+};
 
 var handleNPCScript = function(eventname,npc,ignoreList){
 	var functionArray=[];
@@ -1399,181 +1578,7 @@ var handleNPCScript = function(eventname,npc,ignoreList){
 		console.log(eventname);
 		for(var j=0;j<scriptData.length;j++){
 			if(scriptData[j]["type"]==eventname){
-				var defaultEvent = scriptData[j]["requirements"];
-				var allowContinue=true;
-				for(var k=0;k<defaultEvent.length;k++){
-					switch(defaultEvent[k]["type"]){
-						case "Is Quest Point":
-						console.log("Is Quest Point");
-							var questData = PlayersController.getYou().getQuestData(defaultEvent[k]["data"]["quest"]);
-							if(!questData){
-								questData=0;
-							}
-							if(questData!=defaultEvent[k]["data"]["objective"]){
-								allowContinue=false; break; break;
-							}			
-						break;
-						case "Script Requirement":
-							console.log("SCRIPT REQUIRE);")
-							var data=cloneObj(PlayersController.getYou().getExtraData(npc.script));
-							var isAllow=true;
-							if(!data){
-								data={};
-							}
-							try{
-								var unparsedDataOriginal = defaultEvent[k]["data"]["functionContent"].replace(/,/g,'')
-								var unparsedData = unparsedDataOriginal.split(':');
-								var string = "{";
-								for(var i in unparsedData){
-									if(i%2==0){
-										string+="\""+unparsedData[i]+"\":";
-									}else if(i!=unparsedData.length-1){
-										string+="\""+unparsedData[i]+"\",";
-									}else{
-										string+="\""+unparsedData[i]+"\""
-									}	
-								}
-								string+="}";
-								var tempDat = JSON.parse(string);
-								for(var i in tempDat){
-									if(!data[i]){
-										data[i]="null";
-									}
-									if(data[i]!=tempDat[i]){
-										isAllow=false;
-									}
-								}
-								if(isAllow==false){
-									allowContinue=false; break; break;
-								}
-							}catch(e){
-								GameChat.addMessage("your custom require script failed");
-								allowContinue=false; break; break;
-							}
-						break;
-
-						case "Is Panel Visibility":
-							if(ignoreList && ignoreList["Is Panel Visibility"]){
-								break;
-							}
-							var visible = defaultEvent[k]["data"]["visible"]==1?true:false;
-							switch(defaultEvent[k]["data"]["panel"]){
-								case 0: 
-									if(Inventory!=null && !Inventory._parent) Inventory=null;
-									if(Inventory && !visible){
-										allowContinue=false; break; break;
-									}
-									if(!Inventory && visible){
-										allowContinue=false; break; break;
-									}
-								break;
-								case 1:
-									if(Equipment!=null && !Equipment._parent) Equipment=null;
-									if(Equipment && !visible){
-										allowContinue=false; break; break;
-									}
-									if(!Equipment && visible){
-										allowContinue=false; break; break;
-									}
-								break;
-								case 2:
-									if(Skills!=null && !Skills._parent) Skills=null;
-									if(Skills && !visible){
-										allowContinue=false; break; break;
-									}
-									if(!Skills && visible){
-										allowContinue=false; break; break;
-									}
-								break;
-							}
-						break;
-						case "Is Player Inventory Space":
-							if(ignoreList && ignoreList["Is Player Inventory Space"]){
-								break;
-							}
-							if(!defaultEvent[k]["data"]["space"]){
-								var space=0;
-							}else{
-								var space = defaultEvent[k]["data"]["space"]
-							}
-							var count=0;
-							for(var p=0;p<40;p++){
-								if(!userItems["stored"][p]){
-									count++;
-								}
-							}
-							if(count<space){
-								allowContinue=false; break; break;
-							}
-						break;
-						case "Has Player Item":
-							if(ignoreList && ignoreList["Has Player Item"]){
-								break;
-							}
-							if(defaultEvent[k]["data"]["item"]){
-								if(!defaultEvent[k]["data"]["amount"]){
-									var amount=0;
-								}else{
-									var amount=defaultEvent[k]["data"]["amount"];
-								}	
-								var count=0;
-								var itemName = ObjectLists.getItemList()[defaultEvent[k]["data"]["item"]]["name"];
-								for(var i in userItems["stored"]){
-									if(userItems["stored"][i] && userItems["stored"][i]["name"]==itemName){
-										count++;
-									}
-								}
-								if(count<amount){
-									allowContinue=false; break; break;
-								}
-							}
-						break;
-						case "Is Player Statistics":
-							if(ignoreList && ignoreList["Is Player Statistics"]){
-								break;
-							}
-							var name = ObjectLists.getSkillsList()[defaultEvent[k]["data"]["skill"]]["name"];
-							if(!defaultEvent[k]["data"]["levelUpper"]){
-								defaultEvent[k]["data"]["levelUpper"]=0;
-							}
-							if(!defaultEvent[k]["data"]["levelLower"]){
-								defaultEvent[k]["data"]["levelLower"]=0;
-							}
-							if(!defaultEvent[k]["data"]["healthUpper"]){
-								defaultEvent[k]["data"]["healthUpper"]=0;
-							}
-							if(!defaultEvent[k]["data"]["healthLowe"]){
-								defaultEvent[k]["data"]["healthLower"]=0;
-							}
-							if(!defaultEvent[k]["data"]["xpUpper"]){
-								defaultEvent[k]["data"]["xpUpper"]=0;
-							}
-							if(!defaultEvent[k]["data"]["xpLower"]){
-								defaultEvent[k]["data"]["xpLower"]=0;
-							}
-							if(defaultEvent[k]["data"]["levelUpper"]!=0 || defaultEvent[k]["data"]["levelLower"]!=0){
-								var valtocheck = SkillBarsInstance.skillsData[name]["level"]+1;
-								if(valtocheck>defaultEvent[k]["data"]["levelUpper"] || valtocheck<defaultEvent[k]["data"]["levelLower"]){
-									allowContinue=false; break; break;
-								}
-							}
-							if(defaultEvent[k]["data"]["healthUpper"]!=0 || defaultEvent[k]["data"]["healthLower"]!=0){
-								var valtocheck = SkillBarsInstance.skillsData[name]["currenthealth"];
-								if(valtocheck>defaultEvent[k]["data"]["healthUpper"] || valtocheck<defaultEvent[k]["data"]["healthLower"]){
-									allowContinue=false; break; break;
-								}
-							}
-
-							if(defaultEvent[k]["data"]["xpUpper"]!=0 || defaultEvent[k]["data"]["xpLower"]!=0){
-								var valtocheck = SkillBarsInstance.skillsData[name]["experience"];
-								if(valtocheck>defaultEvent[k]["data"]["xpUpper"] || valtocheck<defaultEvent[k]["data"]["xpLower"]){
-									allowContinue=false; break; break;
-								}
-							}
-						break;
-					}
-				}
-				if(allowContinue==true){
+				if(checkNPCRequirements(scriptData[j]["requirements"],ignoreList)){
 					var defaultEvent = scriptData[j]["responses"];
 						for(var k=0;k<defaultEvent.length;k++){
 							switch(defaultEvent[k]["type"]){
@@ -1757,10 +1762,10 @@ var handleNPCScript = function(eventname,npc,ignoreList){
 										var defaultEvent=scriptData[newJ]["responses"][newK];
 										var x=defaultEvent["data"]["index"] % gridWidth;
 										var y=Math.floor(defaultEvent["data"]["index"]/gridWidth);
-										PlayersController.getYou().setPosition(x*32,y*32);
+										PlayersController.getYou().setPosition(x*cellsize,y*cellsize);
 										sendMessageToServer({"changemap":defaultEvent["data"]["mapnum"], "setTo":defaultEvent["data"]["index"]});
 										GameMap.goToMap(defaultEvent["data"]["mapnum"]);
-										GameMap.goToOffsetFromPosition(x*32,y*32);
+										GameMap.goToOffsetFromPosition(x*cellsize,y*cellsize);
 									},newJ,newK]);
 								break;
 								case "Open/Close Panel":

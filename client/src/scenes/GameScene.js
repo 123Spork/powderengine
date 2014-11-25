@@ -11,7 +11,7 @@ var GameScene = Scene.extend({
 
 	onOrientationChanged:function(){
 		var pos = PlayersController.getYou().getGridPosition();
-		GameMap.goToOffsetFromPosition(pos.x*32,pos.y*32);
+		GameMap.goToOffsetFromPosition(pos.x*cellsize,pos.y*cellsize);
 		resetLayoutsFromObject(this.getLayoutObject(),this.panels);
 		SkillBarsInstance.updateLayoutFromSkills();
 	},

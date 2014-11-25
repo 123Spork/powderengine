@@ -14,7 +14,7 @@ DropDownList = Scene.extend({
 		this.currentContext=0;
 	},
 
-	init:function(delegate,delegateFunc,list,position){
+	init:function(delegate,delegateFunc,list,position,extras){
 		this._super();
 		if(!delegate){
 			return;
@@ -27,6 +27,11 @@ DropDownList = Scene.extend({
 		if(position){
 			this.setPosition(position);
 		}
+		if(extras){
+			this.extras=extras;
+		}else{
+			this.extras={};
+		}
 		this.previousScene = SceneManager.getActiveScene();
 		SceneManager.setActiveScene(this);
 		this.setTouchPriority(-1001);
@@ -38,7 +43,7 @@ DropDownList = Scene.extend({
 		for(var i =0;i<this.list.length;i++){
 			if(!this.setupOptions || this.setupOptions[i]["enabled"]==true){
 				if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"][i+""].getPositionX(),this.panels["control_menu"][i+""].getPositionY(),this.panels["control_menu"][i+""].getContentSize().width,this.panels["control_menu"][i+""].getContentSize().height),menuPos)){
-					this.delegateFunc(i,touch);
+					this.delegateFunc(i,touch,this.list,this.extras);
 				}
 			}
 		}
@@ -93,7 +98,7 @@ DropDownList = Scene.extend({
 					"control_menu":{
 						position:cc.p(0,0),
 						color:cc.c4b(200,200,200,0),
-						size:cc.size(96,48),
+						size:cc.size(96,24),
 						children:listOptions,
 					}
 				}
@@ -118,9 +123,9 @@ DropDownList = Scene.extend({
 });
 
 
-DropDownList.createWithListAndPosition=function(delegate,delegateFunc,list,position,setupOptions){
+DropDownList.createWithListAndPosition=function(delegate,delegateFunc,list,position,setupOptions,extras){
 	var dropDown = new DropDownList();
-	dropDown.init(delegate,delegateFunc,list,position);
+	dropDown.init(delegate,delegateFunc,list,position,extras);
 	dropDown.panels = requestLayout(dropDown.getLayoutObject(),true);
 	if(setupOptions){
 		for(var i =0;i<dropDown.list.length;i++){

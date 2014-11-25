@@ -130,10 +130,9 @@ Character = cc.Sprite.extend({
 			return;
 		}
 		if(!this.isWalking){
-			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 			if(tile){
 				if(tile.getTopItem()){
-					this.pickupItem(tile.getTopItem());
+					this.pickupItemFromTile(tile.getTopItem(),tile);
 					return;
 				}
 				if(tile.getScript()){

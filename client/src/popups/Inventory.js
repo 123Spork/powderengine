@@ -159,13 +159,15 @@ InventoryPanel = Popup.extend({
 				if(isTouching(this.panels["main_panel"][(i+"")],cc.p(truePos.x,truePos.y+reducer))){
 					var item = ObjectLists.getItemList()[PlayersController.getYou().getInventory()[i]["number"]];
 					var scriptData=[];
-					if(item["script"]){
+					if(item["script"] && ObjectLists.getScriptList()[item["script"]]){
 						scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
 					}
-					var firstItem=null;
+					if(!scriptData){
+						continue;
+					}
 					for(var j=0;j<scriptData.length;j++){
 						if(scriptData[j]["type"]=="Default Event"){
-							firstItem="Use Item";
+							var firstItem="Use Item";
 							var defaultEvent = scriptData[j]["responses"];
 							for(var k=0;k<defaultEvent.length;k++){
 								console.log(defaultEvent[k]["type"]);
@@ -182,15 +184,14 @@ InventoryPanel = Popup.extend({
 					}
 					
 					var secondItem = settingsData["Item Dropdown Drop"]+"";
-					secondItem = secondItem.replace("<ITEM>",(PlayersController.getYou().getInventory()[i]["name"]));
+					secondItem = secondItem.replace("<ITEM>",(item["name"]));
 					
-
 					if(firstItem){
 						this.itemUse=true;
-						firstItem = firstItem.replace("<ITEM>",(PlayersController.getYou().getInventory()[i]["name"]));
+						firstItem = firstItem.replace("<ITEM>",(item["name"]));
 						this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,[firstItem,secondItem],touch._point));
 					}else{
-							this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,[secondItem],touch._point));
+						this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,[secondItem],touch._point));
 					}
 					this.itemContext=i;
 					this.panels["item_name"].setVisible(false)

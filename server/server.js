@@ -383,12 +383,12 @@ socket.on('connection', function(client){
 			positions[client.id]= event["moveTo"];
 		}
 		if(event["droppeditem"]){
-			client.send(JSON.stringify({"droppeditem":event["droppeditem"], "mapnumber":event["mapnumber"], "index":event["index"]}));
-			client.broadcast.send(JSON.stringify({"droppeditem":event["droppeditem"],"mapnumber":event["mapnumber"],"index":event["index"]}));
+			client.send(JSON.stringify({"droppeditem":event["droppeditem"], "mapnumber":event["mapnumber"], "index":event["index"],"amount":event["amount"]}));
+			client.broadcast.send(JSON.stringify({"droppeditem":event["droppeditem"],"mapnumber":event["mapnumber"],"index":event["index"],"amount":event["amount"]}));
 			if(!droppedItems[event["mapnumber"]]){
 				droppedItems[event["mapnumber"]]=[];
 			}
-			droppedItems[event["mapnumber"]].push({"droppeditem":event["droppeditem"],"mapnumber":event["mapnumber"],"index":event["index"]});
+			droppedItems[event["mapnumber"]].push({"droppeditem":event["droppeditem"],"mapnumber":event["mapnumber"],"index":event["index"],"amount":event["amount"]});
 		}
 		if(event["pickupitem"]){
 			client.send(JSON.stringify({"pickupitem":event["pickupitem"],"mapnumber":event["mapnumber"]}));
@@ -585,7 +585,7 @@ socket.on('connection', function(client){
 				}
 			}
 			for(var i in droppedItems[event["changemap"]]){
-				client.send(JSON.stringify({"droppeditem":droppedItems[event["changemap"]][i]["droppeditem"],"mapnumber":event["changemap"],"index":droppedItems[event["changemap"]][i]["index"]}));
+				client.send(JSON.stringify({"droppeditem":droppedItems[event["changemap"]][i]["droppeditem"],"mapnumber":event["changemap"],"index":droppedItems[event["changemap"]][i]["index"],"amount":event["amount"]}));
 			}
 			for(var i in mapNPCS[event["changemap"]]){
 				client.send(JSON.stringify({"changeNPCPosition":mapNPCS[event["changemap"]][i],"npcID":i}));

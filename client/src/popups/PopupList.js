@@ -59,6 +59,9 @@ PopupList = Popup.extend({
 				this.editList.splice(i,1);
 				continue;
 			}
+			if(this.editList[i]=={}){
+				continue;
+			}
 			if(this.delegate!=null){
 				var useElement=cc.Sprite.createWithTexture(tc.addImage("GUI/use.png"));
 				useElement.setPosition(cc.p(244,6));
@@ -245,7 +248,7 @@ PopupList = Popup.extend({
 	},
 	
 	deleteElement:function(number){
-		this.editList.splice(number,1);
+		this.editList[number]={};
 		this.childEditor.deleteSave(number,this.editList);
 		this.prepareList();
 	},

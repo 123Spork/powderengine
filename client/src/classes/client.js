@@ -268,13 +268,7 @@ reactToSocketMessage=function(data){
 			else if(data["droppeditem"]){
 				if(data["mapnumber"] == GameMap.getMapNumber() && GameMap.getInstance().isMapDirty==false){
 					var tile = GameMap.getTileNodeForIndex(data["index"]);
-					var itemlist=ObjectLists.getItemList();
-					for(var i in itemlist){
-						if(itemlist[i]["name"]==data["droppeditem"]["name"]){
-							tile.addItem(i,data["droppeditem"]["amount"]);
-							break;
-						}
-					}
+					tile.addItem(data["droppeditem"],data["amount"]);
 					GameMap.updateMap();
 				} else{
 					storedClientMessages.push(JSON.stringify(data));

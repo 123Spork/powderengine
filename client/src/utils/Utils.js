@@ -170,7 +170,7 @@ function validateEmail(email)
 
 function isTouching(obj,pos){
 	if(!obj){
-//		return false;
+		return false;
 	}
 	return ((obj.isVisible && obj.isVisible())|| !obj.isVisible) && cc.rectContainsPoint(cc.rect(obj.getPositionX(),obj.getPositionY(),obj.getContentSize().width,obj.getContentSize().height),pos);
 };
@@ -875,7 +875,7 @@ var handleTileScript = function(eventname,tile,ignoreList){
 };
 
 
-var handleItemScript = function(eventname,item,ignoreList){
+var handleItemScript = function(eventname,item,ignoreList,itemnumber){
 	var functionArray=[];
 	MainScene.scheduleOnce(function(){
 		var scriptData=[];
@@ -1115,8 +1115,14 @@ var handleItemScript = function(eventname,item,ignoreList){
 										temp = cloneObj(userItems["equipped"][place]);
 										handleItemScript("On Dequip",temp)
 									}
-									userItems["equipped"][place]=cloneObj(item);
-									item=temp;
+									var itemList = ObjectLists.getItemList();
+									for(var i in itemList){
+										if(itemList[i]["name"]==item["name"]){
+											userItems["equipped"][place]={"number":i,"amount":item["amount"]};
+											break;
+										}
+									}
+									userItems["stored"][itemnumber]=temp;
 									if(Inventory){
 										Inventory.updateTileGrid();
 									}

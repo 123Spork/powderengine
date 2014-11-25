@@ -35,10 +35,12 @@ var GameTile = cc.Node.extend({
 			var amount=1;
 		}
 		var data = ObjectLists.getItemList()[number];
-		var texture = data["sprite"]["texture"];
-		var pos = data["sprite"]["position"];
-		this.setLayer(texture,pos,"item");
-		this.itemData.push({number:number,amount:amount});
+		if(data){
+			var texture = data["sprite"]["texture"];
+			var pos = data["sprite"]["position"];
+			this.setLayer(texture,pos,"item");
+			this.itemData.push({number:number,amount:amount});
+		}
 	},	
 
 	removeItem:function(){

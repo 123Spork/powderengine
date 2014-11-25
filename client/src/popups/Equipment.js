@@ -108,14 +108,17 @@ EquipmentPanel = Popup.extend({
 		this.panels["main_panel"]["mod"].setTexture(cc.TextureCache.getInstance().addImage("GUI/defaultitem.png"));
 		for(var i in equipmentList){
 			if(equipmentList[i]){
+				var item = ObjectLists.getItemList()[equipmentList[i]["number"]];
 				for(var j in tileTextureList){
-					if(tileTextureList[j]["name"]==equipmentList[i]["sprite"]["texture"]){
+					if(tileTextureList[j]["name"]==item["sprite"]["texture"]){
 						var texture=tileTextureList[j]["texture"];
 					}
 				}
-				this.panels["main_panel"][i].setAnchorPoint(0,1);
-				this.panels["main_panel"][i].setTexture(texture);
-				this.panels["main_panel"][i].setTextureRect(cc.rect(equipmentList[i]["sprite"]["position"].x*32, (equipmentList[i]["sprite"]["position"].y*32),32,32));
+				if(this.panels["main_panel"][i]){
+					this.panels["main_panel"][i].setAnchorPoint(0,1);
+					this.panels["main_panel"][i].setTexture(texture);
+					this.panels["main_panel"][i].setTextureRect(cc.rect(item["sprite"]["position"].x*32, (item["sprite"]["position"].y*32),32,32));
+				}
 			}
 		}
 	},
@@ -136,14 +139,15 @@ EquipmentPanel = Popup.extend({
 		var equipmentList = PlayersController.getYou().getEquipment();
 		for(var i in equipmentList){
 			if(equipmentList[i]){
+				var item = ObjectLists.getItemList()[equipmentList[i]["number"]];
 				var reducer= 32;
 				if(isTouching(this.panels["main_panel"][i],cc.p(truePos.x,truePos.y+reducer))){
 					this.itemContext=i;
 					this.panels["item_name"].setVisible(false)
 					var firstItem = settingsData["Item Dropdown Unequip"]+"";
-					firstItem = firstItem.replace("<ITEM>",(PlayersController.getYou().getEquipment()[i]["name"]));
+					firstItem = firstItem.replace("<ITEM>",(item["name"]));
 					var secondItem = settingsData["Item Dropdown Drop"]+"";
-					secondItem = secondItem.replace("<ITEM>",(PlayersController.getYou().getEquipment()[i]["name"]));
+					secondItem = secondItem.replace("<ITEM>",(item["name"]));
 					this.addChild(DropDownList.createWithListAndPosition(this,this.listItemSelected,[firstItem,secondItem],touch._point));
 					return true;
 				}
@@ -158,9 +162,10 @@ EquipmentPanel = Popup.extend({
 		  var equipmentList = PlayersController.getYou().getEquipment();
 			for(var i in equipmentList){
 				if(equipmentList[i]){
+					var item = ObjectLists.getItemList()[equipmentList[i]["number"]];
 					var reducer= 32;
 					if(isTouching(this.panels["main_panel"][i],cc.p(truePos.x,truePos.y+reducer))){
-						this.panels["item_name"]["content"].setString(equipmentList[i]["name"]);
+						this.panels["item_name"]["content"].setString(item["name"]);
 						this.panels["item_name"].setVisible(true);
 						this.panels["item_name"].setContentSize(this.panels["item_name"]["content"].getContentSize());
 						this.panels["item_name"]["content"].setPositionX(this.panels["item_name"]["content"].getContentSize().width/2);

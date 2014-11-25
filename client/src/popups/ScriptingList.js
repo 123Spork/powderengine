@@ -126,13 +126,9 @@ ScriptingList = Popup.extend({
 		var tc = cc.TextureCache.getInstance();
 		for(var i=0,j=0;i<this.editList.length;i++){
 			listnodes[i]=cc.Node.create();
-			if(this.editList[i]["specifier"]==currentSpecifier){			
+			if(this.editList[i]!={} &&this.editList[i]["specifier"]==currentSpecifier){			
 				listnodes[i].setContentSize(286,32);
 				console.log(this.editList[i]);
-				if(this.editList[i]==null){
-					this.editList.splice(i,1);
-					continue;
-				}
 				var element= cc.LayerColor.create(cc.c4b(0,0,0,127),286,1);
 				element.setPosition(cc.p(0,0));			
 				var text = cc.LabelTTF.create(this.editList[i].name,"Arial",20);
@@ -343,7 +339,7 @@ ScriptingList = Popup.extend({
 	},
 	
 	deleteElement:function(number){
-		this.editList.splice(number,1);
+		this.editList[number]={}
 		this.childEditor.deleteSave(number,this.editList);
 		this.prepareDefaultList();
 		if(this.selectedScriptType){

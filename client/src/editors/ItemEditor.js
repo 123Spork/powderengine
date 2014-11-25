@@ -428,9 +428,6 @@ ItemEditor = Popup.extend({
 			if(isTouching(this.panels["main_panel"]["stackbtn"],truePos)){
 				this.swapStackable(); return true;
 			}
-			if(isTouching(this.panels["main_panel"]["scriptbtn"],truePos)){
-				this.selectScript(); return true;
-			}
 
 			truePos = this.panels["main_panel"]["tiles"].convertToNodeSpace(pos);
 			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tiles"].getContentSize().height){

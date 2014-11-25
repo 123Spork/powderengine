@@ -100,14 +100,15 @@ InventoryPanel = Popup.extend({
 
 		for(var i=0;i<40;i++){
 			if(inventoryList[i]){
+				var item = ObjectLists.getItemList()[inventoryList[i]["number"]];
 				for(var j in tileTextureList){
-					if(tileTextureList[j]["name"]==inventoryList[i]["sprite"]["texture"]){
+					if(tileTextureList[j]["name"]==item["sprite"]["texture"]){
 						var texture=tileTextureList[j]["texture"];
 					}
 				}
 				this.panels["main_panel"][(i+"")].setAnchorPoint(0,1);
 				this.panels["main_panel"][(i+"")].setTexture(texture);
-				this.panels["main_panel"][(i+"")].setTextureRect(cc.rect(inventoryList[i]["sprite"]["position"].x*32, (inventoryList[i]["sprite"]["position"].y*32),32,32));
+				this.panels["main_panel"][(i+"")].setTextureRect(cc.rect(item["sprite"]["position"].x*32, (item["sprite"]["position"].y*32),32,32));
 				this.setStackableLabel(i,inventoryList[i]["amount"]);
 			} else{
 				this.panels["main_panel"][(i+"")].setTexture(cc.TextureCache.getInstance().addImage("GUI/defaultitem.png"));
@@ -156,7 +157,7 @@ InventoryPanel = Popup.extend({
 			if(PlayersController.getYou().getInventory()[i]){
 				var reducer= 32;
 				if(isTouching(this.panels["main_panel"][(i+"")],cc.p(truePos.x,truePos.y+reducer))){
-					var item = PlayersController.getYou().getInventory()[i];
+					var item = ObjectLists.getItemList()[PlayersController.getYou().getInventory()[i]["number"]];
 					var scriptData=[];
 					if(item["script"]){
 						scriptData = ObjectLists.getScriptList()[item["script"]]["data"];
@@ -207,7 +208,7 @@ InventoryPanel = Popup.extend({
 			if(PlayersController.getYou().getInventory()[i]){
 				var reducer= 32;
 				if(isTouching(this.panels["main_panel"][(i+"")],cc.p(truePos.x,truePos.y+reducer))){
-					this.panels["item_name"]["content"].setString(PlayersController.getYou().getInventory()[i]["name"]);
+					this.panels["item_name"]["content"].setString(ObjectLists.getItemList()[PlayersController.getYou().getInventory()[i]["number"]]["name"]);
 					this.panels["item_name"].setVisible(true);
 					this.panels["item_name"].setContentSize(this.panels["item_name"]["content"].getContentSize());
 					this.panels["item_name"]["content"].setPositionX(this.panels["item_name"]["content"].getContentSize().width/2);

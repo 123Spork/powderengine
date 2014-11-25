@@ -407,57 +407,48 @@ PlayerCharacter = Character.extend({
 	},
 
 	updateItemData:function(name,item){
-		for(var i=0;i<this.items["stored"].length;i++){
-			if(this.items["stored"][i] && this.items["stored"][i]["name"]==name){
-				this.items["stored"][i]=item;
-			}
+		if(Inventory){
+			Inventory.updateTileGrid();
 		}
-		console.log(this.items);
+		if(Equipment){
+			Equipment.updateTileGrid();
+		}
 	},
 	
 	pickupItem:function(ref){
 		item=ObjectLists.getItemList()[ref.number];
-		item["amount"]=ref.amount;
 		var gp = this.getGridPosition();
-		var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 		handleItemScript("On Pickup",item);
-		if(item){
-			if(item["stackable"]==true){
-				for(var i=0;i<40;i++){
-					if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
-						if(Inventory){
-							this.items["stored"][i]["amount"] +=item["amount"];
-							Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
-						}
-						GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
-						if(tile.getScriptObject()["temp"]){
-							sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-						} else{
-							sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-						}
-						console.log(this.items);
-						return;
-					}
-				}
-			}
-			
-			var added=false;
+		if(item["stackable"]==true){
 			for(var i=0;i<40;i++){
-				if(this.items["stored"][i]==null){
-					this.items["stored"][i]=cloneObj(item);
+				if(this.items["stored"][i] && this.items["stored"][i]["number"]==ref.number){
 					if(Inventory){
+						this.items["stored"][i]["amount"]+=ref.amount;
 						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
 					}
 					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
 					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-					var added=true;
-					break;
+					return;
 				}
 			}
-			if(added==false){
-				GameChat.addMessage(strings.gameChat.inventoryFull);
+		}
+			
+		var added=false;
+		for(var i=0;i<40;i++){
+			if(this.items["stored"][i]==null){
+				this.items["stored"][i]={"number":ref.number,"amount":ref.amount};
+				if(Inventory){
+					Inventory.setStackableLabel(i,ref.amount);	
+				}
+				GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+				sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+				var added=true;
+				break;
 			}
-		}	
+		}
+		if(added==false){
+			GameChat.addMessage(strings.gameChat.inventoryFull);
+		}
 		if(Inventory){
 			Inventory.updateTileGrid();
 		}
@@ -468,47 +459,37 @@ PlayerCharacter = Character.extend({
 
 	pickupItemFromTile:function(ref,tile){
 		item=ObjectLists.getItemList()[ref.number];
-		item["amount"]=ref.amount;
-
 		var gp = cc.p(tile.getPositionX()/cellsize,tile.getPositionY()/cellsize);
-		handleItemScript("On Pickup",tile);
-		var scriptData=[];
-		
-		if(item){
-			if(item["stackable"]==true){
-				for(var i=0;i<40;i++){
-					if(this.items["stored"][i] && this.items["stored"][i]["name"]==item["name"]){
-						if(Inventory){
-							this.items["stored"][i]["amount"] +=item["amount"];
-							Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
-						}
-						GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
-						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-						return;
-					}
-				}
-			}
-			
-			var added=false;
+		handleItemScript("On Pickup",item);
+		if(item["stackable"]==true){
 			for(var i=0;i<40;i++){
-				if(this.items["stored"][i]==null){
-					this.items["stored"][i]=cloneObj(item);
+				if(this.items["stored"][i] && this.items["stored"][i]["number"]==ref.number){
 					if(Inventory){
+						this.items["stored"][i]["amount"] +=ref.amount;
 						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
 					}
 					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
-					if(tile.getScriptObject()["temp"]){
-						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber(),"temp":true});
-					} else{
-						sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-					}
-					var added=true;
-					break;
+					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+					return;
 				}
 			}
-			if(added==false){
-				GameChat.addMessage(strings.gameChat.inventoryFull);
+		}
+			
+		var added=false;
+		for(var i=0;i<40;i++){
+			if(this.items["stored"][i]==null){
+				this.items["stored"][i]={"number":ref.number,"amount":ref.amount};
+				if(Inventory){
+					Inventory.setStackableLabel(i,ref.amount);	
+				}
+				GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+				sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+				var added=true;
+				break;
 			}
+		}
+		if(added==false){
+			GameChat.addMessage(strings.gameChat.inventoryFull);
 		}
 		if(Inventory){
 			Inventory.updateTileGrid();
@@ -520,13 +501,13 @@ PlayerCharacter = Character.extend({
 	
 	dropItem:function(itemnumber,itembox){
 		var gp = this.getGridPosition();
-		var item = this.items[itembox][itemnumber];
+		var itemref = this.items[itembox][itemnumber];
+		var item = ObjectLists.getItemList()[itemref["number"]];
 		handleItemScript("On Drop",item);
 		if(this.items[itembox][itemnumber]){
-			GameChat.addMessage(strings.gameChat.droppedItem + this.items[itembox][itemnumber]["name"]);
-			sendMessageToServer({"droppeditem":this.items[itembox][itemnumber],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y)});
-			
-			if(this.items[itembox][itemnumber]["stackable"]==true && this.items[itembox][itemnumber]["amount"]>1){
+			GameChat.addMessage(strings.gameChat.droppedItem + item["name"]);
+			sendMessageToServer({"droppeditem":itemref["number"],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y),"amount":itemref["amount"]});
+			if(item["stackable"]==true && itemref["amount"]>1){
 				Inventory.setStackableLabel(itemnumber,0);
 			}
 			this.items[itembox][itemnumber]=null;
@@ -540,8 +521,8 @@ PlayerCharacter = Character.extend({
 	},
 
 	useItem:function(itemnumber){
-		var item = this.items["stored"][itemnumber];
-		handleItemScript("Default Event",item);
+		var item = ObjectLists.getItemList()[this.items["stored"][itemnumber]["number"]];
+		handleItemScript("Default Event",item,{},itemnumber);
 		if(Inventory){
 			Inventory.updateTileGrid();
 		}
@@ -561,8 +542,7 @@ PlayerCharacter = Character.extend({
 				if(Equipment){
 					Equipment.updateTileGrid();
 				}
-				var item = this.items["stored"][i]
-				handleItemScript("On Dequip",item)
+				handleItemScript("On Dequip",this.items["stored"][i])
 				return;
 			}
 		}

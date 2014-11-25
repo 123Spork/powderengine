@@ -20,7 +20,13 @@ ScriptEditor = Popup.extend({
 	},
 	
 	deleteSave:function(num,list){
-		sendMessageToServer({"savescriptswhole":list});
+		var newList = [];
+		for(var i in list){
+			if(list[i]["specifier"]!="Default"){
+				newList.push(cloneObj(list[i]);
+			}
+		}
+		sendMessageToServer({"savescriptswhole":newList});
 	},
 
 	getIdentifier:function(){

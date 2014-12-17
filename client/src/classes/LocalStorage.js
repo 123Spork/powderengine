@@ -317,6 +317,41 @@ LocalStorage.refreshQuest=function(data,updatetime){
 	LocalStorage.updateQuestData(questsarray,updatetime);
 };
 
+LocalStorage.getShopData=function(){
+	if(LocalstorageInstance.getLastUpdate("shops")){
+		if(sys.localStorage.getItem("shops_data")!=""){
+			var data = JSON.parse(sys.localStorage.getItem("shops_data"));
+		}
+		return data ? data :[];
+	} else{
+		return [];
+	}
+};
+
+LocalStorage.updateShopData=function(data,updatetime){
+	LocalstorageInstance.setLastUpdate("shops",updatetime);
+	sys.localStorage.setItem("shops_data",JSON.stringify(data));
+};
+
+LocalStorage.changeShop=function(shopNumber,data,updatetime){
+	if(!LocalstorageInstance.getLastUpdate("shops")){
+		var shopsarray = [];
+	} else{
+		if(sys.localStorage.getItem("shops_data")!=""){
+			var shopsarray = JSON.parse(sys.localStorage.getItem("shops_data"));
+		} else{
+			var shopsarray = [];
+		}
+	}
+	shopsarray[shopNumber]=data;
+	LocalStorage.updateQuestData(shopsarray,updatetime);
+};
+
+LocalStorage.refreshShop=function(data,updatetime){
+	shopsarray=data;
+	LocalStorage.updateShopData(shopsarray,updatetime);
+};
+
 LocalStorage.getSettingsData=function(){
 	if(LocalstorageInstance.getLastUpdate("settings")){
 		if(sys.localStorage.getItem("settings_data")!=""){
@@ -335,28 +370,30 @@ LocalStorage.updateSettingsData=function(data,updatetime){
 
 LocalStorage.Clear=function(){
 	sys.localStorage.setItem("map_data",[]);
-	sys.localStorage.setItem("last_maps",0);
+	sys.localStorage.setItem("last_maps",2);
 	sys.localStorage.setItem("warps_data",[]);
-	sys.localStorage.setItem("last_warps",0);	
+	sys.localStorage.setItem("last_warps",2);	
 	sys.localStorage.setItem("items_data",[]);
-	sys.localStorage.setItem("last_items",0);	
+	sys.localStorage.setItem("last_items",2);	
 	sys.localStorage.setItem("skills_data",[]);
-	sys.localStorage.setItem("last_skills",0);	
+	sys.localStorage.setItem("last_skills",2);	
 	sys.localStorage.setItem("signs_data",[]);
-	sys.localStorage.setItem("last_signs",0);	
+	sys.localStorage.setItem("last_signs",2);	
 	sys.localStorage.setItem("npcs_data",[]);
-	sys.localStorage.setItem("last_npcs",0);	
+	sys.localStorage.setItem("last_npcs",2);	
 	sys.localStorage.setItem("quests_data",[]);
-	sys.localStorage.setItem("last_quests",0);	
+	sys.localStorage.setItem("last_quests",2);	
+	sys.localStorage.setItem("shops_data",[]);
+	sys.localStorage.setItem("last_shops",2);	
 	sys.localStorage.setItem("settings_data",[]);
-	sys.localStorage.setItem("last_settings",0);	
+	sys.localStorage.setItem("last_settings",2);	
 	sys.localStorage.setItem("scripts_data",[]);
-	sys.localStorage.setItem("last_scripts",0);	
+	sys.localStorage.setItem("last_scripts",2);	
 	sys.localStorage.setItem("panelStore",null);
 };
 
 LocalStorage.Sync=function(){
-	sendMessageToServer({"sync":true, "mapupdate":(LocalstorageInstance.getLastUpdate("maps")!=null ? LocalstorageInstance.getLastUpdate("maps"):2),"warpupdate":(LocalstorageInstance.getLastUpdate("warps")!=null ? LocalstorageInstance.getLastUpdate("warps"):2),"itemupdate":(LocalstorageInstance.getLastUpdate("items")!=null ? LocalstorageInstance.getLastUpdate("items"):2),"skillsupdate":(LocalstorageInstance.getLastUpdate("skills")!=null ? LocalstorageInstance.getLastUpdate("skills"):2),"signsupdate":(LocalstorageInstance.getLastUpdate("signs")!=null ? LocalstorageInstance.getLastUpdate("signs"):2),"npcsupdate":(LocalstorageInstance.getLastUpdate("npcs")!=null ? LocalstorageInstance.getLastUpdate("npcs"):2),"questsupdate":(LocalstorageInstance.getLastUpdate("quests")!=null ? LocalstorageInstance.getLastUpdate("quests"):2),"settingsupdate":(LocalstorageInstance.getLastUpdate("settings")!=null ? LocalstorageInstance.getLastUpdate("settings"):2),"scriptsupdate":(LocalstorageInstance.getLastUpdate("scripts")!=null ? LocalstorageInstance.getLastUpdate("scripts"):2)});
+	sendMessageToServer({"sync":true, "mapupdate":(LocalstorageInstance.getLastUpdate("maps")!=null ? LocalstorageInstance.getLastUpdate("maps"):2),"warpupdate":(LocalstorageInstance.getLastUpdate("warps")!=null ? LocalstorageInstance.getLastUpdate("warps"):2),"itemupdate":(LocalstorageInstance.getLastUpdate("items")!=null ? LocalstorageInstance.getLastUpdate("items"):2),"skillsupdate":(LocalstorageInstance.getLastUpdate("skills")!=null ? LocalstorageInstance.getLastUpdate("skills"):2),"signsupdate":(LocalstorageInstance.getLastUpdate("signs")!=null ? LocalstorageInstance.getLastUpdate("signs"):2),"npcsupdate":(LocalstorageInstance.getLastUpdate("npcs")!=null ? LocalstorageInstance.getLastUpdate("npcs"):2),"questsupdate":(LocalstorageInstance.getLastUpdate("quests")!=null ? LocalstorageInstance.getLastUpdate("quests"):2),"shopsupdate":(LocalstorageInstance.getLastUpdate("shops")!=null ? LocalstorageInstance.getLastUpdate("shops"):2),"settingsupdate":(LocalstorageInstance.getLastUpdate("settings")!=null ? LocalstorageInstance.getLastUpdate("settings"):2),"scriptsupdate":(LocalstorageInstance.getLastUpdate("scripts")!=null ? LocalstorageInstance.getLastUpdate("scripts"):2)});
 };
 
 LocalStorage.setMapSaveOnExit=function(value){

@@ -14,7 +14,6 @@ Character = cc.Sprite.extend({
 	path:null,
 	facing:"DOWN",
 
-
 	init:function(withData){
 		this.setTextureData(withData.textureName,withData.spriteId);
 		this.stats = new StatsController(withData.statData,this);
@@ -90,8 +89,6 @@ Character = cc.Sprite.extend({
 		this.setSpriteFrame(1,0);
 	},
 	
-	
-	
 	getGridPosition:function(){
 		return cc.p(this.getPosition().x/cellsize,this.getPosition().y/cellsize);
 	},
@@ -119,7 +116,7 @@ Character = cc.Sprite.extend({
 					this.pickupItem(tile.getTopItem());
 				}
 				if(tile.getScript()){
-					handleTileScript("Interact On",tile);
+					handleScript("Interact On",tile,"Tile");
 				}
 			}
 		}
@@ -136,7 +133,7 @@ Character = cc.Sprite.extend({
 					return;
 				}
 				if(tile.getScript()){
-					handleTileScript("Interact On");
+					handleScript("Interact On",tile,"Tile");
 				}
 			}
 		}
@@ -154,12 +151,12 @@ Character = cc.Sprite.extend({
 				
 			var npc = GameMap.getNPCForXY(gp.x,gp.y);
 			if(npc){
-				handleNPCScript("Default Event",npc); return;
+				handleScript("Default Event",npc,"NPC"); return;
 			}
 			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 			if(tile){
 				if(tile.getScript()){
-					handleTileScript("Interact Facing",tile);
+					handleScript("Interact Facing",tile,"Tile");
 				}
 			}
 
@@ -206,16 +203,16 @@ Character = cc.Sprite.extend({
 		}
 		if(pos.y==this.toPosition.y && pos.x==this.toPosition.x){
 			this.isWalking=false;
-			handleTileScript("On Leave",GameMap.getTileNodeForXY(this.leavePosition.x,this.leavePosition.y));
+			if(this.leavePosition){
+				handleScript("On Leave",GameMap.getTileNodeForXY(this.leavePosition.x,this.leavePosition.y),"Tile");
+			}
 			this.leavePosition=null;
-			handleTileScript("On Enter",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y));
+			handleScript("On Enter",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y),"Tile");
 			this.unschedule(this.walk);
 			if(this.path!=null){
 				this.beginPathWalk();
 			}
 		}
-	
-	
 	},
 	
 	walkTo:function(x,y){
@@ -236,26 +233,31 @@ Character = cc.Sprite.extend({
 			this.setSpriteFrame(sf.x,3,"UP");
 		}
 		if(!tile){
+			if(Mapeditor!=null && !Mapeditor._parent) Mapeditor=null;
 			if(this.isPlayer && Mapeditor==null){
 				if(gp.x<x && GameMap.hasMapRight()){
+					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapRight());
 					this.setPosition(0,cellsize*y)
-					sendMessageToServer({"changemap":parseInt(GameMap.getMapRight()), "setTo":((0) + ((y) * gridWidth))});
+					sendMessageToServer({"changemap":parseInt(GameMap.getMapRight()), "setTo":((0) + ((y) * newMapSize.width))});
 					GameMap.goToMapRight();
 					GameMap.goToOffsetLeft();
 				} else if(gp.x>x && GameMap.hasMapLeft()){
-					this.setPosition(cellsize*(gridWidth-1),cellsize*y)
-					sendMessageToServer({"changemap":parseInt(GameMap.getMapLeft()), "setTo":((gridWidth-1) + ((y) * gridWidth))});
+					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapLeft());
+					this.setPosition(cellsize*(newMapSize.width-1),cellsize*y)
+					sendMessageToServer({"changemap":parseInt(GameMap.getMapLeft()), "setTo":((newMapSize.width-1) + ((y) * newMapSize.width))});
 					GameMap.goToMapLeft();
 					GameMap.goToOffsetRight();
 				} if(gp.y<y && GameMap.hasMapUp()){
+					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapUp());
 					this.setPosition(cellsize*x,cellsize);
-					sendMessageToServer({"changemap":parseInt(GameMap.getMapUp()), "setTo":((x) + ((1) * gridWidth))});
+					sendMessageToServer({"changemap":parseInt(GameMap.getMapUp()), "setTo":((x) + ((1) * newMapSize.width))});
 					GameMap.goToMapUp();
 					GameMap.goToOffsetUp();
 				} else if(gp.y>y && GameMap.hasMapDown()){
-					sendMessageToServer({"changemap":parseInt(GameMap.getMapDown()),"setTo":((x) + ((gridHeight) * gridWidth))});
+					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapDown());
+					sendMessageToServer({"changemap":parseInt(GameMap.getMapDown()),"setTo":((x) + ((newMapSize.height) * newMapSize.width))});
+					this.setPosition(cellsize*x,cellsize*(newMapSize.height));
 					GameMap.goToMapDown();
-					this.setPosition(cellsize*x,cellsize*(gridHeight));
 					GameMap.goToOffsetDown();
 				}
 			}
@@ -265,11 +267,11 @@ Character = cc.Sprite.extend({
 			if(gameMapInstance.isTileBlocked(tile)){
 				return;
 			}
-			handleTileScript("Will Leave",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y));
+			handleScript("Will Leave",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y),"Tile");
 			this.leavePosition=cc.p(this.getGridPosition().x,this.getGridPosition().y);
 			this.toPosition = cc.p(cellsize*x,cellsize*y);
 			this.isWalking=true;
-			handleTileScript("Will Enter",GameMap.getTileNodeForXY(x,y));
+			handleScript("Will Enter",GameMap.getTileNodeForXY(x,y),"Tile");
 			this.schedule(this.walk);
 			this.walk(0);
 			if(this.isPlayer){
@@ -329,8 +331,6 @@ Character = cc.Sprite.extend({
 			this.walk(0);
 		}
 	}
-
-	
 });
 
 PlayerCharacter = Character.extend({
@@ -345,10 +345,11 @@ PlayerCharacter = Character.extend({
 		if(withData.access){
 			this.access=withData.access;
 		}
-		this.items = {"stored":[], "equipped":{}};
+		this.items = {"stored":[], "equipped":{}, "bank":[]};
 		if(withData.position){
-			var x=withData.position % gridWidth;
-			var y=Math.floor(withData.position/gridWidth);
+			var mapSize = GameMap.getMapSizeForIndex(withData.map);
+			var x=withData.position % mapSize.width;
+			var y=Math.floor(withData.position/mapSize.width);
 			this.setPosition(x*cellsize,y*cellsize);
 			GameMap.goToMapWithoutPlayer(withData.map);
 			GameMap.goToOffsetFromPosition(x*cellsize,y*cellsize);
@@ -356,6 +357,9 @@ PlayerCharacter = Character.extend({
 		}
 		if(withData.inventory){
 			this.items["stored"]=withData.inventory;
+		}
+		if(withData.bank){
+			this.items["bank"]=withData.bank;
 		}
 		if(withData.extraData){
 			this.extraData=withData.extraData;
@@ -367,7 +371,7 @@ PlayerCharacter = Character.extend({
 			this.items["equipped"]=withData.equipment;
 			for(var i in this.items["equipped"]){
 				var item = this.items["equipped"][i];
-				handleItemScript("Default Event",item,{"Equip Item":true,"Give /Take Item":true,"Warp Player":true,"Read Item":true,"Open/Close Panel":true,"Destroy":true});
+				handleScript("Default Event",item,"Item",{"Equip Item":true,"Give /Take Item":true,"Warp Player":true,"Read Item":true,"Open/Close Panel":true,"Destroy":true});
 			}
 		}
 		this.clearExtraData();
@@ -414,10 +418,32 @@ PlayerCharacter = Character.extend({
 		}
 	},
 	
+	addToBank:function(data){
+		var context=0;
+		for(var i=0;i<this.items["bank"].length;i++){
+			if(!this.items["bank"][i]){
+				var context=i;
+				break;
+			}
+		}
+		this.items["bank"][context]=data;
+	},
+
+	addToInventory:function(data){
+		var context=0;
+		for(var i=0;i<this.items["stored"].length;i++){
+			if(!this.items["stored"][i]){
+				var context=i;
+				break;
+			}
+		}
+		this.items["stored"][context]=data;
+	},
+
 	pickupItem:function(ref){
 		item=ObjectLists.getItemList()[ref.number];
 		var gp = this.getGridPosition();
-		handleItemScript("On Pickup",item);
+		handleScript("On Pickup",item,"Item");
 		if(item["stackable"]==true){
 			for(var i=0;i<40;i++){
 				if(this.items["stored"][i] && this.items["stored"][i]["number"]==ref.number){
@@ -459,7 +485,7 @@ PlayerCharacter = Character.extend({
 	pickupItemFromTile:function(ref,tile){
 		item=ObjectLists.getItemList()[ref.number];
 		var gp = cc.p(tile.getPositionX()/cellsize,tile.getPositionY()/cellsize);
-		handleItemScript("On Pickup",item);
+		handleScript("On Pickup",item,"Item");
 		if(item["stackable"]==true){
 			for(var i=0;i<40;i++){
 				if(this.items["stored"][i] && this.items["stored"][i]["number"]==ref.number){
@@ -502,7 +528,7 @@ PlayerCharacter = Character.extend({
 		var gp = this.getGridPosition();
 		var itemref = this.items[itembox][itemnumber];
 		var item = ObjectLists.getItemList()[itemref["number"]];
-		handleItemScript("On Drop",item);
+		handleScript("On Drop",item,"Item");
 		if(this.items[itembox][itemnumber]){
 			GameChat.addMessage(strings.gameChat.droppedItem + item["name"]);
 			sendMessageToServer({"droppeditem":itemref["number"],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y),"amount":itemref["amount"]});
@@ -521,13 +547,7 @@ PlayerCharacter = Character.extend({
 
 	useItem:function(itemnumber){
 		var item = ObjectLists.getItemList()[this.items["stored"][itemnumber]["number"]];
-		handleItemScript("Default Event",item,{},itemnumber);
-		if(Inventory){
-			Inventory.updateTileGrid();
-		}
-		if(Equipment){
-			Equipment.updateTileGrid();
-		}
+		handleScript("Default Event",item,"Item",{},itemnumber);
 	},
 	
 	dequipItem:function(itemtype){
@@ -541,7 +561,7 @@ PlayerCharacter = Character.extend({
 				if(Equipment){
 					Equipment.updateTileGrid();
 				}
-				handleItemScript("On Dequip",this.items["stored"][i])
+				handleScript("On Dequip",this.items["stored"][i],"Item")
 				return;
 			}
 		}
@@ -550,6 +570,11 @@ PlayerCharacter = Character.extend({
 
 	getInventory:function(){
 		return this.items["stored"];
+	},
+
+
+	getBank:function(){
+		return this.items["bank"];
 	},
 
 	getEquipment:function(){

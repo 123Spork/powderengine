@@ -14,6 +14,16 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"17th December 2014: (v0.75)":[
+					"Added banking panel and implemented banking storage into player profile data.",
+					"Added map width and height specifiers to map editor for custom map sizes.",
+					"Added shop editor for custom shop type generation.",
+					"Compressed script logic into single straightforward functions with a type specifier.",
+					"Fixed a couple of bugs",
+				],
+				"14th December 2014: (v0.75)":[
+					"Fixed multiplayer login movement crash."
+				],
 				"24th November 2014: (v0.75)":[
 					"Re-introduced dependancies so that I can added orientation change logic to the project. Clicking and dragging a client window now correctly resizes the game."
 				],

@@ -95,23 +95,16 @@ var GameScene = Scene.extend({
 					texture:"GUI/skilleditor_icon.png",
 				},
 				"scriptedit_button":{
-					position:cc.p(90,Math.floor(screenSize.height/2)-108),
+					position:cc.p(34,Math.floor(screenSize.height/2)-108),
 					anchorPoint:cc.p(0,0),
 					size:cc.size(48,48),
 					texture:"GUI/scripteditor_icon.png",
 				},
 				"settings_button":{
-					position:cc.p(4,Math.floor(screenSize.height/2)-220),
+					position:cc.p(4,Math.floor(screenSize.height/2)-164),
 					anchorPoint:cc.p(0,0),
 					size:cc.size(48,48),
 					texture:"GUI/settings_icon.png",
-				},
-				//Level 2
-				"bankedit_button":{
-					position:cc.p(90,Math.floor(screenSize.height/2)+60),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/bankeditor_icon.png",
 				},
 				"shopedit_button":{
 					position:cc.p(120,Math.floor(screenSize.height/2)+4),
@@ -153,6 +146,11 @@ var GameScene = Scene.extend({
 			Inventory.willTerminate();
 			Inventory.removeFromParent();
 			Inventory=null;
+		}
+		if(Bank!=null){
+			Bank.willTerminate();
+			Bank.FromParent();
+			Bank=null;
 		}
 		if(Skills!=null){
 			Skills.willTerminate();
@@ -234,10 +232,6 @@ var GameScene = Scene.extend({
 			this.runCommand("/editquest");
 			return true;
 		}	
-		if(cc.rectContainsPoint(this.panels["bankedit_button"].getBoundingBox(),touch._point) && this.panels["bankedit_button"].isVisible()){
-			this.runCommand("/editbank");
-			return true;
-		}	
 	},
 	
 	showSign:function(name,content){
@@ -313,6 +307,25 @@ var GameScene = Scene.extend({
 				PlayersController.getYou().interactWithFacing();
 			break;
 			case "ESC": this.destroyGame(); SceneManager.getInstance().goToScene("Login",{logout:true,serverConnected:true}); break;
+			/*case "B":
+				if(Inventory!=null && !Inventory._parent) Inventory=null;
+				if(Inventory){
+					Inventory.willTerminate();
+					Inventory.removeFromParent();
+					Inventory=null;
+				}
+				if(Bank!=null && !Bank._parent) Bank=null;
+				if(Bank){
+					Bank.willTerminate();
+					Bank.removeFromParent();
+					Bank=null;
+				} else{
+					Bank = new BankPanel();
+					Bank.init();
+					Bank.didBecomeActive();
+					this.addChild(Bank);
+				}
+			break;*/
 			case "I":
 				if(Inventory!=null && !Inventory._parent) Inventory=null;
 				if(Inventory){
@@ -320,10 +333,13 @@ var GameScene = Scene.extend({
 					Inventory.removeFromParent();
 					Inventory=null;
 				} else{
-					Inventory = new InventoryPanel();
-					Inventory.init();
-					Inventory.didBecomeActive();
-					this.addChild(Inventory);
+					if(Bank!=null && !Bank._parent) Bank=null;
+					if(!Bank){
+						Inventory = new InventoryPanel();
+						Inventory.init();
+						Inventory.didBecomeActive();
+						this.addChild(Inventory);
+					}
 				}
 			break;
 			case "E":
@@ -399,7 +415,6 @@ var GameScene = Scene.extend({
 		this.panels["scriptedit_button"].setVisible(visible);
 		this.panels["settings_button"].setVisible(visible);
 		this.panels["shopedit_button"].setVisible(visible);
-		this.panels["bankedit_button"].setVisible(visible);
 		this.panels["questedit_button"].setVisible(visible);
 		this.panels["quickedit_button"].setTexture(cc.TextureCache.getInstance().addImage(visible==true?"GUI/quickedit_opened_icon.png":"GUI/quickedit_closed_icon.png"));
 	},
@@ -421,6 +436,19 @@ var GameScene = Scene.extend({
 						Scripteditor.init({delegate:null,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
 						Scripteditor.didBecomeActive();
 						this.addChild(Scripteditor);
+					}
+				break;
+				case "/editshop":
+					if(Shopeditor!=null && !Shopeditor._parent) Shopeditor=null;
+					if(Shopeditor){
+						Shopeditor.willTerminate();
+						Shopeditor.removeFromParent();
+						Shopeditor=null;
+					} else{
+						Shopeditor = new PopupList();
+						Shopeditor.init({delegate:null,editor:new ShopEditor(),list:ObjectLists.getShopList(),name:"Shop List"});
+						Shopeditor.didBecomeActive();
+						this.addChild(Shopeditor);
 					}
 				break;
 				case "/editmap":
@@ -565,7 +593,7 @@ var GameScene = Scene.extend({
 				"health":{level:1,value:100,maxval:200,maxlvl:900},
 				"mana":{level:1,value:100,maxval:200,maxlvl:99},
 			},
-			map:withData.playerData["location"]["mapnumber"],
+			map:withData.playerData["location"]["mapnumber"]?withData.playerData["location"]["mapnumber"]:1,
 			position:withData.playerData["location"]["position"],
 			textureName: "sprites1.png",
 			spriteId: 1,
@@ -612,6 +640,7 @@ var GameScene = Scene.extend({
 			"guilds":[],
 			"quests":PlayersController.getYou().quests,
 			"friends":[],
+			"bank":PlayersController.getYou().getBank(),
 			"pets":[],
 			"pmessages":[],
 			"lastchats":[],

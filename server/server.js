@@ -21,6 +21,7 @@ var skills=[];
 var signs=[];
 var npcs=[];
 var quests=[];
+var shops=[];
 var scripts=[];
 var settings=null;
 var updateMapIndex=0;
@@ -32,6 +33,7 @@ var updateNPCIndex=5;
 var updateQuestIndex=6;
 var updateSettingsIndex=7;
 var updateScriptIndex=8;
+var updateShopIndex=9;
 
 
 
@@ -62,7 +64,10 @@ fs.readdirSync("./additionals").forEach(function(file) {
   if(file=="quests.json"){
 	quests =require("./additionals/quests.json");
   }
-   if(file=="settings.json"){
+  if(file=="shops.json"){
+	shops =require("./additionals/shops.json");
+  }
+  if(file=="settings.json"){
 	settings =require("./additionals/settings.json");
   }
   if(file=="scripts.json"){
@@ -80,8 +85,13 @@ fs.readdirSync("./additionals").forEach(function(file) {
 });
 
 
+if(fs.existsSync('./tools/updatedata.json')){
+	try{
+		last=require('./tools/updatedata.json');
+	}catch(e){
 
-last=require('./tools/updatedata.json');
+	}
+}
 
 // Start the server at port 8080
 var server = http.createServer(function(req, res){ 
@@ -148,6 +158,11 @@ var setQuestData = function(data){
 	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
 };
 
+var setShopData = function(data){
+	var outputFilename = './additionals/shops.json';
+	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+};
+
 var setScriptData = function(data){
 	var outputFilename = './additionals/scripts.json';
 	var newData = [];
@@ -202,6 +217,7 @@ socket.on('connection', function(client){
 					"pmessages":[],
 					"lastchats":[],
 					"inventory":[],
+					"bank":[],
 					"equipment":{},
 					"extraData":[],
 				}
@@ -215,10 +231,8 @@ socket.on('connection', function(client){
 				playerData["location"]=event["location"];
 				playerData["inventory"]=event["inventory"];
 				playerData["equipment"]=event["equipment"];
+				playerData["bank"]=event["bank"];
 				playerData["extraData"]=event["extraData"];
-
-				console.log(playerData);
-
 				savePlayer(client,event["name"],playerData);
 			}
 		}
@@ -273,6 +287,7 @@ socket.on('connection', function(client){
 							"lastchats":playerData["lastchats"],
 							"location":playerData["location"],
 							"inventory":playerData["inventory"],
+							"bank":playerData["bank"],
 							"equipment":playerData["equipment"],
 							"extraData":playerData["extraData"],
 						};
@@ -369,6 +384,17 @@ socket.on('connection', function(client){
 				}
 				returner["queststime"] = last[updateQuestIndex];
 				returner["questdata"] = quests;
+			}
+
+
+
+			if(!last[updateShopIndex] || event["shopsupdate"]<last[updateShopIndex]){
+				if(!last[updateShopIndex]){
+					last[updateShopIndex]=Date.now();
+					saveLastAccessData();
+				}
+				returner["shopstime"] = last[updateShopIndex];
+				returner["shopsdata"] = shops;
 			}
 			if(!last[updateSettingsIndex] || event["settingsupdate"]<last[updateSettingsIndex]){
 				if(!last[updateSettingsIndex]){
@@ -511,6 +537,24 @@ socket.on('connection', function(client){
 			quests=event["savequestswhole"];
 			setQuestData(quests);
 			event["updatetime"]=last[updateQuestIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+		if(event["saveshops"]){
+			last[updateShopIndex]=Date.now();
+			saveLastAccessData();
+			shops[parseInt(event["saveshops"])]=event["shopsdata"];
+			setShopData(shops);
+			event["updatetime"]=last[updateShopIndex];
+			client.broadcast.send(JSON.stringify(event));
+			client.send(JSON.stringify(event));
+		}
+		if(event["saveshopswhole"]){
+			last[updateShopIndex]=Date.now();
+			saveLastAccessData();
+			shops=event["saveshopswhole"];
+			setShopData(shops);
+			event["updatetime"]=last[updateShopIndex];
 			client.broadcast.send(JSON.stringify(event));
 			client.send(JSON.stringify(event));
 		}

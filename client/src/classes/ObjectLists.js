@@ -6,6 +6,7 @@ ObjectLists=cc.Class.extend({
 	npclist:null,
 	questlist:null,
 	scriptlist:null,
+	shoplist:null,
 });
 var ObjectListInstance
 
@@ -19,6 +20,7 @@ ObjectLists.getInstance=function(){
 		ObjectListInstance.npclist=LocalStorage.getNPCData();
 		ObjectListInstance.questlist=LocalStorage.getQuestData();
 		ObjectListInstance.scriptlist=LocalStorage.getScriptData();
+		ObjectListInstance.shoplist=LocalStorage.getShopData();
 	} 
 	return ObjectListInstance;
 };
@@ -77,6 +79,14 @@ ObjectLists.getScriptList=function(){
 
 ObjectLists.setScriptList=function(data){
 	ObjectListInstance.scriptlist=data;
+};
+
+ObjectLists.getShopList=function(){
+	return ObjectListInstance.shoplist;
+};
+
+ObjectLists.setShopList=function(data){
+	ObjectListInstance.shoplist=data;
 };
 
 

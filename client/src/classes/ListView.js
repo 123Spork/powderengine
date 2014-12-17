@@ -110,7 +110,6 @@ onTouchBegan:function(touch){
 			this.scrollBarStartPos = scrollPos.y-this.scrollBar.getPositionY();
 			return true;
 		} else{
-			console.log("TURNING OFF SCROLOL");
 			this.scrollBarStartPos=null;
 		}
 

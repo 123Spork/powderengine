@@ -47,7 +47,7 @@ PlayersController.moveNPC=function(id,index,map){
 
 PlayersController.repositionNPC=function(id,index){
 	if(this.instance.npcs[id] && index!="default"){
-		this.instance.npcs[id].setPosition(cc.p((index % gridWidth)*32,(Math.floor(index/gridWidth))*32));
+		this.instance.npcs[id].setPosition(cc.p((index % gridWidth)*cellsize,(Math.floor(index/gridWidth))*cellsize));
 	}
 };
 
@@ -61,6 +61,9 @@ PlayersController.destroyNPCs=function(){
 };
 
 PlayersController.addNPC=function(data,position,map){
+	if(!data || !data["sprite"]){
+		return;
+	}
 	var npcID = parseInt(this.instance.npcs.length);
 	var withData ={
 		name: data["name"],
@@ -100,10 +103,11 @@ PlayersController.addPlayer=function(data){
 			spriteId: 1,
 		};
 		this.instance.players[data["id"]] = PlayerCharacter.create(withData);
-
 		var position=data["location"]["position"];
-		var x =position % gridWidth;
-		var y=Math.floor(position/gridWidth);
+
+		var mapSize = GameMap.getMapSizeForIndex(data["location"]["mapnumber"]);
+		var x =position % mapSize.width;
+		var y=Math.floor(position/mapSize.width);
 		this.instance.players[data["id"]].setPosition(x*cellsize,y*cellsize);
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[data["id"]]);
@@ -146,7 +150,8 @@ PlayersController.movePlayer=function(data){
 		};
 		this.instance.players[id] = PlayerCharacter.create(withData);
 		var index=data["location"]["position"];
-		this.instance.players[id].setPosition(cc.p((index % gridWidth)*cellsize,(Math.floor(index/gridWidth))*cellsize)); 
+		var mapSize = GameMap.getMapSizeForIndex(data["location"]["mapnumber"]);
+		this.instance.players[id].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[data["id"]]);
 		var playerJoinString = settingsData["Join Message"]+"";
@@ -170,8 +175,8 @@ PlayersController.positionPlayer=function(data){
 			spriteId: 1,
 		};
 		this.instance.players[data["id"]] = PlayerCharacter.create(withData);
-		var index = data["location"]["position"];
-		this.instance.players[data["id"]].setPosition(cc.p((index % gridWidth)*32,(Math.floor(index/gridWidth))*32)); 
+		var index = data["location"]["position"];	var mapSize = GameMap.getMapSizeForIndex(data["location"]["mapnumber"]);
+		this.instance.players[id].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[data["id"]]);
 		GameChat.addMessage(data["id"] + strings.gameChat.playerJoin);

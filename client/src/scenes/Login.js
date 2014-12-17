@@ -236,7 +236,6 @@ getLayoutObject:function(){
 						position: cc.p(505,240),
 						size: cc.size(120,40),
 						color: cc.c4b(0,0,0,255),
-						anchorPoint:cc.p(0,1),
 						children:{
 							"label":{
 								label:"Confirm",

@@ -1519,8 +1519,9 @@ ScriptEditor = Popup.extend({
 			case "Warp Player":
 				var x=1, y=1;
 				if(data["index"]){
-					x=data["index"] % gridWidth;
-					y=(Math.floor(data["index"]/gridWidth));
+					var mapSize = GameMap.getMapSizeForIndex(data["mapnum"]);
+					x=data["index"] % mapSize.width;
+					y=(Math.floor(data["index"]/mapSize.width));
 				} 
 				this.warpMapBox = new EntryBox(this.subEditor["mapNumberText"],cc.size(this.subEditor["mapNumberText"].getContentSize().width,this.subEditor["mapNumberText"].getContentSize().height), cc.p(0,this.subEditor["mapNumberText"].getContentSize().height), data["mapnum"]!=null && data["mapnum"]!=='undefined' ?  data["mapnum"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.warpMapBox.setDefaultFineFlag(true);
@@ -1972,7 +1973,7 @@ ScriptEditor = Popup.extend({
 			case "Is Panel Visibility": case "Open/Close Panel":
 					var listnodes = [];
 					var callBackList=[];
-					var panelList = ["Inventory","Equipment","Skills","QuestLog"]
+					var panelList = ["Inventory","Equipment","Skills","QuestLog","Bank"]
 					for(var i=0;i<panelList.length;i++){
 						listnodes[i]=cc.Node.create();
 						var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
@@ -2353,7 +2354,8 @@ ScriptEditor = Popup.extend({
 			if(isTouching(this.subEditor["okbtn"],truePos)){
 				switch(this.subEditorType){
 					case "Warp Player":
-						var index = indexFromPos(parseInt(this.warpXBox.getText()),(gridHeight)-parseInt(this.warpYBox.getText()));
+						var mapSize = GameMap.getMapSizeForIndex(this.warpMapBox.getText());
+						var index = indexFromPos(parseInt(this.warpXBox.getText()),(mapSize.width)-parseInt(this.warpYBox.getText()));
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"mapnum":parseInt(this.warpMapBox.getText()),
 							"index":index,

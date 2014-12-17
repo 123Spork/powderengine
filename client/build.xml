@@ -115,6 +115,7 @@
                 <file name="./src/popups/NpcChatPanel.js"></file>
                 <file name="./src/popups/Equipment.js"></file>
                 <file name="./src/popups/Inventory.js"></file>
+                <file name="./src/popups/Bank.js"></file>
                 <file name="./src/popups/Sign.js"></file>
                 <file name="./src/popups/Quests.js"></file>
                 <file name="./src/popups/Skills.js"></file>
@@ -124,6 +125,7 @@
                 <file name="./src/editors/QuestEditor.js"></file>
                 <file name="./src/editors/MapEditor.js"></file>
                 <file name="./src/editors/NPCEditor.js"></file>
+                <file name="./src/editors/ShopEditor.js"></file>
                 <file name="./src/editors/SkillsEditor.js"></file>
                 <file name="./src/popups/PopupList.js"></file>
                 <file name="./src/popups/ScriptingList.js"></file>

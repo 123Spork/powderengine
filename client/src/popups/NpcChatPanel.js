@@ -112,7 +112,7 @@ NpcChatPanel = Popup.extend({
 			switch(name){
 				case "Use":
 					MainScene.hideNPCTalk();
-					handleNPCScript("On Talk Option Selected for event:"+self.eventnumber + ", option:"+listelement,self.npccontext);
+					handleScript("On Talk Option Selected for event:"+self.eventnumber + ", option:"+listelement,self.npccontext,"NPC");
 				break;
 			}
 		};

@@ -315,6 +315,6 @@ var GameTile = cc.Node.extend({
 GameTile.Create=function(x,y){
 	var tile = new GameTile();
 	tile.init();
-	tile.position = cc.p(x,y);
+	tile.position = cc.p(x.x,x.y);
 	return tile;
 };

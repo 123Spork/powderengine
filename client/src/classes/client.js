@@ -61,6 +61,9 @@ reactToSocketMessage=function(data){
 		if(data["questdata"]){
 			LocalStorage.updateQuestData(data["questdata"],data["queststime"]);
 		}
+		if(data["shopsdata"]){
+			LocalStorage.updateShopData(data["shopsdata"],data["shopstime"]);
+		}
 		if(data["settingsdata"]){
 			LocalStorage.updateSettingsData(data["settingsdata"],data["settingstime"]);
 			settingsData = mergeSettings(settingsData,data["settingsdata"]);
@@ -179,9 +182,21 @@ reactToSocketMessage=function(data){
 					Questeditor.didBecomeActive();	
 				}	
 			}
-			else if(data["savequestswhole"]){
+			else if(data["savequestswhole"]){n
 				LocalStorage.refreshQuest(data["savequestswhole"],data["updatetime"]);
 				ObjectLists.setQuestList(data["savequestswhole"]);
+			}
+			else if(data["saveshops"]){
+				LocalStorage.changeShop(parseInt(data["saveshops"]),data["shopsdata"],data["updatetime"]);
+				ObjectLists.getShopList()[parseInt(data["saveshops"])]=data["shopsdata"];
+				if(Shopeditor){
+					Shopeditor.editList = ObjectLists.getShopList();
+					Shopeditor.didBecomeActive();	
+				}	
+			}
+			else if(data["saveshopswhole"]){
+				LocalStorage.refreshShop(data["saveshopswhole"],data["updatetime"]);
+				ObjectLists.setShopList(data["saveshopswhole"]);
 			}
 			else if(data["saveskills"]){
 				LocalStorage.changeSkills(parseInt(data["saveskills"]),data["skillsdata"],data["updatetime"]);

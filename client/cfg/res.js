@@ -4,6 +4,7 @@ var res = {
     TOWNJNT2_bmp : '2D Circle Graphic/TOWNJNT2.bmp',
     _BACKUP__bmp : '2D Circle Graphic/_BACKUP_.bmp',
     _40x40Tiles_png : '40x40Tiles.png',
+    bank_png : 'GUI/bank.png',
     bankeditor_icon_png : 'GUI/bankeditor_icon.png',
     book_png : 'GUI/book.png',
     btnDown_png : 'GUI/btnDown.png',

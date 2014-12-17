@@ -14,7 +14,10 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
-				"17th December 2014: (v0.75)":[
+				"17th December 2014: (v0.78)":[
+					"Added /wherami and /warpmeto user commands."
+				],
+				"17th December 2014: (v0.78)":[
 					"Added banking panel and implemented banking storage into player profile data.",
 					"Added map width and height specifiers to map editor for custom map sizes.",
 					"Added shop editor for custom shop type generation.",

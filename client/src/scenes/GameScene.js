@@ -423,7 +423,26 @@ var GameScene = Scene.extend({
 	if(!command){
 		return;
 	}
+		switch(command){
+			case "/whereami":
+				var you = PlayersController.getYou();
+				var pos = you.getGridPosition();
+				GameChat.addMessage("Map: "+GameMap.getMapNumber()+", XY: ("+pos.x+","+pos.y+")");
+			break;
+		}
+
 		if(PlayersController.getYou().access>1){
+			if(command.substring(0,9)=="/warpmeto" && command.split(' ').length==4){
+				var operands=command.substring(10).split(' ');
+				var mapSize = GameMap.getMapSizeForIndex(operands[0]);
+				var position = ((operands[1]) + ((operands[2]) * mapSize.width))
+				sendMessageToServer({"changemap":operands[0], "setTo":position});
+				GameMap.goToMap(operands[0]);
+				var you = PlayersController.getYou();
+				you.setPosition(operands[1]*cellsize,operands[2]*cellsize)
+				return;
+			}
+
 			switch(command){
 				case "/editscript":
 					if(Scripteditor!=null && !Scripteditor._parent) Scripteditor=null;

@@ -7,6 +7,9 @@ PopupList = Popup.extend({
 	itemOffsets:0,
 	defaultPositions:null,
 	listPanel:null,
+	allowEdit:true,
+	allowDel:true,
+	allowAdd:true,
 	hasChosen:false,
 	
 	willTerminate:function(){
@@ -19,10 +22,24 @@ PopupList = Popup.extend({
 		}
 	},
 
-	init:function(withData){
+	init:function(withData,control){
 		this._super();
 		this.childEditor=null;
-		this.editList=[],
+		this.editList=[];
+		this.allowDel=true;
+		this.allowEdit=true;
+		this.allowAdd=true;
+		if(control){
+			if(control.edit==false || control.edit==true){
+				this.allowEdit=control.edit;
+			}
+			if(control.del==false || control.del==true){
+				this.allowDel=control.del;
+			}
+			if(control.add==false || control.add==true){
+				this.allowAdd=control.add;
+			}
+		}
 		this.listName=null;
 		this.showingEditor=false;
 		this.saveNewDataID=-1;
@@ -72,20 +89,26 @@ PopupList = Popup.extend({
 				text.setAnchorPoint(cc.p(0,0.5));
 				text.setPosition(cc.p(0,16));
 
-				var editElement=cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
-				editElement.setPosition(cc.p(272,6));
-				editElement.setAnchorPoint(cc.p(0,0));
+				if(this.allowEdit){
+					var editElement=cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
+					editElement.setPosition(cc.p(272,6));
+					editElement.setAnchorPoint(cc.p(0,0));
+				}
 				
-				var delElement=cc.Sprite.createWithTexture(tc.addImage("GUI/trash.png"));
-				delElement.setPosition(cc.p(300,6));
-				delElement.setAnchorPoint(cc.p(0,0));		
-
-
-				editElement.callBack = "Edit";
+				if(this.allowDel){
+					var delElement=cc.Sprite.createWithTexture(tc.addImage("GUI/trash.png"));
+					delElement.setPosition(cc.p(300,6));
+					delElement.setAnchorPoint(cc.p(0,0));		
+				}
 				var touchableNodes =[];
-				touchableNodes.push(editElement);
-				delElement.callBack = "Delete";
-				touchableNodes.push(delElement);
+				if(this.allowEdit){
+					editElement.callBack = "Edit";
+					touchableNodes.push(editElement);
+				}				
+				if(this.allowDel){
+					delElement.callBack = "Delete";
+					touchableNodes.push(delElement);
+				}
 				if(this.delegate!=null){
 					useElement.callBack="Use";
 					touchableNodes.push(useElement);
@@ -94,8 +117,12 @@ PopupList = Popup.extend({
 
 				listnodes[i].addChild(element);
 				listnodes[i].addChild(text);
-				listnodes[i].addChild(editElement);
-				listnodes[i].addChild(delElement);	
+				if(this.allowEdit){
+					listnodes[i].addChild(editElement);
+				}
+				if(this.allowDel){
+					listnodes[i].addChild(delElement);
+				}
 				if(this.delegate!=null){
 					listnodes[i].addChild(useElement);
 				}
@@ -106,16 +133,17 @@ PopupList = Popup.extend({
 
 
 		}
-
-		var addButton = cc.LayerColor.create(cc.c4b(70,200,70,255),90,26);
-		var plus = cc.LabelTTF.create("+","Arial",20);
-		plus.setPosition(45,13);
-		plus.setAnchorPoint(cc.p(0.5,0.5));
-		addButton.setPosition(cc.p(120,0));
-		addButton.callBack="Add";
-		addButton.addChild(plus);
-		callBackList.push([addButton]);
-		listnodes.push(addButton);
+		if(this.allowAdd){
+			var addButton = cc.LayerColor.create(cc.c4b(70,200,70,255),90,26);
+			var plus = cc.LabelTTF.create("+","Arial",20);
+			plus.setPosition(45,13);
+			plus.setAnchorPoint(cc.p(0.5,0.5));
+			addButton.setPosition(cc.p(120,0));
+			addButton.callBack="Add";
+			addButton.addChild(plus);
+			callBackList.push([addButton]);
+			listnodes.push(addButton);
+		}
 
 		this.listPanel = this.panels["main_panel"]["list"];
 		var self=this;

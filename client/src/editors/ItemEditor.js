@@ -7,6 +7,7 @@ ItemEditor = Popup.extend({
 	amountBtn:null,
 	contextItem:null,
 	contextStore:null,
+	addingSell:false,
 
 
 
@@ -25,12 +26,19 @@ ItemEditor = Popup.extend({
 			Shopeditor=null;
 			this.addNewStoreFromId(value);
 		}
-		if(Itemeditor2){
+		if(Itemeditor2 && this.addingSell==true){
 			Itemeditor2.willTerminate();
 			Itemeditor2.removeFromParent();
 			Itemeditor2=null;
-			this.addNewCostFromIdandData(this.contextStore,value,data);
-			contextStore=null;
+			this.addNewSellFromIdandData(this.contextStore,value,data);
+			this.contextStore=null;
+		}
+		if(Itemeditor2 && this.addingSell==false){
+			Itemeditor2.willTerminate();
+			Itemeditor2.removeFromParent();
+			Itemeditor2=null;
+			this.addNewBuyFromIdandData(this.contextStore,value,data);
+			this.contextStore=null;
 		}
 	},
 
@@ -238,8 +246,29 @@ ItemEditor = Popup.extend({
 							"tab2":{
 								children:{
 									"list":{
-										size:cc.size(460,340),
+										size:cc.size(466,320),
 										position:cc.p(2,2),
+										anchorPoint:cc.p(0,0),
+									},
+									"shopName_label":{
+										label:"Store Name",
+										position:cc.p(4,328),
+										color:cc.c3b(255,255,255),
+										fontSize:15,
+										anchorPoint:cc.p(0,0),
+									},
+									"shopSell_label":{
+										label:"Sell Price",
+										position:cc.p(130,328),
+										color:cc.c3b(255,255,255),
+										fontSize:15,
+										anchorPoint:cc.p(0,0),
+									},
+									"shopBuy_label":{
+										label:"Buy Price",
+										position:cc.p(315,328),
+										color:cc.c3b(255,255,255),
+										fontSize:15,
 										anchorPoint:cc.p(0,0),
 									}
 								}
@@ -471,101 +500,102 @@ ItemEditor = Popup.extend({
 		var callBackList=[];
 		var panelList = this.data["value"];
 		var self=this;
-		console.log(panelList);
 		for(var i=0;i<panelList.length;i++){
 			listnodes[i]=cc.Node.create();
-			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),456,1);		
+			var element= cc.LayerColor.create(cc.c4b(255,0,0,127),456,1);		
 			var shopname = ObjectLists.getShopList()[panelList[i]["shopid"]]["name"];
-			var text = cc.LabelTTF.create(shopname,"Arial",15);
+			var text = cc.LabelTTF.create(shopname,"Arial",12);
 			text.setColor(cc.c3b(0,0,0));
 			text.setAnchorPoint(cc.p(0,0.5));
 			text.setPosition(cc.p(4,30));
-			text.setDimensions(cc.size(160,0));
+			text.setDimensions(cc.size(40,0));
 			var delElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/trash.png"));
-			delElement.setPosition(cc.p(184,((60)/2)-12));
+			delElement.setPosition(cc.p(64,((60)/2)-12));
 			delElement.setAnchorPoint(cc.p(0,0));
 			delElement.callBack="Delete";
-			listnodes[i].setContentSize(208,60);
+			listnodes[i].setContentSize(468,60);
 			callBackList.push([delElement]);
 			listnodes[i].addChild(element);
 			listnodes[i].addChild(text);
 			listnodes[i].addChild(delElement);
 
-			var sublist = cc.LayerColor.create(cc.c4b(255,255,255,100),208,59);
-			sublist.setPosition(208,1);
-			listnodes[i].addChild(sublist);
+			var newi = (function(index) {return index;})(i);
 
-			var sublistnodes = [];
-			var subcallBackList=[];
-			for(var j=0;j<panelList[i]["costs"].length;j++){
-				var itemname = ObjectLists.getItemList()[panelList[i]["costs"][j]["id"]]["name"];	
-				sublistnodes[j]=cc.Node.create();
-				sublistnodes[j].setContentSize(200,20);
+			var sublist1 = cc.LayerColor.create(cc.c4b(255,255,255,100),148,59);
+			sublist1.setPosition(88,1);
+			listnodes[i].addChild(sublist1);
+			var sublist1nodes = [];
+			var sub1callBackList=[];
+			for(var j=0;j<panelList[i]["sell"].length;j++){
+				var itemname = ObjectLists.getItemList()[panelList[i]["sell"][j]["id"]]["name"];	
+				sublist1nodes[j]=cc.Node.create();
+				sublist1nodes[j].setContentSize(148,20);
 				var t = cc.LabelTTF.create(itemname,"Arial",15);
 				t.setColor(cc.c3b(0,0,0));
 				t.setAnchorPoint(cc.p(0,0));
 				t.setPosition(cc.p(4,4));
-				t.setDimensions(cc.size(120,0));
-
+				t.setDimensions(cc.size(65,0));
 				var d=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/trash.png"));
-				d.setPosition(cc.p(184,((t.getContentSize().height+8)/2)-10));
+				d.setPosition(cc.p(124,((t.getContentSize().height+8)/2)-10));
 				d.setAnchorPoint(cc.p(0,0));
 				d.callBack="Delete";
-				listnodes[i].setContentSize(208,60);
-
+				listnodes[i].setContentSize(148,60);
 				var amountBtn = cc.LayerColor.create(cc.c4b(255,255,255,255),50,20);
-				amountBtn.setPosition(cc.p(124,((t.getContentSize().height+8)/2)-10));
+				amountBtn.setPosition(cc.p(69,((t.getContentSize().height+8)/2)-10));
 				amountBtn.setAnchorPoint(cc.p(0,0));
 				amountBtn.callBack="Edit";
-				var t2 = cc.LabelTTF.create("x " + panelList[i]["costs"][j]["amount"],"Arial",12);
+				var t2 = cc.LabelTTF.create("x " + panelList[i]["sell"][j]["amount"],"Arial",12);
 				t2.setPosition(2,(20-t2.getContentSize().height)/2);
 				t2.setColor(cc.c3b(0,0,0));
 				t2.setAnchorPoint(cc.p(0,0));
 				amountBtn.addChild(t2);
 
-				var e= cc.LayerColor.create(cc.c4b(0,0,0,127),208,1);		
-				sublistnodes[j].addChild(e);
+				var e= cc.LayerColor.create(cc.c4b(0,0,0,127),148,1);		
+				sublist1nodes[j].addChild(e);
 
-				sublistnodes[j].addChild(t);
-				sublistnodes[j].addChild(d);
-				sublistnodes[j].addChild(amountBtn);
-				sublistnodes[j].setContentSize(248,t.getContentSize().height+8);
-				subcallBackList.push([d,amountBtn]);
+				sublist1nodes[j].addChild(t);
+				sublist1nodes[j].addChild(d);
+				sublist1nodes[j].addChild(amountBtn);
+				sublist1nodes[j].setContentSize(148,t.getContentSize().height+8);
+				sub1callBackList.push([d,amountBtn]);
 			}
 			var a = cc.LayerColor.create(cc.c4b(70,200,70,255),40,20);
 			var p = cc.LabelTTF.create("+","Arial",15);
 			p.setPosition(20,10);
 			p.setAnchorPoint(cc.p(0.5,0.5));
-			a.setPosition(cc.p((208/2)-20,0));
+			a.setPosition(cc.p((148/2)-20,0));
 			a.callBack="Add";
 			a.addChild(p);
-			subcallBackList.push([a]);
-			sublistnodes.push(a);
-			var newi = (function(index) {return index;})(i);
+			sub1callBackList.push([a]);
+			sublist1nodes.push(a);
 
-			sublist.getListSize = function(){
+			sublist1.getListSize = function(){
 				var height =0;
-				for(var i=0;i<sublistnodes.length;i++){
-					height+=sublistnodes[i].getContentSize().height;
+				for(var i=0;i<sublist1nodes.length;i++){
+					height+=sublist1nodes[i].getContentSize().height;
 				}
-				return cc.size(208,height);
+				return cc.size(180,height);
 			};
-			sublist.getListElementAmount=function(){
-				return sublistnodes.length;
+			sublist1.getListElementAmount=function(){
+				return sublist1nodes.length;
 			};
-			sublist.getSizeForElement=function(elementID){
-				return sublistnodes[elementID].getContentSize();
+			sublist1.getSizeForElement=function(elementID){
+				return sublist1nodes[elementID].getContentSize();
 			};
-			sublist.getListNodeForIndex=function(elementID){
-				return sublistnodes[elementID];
+			sublist1.getListNodeForIndex=function(elementID){
+				return sublist1nodes[elementID];
 			};
-			sublist.getHighlightNode = function(elementID){
-				return sublistnodes[elementID].highlightNode;
+			sublist1.getHighlightNode = function(elementID){
+				return sublist1nodes[elementID].highlightNode;
 			};
-			sublist.runListCallBack=function(name,listelement){
+			sublist1.runListCallBack=function(name,listelement,touch){
+				if(self.currentTab!=2){
+					return;
+				}
 				switch(name){
 					case "Add":
-						self.contextStore=newi;
+						self.contextStore=this.listView.index;
+						self.addingSell=true;
 						if(Itemeditor2 && !Itemeditor2._parent) Itemeditor2=null;
 						if(Itemeditor2){
 							Itemeditor2.willTerminate();
@@ -573,23 +603,137 @@ ItemEditor = Popup.extend({
 							Itemeditor2r=null;
 						} else{
 							Itemeditor2 = new PopupList();
-							Itemeditor2.init({delegate:self,editor:new ShopEditor(),list:ObjectLists.getItemList(),name:"Item List"});
+							Itemeditor2.init({delegate:self,editor:new ShopEditor(),list:ObjectLists.getItemList(),name:"Item List"},{del:false,edit:false,add:false});
+							Itemeditor2.didBecomeActive();
+							self.addChild(Itemeditor2);
+							Itemeditor2.setPosition(self.getPosition());
+						}
+					break;
+					case "Edit":
+						self.addingSell=true;
+						self.contextStore=this.listView.index;
+						self.contextItem=listelement;
+						self.setTab(3);
+					break;
+					case "Delete":
+						self.contextStore=this.listView.index;
+						self.contextItem=listelement;
+						self.deleteSell(touch)
+					break;
+				}
+			};
+			sublist1.listView = ListView.create(sublist1);
+			sublist1.listView.setCallBackList(sub1callBackList);
+			sublist1.listView.index=newi;
+			sublist1.addChild(sublist1.listView);
+
+
+			var sublist2 = cc.LayerColor.create(cc.c4b(255,255,255,180),148,59);
+			sublist2.setPosition(274,1);
+			listnodes[i].addChild(sublist2);
+
+			var sublist2nodes = [];
+			var sub2callBackList=[];
+			for(var j=0;j<panelList[i]["buy"].length;j++){
+				var itemname = ObjectLists.getItemList()[panelList[i]["buy"][j]["id"]]["name"];	
+				sublist2nodes[j]=cc.Node.create();
+				sublist2nodes[j].setContentSize(148,20);
+				var t = cc.LabelTTF.create(itemname,"Arial",15);
+				t.setColor(cc.c3b(0,0,0));
+				t.setAnchorPoint(cc.p(0,0));
+				t.setPosition(cc.p(4,4));
+				t.setDimensions(cc.size(65,0));
+
+				var d=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/trash.png"));
+				d.setPosition(cc.p(124,((t.getContentSize().height+8)/2)-10));
+				d.setAnchorPoint(cc.p(0,0));
+				d.callBack="Delete";
+				listnodes[i].setContentSize(148,60);
+
+				var amountBtn = cc.LayerColor.create(cc.c4b(255,255,255,255),50,20);
+				amountBtn.setPosition(cc.p(69,((t.getContentSize().height+8)/2)-10));
+				amountBtn.setAnchorPoint(cc.p(0,0));
+				amountBtn.callBack="Edit";
+				var t2 = cc.LabelTTF.create("x " + panelList[i]["buy"][j]["amount"],"Arial",12);
+				t2.setPosition(2,(20-t2.getContentSize().height)/2);
+				t2.setColor(cc.c3b(0,0,0));
+				t2.setAnchorPoint(cc.p(0,0));
+				amountBtn.addChild(t2);
+
+				var e= cc.LayerColor.create(cc.c4b(0,0,0,127),148,1);		
+				sublist2nodes[j].addChild(e);
+
+				sublist2nodes[j].addChild(t);
+				sublist2nodes[j].addChild(d);
+				sublist2nodes[j].addChild(amountBtn);
+				sublist2nodes[j].setContentSize(148,t.getContentSize().height+8);
+				sub2callBackList.push([d,amountBtn]);
+			}
+			var a = cc.LayerColor.create(cc.c4b(70,200,70,255),40,20);
+			var p = cc.LabelTTF.create("+","Arial",15);
+			p.setPosition(20,10);
+			p.setAnchorPoint(cc.p(0.5,0.5));
+			a.setPosition(cc.p((148/2)-20,0));
+			a.callBack="Add";
+			a.addChild(p);
+			sub2callBackList.push([a]);
+			sublist2nodes.push(a);
+			sublist2.getListSize = function(){
+				var height =0;
+				for(var i=0;i<sublist2nodes.length;i++){
+					height+=sublist2nodes[i].getContentSize().height;
+				}
+				return cc.size(180,height);
+			};
+			sublist2.getListElementAmount=function(){
+				return sublist2nodes.length;
+			};
+			sublist2.getSizeForElement=function(elementID){
+				return sublist2nodes[elementID].getContentSize();
+			};
+			sublist2.getListNodeForIndex=function(elementID){
+				return sublist2nodes[elementID];
+			};
+			sublist2.getHighlightNode = function(elementID){
+				return sublist2nodes[elementID].highlightNode;
+			};
+			sublist2.runListCallBack=function(name,listelement,touch){
+				if(self.currentTab!=2){
+					return;
+				}
+				switch(name){
+					case "Add":
+						self.contextStore=this.listView.index;
+						self.addingSell=false;
+						if(Itemeditor2 && !Itemeditor2._parent) Itemeditor2=null;
+						if(Itemeditor2){
+							Itemeditor2.willTerminate();
+							Itemeditor2.removeFromParent();
+							Itemeditor2r=null;
+						} else{
+							Itemeditor2 = new PopupList();
+							Itemeditor2.init({delegate:self,editor:new ShopEditor(),list:ObjectLists.getItemList(),name:"Item List"},{del:false,edit:false,add:false});
 							Itemeditor2.didBecomeActive();
 							self.addChild(Itemeditor2);
 						}
 					break;
 					case "Edit":
-						self.contextStore=newi;
+						self.addingSell=false;
+						self.contextStore=this.listView.index;
 						self.contextItem=listelement;
 						self.setTab(3);
 					break;
 					case "Delete":
+						self.contextStore=this.listView.index;
+						self.contextItem=listelement;
+						self.deleteBuy(touch)
 					break;
 				}
 			};
-			sublist.listView = ListView.create(sublist);
-			sublist.listView.setCallBackList(subcallBackList);
-			sublist.addChild(sublist.listView);
+			sublist2.listView = ListView.create(sublist2);
+			sublist2.listView.index=newi;
+			sublist2.listView.setCallBackList(sub2callBackList);
+			sublist2.addChild(sublist2.listView);
 		}
 		var addButton = cc.LayerColor.create(cc.c4b(70,200,70,255),90,26);
 		var plus = cc.LabelTTF.create("+","Arial",20);
@@ -605,7 +749,7 @@ ItemEditor = Popup.extend({
 			for(var i=0;i<listnodes.length;i++){
 				height+=listnodes[i].getContentSize().height;
 			}
-			return cc.size(460,height);
+			return cc.size(468,height);
 		};
 		this.panels["main_panel"]["tab2"]["list"].getListElementAmount=function(){
 			return listnodes.length;
@@ -619,7 +763,10 @@ ItemEditor = Popup.extend({
 		this.panels["main_panel"]["tab2"]["list"].getHighlightNode = function(elementID){
 			return listnodes[elementID].highlightNode;
 		};
-		this.panels["main_panel"]["tab2"]["list"].runListCallBack=function(name,listelement){
+		this.panels["main_panel"]["tab2"]["list"].runListCallBack=function(name,listelement,touch){
+			if(self.currentTab!=2){
+				return;
+			}
 			switch(name){
 				case "Add":
 					if(Shopeditor){
@@ -643,9 +790,10 @@ ItemEditor = Popup.extend({
 							self.addChild(Shopeditor);
 						}
 					}
-
 				break;
 				case "Delete":
+					self.contextStore=listelement;
+					self.deleteStore(touch);
 				break;
 			}
 		};
@@ -657,13 +805,57 @@ ItemEditor = Popup.extend({
 
 	addNewStoreFromId:function(id){
 		var shop = ObjectLists.getShopList()[id];
-		this.data["value"].push({"shopid":id,"costs":[]});
+		this.data["value"].push({"shopid":id,"sell":[],"buy":[]});
 		this.updateValueList();
 	},
 
+	deleteSell:function(touch){
+		this._parent.addChild(DropDownList.createWithListAndPosition(this,this.deleteSellClicked,["Delete","Cancel"],touch._point));
+	},
 
-	addNewCostFromIdandData:function(id,value,data){
-		this.data["value"][id]["costs"].push({"id":value,"amount":1});
+	deleteSellClicked:function(index){
+		if(index==0){
+			this.delegate.data["value"][this.delegate.contextStore]["sell"].splice(this.delegate.contextItem,1);
+			this.delegate.updateValueList();
+		}
+		this.delegate.contextStore=null;
+		this.delegate.contextItem=null;
+	},
+
+
+	deleteStore:function(touch){
+		this._parent.addChild(DropDownList.createWithListAndPosition(this,this.deleteStoreClicked,["Delete","Cancel"],touch._point));
+	},
+
+	deleteStoreClicked:function(index){
+		if(index==0){
+			this.delegate.data["value"].splice(this.delegate.contextStore,1);
+			this.delegate.updateValueList();
+		}
+		this.delegate.contextStore=null;
+	},
+
+	deleteBuy:function(touch){
+		this._parent.addChild(DropDownList.createWithListAndPosition(this,this.deleteBuyClicked,["Delete","Cancel"],touch._point));
+	},
+
+	deleteBuyClicked:function(index){
+		if(index==0){
+			this.delegate.data["value"][this.delegate.contextStore]["buy"].splice(this.delegate.contextItem,1);
+			this.delegate.updateValueList();
+		}
+		this.delegate.contextStore=null;
+		this.delegate.contextItem=null;
+	},
+
+
+	addNewSellFromIdandData:function(id,value,data){
+		this.data["value"][id]["sell"].push({"id":value,"amount":1});
+		this.updateValueList();
+	},
+
+	addNewBuyFromIdandData:function(id,value,data){
+		this.data["value"][id]["buy"].push({"id":value,"amount":1});
 		this.updateValueList();
 	},
 
@@ -701,7 +893,11 @@ ItemEditor = Popup.extend({
 				if(this.amountBox.getText()==null || this.amountBox.getText()=="" || this.amountBox.getText()<=0){
 					return true;
 				}
-				this.data["value"][this.contextStore]["costs"][this.contextItem]["amount"]=this.amountBox.getText();
+				if(this.addingSell==true){
+					this.data["value"][this.contextStore]["sell"][this.contextItem]["amount"]=this.amountBox.getText();
+				}else{
+					this.data["value"][this.contextStore]["buy"][this.contextItem]["amount"]=this.amountBox.getText();
+				}
 				this.setTab(2);
 				this.updateValueList();
 				return true;

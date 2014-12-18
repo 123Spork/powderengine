@@ -15,6 +15,9 @@ News = Popup.extend({
 		this._super();
 			this.data={
 				"18th December 2014: (v0.79)":[
+					"Added buying price section of item value setup. Fixed some basic issues with the system",
+				],
+				"18th December 2014: (v0.79)":[
 					"Added initial setup value tab into item editor to add trade values to defined items. You simply add a shop in list and then the price to buy it.",
 					"The above system will eventually include a sale price area as well.",
 				],

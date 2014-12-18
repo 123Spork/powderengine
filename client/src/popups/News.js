@@ -14,6 +14,10 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"18th December 2014: (v0.79)":[
+					"Added initial setup value tab into item editor to add trade values to defined items. You simply add a shop in list and then the price to buy it.",
+					"The above system will eventually include a sale price area as well.",
+				],
 				"17th December 2014: (v0.78)":[
 					"Added /wherami and /warpmeto user commands."
 				],

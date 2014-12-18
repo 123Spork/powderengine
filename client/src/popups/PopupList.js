@@ -54,52 +54,54 @@ PopupList = Popup.extend({
 		this.defaultPositions={};
 		for(var i in this.editList){
 			listnodes[i]=cc.Node.create();
-			listnodes[i].setContentSize(324,32);
-			if(this.editList[i]==null){
-				this.editList.splice(i,1);
-				continue;
-			}
-			if(this.editList[i]=={}){
-				continue;
-			}
-			if(this.delegate!=null){
-				var useElement=cc.Sprite.createWithTexture(tc.addImage("GUI/use.png"));
-				useElement.setPosition(cc.p(244,6));
-				useElement.setAnchorPoint(cc.p(0,0));
-			}
-			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),316,1);
-			element.setPosition(cc.p(4,0));			
+			if(this.editList[i]["name"]){
+				listnodes[i].setContentSize(324,32);
+				if(this.editList[i]==null){
+					this.editList.splice(i,1);
+					continue;
+				}
+				if(this.delegate!=null){
+					var useElement=cc.Sprite.createWithTexture(tc.addImage("GUI/use.png"));
+					useElement.setPosition(cc.p(244,6));
+					useElement.setAnchorPoint(cc.p(0,0));
+				}
+				var element= cc.LayerColor.create(cc.c4b(0,0,0,127),316,1);
+				element.setPosition(cc.p(4,0));			
 
-			var text = cc.LabelTTF.create(this.editList[i].name,"Arial",20);
-			text.setAnchorPoint(cc.p(0,0.5));
-			text.setPosition(cc.p(0,16));
+				var text = cc.LabelTTF.create(this.editList[i].name,"Arial",20);
+				text.setAnchorPoint(cc.p(0,0.5));
+				text.setPosition(cc.p(0,16));
 
-			var editElement=cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
-			editElement.setPosition(cc.p(272,6));
-			editElement.setAnchorPoint(cc.p(0,0));
-			
-			var delElement=cc.Sprite.createWithTexture(tc.addImage("GUI/trash.png"));
-			delElement.setPosition(cc.p(300,6));
-			delElement.setAnchorPoint(cc.p(0,0));		
+				var editElement=cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
+				editElement.setPosition(cc.p(272,6));
+				editElement.setAnchorPoint(cc.p(0,0));
+				
+				var delElement=cc.Sprite.createWithTexture(tc.addImage("GUI/trash.png"));
+				delElement.setPosition(cc.p(300,6));
+				delElement.setAnchorPoint(cc.p(0,0));		
 
 
-			editElement.callBack = "Edit";
-			var touchableNodes =[];
-			touchableNodes.push(editElement);
-			delElement.callBack = "Delete";
-			touchableNodes.push(delElement);
-			if(this.delegate!=null){
-				useElement.callBack="Use";
-				touchableNodes.push(useElement);
-			}
-			callBackList.push(touchableNodes);
+				editElement.callBack = "Edit";
+				var touchableNodes =[];
+				touchableNodes.push(editElement);
+				delElement.callBack = "Delete";
+				touchableNodes.push(delElement);
+				if(this.delegate!=null){
+					useElement.callBack="Use";
+					touchableNodes.push(useElement);
+				}
+				callBackList.push(touchableNodes);
 
-			listnodes[i].addChild(element);
-			listnodes[i].addChild(text);
-			listnodes[i].addChild(editElement);
-			listnodes[i].addChild(delElement);	
-			if(this.delegate!=null){
-				listnodes[i].addChild(useElement);
+				listnodes[i].addChild(element);
+				listnodes[i].addChild(text);
+				listnodes[i].addChild(editElement);
+				listnodes[i].addChild(delElement);	
+				if(this.delegate!=null){
+					listnodes[i].addChild(useElement);
+				}
+			}else{
+				listnodes[i].setContentSize(cc.size(0,0));
+				callBackList.push([]);
 			}
 
 

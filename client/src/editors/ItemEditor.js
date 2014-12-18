@@ -241,6 +241,18 @@ ItemEditor = Popup.extend({
 										texture:"GUI/cross_icon.png",
 										anchorPoint:cc.p(0,0),
 									},
+									"descriptionLbl":{
+										label:"Description",
+										fontSize:12,
+										anchorPoint:cc.p(0,0),
+										position:cc.p(360,154),
+										color:cc.c3b(0,0,0),
+									},
+									"descriptionBox":{
+										size:cc.size(128,96),
+										position:cc.p(360,55),
+										color:cc.c3b(255,255,255),
+									}
 								}
 							},
 							"tab2":{
@@ -356,6 +368,7 @@ ItemEditor = Popup.extend({
 		return "itemEditor";
 	},
 	nameBox:null,
+	descriptionBox:null,
 	delegate:null,
 	data:null,
 	typeData:null,
@@ -366,6 +379,7 @@ ItemEditor = Popup.extend({
 		this.currentTexture=tileTextureList[0]["name"],
 		this.currentTextureNumber=0,
 		this.nameBox=null,
+		this.descriptionBox=null,
 		this.delegate=null,
 		this.typeData=null,
 		this.mapOffset=cc.p(0,0);
@@ -429,6 +443,9 @@ ItemEditor = Popup.extend({
 		this.amountBox = new EntryBox(this.panels["main_panel"]["tab3"]["textBox"],cc.size(this.panels["main_panel"]["tab3"]["textBox"].getContentSize().width,this.panels["main_panel"]["tab3"]["textBox"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["textBox"].getContentSize().height), "1", cc.c4b(255,255,255), cc.c3b(0,0,0));
 		this.amountBox.setDefaultFineFlag(true);
 
+		this.descriptionBox = new EntryBox(this.panels["main_panel"]["tab1"]["descriptionBox"],cc.size(this.panels["main_panel"]["tab1"]["descriptionBox"].getContentSize().width,this.panels["main_panel"]["tab1"]["descriptionBox"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab1"]["descriptionBox"].getContentSize().height), "", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+		this.descriptionBox.setDefaultFineFlag(true);
+
 		this.panels["main_panel"]["tab1"]["stackbtn"].setColor(RED);
 		this.panels["main_panel"]["tab1"]["stackbtn"]["text"].setString("No");
 		if(this.data["stackable"]==true){
@@ -444,13 +461,15 @@ ItemEditor = Popup.extend({
 		if(value==2){
 			this.panels["main_panel"]["tab1"]["name_entry"].setPositionX(-10000);
 			this.panels["main_panel"]["tab3"]["textBox"].setPositionX(-10000);
+			this.panels["main_panel"]["tab1"]["descriptionBox"].setPositionX(-10000);
 		}
 		if(value==1){
 			this.panels["main_panel"]["tab1"]["name_entry"].setPositionX(74);
 			this.panels["main_panel"]["tab3"]["textBox"].setPositionX(-10000);
-
+			this.panels["main_panel"]["tab1"]["descriptionBox"].setPositionX(360);
 		}
 		if(value==3){
+			this.panels["main_panel"]["tab1"]["descriptionBox"].setPositionX(-10000);
 			this.panels["main_panel"]["tab2"].setVisible(true);
 			this.panels["main_panel"]["tab3"]["textBox"].setPositionX(20);
 			this.panels["main_panel"]["tab3"].setVisible(true);
@@ -916,6 +935,7 @@ ItemEditor = Popup.extend({
 				return true;
 			}
 			this.ignoreTerminate=true;
+			this.data["description"]=this.descriptionBox.getText();
 			this.data["name"]=this.nameBox.getText();
 			this.data["script"]=this.typeData;
 			this.delegate.endedEdit(this.data);

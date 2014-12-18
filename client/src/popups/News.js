@@ -14,7 +14,10 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
-				"18th December 2014: (v0.79)":[
+				"18th December 2014: (v0.793)":[
+					"Added item editor text field for descriptions.",
+				],
+				"18th December 2014: (v0.792)":[
 					"Added buying price section of item value setup. Fixed some basic issues with the system",
 				],
 				"18th December 2014: (v0.79)":[

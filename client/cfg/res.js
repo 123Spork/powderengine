@@ -48,6 +48,7 @@ var res = {
     scripting_list_png : 'GUI/scripting_list.png',
     selected_png : 'GUI/selected.png',
     settings_icon_png : 'GUI/settings_icon.png',
+    shop_png : 'GUI/shop.png',
     shopeditor_icon_png : 'GUI/shopeditor_icon.png',
     signeditor_bg_png : 'GUI/signeditor_bg.png',
     signeditor_icon_png : 'GUI/signeditor_icon.png',

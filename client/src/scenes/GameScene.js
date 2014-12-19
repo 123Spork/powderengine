@@ -326,6 +326,25 @@ var GameScene = Scene.extend({
 					this.addChild(Bank);
 				}
 			break;*/
+			case "P":
+				if(Inventory!=null && !Inventory._parent) Inventory=null;
+				if(Inventory){
+					Inventory.willTerminate();
+					Inventory.removeFromParent();
+					Inventory=null;
+				}
+				if(Shop!=null && !Shop._parent) Shop=null;
+				if(Shop){
+					Shop.willTerminate();
+					Shop.removeFromParent();
+					Shop=null;
+				} else{
+					Shop = new ShopPanel();
+					Shop.init();
+					Shop.didBecomeActive();
+					this.addChild(Shop);
+				}
+			break;
 			case "I":
 				if(Inventory!=null && !Inventory._parent) Inventory=null;
 				if(Inventory){

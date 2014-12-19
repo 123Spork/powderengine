@@ -151,6 +151,7 @@ var settingsData = {
 	//"Use Equipment Panel": "ISYESNO",
 	"Equipment Header": "Equipment",
 	"Bank Header": "Bank",
+	"Shop Header": "Shop",
 	//"Use Inventory Panel": "ISYESNO",
 	"Inventory Header": "Inventory",
 	"Skills Header":"Skills List",

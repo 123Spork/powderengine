@@ -29,6 +29,7 @@ resCfg[jsRes.SceneManager_js] = {
 	    jsRes.Equipment_js,
 	    jsRes.Inventory_js,
 	    jsRes.Bank_js,
+	    jsRes.Shop_js,
 	    jsRes.Sign_js,
 	    jsRes.Quests_js,
 	    jsRes.Skills_js,

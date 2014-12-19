@@ -14,6 +14,9 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"19th December 2014: (v0.796)":[
+					"Added initial storefront layout for in-game shops.",
+				],
 				"18th December 2014: (v0.793)":[
 					"Added item editor text field for descriptions.",
 				],

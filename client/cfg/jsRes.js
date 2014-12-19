@@ -34,6 +34,7 @@ js.client = {
     PopupList_js : '[%client%]src/popups/PopupList.js',
     Quests_js : '[%client%]src/popups/Quests.js',
     ScriptingList_js : '[%client%]src/popups/ScriptingList.js',
+    Shop_js : '[%client%]src/popups/Shop.js',
     Sign_js : '[%client%]src/popups/Sign.js',
     Skills_js : '[%client%]src/popups/Skills.js',
     GameScene_js : '[%client%]src/scenes/GameScene.js',

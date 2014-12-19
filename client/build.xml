@@ -116,6 +116,7 @@
                 <file name="./src/popups/Equipment.js"></file>
                 <file name="./src/popups/Inventory.js"></file>
                 <file name="./src/popups/Bank.js"></file>
+                <file name="./src/popups/Shop.js"></file>
                 <file name="./src/popups/Sign.js"></file>
                 <file name="./src/popups/Quests.js"></file>
                 <file name="./src/popups/Skills.js"></file>

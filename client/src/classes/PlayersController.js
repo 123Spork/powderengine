@@ -179,7 +179,9 @@ PlayersController.positionPlayer=function(data){
 		this.instance.players[id].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[data["id"]]);
-		GameChat.addMessage(data["id"] + strings.gameChat.playerJoin);
+		var string = settingsData["Join Message"];
+		string = string.replace("<PLAYER>",data["id"]);
+		GameChat.addMessage(string);
 	}
 };
 

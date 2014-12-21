@@ -175,19 +175,12 @@ GameChat.isFocused=function(){
 };
 
 GameChat.showHelp=function(){
-	GameChat.addMessage(strings.gameChat.helpText0);
-	GameChat.addMessage(strings.gameChat.helpText1);
-	GameChat.addMessage(strings.gameChat.helpText2);
-	GameChat.addMessage(strings.gameChat.helpText3);
-	GameChat.addMessage(strings.gameChat.helpText4);
+	GameChat.addMessage(settingsData["Help Text"]);
 };
 
 
 GameChat.showCommands=function(){
-	GameChat.addMessage(strings.gameChat.commandText0);
-	GameChat.addMessage(strings.gameChat.commandText1);
-	GameChat.addMessage(strings.gameChat.commandText2);
-	GameChat.addMessage(strings.gameChat.commandText3);
+	GameChat.addMessage(settingsData["Command Text"]);
 };
 
 GameChat.showWelcome=function(){

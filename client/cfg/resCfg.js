@@ -9,9 +9,9 @@ cc.gameModules = [jsRes.SceneManager_js];//Game modules
 
 resCfg[jsRes.SceneManager_js] = {
     ref : [
+    	jsRes.EN_js,
     	jsRes.SingleLineBox_js,
 	    jsRes.MultiLineBox_js,
-	    jsRes.Strings_js,
 	    jsRes.Utils_js,
 	    jsRes.LocalStorage_js,
 	    jsRes.ListView_js,

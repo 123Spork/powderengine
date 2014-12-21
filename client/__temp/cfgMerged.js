@@ -642,6 +642,7 @@ js.client = {
     SettingsEditor_js : './src/editors/SettingsEditor.js',
     ShopEditor_js : './src/editors/ShopEditor.js',
     SkillsEditor_js : './src/editors/SkillsEditor.js',
+    EN_js : './src/lang/EN.js',
     Bank_js : './src/popups/Bank.js',
     Book_js : './src/popups/Book.js',
     Credits_js : './src/popups/Credits.js',
@@ -661,7 +662,6 @@ js.client = {
     MainScene_js : './src/scenes/MainScene.js',
     Scene_js : './src/scenes/Scene.js',
     SceneManager_js : './src/scenes/SceneManager.js',
-    Strings_js : './src/utils/Strings.js',
     Utils_js : './src/utils/Utils.js'
 };
 var resCfg = cc.resCfg;
@@ -675,9 +675,9 @@ cc.gameModules = [jsRes.SceneManager_js];//Game modules
 
 resCfg[jsRes.SceneManager_js] = {
     ref : [
+    	jsRes.EN_js,
     	jsRes.SingleLineBox_js,
 	    jsRes.MultiLineBox_js,
-	    jsRes.Strings_js,
 	    jsRes.Utils_js,
 	    jsRes.LocalStorage_js,
 	    jsRes.ListView_js,

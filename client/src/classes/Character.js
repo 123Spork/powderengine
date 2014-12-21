@@ -451,7 +451,9 @@ PlayerCharacter = Character.extend({
 						this.items["stored"][i]["amount"]+=ref.amount;
 						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
 					}
-					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+					var string = settingsData["Item Pick Up"];
+					string = string.replace("<ITEM>",item["name"]);
+					GameChat.addMessage(string);
 					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 					return;
 				}
@@ -465,14 +467,16 @@ PlayerCharacter = Character.extend({
 				if(Inventory){
 					Inventory.setStackableLabel(i,ref.amount);	
 				}
-				GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+				var string = settingsData["Item Pick Up"];
+				string = string.replace("<ITEM>",item["name"]);
+				GameChat.addMessage(string);
 				sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 				var added=true;
 				break;
 			}
 		}
 		if(added==false){
-			GameChat.addMessage(strings.gameChat.inventoryFull);
+			GameChat.addMessage(settingsData["Inventory Full"]);
 		}
 		if(Inventory){
 			Inventory.updateTileGrid();
@@ -493,7 +497,9 @@ PlayerCharacter = Character.extend({
 						this.items["stored"][i]["amount"] +=ref.amount;
 						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
 					}
-					GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+					var string = settingsData["Item Pick Up"];
+					string = string.replace("<ITEM>",item["name"]);
+					GameChat.addMessage(string);
 					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 					return;
 				}
@@ -507,14 +513,16 @@ PlayerCharacter = Character.extend({
 				if(Inventory){
 					Inventory.setStackableLabel(i,ref.amount);	
 				}
-				GameChat.addMessage(strings.gameChat.pickedUpItem + item["name"]);
+				var string = settingsData["Item Pick Up"];
+					string = string.replace("<ITEM>",item["name"]);
+					GameChat.addMessage(string);
 				sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 				var added=true;
 				break;
 			}
 		}
 		if(added==false){
-			GameChat.addMessage(strings.gameChat.inventoryFull);
+			GameChat.addMessage(settingsData["Inventory Full"]);
 		}
 		if(Inventory){
 			Inventory.updateTileGrid();
@@ -530,7 +538,9 @@ PlayerCharacter = Character.extend({
 		var item = ObjectLists.getItemList()[itemref["number"]];
 		handleScript("On Drop",item,"Item");
 		if(this.items[itembox][itemnumber]){
-			GameChat.addMessage(strings.gameChat.droppedItem + item["name"]);
+			var string = settingsData["Item Dropped"];
+			string= string.replace("<ITEM>",item["name"]);
+					GameChat.addMessage(string);
 			sendMessageToServer({"droppeditem":itemref["number"],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y),"amount":itemref["amount"]});
 			if(item["stackable"]==true && itemref["amount"]>1){
 				Inventory.setStackableLabel(itemnumber,0);

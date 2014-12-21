@@ -23,6 +23,7 @@ js.client = {
     SettingsEditor_js : '[%client%]src/editors/SettingsEditor.js',
     ShopEditor_js : '[%client%]src/editors/ShopEditor.js',
     SkillsEditor_js : '[%client%]src/editors/SkillsEditor.js',
+    EN_js : '[%client%]src/lang/EN.js',
     Bank_js : '[%client%]src/popups/Bank.js',
     Book_js : '[%client%]src/popups/Book.js',
     Credits_js : '[%client%]src/popups/Credits.js',
@@ -42,6 +43,5 @@ js.client = {
     MainScene_js : '[%client%]src/scenes/MainScene.js',
     Scene_js : '[%client%]src/scenes/Scene.js',
     SceneManager_js : '[%client%]src/scenes/SceneManager.js',
-    Strings_js : '[%client%]src/utils/Strings.js',
     Utils_js : '[%client%]src/utils/Utils.js'
 };

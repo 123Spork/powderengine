@@ -247,6 +247,13 @@ getLayoutObject:function(){
 						}
 					},
 
+					"accountdetails":{
+						label:"Accounts are culled daily 00:00 and on software git updates.",
+						position:cc.p(4,4),
+						color:cc.c3b(255,255,255),
+						anchorPoint:cc.p(0,0),
+					},
+
 
 					"credits_button":{
 						position: cc.p(30,400),

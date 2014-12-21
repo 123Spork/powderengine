@@ -3,6 +3,7 @@ ShopPanel = Popup.extend({
 	itemContext:null,
 	itemUse:false,
 	listPanel:null,
+	offerlistPanel:null,
 
 	getIdentifier:function(){
 		return "Shop";
@@ -83,6 +84,82 @@ ShopPanel = Popup.extend({
 		this.listPanel.listView.setCallBackList(callBackList);
 		this.listPanel.addChild(this.listPanel.listView);
 	},
+
+	updateOfferList:function(){
+		if(this.offerlistPanel){
+			this.offerlistPanel.removeAllChildren();
+		}
+		var listnodes = [];
+		var callBackList=[];
+		var tc = cc.TextureCache.getInstance();
+		var list = ["Buy","Sell"];
+		for(var i=0;i<list.length;i++){
+			listnodes[i]=cc.LayerColor.create(cc.c4b(0,0,0,0),118,32);
+			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),118,1);
+			element.setPosition(cc.p(0,0));						
+			
+			var text = cc.LabelTTF.create(list[i],"Arial",15);
+			text.setColor(cc.c3b(0,0,0));
+			text.setAnchorPoint(cc.p(0,0));
+			text.setPosition(cc.p(4,4));
+			text.setDimensions(cc.size(90,0));
+			listnodes[i].setContentSize(118,text.getContentSize().height+8);
+
+			if(this.currentTab==(i+1)){
+				listnodes[i]=cc.LayerColor.create(cc.c4b(100,0,0,255),118,text.getContentSize().height+8);
+				var selectedElement=cc.Sprite.createWithTexture(tc.addImage("GUI/selected.png"));
+				selectedElement.setPosition(cc.p(94,((text.getContentSize().height+8)-20)/2));
+				selectedElement.setAnchorPoint(cc.p(0,0));
+				listnodes[i].addChild(selectedElement);
+				text.setColor(cc.c3b(255,255,255));
+			}
+			listnodes[i].addChild(element);
+			listnodes[i].addChild(text);
+			listnodes[i].callBack="Use";
+			callBackList.push([listnodes[i]]);
+		}
+		if(listnodes.length<1){
+			listnodes[0]=cc.LayerColor.create(cc.c4b(0,0,0,0),420,32);
+			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),212,1);
+			element.setPosition(cc.p(4,0));						
+			var questname = cc.LabelTTF.create("THERES NO QUESTS!","Arial",15);
+			questname.setColor(cc.c3b(0,0,0));
+			questname.setAnchorPoint(cc.p(0,0));
+			questname.setPosition(cc.p(4,4));
+			questname.setDimensions(cc.size(216,0));
+			listnodes[0].setContentSize(216,questname.getContentSize().height+8);
+			listnodes[0].addChild(questname);
+			callBackList.push([]);
+		}
+
+		this.offerlistPanel = this.panels["main_panel"]["tab2"]["offer_list"];
+		var self=this;
+		this.offerlistPanel.getListSize = function(){
+			var height =0;
+			for(var i=0;i<listnodes.length;i++){
+				height+=listnodes[i].getContentSize().height;
+			}
+			return cc.size(216,height);
+		};
+		this.offerlistPanel.getListElementAmount=function(){
+			return listnodes.length;
+		};
+		this.offerlistPanel.getSizeForElement=function(elementID){
+			return listnodes[elementID].getContentSize();
+		};
+		this.offerlistPanel.getListNodeForIndex=function(elementID){
+			return listnodes[elementID];
+		};
+		this.offerlistPanel.runListCallBack=function(name,listelement,touch){
+			if(name=="Use"){
+				self.setTab(listelement+1);
+				self.prepareList();
+			}
+		};
+		this.offerlistPanel.listView = ListView.create(this.offerlistPanel);
+		this.offerlistPanel.listView.setCallBackList(callBackList);
+		this.offerlistPanel.addChild(this.offerlistPanel.listView);
+	},
 	
 	getLayoutObject:function(){
 		var inventory_panel = {};
@@ -143,6 +220,17 @@ ShopPanel = Popup.extend({
 										fontSize:16,
 										anchorPoint:cc.p(0,0),
 									},
+									"offer_label":{
+										label:"Offer",
+										color:cc.c3b(255,255,255),
+										position:cc.p(400,364),
+										fontSize:16,
+										anchorPoint:cc.p(0,0),
+									},
+									"offer_list":{
+										size:cc.size(158,358),
+										position:cc.p(389,1),	
+									}
 								}
 							},
 							"tab1":{
@@ -151,6 +239,13 @@ ShopPanel = Popup.extend({
 										label:"Store Items",
 										color:cc.c3b(255,255,255),
 										position:cc.p(138,364),
+										fontSize:16,
+										anchorPoint:cc.p(0,0),
+									},
+									"offer_label":{
+										label:"Price",
+										color:cc.c3b(255,255,255),
+										position:cc.p(400,364),
 										fontSize:16,
 										anchorPoint:cc.p(0,0),
 									},
@@ -252,8 +347,12 @@ ShopPanel = Popup.extend({
 		this.currentTab=value;
 		this.panels["main_panel"]["tab1"].setVisible(false);
 		this.panels["main_panel"]["tab2"].setVisible(false);
+		if(value==2){
+			this.updateOfferList();
+		}
 		this.panels["main_panel"]["tab"+value].setVisible(true);
 	},
+
 
 
 	withdrawSelected:function(val){

@@ -204,7 +204,7 @@ socket.on('connection', function(client){
 					"pass":event["password"],
 					"email":event["email"],
 					"registrationdate":Date.now(),
-					"rank":1,
+					"rank":3,
 					"location":{"mapnumber":1,"position":100},
 					"race":0,
 					"class":0,

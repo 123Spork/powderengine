@@ -98,6 +98,7 @@
                 <file name="../node_modules/cceditbox/lib/CCEditBox.js"></file>
                 <file name="./src/lang/EN.js"></file>
                 <file name="./src/lang/CZ.js"></file>
+                <file name="./src/lang/LA.js"></file>
                 <file name="./src/classes/SingleLineBox.js"></file>
                 <file name="./src/classes/MultiLineBox.js"></file>
                 <file name="./src/utils/Utils.js"></file>

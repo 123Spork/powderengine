@@ -30,6 +30,7 @@ lang["CZ"]={
 	"Eail Label": "Email Address",
 	"Register User Taken":"Registration failed, user already exists.",
 	"Logging In Message":"Logging In",
+	
    "CHATBAR":"ISSECTION",
    "Welcome Message":"Vítejte do Powder Engine! Napište /help pro pomocné příkazy.",
    "Join Message":"<PLAYER> se přidal/a do hry!",

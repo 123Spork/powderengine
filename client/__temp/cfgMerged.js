@@ -66,10 +66,8 @@ var res = {
     warpeditor_bg_png : 'GUI/warpeditor_bg.png',
     warpeditor_icon_png : 'GUI/warpeditor_icon.png',
     building1_png : 'building1.png',
-    character_graphics_txt : 'character_graphics.txt',
     items1_png : 'items1.png',
     sprites1_png : 'sprites1.png',
-    tile_graphics_txt : 'tile_graphics.txt',
     tiles0_png : 'tiles0.png',
     tiles1_png : 'tiles1.png'
 };
@@ -644,6 +642,7 @@ js.client = {
     SkillsEditor_js : './src/editors/SkillsEditor.js',
     CZ_js : './src/lang/CZ.js',
     EN_js : './src/lang/EN.js',
+    LA_js : './src/lang/LA.js',
     Bank_js : './src/popups/Bank.js',
     Book_js : './src/popups/Book.js',
     Credits_js : './src/popups/Credits.js',
@@ -678,6 +677,7 @@ resCfg[jsRes.SceneManager_js] = {
     ref : [
     	jsRes.EN_js,
     	jsRes.CZ_js,
+    	jsRes.LA_js,
     	jsRes.SingleLineBox_js,
 	    jsRes.MultiLineBox_js,
 	    jsRes.Utils_js,

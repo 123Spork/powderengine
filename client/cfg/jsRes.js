@@ -25,6 +25,7 @@ js.client = {
     SkillsEditor_js : '[%client%]src/editors/SkillsEditor.js',
     CZ_js : '[%client%]src/lang/CZ.js',
     EN_js : '[%client%]src/lang/EN.js',
+    LA_js : '[%client%]src/lang/LA.js',
     Bank_js : '[%client%]src/popups/Bank.js',
     Book_js : '[%client%]src/popups/Book.js',
     Credits_js : '[%client%]src/popups/Credits.js',

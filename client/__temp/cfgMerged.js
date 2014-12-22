@@ -642,6 +642,7 @@ js.client = {
     SettingsEditor_js : './src/editors/SettingsEditor.js',
     ShopEditor_js : './src/editors/ShopEditor.js',
     SkillsEditor_js : './src/editors/SkillsEditor.js',
+    CZ_js : './src/lang/CZ.js',
     EN_js : './src/lang/EN.js',
     Bank_js : './src/popups/Bank.js',
     Book_js : './src/popups/Book.js',
@@ -676,6 +677,7 @@ cc.gameModules = [jsRes.SceneManager_js];//Game modules
 resCfg[jsRes.SceneManager_js] = {
     ref : [
     	jsRes.EN_js,
+    	jsRes.CZ_js,
     	jsRes.SingleLineBox_js,
 	    jsRes.MultiLineBox_js,
 	    jsRes.Utils_js,

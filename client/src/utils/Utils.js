@@ -109,6 +109,9 @@ autoLoginNextTime=false;
 rememberLoginNextTime=false;
 
 var settingsData = lang[ccconfig["language"]];
+
+console.log(settingsData);
+
 function validateEmail(email) 
 {
     var re = /\S+@\S+\.\S+/;

@@ -26,7 +26,6 @@ var cocos2dApp = cc.Application.extend({
         if(cc.AudioEngine) cc.AudioEngine.getInstance().setResPath("res/Audio");
         director.setContentScaleFactor(1);
         eglView.setDesignResolutionSize(designSize.width, designSize.height, cc.RESOLUTION_POLICY.SHOW_ALL);
-
         // turn on display FPS
        // director.setDisplayStats(config['showFPS']);
 

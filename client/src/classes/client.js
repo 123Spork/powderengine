@@ -1,34 +1,49 @@
+var socket;
+var io=null;
 var storedClientMessages=[];
+setupserver = function(){
+	socket = io.connect(ccconfig["SERVER:PORT"],{
+			'sync disconnect on unload':true,
+			'connect timeout':5000,
+			'reconnection delay ':100,
+		}
+	); 
 
-var socket = io.connect(ccconfig["SERVER:PORT"],{
-		'sync disconnect on unload':true,
-		'connect timeout':5000,
-		'reconnection delay ':100,
-	}
-); 
-
-socket.on('connect',function() {
-    LocalStorage.Create();
-    LocalStorage.Clear();
-    LocalStorage.Sync();
-   
-    console.log('Client has connected to the server!');
-    if(SceneManager){
-	    var gameScreen = SceneManager.getInstance().currentScene;
-	    if(gameScreen){
-			gameScreen.setServerConnected(true);
+	socket.on('connect',function() {
+	    LocalStorage.Create();
+	    LocalStorage.Clear();
+	    LocalStorage.Sync();
+	   
+	    console.log('Client has connected to the server!');
+	    if(SceneManager){
+		    var gameScreen = SceneManager.getInstance().currentScene;
+		    if(gameScreen){
+				gameScreen.setServerConnected(true);
+			}else{
+				storedClientMessages.push(JSON.stringify({"connect":true}));
+		}
 		}else{
 			storedClientMessages.push(JSON.stringify({"connect":true}));
-	}
-	}else{
-		storedClientMessages.push(JSON.stringify({"connect":true}));
-	}
-});
+		}
+	});
 
 
-socket.on('message',function(data) {
-	reactToSocketMessage(data);
-});
+	socket.on('message',function(data) {
+		reactToSocketMessage(data);
+	});
+
+
+
+	socket.on('disconnect',function() {
+	  console.log('The client has disconnected!');
+	  var screen = SceneManager.getInstance().currentScene;
+	  if(screen){
+			screen.setServerConnected(false);
+	  }	else{
+			storedClientMessages.push(JSON.stringify({"disconnect":true}));
+		}
+	});
+}
 
 reactToSocketMessage=function(data){
 	data = JSON.parse(data);
@@ -321,17 +336,14 @@ reactToSocketMessage=function(data){
 
 
 
-socket.on('disconnect',function() {
-  console.log('The client has disconnected!');
-  var screen = SceneManager.getInstance().currentScene;
-  if(screen){
-		screen.setServerConnected(false);
-  }	else{
-		storedClientMessages.push(JSON.stringify({"disconnect":true}));
-	}
-});
-
 // Sends a message to the server via sockets
 function sendMessageToServer(message) {
   socket.send(JSON.stringify(message));
 };
+
+var script = document.createElement("SCRIPT");
+script.type = "text/javascript";
+script.src=document["ccConfig"]["SERVER:PORT"]+"/socket.io/socket.io.js";
+script.onreadystatechange = setupserver;
+script.onload = setupserver;
+document.getElementById("gameCanvas").appendChild(script); 

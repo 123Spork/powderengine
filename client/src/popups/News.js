@@ -14,8 +14,11 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
-				"22nd December 2014: (v0.796)":[
+				"22nd December 2014: (v0.797)":[
 					"Updated shop testbed. Inventory now loaded as selectable list (like shop items). Removed seperate tab lists to reduce amount of unused nodes. Added some test data into price and offer lists.",
+					"Consolidated configuration files into single file.",
+					"Made socket.io load from the actual application and not from the template pages.",
+					"Fixed some issed with graphics loading in minified builds",
 				],				
 				"21st December 2014: (v0.796)":[
 					"Updated shop testbed. Game now loads store sale items.",

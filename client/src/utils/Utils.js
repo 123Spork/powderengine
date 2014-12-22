@@ -1,41 +1,20 @@
-var ccconfig = eval("gameConfig();");
-
-
-
 var DEV =0;
 var LIVE = 1;
-
+var ccconfig=document["ccConfig"];
 var PLAYMODE = LIVE;
-
 var keyMap = {};
-
-
-var fileUtils = cc.FileUtils.getInstance();
-var platform = cc.Application.getInstance().getTargetPlatform();
-fileUtils.setSearchPaths(["res/Graphics"]);
-var request = new XMLHttpRequest();
-request.open("GET", "res/Graphics/tile_graphics.txt", false);
-request.send(null);
-var returnValue = request.responseText;
-var filenames = returnValue.split(',');
-
-var tileTextureList = [];
-for(var i in filenames){
-    tileTextureList.push({"name":filenames[i],"texture":cc.TextureCache.getInstance().addImage(filenames[i])});
-}
-
 var isGameInSync=false;
 
-var request = new XMLHttpRequest();
-request.open("GET", "res/Graphics/character_graphics.txt", false);
-request.send(null);
-var returnValue = request.responseText;
-var filenames = returnValue.split(',');
-
-var characterTextureList = [];
-for(var i in filenames){
-    characterTextureList.push({"name":filenames[i],"texture":cc.TextureCache.getInstance().addImage(filenames[i])});
+var tileTextureList = [], characterTextureList=[];
+cc.FileUtils.getInstance().setSearchPaths(["res/Graphics"]);
+for(var i in document["ccConfig"]["tileSheets"]){
+    tileTextureList.push({"name":document["ccConfig"]["tileSheets"][i],"texture":cc.TextureCache.getInstance().addImage(document["ccConfig"]["tileSheets"][i])});
 }
+for(var i in document["ccConfig"]["characterSheets"]){
+    characterTextureList.push({"name":document["ccConfig"]["characterSheets"][i],"texture":cc.TextureCache.getInstance().addImage(document["ccConfig"]["characterSheets"][i])});
+}
+
+
 
 
 document.getElementById("gameCanvas").onkeydown = function (event) {
@@ -109,8 +88,6 @@ autoLoginNextTime=false;
 rememberLoginNextTime=false;
 
 var settingsData = lang[ccconfig["language"]];
-
-console.log(settingsData);
 
 function validateEmail(email) 
 {

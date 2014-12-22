@@ -176,7 +176,7 @@ PlayersController.positionPlayer=function(data){
 		};
 		this.instance.players[data["id"]] = PlayerCharacter.create(withData);
 		var index = data["location"]["position"];	var mapSize = GameMap.getMapSizeForIndex(data["location"]["mapnumber"]);
-		this.instance.players[id].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
+		this.instance.players[data["id"]].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[data["id"]]);
 		var string = settingsData["Join Message"];

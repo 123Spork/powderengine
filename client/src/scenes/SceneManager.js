@@ -26,14 +26,16 @@ var SceneManager = cc.Layer.extend({
 	},
 
 	orientationChange:function(){
-		var egl = cc.EGLView.getInstance();
-        screenSize=cc.size(egl.getFrameSize().width,egl.getFrameSize().height);
-        SceneManager.getInstance().background_node.setTextureRect(cc.rect(0,0,screenSize.width,screenSize.height));
-		SceneManager.getInstance().currentScene.onOrientationChanged();
+		if(SceneManager.getInstance().currentScene){
+			var egl = cc.EGLView.getInstance();
+	        screenSize=cc.size(egl.getFrameSize().width,egl.getFrameSize().height);
+	        SceneManager.getInstance().background_node.setTextureRect(cc.rect(0,0,screenSize.width,screenSize.height));
+			SceneManager.getInstance().currentScene.onOrientationChanged();
+		}
 	},
 
 	initGameWhenLocalStorage:function(){
-		if(LocalStorage.getInstance() && isGameInSync){
+		if(LocalStorage.getInstance() && isGameInSync && io){
 			this.unschedule(this.initGameWhenLocalStorage);
 			settingsData = mergeSettings(settingsData,LocalStorage.getSettingsData());
 			this.goToScene("Login",{});	
@@ -126,5 +128,3 @@ SceneManager.getActiveScene = function(){
 	}
 	return this.instance.activeScene;
 };
-
-

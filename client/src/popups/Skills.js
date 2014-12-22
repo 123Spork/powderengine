@@ -131,7 +131,7 @@ SkillsPanel = Popup.extend({
 						size: cc.size(365,32),
 						children:{	
 							"header":{
-								label:"Skills",
+								label:settingsData["Skills Header"],
 								fontSize:20,
 								anchorPoint:cc.p(0,0.5),
 								position:cc.p(8,16),

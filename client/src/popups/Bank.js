@@ -81,7 +81,7 @@ BankPanel = Popup.extend({
 								children: inventory_panel
 							},
 							"inventory_label":{
-								label:"Inventory",
+								label:settingsData["Bank Header"],
 								color:cc.c3b(255,255,255),
 								position:cc.p(8,324),
 								fontSize:16,

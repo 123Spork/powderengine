@@ -52,7 +52,7 @@ QuestsPanel = Popup.extend({
 			listnodes[0]=cc.LayerColor.create(cc.c4b(0,0,0,0),420,32);
 			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),212,1);
 			element.setPosition(cc.p(4,0));						
-			var questname = cc.LabelTTF.create("THERES NO QUESTS!","Arial",15);
+			var questname = cc.LabelTTF.create(settingsData["No Quests"],"Arial",15);
 			questname.setColor(cc.c3b(0,0,0));
 			questname.setAnchorPoint(cc.p(0,0));
 			questname.setPosition(cc.p(4,4));
@@ -193,7 +193,7 @@ QuestsPanel = Popup.extend({
 						size: cc.size(365,32),
 						children:{	
 							"header":{
-								label:"Quest Log",
+								label:settingsData["Quest Header"],
 								fontSize:20,
 								anchorPoint:cc.p(0,0.5),
 								position:cc.p(8,16),

@@ -51,14 +51,14 @@ onKeyUp:function(key){
 
 						if(regName!="" && regName!=null && regPass!="" && regPass!=null && regEmail!="" && regEmail!=null){
 							if(validateEmail(regEmail)==false){
-								this.setInfoMessage("Please use a correct email address.")
+								this.setInfoMessage(settingsData["Incorrect Email Format"])
 							}else{
 								this.isRegistering=true;
-								this.setInfoMessage("Registering please wait...");
+								this.setInfoMessage(settingsData["Registering Message"]);
 								this.registerPlayer({"name":regName,"password":regPass,"email":regEmail});
 							}
 						}else{
-							this.setInfoMessage("Please fill all fields.");
+							this.setInfoMessage(settingsData["Register Empty Fields"]);
 						}
 				}else{
 					if(this.waitingOnServer==false && this.serverActive){
@@ -66,13 +66,13 @@ onKeyUp:function(key){
 						var logPass = this.passbox.getText();
 						if(logName!="" && logName!=null && logPass!="" && logPass!=null){
 							this.waitingOnServer=true;
-							this.setInfoMessage("Logging In");
+							this.setInfoMessage(settingsData["Logging In Message"]);
 							sendMessageToServer({"login":true,"username":this.namebox.getText(),"password":this.passbox.getText()});
 						}else{
-							this.setInfoMessage("Please enter a User and Password");
+							this.setInfoMessage(settingsData["User Pass Empty"]);
 						}
 					} else{
-						this.onLoginFailed("Server is offline!");
+						this.onLoginFailed(settingsData["Server Offline Message"]);
 					}
 				}
 			break;
@@ -82,10 +82,10 @@ onKeyUp:function(key){
 setServerConnected:function(active){
 	this.serverActive=active;
 	if(active==true){
-		this.panels["server_activity"].setString("Server: Online");
+		this.panels["server_activity"].setString(settingsData["Online Server"]);
 		this.panels["server_activity"].setColor(cc.c3b(0,255,0));
 	} else{
-		this.panels["server_activity"].setString("Server: Offline");
+		this.panels["server_activity"].setString(settingsData["Offline Server"]);
 		this.panels["server_activity"].setColor(cc.c3b(255,0,0));
 	}
 },
@@ -104,7 +104,7 @@ checkAuto:function(){
 			this.setInfoMessage("Logging In");
 			sendMessageToServer({"login":true,"username":this.namebox.getText(),"password":this.passbox.getText()});
 		} else{
-			this.onLoginFailed("Server is offline!");
+			this.onLoginFailed(settingsData["Offline Server Message"]);
 		}
 	}
 },
@@ -167,7 +167,7 @@ getLayoutObject:function(){
 						anchorPoint:cc.p(0,0),
 					},
 					"rem_login_text":{
-						label:"Remember login.",
+						label:settingsData["Save Login Cred"],
 						fontSize:16,
 						color:cc.c3b(255,255,255),
 						anchorPoint:cc.p(0,1),
@@ -181,7 +181,7 @@ getLayoutObject:function(){
 						anchorPoint:cc.p(0,0),
 					},
 					"auto_login_text":{
-						label:"Auto login next time.",
+						label:settingsData["Auto Login Next"],
 						fontSize:16,
 						color:cc.c3b(255,255,255),
 						anchorPoint:cc.p(0,0.0),
@@ -194,7 +194,7 @@ getLayoutObject:function(){
 						color: cc.c4b(0,0,0,255),
 						children:{
 							"label":{
-								label:"Play",
+								label:settingsData["Play Button Text"],
 								fontSize:20,
 								color:cc.c3b(255,255,255),
 								anchorPoint:cc.p(0.5,0.5),
@@ -208,7 +208,7 @@ getLayoutObject:function(){
 						color: cc.c4b(0,0,0,255),
 						children:{
 							"label":{
-								label:"Register",
+								label:settingsData["Register Button Text"],
 								fontSize:20,
 								color:cc.c3b(255,255,255),
 								anchorPoint:cc.p(0.5,0.5),
@@ -224,7 +224,7 @@ getLayoutObject:function(){
 						color: cc.c4b(0,0,0,255),
 						children:{
 							"label":{
-								label:"Go Back",
+								label:settingsData["Back From Reg Button Text"],
 								fontSize:20,
 								color:cc.c3b(255,255,255),
 								anchorPoint:cc.p(0.5,0.5),
@@ -238,7 +238,7 @@ getLayoutObject:function(){
 						color: cc.c4b(0,0,0,255),
 						children:{
 							"label":{
-								label:"Confirm",
+								label:settingsData["Reg Confirm Button Text"],
 								fontSize:20,
 								color:cc.c3b(255,255,255),
 								anchorPoint:cc.p(0.5,0.5),
@@ -247,8 +247,8 @@ getLayoutObject:function(){
 						}
 					},
 
-					"accountdetails":{
-						label:"Accounts are culled daily 00:00 and on software git updates.",
+					"sysMessage":{
+						label:settingsData["System Message"],
 						position:cc.p(4,4),
 						color:cc.c3b(255,255,255),
 						anchorPoint:cc.p(0,0),
@@ -261,7 +261,7 @@ getLayoutObject:function(){
 						color: cc.c4b(0,0,0,255),
 						children:{
 							"label":{
-								label:"Credits",
+								label:settingsData["Credit Button Text"],
 								fontSize:20,
 								color:cc.c3b(255,255,255),
 								anchorPoint:cc.p(0.5,0.5),
@@ -277,7 +277,7 @@ getLayoutObject:function(){
 						anchorPoint:cc.p(0,1),
 						children:{
 							"label":{
-								label:"News",
+								label:settingsData["News Button Text"],
 								fontSize:20,
 								color:cc.c3b(255,255,255),
 								anchorPoint:cc.p(0.5,0.5),
@@ -293,7 +293,7 @@ getLayoutObject:function(){
 						position:cc.p(325,220),
 					},
 					"server_message2":{
-						label:"This game saves data automatically.",
+						label:settingsData["Login Message"],
 						fontSize:16,
 						color:cc.c3b(255,255,255),
 						anchorPoint:cc.p(0,1),
@@ -310,7 +310,7 @@ getLayoutObject:function(){
 						position:cc.p(910,630),
 						size:cc.size(100,20),
 						anchorPoint:cc.p(0.5,0.5),
-						label:"Server: Offline",
+						label:settingsData["Offline Server"],
 						color:cc.c3b(255,0,0),
 					}
 				}
@@ -350,14 +350,14 @@ onTouchBegan:function(touch){
 				var logPass = this.passbox.getText();
 				if(logName!="" && logName!=null && logPass!="" && logPass!=null){
 					this.waitingOnServer=true;
-					this.setInfoMessage("Logging In");
+					this.setInfoMessage(settingsData["Logging In Message"]);
 					sendMessageToServer({"login":true,"username":this.namebox.getText(),"password":this.passbox.getText()});
 				}else{
-					this.setInfoMessage("Please enter a User and Password");
+					this.setInfoMessage(settingsData["User Pass Empty"]);
 				}
 				return true;
 			} else{
-				this.onLoginFailed("Server is offline!");
+				this.onLoginFailed(settingsData["Offline Server Message"]);
 				return true;
 			}
 		}
@@ -396,14 +396,14 @@ onTouchBegan:function(touch){
 
 		if(regName!="" && regName!=null && regPass!="" && regPass!=null && regEmail!="" && regEmail!=null){
 			if(validateEmail(regEmail)==false){
-				this.setInfoMessage("Please use a correct email address.")
+				this.setInfoMessage(settingsData["Incorrect Email Format"])
 			}else{
 				this.isRegistering=true;
-				this.setInfoMessage("Registering please wait...");
+				this.setInfoMessage(settingsData["Registering Message"]);
 				this.registerPlayer({"name":regName,"password":regPass,"email":regEmail});
 			}
 		}else{
-			this.setInfoMessage("Please fill all fields.");
+			this.setInfoMessage(settingsData["Register Empty Fields"]);
 		}
 		return false;
 	}
@@ -415,10 +415,10 @@ registerPlayer:function(playerDetails){
 },
 
 completedRegistration:function(){
-	this.setInfoMessage("Registration successful.");
-	this.register_namebox.setText("Username");
-	this.register_passbox.setText("Password");
-	this.register_emailbox.setText("Email Address");
+	this.setInfoMessage(settingsData["Registration Success"]);
+	this.register_namebox.setText(settingsData["Username Label"]);
+	this.register_passbox.setText(settingsData["Password Label"]);
+	this.register_emailbox.setText(settingsData["Email Label"]);
 	this.isRegistering=false;
 	this.hideRegister();
 },
@@ -426,7 +426,7 @@ completedRegistration:function(){
 failedRegistration:function(reason){
 	this.isRegistering=false;
 	switch(reason){
-		case "UserTaken": this.setInfoMessage("Registration failed, user already exists."); break;
+		case "UserTaken": this.setInfoMessage(settingsData["Register User Taken"]); break;
 	}
 
 },

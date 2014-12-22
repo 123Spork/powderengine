@@ -14,6 +14,9 @@ News = Popup.extend({
 	init:function(){
 		this._super();
 			this.data={
+				"22nd December 2014: (v0.796)":[
+					"Updated shop testbed. Inventory now loaded as selectable list (like shop items). Removed seperate tab lists to reduce amount of unused nodes. Added some test data into price and offer lists.",
+				],				
 				"21st December 2014: (v0.796)":[
 					"Updated shop testbed. Game now loads store sale items.",
 				],

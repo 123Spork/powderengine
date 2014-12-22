@@ -18,14 +18,12 @@ Credits = Popup.extend({
 
 			this.data={
 
-				"Programmed and designed by:":"Alan Tuckwood",
-				"Special thanks:":"Claire, for putting up with all the non-talking hours.",
-				"Special thanks 2:":"IndieRising dev community for all their wonderful support.",
-				"Special thanks 3:":"Finblade, for all the skills I was able to pass into this engine.",
-				"Special thanks 4:":"All of you players, who's positive response keep me motivated.",
-				"Powder Engine is Copywritten":"Contact the developer in-site regarding questions.",
-
-
+				"Project Leader":"Spork",
+				"Localisation Contributors":"Vus",
+				"Programmers":"Spork",
+				"Community Management & Support": "Chief, Seb, Mad Hatter",
+				"Special thanks":"All of you, who's positive response keep us motivated to deliver the best software we can make.",
+				"Powder Engine is Copywritten":"Contact the developera in-site regarding questions.",
 			}
 		
 	},

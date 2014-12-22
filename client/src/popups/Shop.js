@@ -4,6 +4,9 @@ ShopPanel = Popup.extend({
 	itemUse:false,
 	listPanel:null,
 	offerlistPanel:null,
+	salelistPanel:null,
+
+	selectedbuyitems:null,
 
 	getIdentifier:function(){
 		return "Shop";
@@ -84,6 +87,83 @@ ShopPanel = Popup.extend({
 		this.listPanel.listView.setCallBackList(callBackList);
 		this.listPanel.addChild(this.listPanel.listView);
 	},
+
+	updateSaleList:function(){
+		if(this.salelistPanel){
+			this.salelistPanel.removeAllChildren();
+		}
+		var listnodes = [];
+		var callBackList=[];
+		var tc = cc.TextureCache.getInstance();
+
+		var itemList = ObjectLists.getItemList();
+		var contextList = [];
+		for(var i in itemList){
+			for(var j in itemList[i]["value"]){
+				if(itemList[i]["value"][j]["shopid"]==this.shopid){
+					contextList.push(itemList[i]["name"]);
+					break;
+				}
+			}
+		}
+
+
+
+		var list = contextList;
+		for(var i=0;i<list.length;i++){
+			if(this.selectedbuyitems && this.selectedbuyitems[i] && this.selectedbuyitems[i]==true){
+				listnodes[i]=cc.LayerColor.create(cc.c4b(255,255,255,127),218,32);
+			}else{
+				listnodes[i]=cc.LayerColor.create(cc.c4b(0,0,0,0),218,32);
+			}
+			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),218,1);
+			element.setPosition(cc.p(0,0));						
+			
+			var text = cc.LabelTTF.create(list[i],"Arial",15);
+			text.setColor(cc.c3b(0,0,0));
+			text.setAnchorPoint(cc.p(0,0));
+			text.setPosition(cc.p(4,4));
+			text.setDimensions(cc.size(214,0));
+			listnodes[i].setContentSize(218,text.getContentSize().height+8);
+			listnodes[i].addChild(element);
+			listnodes[i].addChild(text);
+			listnodes[i].callBack="Use";
+			callBackList.push([listnodes[i]]);
+		}
+
+		this.salelistPanel = this.panels["main_panel"]["tab1"]["sale_list"];
+		var self=this;
+		this.salelistPanel.getListSize = function(){
+			var height =0;
+			for(var i=0;i<listnodes.length;i++){
+				height+=listnodes[i].getContentSize().height;
+			}
+			return cc.size(218,height);
+		};
+		this.salelistPanel.getListElementAmount=function(){
+			return listnodes.length;
+		};
+		this.salelistPanel.getSizeForElement=function(elementID){
+			return listnodes[elementID].getContentSize();
+		};
+		this.salelistPanel.getListNodeForIndex=function(elementID){
+			return listnodes[elementID];
+		};
+		this.salelistPanel.runListCallBack=function(name,listelement,touch){
+			if(!self.selectedbuyitems){
+				self.selectedbuyitems=[];
+				self.selectedbuyitems[listelement]=true;
+			}
+			else{
+				self.selectedbuyitems[listelement]=!self.selectedbuyitems[listelement]
+			}
+			self.updateSaleList();
+		};
+		this.salelistPanel.listView = ListView.create(this.salelistPanel);
+		this.salelistPanel.listView.setCallBackList(callBackList);
+		this.salelistPanel.addChild(this.salelistPanel.listView);
+	},
+
 
 	updateOfferList:function(){
 		if(this.offerlistPanel){
@@ -249,6 +329,10 @@ ShopPanel = Popup.extend({
 										fontSize:16,
 										anchorPoint:cc.p(0,0),
 									},
+									"sale_list":{
+										position:cc.p(127,2),
+										size:cc.size(218,358),
+									}
 								}
 							}
 						}
@@ -334,6 +418,7 @@ ShopPanel = Popup.extend({
 
 	didBecomeActive:function(){
 		this._super();
+		this.shopid=0;
 		if(!this.panels["main_panel"]["tab2"]["inventory"][(i+"")].getTexture()){
 			this.schedule(this.scheduledupdateTileGrid);
 		}else{
@@ -349,6 +434,9 @@ ShopPanel = Popup.extend({
 		this.panels["main_panel"]["tab2"].setVisible(false);
 		if(value==2){
 			this.updateOfferList();
+		}
+		if(value==1){
+			this.updateSaleList();
 		}
 		this.panels["main_panel"]["tab"+value].setVisible(true);
 	},

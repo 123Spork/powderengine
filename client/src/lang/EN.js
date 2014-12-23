@@ -32,7 +32,7 @@ lang["EN"]={
 	"Logging In Message":"Logging In",
 
 	"CHATBAR":"ISSECTION",
-	"Welcome Message":"Welcome to the Powder Engine! Enter /help for some help.",
+	"Welcome Message":"powderengine.net or /help for some help.",
 	"Join Message":"<PLAYER> has joined the game!",
 	"Leave Message":"<PLAYER> has left the game!",
 	"Default ChatBar Message": "C to popup/dismiss, enter for chat. Say /help for help.",

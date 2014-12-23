@@ -7,7 +7,7 @@ document["ccConfig"] = {
 	"SERVER:PORT":"http://82.1.137.1:1337",
 	"tileSize":32,
 	"characterSize":32,
-	"language":"CZ",
+	"language":"EN",
 	"characterSheets":["sprites1.png"],
 	"tileSheets":["tiles0.png","tiles1.png","items1.png","building1.png","40x40Tiles.png"],
 };

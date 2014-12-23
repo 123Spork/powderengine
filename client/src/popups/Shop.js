@@ -5,6 +5,7 @@ ShopPanel = Popup.extend({
 	listPanel:null,
 	offerlistPanel:null,
 	salelistPanel:null,
+	contextList:null,
 
 	selectedbuyitems:null,
 
@@ -44,19 +45,6 @@ ShopPanel = Popup.extend({
 			listnodes[i].addChild(text);
 			listnodes[i].callBack="Use";
 			callBackList.push([listnodes[i]]);
-		}
-		if(listnodes.length<1){
-			listnodes[0]=cc.LayerColor.create(cc.c4b(0,0,0,0),420,32);
-			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),212,1);
-			element.setPosition(cc.p(4,0));						
-			var questname = cc.LabelTTF.create("THERES NO QUESTS!","Arial",15);
-			questname.setColor(cc.c3b(0,0,0));
-			questname.setAnchorPoint(cc.p(0,0));
-			questname.setPosition(cc.p(4,4));
-			questname.setDimensions(cc.size(216,0));
-			listnodes[0].setContentSize(216,questname.getContentSize().height+8);
-			listnodes[0].addChild(questname);
-			callBackList.push([]);
 		}
 
 		this.listPanel = this.panels["main_panel"]["buyselllist"];
@@ -98,18 +86,18 @@ ShopPanel = Popup.extend({
 		var itemList = ObjectLists.getItemList();
 
 		if(this.currentTab==1){
-			var contextList = [];
+			this.contextList = [];
 			for(var i in itemList){
 				for(var j in itemList[i]["value"]){
-					if(itemList[i]["value"][j]["shopid"]==this.shopid){
-						contextList.push(itemList[i]["name"]);
+					if(itemList[i]["value"][j]["shopid"]==this.shopid && itemList[i]["value"][j]["sell"] && itemList[i]["value"][j]["sell"].length>0){
+						this.contextList.push({name:itemList[i]["name"],value:itemList[i]["value"][j]});
 						break;
 					}
 				}
 			}
 		}else{
 			var itemList = PlayersController.getYou().getInventory();
-			var contextList = [], items=[];
+			this.contextList = [], items=[];
 			gameitems = ObjectLists.getItemList();
 			for(var i in itemList){
 				if(itemList[i]){
@@ -118,15 +106,15 @@ ShopPanel = Popup.extend({
 			}
 			for(var i in items){
 				for(var j in items[i]["value"]){
-					if(items[i]["value"][j]["shopid"]==this.shopid){
-						contextList.push(items[i]["name"]);
+					if(items[i]["value"][j]["shopid"]==this.shopid && items[i]["value"][j]["buy"] && items[i]["value"][j]["buy"].length>0){
+						this.contextList.push({name:items[i]["name"],value:items[i]["value"][j]});
 						break;
 					}
 				}
 			}
 
 		}
-		var list = contextList;
+		var list = this.contextList;
 		for(var i=0;i<list.length;i++){
 			if(this.selectedbuyitems && this.selectedbuyitems[i] && this.selectedbuyitems[i]==true){
 				listnodes[i]=cc.LayerColor.create(cc.c4b(255,255,255,127),218,32);
@@ -136,11 +124,12 @@ ShopPanel = Popup.extend({
 			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),218,1);
 			element.setPosition(cc.p(0,0));						
 			
-			var text = cc.LabelTTF.create(list[i],"Arial",15);
+			var text = cc.LabelTTF.create(list[i].name,"Arial",15);
 			text.setColor(cc.c3b(0,0,0));
 			text.setAnchorPoint(cc.p(0,0));
 			text.setPosition(cc.p(4,4));
-			text.setDimensions(cc.size(214,0));
+			text.setDimensions(cc.size(180,0));
+
 			listnodes[i].setContentSize(218,text.getContentSize().height+8);
 			listnodes[i].addChild(element);
 			listnodes[i].addChild(text);
@@ -175,6 +164,7 @@ ShopPanel = Popup.extend({
 				self.selectedbuyitems[listelement]=!self.selectedbuyitems[listelement]
 			}
 			self.updateSaleList();
+			self.updateOfferList();
 		};
 		this.salelistPanel.listView = ListView.create(this.salelistPanel);
 		this.salelistPanel.listView.setCallBackList(callBackList);
@@ -188,20 +178,66 @@ ShopPanel = Popup.extend({
 		var listnodes = [];
 		var callBackList=[];
 		var tc = cc.TextureCache.getInstance();
-		var list = ["Item1","Item2","Item3"];
+		var salelist=[];
+		var list=[];
+		var itemlist = ObjectLists.getItemList();
+
+		for(var j in this.contextList){
+			if(this.currentTab==1){
+				for(var i in this.contextList[j].value["sell"]){
+					if(this.selectedbuyitems[j]==true){
+						salelist.push({name:itemlist[this.contextList[j].value["sell"][i]["id"]]["name"],amount:this.contextList[j].value["sell"][i]["amount"],number:this.contextList[j].value["sell"][i]["id"]});
+					}
+				}
+			}else{
+				for(var i in this.contextList[j].value["buy"]){
+					if( this.selectedbuyitems[j]==true){
+						salelist.push({name:itemlist[this.contextList[j].value["buy"][i]["id"]]["name"],amount:this.contextList[j].value["buy"][i]["amount"],number:this.contextList[j].value["buy"][i]["id"]});
+					}
+				}
+			}
+		}
+		salelist.sort(function(a,b){
+			return a.name>b.name;
+		})
+
+		for(var i=0;i<salelist.length;i++){
+			for(var j=i+1;j<salelist.length;j++){
+				if(salelist[i].number==salelist[j].number){
+					salelist[i].amount = parseInt(salelist[i].amount)+parseInt(salelist[j].amount);
+					salelist.splice(j,1);
+					j--;
+				}
+			}
+		}
+
+		list=salelist;
+
+
 		for(var i=0;i<list.length;i++){
 			listnodes[i]=cc.LayerColor.create(cc.c4b(0,0,0,0),158,32);
 			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),158,1);
 			element.setPosition(cc.p(0,0));						
 			
-			var text = cc.LabelTTF.create(list[i],"Arial",15);
+			var text = cc.LabelTTF.create(list[i].name,"Arial",15);
 			text.setColor(cc.c3b(0,0,0));
 			text.setAnchorPoint(cc.p(0,0));
 			text.setPosition(cc.p(4,4));
-			text.setDimensions(cc.size(154,0));
+			text.setDimensions(cc.size(90,0));
+
+
+			var text2 = cc.LabelTTF.create("x"+list[i].amount,"Arial",15);
+			text2.setColor(cc.c3b(0,0,0));
+			text2.setAnchorPoint(cc.p(0,0));
+			text2.setPosition(cc.p(102,4));
+			text2.setDimensions(cc.size(54,0));
+
+
+
 			listnodes[i].setContentSize(158,text.getContentSize().height+8);
 			listnodes[i].addChild(element);
 			listnodes[i].addChild(text);
+						listnodes[i].addChild(text2);
 			listnodes[i].callBack="Use";
 			callBackList.push([listnodes[i]]);
 		}
@@ -225,10 +261,10 @@ ShopPanel = Popup.extend({
 			return listnodes[elementID];
 		};
 		this.offerlistPanel.runListCallBack=function(name,listelement,touch){
-			if(name=="Use"){
+			/*if(name=="Use"){
 				self.setTab(listelement+1);
 				self.prepareList();
-			}
+			}*/
 		};
 		this.offerlistPanel.listView = ListView.create(this.offerlistPanel);
 		this.offerlistPanel.listView.setCallBackList(callBackList);

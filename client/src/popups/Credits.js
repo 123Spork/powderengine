@@ -17,7 +17,6 @@ Credits = Popup.extend({
 		this._super();
 
 			this.data={
-
 				"Project Leader":"Spork",
 				"Localisation Contributors":"Vus, sn0w Beast",
 				"Programmers":"Spork",

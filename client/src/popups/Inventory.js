@@ -18,8 +18,8 @@ InventoryPanel = Popup.extend({
 					anchorPoint:cc.p(0,1),
 					children:{	
 						"stacklabelbg":{
-							position: cc.p(1,1),
-							size: cc.size(10,6),
+							position: cc.p(0,0),
+							size: cc.size(10,12),
 							anchorPoint:cc.p(0,0),
 							color: cc.c4b(255,255,255,200),
 							children:{
@@ -91,7 +91,7 @@ InventoryPanel = Popup.extend({
 		if(amount>1){
 			this.panels["main_panel"][(itemNum+"")]["stacklabelbg"].setVisible(true);
 			this.panels["main_panel"][(itemNum+"")]["stacklabelbg"]["stacklabel"].setString(amount);
-			this.panels["main_panel"][(itemNum+"")]["stacklabelbg"].setContentSize(this.panels["main_panel"][(itemNum+"")]["stacklabelbg"]["stacklabel"].getContentSize());
+			this.panels["main_panel"][(itemNum+"")]["stacklabelbg"].setContentSize(this.panels["main_panel"][(itemNum+"")]["stacklabelbg"]["stacklabel"].getContentSize().width,	this.panels["main_panel"][(itemNum+"")]["stacklabelbg"].getContentSize().height);
 		}
 	},
 

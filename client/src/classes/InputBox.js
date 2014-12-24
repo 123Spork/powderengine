@@ -1,6 +1,7 @@
 var InputBox = cc.Class.extend({
 	inputBox:null,
 	focused:false,
+	delegate:null,
 	
 	setFocused:function(_isFocused){
 		console.log("setting focused: " + _isFocused)
@@ -28,8 +29,12 @@ var InputBox = cc.Class.extend({
 	init:function(){
 		cc.log("Ovveride inputbox init call if necessary");
 	},
+
+	removeFromParent:function(){
+		this.inputBox.removeFromParent();
+	},
 	
-	ctor:function(parent, size, position, defaultText, bgColor, fontColor, type,filename){
+	ctor:function(parent, size, position, defaultText, bgColor, fontColor, type,filename,delegate){
 		if(!type || type==false){
 			this.inputBox = SingleLineBox.create(cc.size(size.width, size.height),filename? cc.Scale9Sprite.create(filename) : cc.Scale9Sprite.create());
 			var hex = rgbToHex(bgColor.r,bgColor.g,bgColor.b);
@@ -44,6 +49,7 @@ var InputBox = cc.Class.extend({
 		this.inputBox.setPosition(position.x,position.y);
 		this.inputBox.setAnchorPoint(cc.p(0,1));
 		this.inputBox.setDelegate(this);
+		this.delegate=delegate;
 		parent.addChild(this.inputBox);
 		this.init();
 	},

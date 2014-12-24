@@ -420,7 +420,7 @@ PlayerCharacter = Character.extend({
 	
 	addToBank:function(data){
 		var context=0;
-		for(var i=0;i<this.items["bank"].length;i++){
+		for(var i=0;i<72;i++){
 			if(!this.items["bank"][i]){
 				var context=i;
 				break;
@@ -440,6 +440,53 @@ PlayerCharacter = Character.extend({
 		this.items["stored"][context]=data;
 	},
 
+	addInventoryItem:function(ref){
+		item=ObjectLists.getItemList()[ref.number];
+		var gp = this.getGridPosition();
+		if(item["stackable"]==true){
+			for(var i=0;i<40;i++){
+				if(this.items["stored"][i] && this.items["stored"][i]["number"]==ref.number){
+					this.items["stored"][i]["amount"]+=ref.amount;
+					if(Inventory){
+						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
+					}
+					return;
+				}
+			}
+		}
+			
+		var added=false;
+		var amount=ref.amount;
+		for(var i=0;ref.amount>0;i++){
+			if(this.items["stored"][i]==null){
+				if(item["stackable"]==true){
+					this.items["stored"][i]={"number":ref.number,"amount":ref.amount};
+					if(Inventory){
+						Inventory.setStackableLabel(i,ref.amount);	
+					}
+					var added=true;
+					break;
+				}else{
+					ref.amount--;
+					this.items["stored"][i]={"number":ref.number,"amount":1};
+					if(Inventory){
+						Inventory.setStackableLabel(i,ref.amount);	
+					}
+					var added=true;
+				}
+			}
+		}
+		if(added==false){
+			GameChat.addMessage(settingsData["Inventory Full"]);
+		}
+		if(Inventory){
+			Inventory.updateTileGrid();
+		}
+		if(Equipment){
+			Equipment.updateTileGrid();
+		}
+	},
+
 	pickupItem:function(ref){
 		item=ObjectLists.getItemList()[ref.number];
 		var gp = this.getGridPosition();
@@ -447,8 +494,8 @@ PlayerCharacter = Character.extend({
 		if(item["stackable"]==true){
 			for(var i=0;i<40;i++){
 				if(this.items["stored"][i] && this.items["stored"][i]["number"]==ref.number){
+					this.items["stored"][i]["amount"]+=ref.amount;
 					if(Inventory){
-						this.items["stored"][i]["amount"]+=ref.amount;
 						Inventory.setStackableLabel(i,this.items["stored"][i]["amount"]);	
 					}
 					var string = settingsData["Item Pick Up"];
@@ -461,22 +508,33 @@ PlayerCharacter = Character.extend({
 		}
 			
 		var added=false;
-		for(var i=0;i<40;i++){
+		var amount=ref.amount;
+		for(var i=0;ref.amount>0;i++){
 			if(this.items["stored"][i]==null){
-				this.items["stored"][i]={"number":ref.number,"amount":ref.amount};
-				if(Inventory){
-					Inventory.setStackableLabel(i,ref.amount);	
+				if(item["stackable"]==true){
+					this.items["stored"][i]={"number":ref.number,"amount":ref.amount};
+					if(Inventory){
+						Inventory.setStackableLabel(i,ref.amount);	
+					}
+					var added=true;
+					break;
+				}else{
+					ref.amount--;
+					this.items["stored"][i]={"number":ref.number,"amount":1};
+					if(Inventory){
+						Inventory.setStackableLabel(i,ref.amount);	
+					}
+					var added=true;
 				}
-				var string = settingsData["Item Pick Up"];
-				string = string.replace("<ITEM>",item["name"]);
-				GameChat.addMessage(string);
-				sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
-				var added=true;
-				break;
 			}
 		}
 		if(added==false){
 			GameChat.addMessage(settingsData["Inventory Full"]);
+		}else{
+			var string = settingsData["Item Pick Up"];
+			string = string.replace("<ITEM>",item["name"]);
+			GameChat.addMessage(string);
+			sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 		}
 		if(Inventory){
 			Inventory.updateTileGrid();
@@ -552,6 +610,9 @@ PlayerCharacter = Character.extend({
 		}
 		if(Equipment){
 			Equipment.updateTileGrid();
+		}
+		if(Shop){
+			Shop.resetShop();
 		}
 	},
 

@@ -96,7 +96,7 @@ onTouchBegan:function(touch){
 			if(isTouching(this.callbacklist[i][j],truePos)){ //&& isInScene==true){
 				var self=this;
 				(function(index){
-					self.delegate.runListCallBack(self.callbacklist[index][j].callBack,index,touch);
+					self.delegate.runListCallBack(self.callbacklist[index][j].callBack,index,touch,self.callbacklist[index][j]);
 					self.returningFromDelTouch=true;
 				})(i)
 				return true;

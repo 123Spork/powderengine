@@ -326,25 +326,6 @@ var GameScene = Scene.extend({
 					this.addChild(Bank);
 				}
 			break;*/
-			case "P":
-				if(Inventory!=null && !Inventory._parent) Inventory=null;
-				if(Inventory){
-					Inventory.willTerminate();
-					Inventory.removeFromParent();
-					Inventory=null;
-				}
-				if(Shop!=null && !Shop._parent) Shop=null;
-				if(Shop){
-					Shop.willTerminate();
-					Shop.removeFromParent();
-					Shop=null;
-				} else{
-					Shop = new ShopPanel();
-					Shop.init();
-					Shop.didBecomeActive();
-					this.addChild(Shop);
-				}
-			break;
 			case "I":
 				if(Inventory!=null && !Inventory._parent) Inventory=null;
 				if(Inventory){
@@ -406,6 +387,11 @@ var GameScene = Scene.extend({
 	onKeyDown:function(keys){
 		var gp = PlayersController.getYou().getGridPosition();
 		PlayersController.getYou().path=null;
+
+		if((Shop && Shop._parent) || (Bank && Bank._parent)){
+			return;
+		}
+
 		if(gp.x%1==0 && gp.y%1==0){
 			switch(keys){
 				case "RIGHTARROW": PlayersController.getYou().walkTo(gp.x+1,gp.y);  break;

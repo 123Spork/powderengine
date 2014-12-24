@@ -21,6 +21,9 @@ var EntryBox = InputBox.extend({
 
     editBoxEditingDidEnd: function (editBox) {
 		this.isCurrentlyEditing=false;
+		if(this.delegate && this.delegate.updateFromEnd){
+			this.delegate.updateFromEnd();
+		}
 		if(editBox.getText()==null || editBox.getText().length == "" && this.nullAllowed){
 			this.hasEntry=true;
 			return;

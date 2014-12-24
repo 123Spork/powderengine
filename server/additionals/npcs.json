@@ -1,1 +1,1 @@
-[{"name":"Banker","sprite":{"texture":null,"number":0},"script":12},{"name":"Demon","sprite":{"texture":null,"number":2}}]
+[{"name":"Banker","sprite":{"texture":null,"number":0},"script":12},{"name":"Shopkeep","sprite":{"texture":null,"number":1},"script":15}]

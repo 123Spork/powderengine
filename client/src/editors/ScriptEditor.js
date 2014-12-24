@@ -227,8 +227,8 @@ ScriptEditor = Popup.extend({
 											self.editPressed(this.identifier,"responses",listelement);
 										break;
 										case "Add":
-											var resArray = ["Talk","Destroy","Give/ Take Item","Set Quest Point", "Warp Player", "Wait", "Repeat Responses", "Open/Close Panel", "Modify Player Stats","Script Response"];
-											var resSetup = [{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true}]
+											var resArray = ["Talk","Destroy","Give/ Take Item","Set Quest Point", "Warp Player", "Wait", "Repeat Responses", "Open/Close Panel", "Modify Player Stats","Script Response","Open/Close Shop"];
+											var resSetup = [{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true}]
 											for( var i=0;i<self.data["data"][this.identifier]["responses"].length;i++){
 												if(self.data["data"][this.identifier]["responses"][i]["type"]=="Repeat Responses"){
 													resSetup[7]["enabled"]=false;
@@ -649,30 +649,31 @@ ScriptEditor = Popup.extend({
 			case 7: responseText ="Open/Close Panel"; break;
 			case 8: responseText ="Modify Player Stats"; break
 			case 9: responseText ="Script Response";break;
+			case 10: responseText ="Open/Close Shop";break;
 		}
 		if(responseText==""){
 			switch(this.delegate.data["specifier"]){
 				case "NPC": 
 					switch(clicknum){
-						case 10: responseText = "Attack"; break;
-						case 11: responseText = "Run Away"; break;
-						case 12: responseText = "Defend"; break;
-						case 13: responseText = "Modify NPC Stats"
+						case 11: responseText = "Attack"; break;
+						case 12: responseText = "Run Away"; break;
+						case 13: responseText = "Defend"; break;
+						case 14: responseText = "Modify NPC Stats"
 					}
 				break;
 				case "Item": 
 					switch(clicknum){
-						case 10: responseText = "Equip Item"; break;
-						case 11: responseText = "Read Item"; break;
+						case 11: responseText = "Equip Item"; break;
+						case 12: responseText = "Read Item"; break;
 					}
 				break;
 				case "Tile":
 					switch(clicknum){
-						case 10: responseText = "Block Entry"; break;
-						case 11: responseText = "Add Layer Graphic"; break;
-						case 12: responseText = "Show Sign"; break;	
-						case 13: responseText = "Spawn NPC"; break;
-						case 14: responseText = "Spawn Item"; break;
+						case 12: responseText = "Block Entry"; break;
+						case 13: responseText = "Add Layer Graphic"; break;
+						case 13: responseText = "Show Sign"; break;	
+						case 14: responseText = "Spawn NPC"; break;
+						case 15: responseText = "Spawn Item"; break;
 					}
 				break;
 			}
@@ -1195,6 +1196,40 @@ ScriptEditor = Popup.extend({
 				};
 			break;
 			case "Is Panel Visibility": case "Open/Close Panel":
+				panels["panels"].children={
+					"panelsLabel":{
+						label:"Panel:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,374),
+					},
+					"panelList":{
+						color:cc.c4b(255,255,255,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,230),
+						size:cc.size(154,135),
+					},
+					"visibleLabel":{
+						label:"Visibility:",
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,205),
+					},
+					"visibleButton":{
+						color:cc.c4b(255,0,0,255),
+						anchorPoint:cc.p(0,0),
+						position:cc.p(12,169),
+						size:cc.size(154,32),
+						children:{
+							"content":{
+								position:cc.p(77,16),
+								anchorPoint:cc.p(0.5,0.5),
+								label: "Invisible",
+								color:cc.c3b(0,0,0),
+							}
+						}
+					},
+				};
+			break;
+			case "Open/Close Shop":
 				panels["panels"].children={
 					"panelsLabel":{
 						label:"Panel:",
@@ -2035,6 +2070,75 @@ ScriptEditor = Popup.extend({
 						this.subEditor["visibleButton"]["content"].setString("Visible");
 					}
 			break;
+			case "Open/Close Shop":
+					var listnodes = [];
+					var callBackList=[];
+					var shoplist = ObjectLists.getShopList();
+					var panelList=[];
+					for(var i=0;i<shoplist.length;i++){
+						panelList.push(shoplist[i]["name"]);
+					}
+					for(var i=0;i<panelList.length;i++){
+						listnodes[i]=cc.Node.create();
+						var element= cc.LayerColor.create(cc.c4b(0,0,0,127),154,1);			
+						var text = cc.LabelTTF.create(panelList[i],"Arial",15);
+						text.setColor(cc.c3b(0,0,0));
+						text.setAnchorPoint(cc.p(0,0));
+						text.setPosition(cc.p(4,4));
+						text.setDimensions(cc.size(126,0));
+						var useElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/use.png"));
+						useElement.setPosition(cc.p(130,0));
+						useElement.setAnchorPoint(cc.p(0,0));
+						useElement.callBack="Use";
+						listnodes[i].setContentSize(154,text.getContentSize().height+8);
+						useElement.setPositionY(((text.getContentSize().height+8)/2)-10);
+						callBackList.push([useElement]);
+
+						var highlightNode = cc.LayerColor.create(cc.c4b(255,255,255,255,255),154,text.getContentSize().height+8);
+						listnodes[i].addChild(highlightNode);
+						listnodes[i].highlightNode=highlightNode;
+						listnodes[i].addChild(element);
+						listnodes[i].addChild(text);
+						listnodes[i].addChild(useElement);
+					}
+					var self=this;
+					this.subEditor["panelList"].getListSize = function(){
+						var height =0;
+						for(var i=0;i<listnodes.length;i++){
+							height+=listnodes[i].getContentSize().height;
+						}
+						return cc.size(154,height);
+					};
+					this.subEditor["panelList"].getListElementAmount=function(){
+						return listnodes.length;
+					};
+					this.subEditor["panelList"].getSizeForElement=function(elementID){
+						return listnodes[elementID].getContentSize();
+					};
+					this.subEditor["panelList"].getListNodeForIndex=function(elementID){
+						return listnodes[elementID];
+					};
+					this.subEditor["panelList"].getHighlightNode = function(elementID){
+						return listnodes[elementID].highlightNode;
+					};
+					this.subEditor["panelList"].runListCallBack=function(name,listelement){
+						if(name== "Use"){
+							this.listView.highlightNode(listelement);
+							self.panelContext=listelement;
+						}
+					};
+					this.subEditor["panelList"].listView = ListView.create(this.subEditor["panelList"]);
+					this.subEditor["panelList"].listView.setCallBackList(callBackList);
+					this.subEditor["panelList"].addChild(this.subEditor["panelList"].listView);
+					if(data["panel"]!=null && data["panel"]!=='undefined'){
+						this.subEditor["panelList"].runListCallBack("Use",data["panel"]);
+					}
+					this.visibleContext = data["visible"]==1?1:0;
+					if(this.visibleContext==1){
+						this.subEditor["visibleButton"].setColor(cc.c4b(0,255,0,255));
+						this.subEditor["visibleButton"]["content"].setString("Visible");
+					}
+			break;
 			case "Is Event Fired By":
 				var listnodes = [];
 				var callBackList=[];
@@ -2406,6 +2510,12 @@ ScriptEditor = Popup.extend({
 					case "Is Panel Visibility": case "Open/Close Panel":
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
 							"panel":this.panelContext,
+							"visible":this.visibleContext,
+						}
+					break;
+					case "Open/Close Shop":
+						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
+							"id":this.panelContext,
 							"visible":this.visibleContext,
 						}
 					break;

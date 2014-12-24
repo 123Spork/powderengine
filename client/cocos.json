@@ -1,5 +1,5 @@
 {
-    "engineDir" : "../node_modules/",
+    "engineDir" : "../node_modules/powder-cocos2d/",
     "dependencies" : [
         "cocos2d-html5",
 		"cctouch",

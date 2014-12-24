@@ -34,11 +34,12 @@ build/Release
 # Posters
 public/posters/
 
-*.orig
-
 # Cert/Key and Security Files
 *.pem
 *.pfx
 security/
 
+# Custom
+node_modules/powder-cocos2d/
 .DS_STORE
+*.orig

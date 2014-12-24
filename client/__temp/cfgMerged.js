@@ -73,73 +73,73 @@ var res = {
 };
 var js = js || {};
 js.cocos2d_html5 = {
-    CCActionManager_js : '../node_modules/cocos2d-html5/lib/CCActionManager.js',
-    CCCamera_js : '../node_modules/cocos2d-html5/lib/CCCamera.js',
-    CCConfiguration_js : '../node_modules/cocos2d-html5/lib/CCConfiguration.js',
-    CCDirector_js : '../node_modules/cocos2d-html5/lib/CCDirector.js',
-    CCDrawingPrimitives_js : '../node_modules/cocos2d-html5/lib/CCDrawingPrimitives.js',
-    CCLoader_js : '../node_modules/cocos2d-html5/lib/CCLoader.js',
-    CCScheduler_js : '../node_modules/cocos2d-html5/lib/CCScheduler.js',
-    CCAtlasNode_js : '../node_modules/cocos2d-html5/lib/base_nodes/CCAtlasNode.js',
-    CCNode_js : '../node_modules/cocos2d-html5/lib/base_nodes/CCNode.js',
-    cc_js : '../node_modules/cocos2d-html5/lib/cc.js',
-    cc4publish_js : '../node_modules/cocos2d-html5/lib/cc4publish.js',
-    CCAffineTransform_js : '../node_modules/cocos2d-html5/lib/cocoa/CCAffineTransform.js',
-    CCGeometry_js : '../node_modules/cocos2d-html5/lib/cocoa/CCGeometry.js',
-    CCNS_js : '../node_modules/cocos2d-html5/lib/cocoa/CCNS.js',
-    cocos2d_externs_js : '../node_modules/cocos2d-html5/lib/cocos2d_externs.js',
-    CCLabelTTF_js : '../node_modules/cocos2d-html5/lib/labelTTF/CCLabelTTF.js',
-    CCLayer_js : '../node_modules/cocos2d-html5/lib/layers_nodes/CCLayer.js',
-    AppControl_js : '../node_modules/cocos2d-html5/lib/platform/AppControl.js',
-    CCApplication_js : '../node_modules/cocos2d-html5/lib/platform/CCApplication.js',
-    CCClass_js : '../node_modules/cocos2d-html5/lib/platform/CCClass.js',
-    CCCommon_js : '../node_modules/cocos2d-html5/lib/platform/CCCommon.js',
-    CCConfig_js : '../node_modules/cocos2d-html5/lib/platform/CCConfig.js',
-    CCEGLView_js : '../node_modules/cocos2d-html5/lib/platform/CCEGLView.js',
-    CCFileUtils_js : '../node_modules/cocos2d-html5/lib/platform/CCFileUtils.js',
-    CCMacro_js : '../node_modules/cocos2d-html5/lib/platform/CCMacro.js',
-    CCSAXParser_js : '../node_modules/cocos2d-html5/lib/platform/CCSAXParser.js',
-    CCScreen_js : '../node_modules/cocos2d-html5/lib/platform/CCScreen.js',
-    CCTypes_js : '../node_modules/cocos2d-html5/lib/platform/CCTypes.js',
-    CCVisibleRect_js : '../node_modules/cocos2d-html5/lib/platform/CCVisibleRect.js',
-    Sys_js : '../node_modules/cocos2d-html5/lib/platform/Sys.js',
-    miniFramework_js : '../node_modules/cocos2d-html5/lib/platform/miniFramework.js',
-    CCScene_js : '../node_modules/cocos2d-html5/lib/scenes_nodes/CCScene.js',
-    CCAnimation_js : '../node_modules/cocos2d-html5/lib/sprite_nodes/CCAnimation.js',
-    CCAnimationCache_js : '../node_modules/cocos2d-html5/lib/sprite_nodes/CCAnimationCache.js',
-    CCSprite_js : '../node_modules/cocos2d-html5/lib/sprite_nodes/CCSprite.js',
-    CCSpriteBatchNode_js : '../node_modules/cocos2d-html5/lib/sprite_nodes/CCSpriteBatchNode.js',
-    CCSpriteFrame_js : '../node_modules/cocos2d-html5/lib/sprite_nodes/CCSpriteFrame.js',
-    CCSpriteFrameCache_js : '../node_modules/cocos2d-html5/lib/sprite_nodes/CCSpriteFrameCache.js',
-    CCPointExtension_js : '../node_modules/cocos2d-html5/lib/support/CCPointExtension.js',
-    CCVertex_js : '../node_modules/cocos2d-html5/lib/support/CCVertex.js',
-    TransformUtils_js : '../node_modules/cocos2d-html5/lib/support/TransformUtils.js',
-    CCTexture2D_js : '../node_modules/cocos2d-html5/lib/textures/CCTexture2D.js',
-    CCTextureAtlas_js : '../node_modules/cocos2d-html5/lib/textures/CCTextureAtlas.js',
-    CCTextureCache_js : '../node_modules/cocos2d-html5/lib/textures/CCTextureCache.js',
-    BoundingBoxTest_js : '../node_modules/cocos2d-html5/test/ccnode/BoundingBoxTest.js',
-    CCNodeTest2_js : '../node_modules/cocos2d-html5/test/ccnode/CCNodeTest2.js',
-    CCNodeTest6_js : '../node_modules/cocos2d-html5/test/ccnode/CCNodeTest6.js',
-    LabelTTFA8Test_js : '../node_modules/cocos2d-html5/test/labelTTF/LabelTTFA8Test.js',
-    LabelTTFAlignment_js : '../node_modules/cocos2d-html5/test/labelTTF/LabelTTFAlignment.js',
-    LabelTTFChinese_js : '../node_modules/cocos2d-html5/test/labelTTF/LabelTTFChinese.js',
-    LabelTTFMultiline_js : '../node_modules/cocos2d-html5/test/labelTTF/LabelTTFMultiline.js',
-    IgnoreAnchorpointTest1_js : '../node_modules/cocos2d-html5/test/layers/IgnoreAnchorpointTest1.js',
-    LayerGradientTest_js : '../node_modules/cocos2d-html5/test/layers/LayerGradientTest.js',
-    LayerTest1_js : '../node_modules/cocos2d-html5/test/layers/LayerTest1.js',
-    ScheduleUsingSchedulerTest_js : '../node_modules/cocos2d-html5/test/scheduler/ScheduleUsingSchedulerTest.js',
-    SchedulerAutoremoveTest_js : '../node_modules/cocos2d-html5/test/scheduler/SchedulerAutoremoveTest.js',
-    SchedulerPauseResumeTest_js : '../node_modules/cocos2d-html5/test/scheduler/SchedulerPauseResumeTest.js',
-    SchedulerUnscheduleAllHardTest_js : '../node_modules/cocos2d-html5/test/scheduler/SchedulerUnscheduleAllHardTest.js',
-    SchedulerUnscheduleAllTest_js : '../node_modules/cocos2d-html5/test/scheduler/SchedulerUnscheduleAllTest.js',
-    SchedulerUpdateAndCustomTest_js : '../node_modules/cocos2d-html5/test/scheduler/SchedulerUpdateAndCustomTest.js',
-    SchedulerUpdateTest_js : '../node_modules/cocos2d-html5/test/scheduler/SchedulerUpdateTest.js',
-    Sprite1Test_js : '../node_modules/cocos2d-html5/test/sprite/Sprite1Test.js',
-    SpriteBatchNode1Test_js : '../node_modules/cocos2d-html5/test/sprite/SpriteBatchNode1Test.js',
-    SpriteColorOpacity_js : '../node_modules/cocos2d-html5/test/sprite/SpriteColorOpacity.js',
-    SpriteNilTexture_js : '../node_modules/cocos2d-html5/test/sprite/SpriteNilTexture.js',
-    SpriteZOrder_js : '../node_modules/cocos2d-html5/test/sprite/SpriteZOrder.js',
-    TextureColorCacheIssue_js : '../node_modules/cocos2d-html5/test/sprite/TextureColorCacheIssue.js'
+    CCActionManager_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/CCActionManager.js',
+    CCCamera_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/CCCamera.js',
+    CCConfiguration_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/CCConfiguration.js',
+    CCDirector_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/CCDirector.js',
+    CCDrawingPrimitives_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/CCDrawingPrimitives.js',
+    CCLoader_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/CCLoader.js',
+    CCScheduler_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/CCScheduler.js',
+    CCAtlasNode_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/base_nodes/CCAtlasNode.js',
+    CCNode_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/base_nodes/CCNode.js',
+    cc_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/cc.js',
+    cc4publish_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/cc4publish.js',
+    CCAffineTransform_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/cocoa/CCAffineTransform.js',
+    CCGeometry_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/cocoa/CCGeometry.js',
+    CCNS_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/cocoa/CCNS.js',
+    cocos2d_externs_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/cocos2d_externs.js',
+    CCLabelTTF_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/labelTTF/CCLabelTTF.js',
+    CCLayer_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/layers_nodes/CCLayer.js',
+    AppControl_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/AppControl.js',
+    CCApplication_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCApplication.js',
+    CCClass_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCClass.js',
+    CCCommon_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCCommon.js',
+    CCConfig_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCConfig.js',
+    CCEGLView_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCEGLView.js',
+    CCFileUtils_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCFileUtils.js',
+    CCMacro_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCMacro.js',
+    CCSAXParser_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCSAXParser.js',
+    CCScreen_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCScreen.js',
+    CCTypes_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCTypes.js',
+    CCVisibleRect_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/CCVisibleRect.js',
+    Sys_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/Sys.js',
+    miniFramework_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/platform/miniFramework.js',
+    CCScene_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/scenes_nodes/CCScene.js',
+    CCAnimation_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/sprite_nodes/CCAnimation.js',
+    CCAnimationCache_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/sprite_nodes/CCAnimationCache.js',
+    CCSprite_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/sprite_nodes/CCSprite.js',
+    CCSpriteBatchNode_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/sprite_nodes/CCSpriteBatchNode.js',
+    CCSpriteFrame_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/sprite_nodes/CCSpriteFrame.js',
+    CCSpriteFrameCache_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/sprite_nodes/CCSpriteFrameCache.js',
+    CCPointExtension_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/support/CCPointExtension.js',
+    CCVertex_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/support/CCVertex.js',
+    TransformUtils_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/support/TransformUtils.js',
+    CCTexture2D_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/textures/CCTexture2D.js',
+    CCTextureAtlas_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/textures/CCTextureAtlas.js',
+    CCTextureCache_js : '../node_modules/powder-cocos2d/cocos2d-html5/lib/textures/CCTextureCache.js',
+    BoundingBoxTest_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/ccnode/BoundingBoxTest.js',
+    CCNodeTest2_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/ccnode/CCNodeTest2.js',
+    CCNodeTest6_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/ccnode/CCNodeTest6.js',
+    LabelTTFA8Test_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/labelTTF/LabelTTFA8Test.js',
+    LabelTTFAlignment_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/labelTTF/LabelTTFAlignment.js',
+    LabelTTFChinese_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/labelTTF/LabelTTFChinese.js',
+    LabelTTFMultiline_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/labelTTF/LabelTTFMultiline.js',
+    IgnoreAnchorpointTest1_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/layers/IgnoreAnchorpointTest1.js',
+    LayerGradientTest_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/layers/LayerGradientTest.js',
+    LayerTest1_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/layers/LayerTest1.js',
+    ScheduleUsingSchedulerTest_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/scheduler/ScheduleUsingSchedulerTest.js',
+    SchedulerAutoremoveTest_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/scheduler/SchedulerAutoremoveTest.js',
+    SchedulerPauseResumeTest_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/scheduler/SchedulerPauseResumeTest.js',
+    SchedulerUnscheduleAllHardTest_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/scheduler/SchedulerUnscheduleAllHardTest.js',
+    SchedulerUnscheduleAllTest_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/scheduler/SchedulerUnscheduleAllTest.js',
+    SchedulerUpdateAndCustomTest_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/scheduler/SchedulerUpdateAndCustomTest.js',
+    SchedulerUpdateTest_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/scheduler/SchedulerUpdateTest.js',
+    Sprite1Test_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/sprite/Sprite1Test.js',
+    SpriteBatchNode1Test_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/sprite/SpriteBatchNode1Test.js',
+    SpriteColorOpacity_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/sprite/SpriteColorOpacity.js',
+    SpriteNilTexture_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/sprite/SpriteNilTexture.js',
+    SpriteZOrder_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/sprite/SpriteZOrder.js',
+    TextureColorCacheIssue_js : '../node_modules/powder-cocos2d/cocos2d-html5/test/sprite/TextureColorCacheIssue.js'
 };
 var cc = cc || {};
 cc.resCfg = cc.resCfg || {};
@@ -243,13 +243,13 @@ exports.gameModules = cc.gameModules;
 exports.jsRes = js;
 var js = js || {};
 js.cctouch = {
-    CCMouseDispatcher_js : '../node_modules/cctouch/lib/CCMouseDispatcher.js',
-    CCTouchDelegateProtocol_js : '../node_modules/cctouch/lib/CCTouchDelegateProtocol.js',
-    CCTouchDispatcher_js : '../node_modules/cctouch/lib/CCTouchDispatcher.js',
-    CCTouchHandler_js : '../node_modules/cctouch/lib/CCTouchHandler.js',
-    MouseTest_js : '../node_modules/cctouch/test/MouseTest.js',
-    TouchAllAtOnce_js : '../node_modules/cctouch/test/TouchAllAtOnce.js',
-    TouchOneByOneTest_js : '../node_modules/cctouch/test/TouchOneByOneTest.js'
+    CCMouseDispatcher_js : '../node_modules/powder-cocos2d/cctouch/lib/CCMouseDispatcher.js',
+    CCTouchDelegateProtocol_js : '../node_modules/powder-cocos2d/cctouch/lib/CCTouchDelegateProtocol.js',
+    CCTouchDispatcher_js : '../node_modules/powder-cocos2d/cctouch/lib/CCTouchDispatcher.js',
+    CCTouchHandler_js : '../node_modules/powder-cocos2d/cctouch/lib/CCTouchHandler.js',
+    MouseTest_js : '../node_modules/powder-cocos2d/cctouch/test/MouseTest.js',
+    TouchAllAtOnce_js : '../node_modules/powder-cocos2d/cctouch/test/TouchAllAtOnce.js',
+    TouchOneByOneTest_js : '../node_modules/powder-cocos2d/cctouch/test/TouchOneByOneTest.js'
 };
 var resCfg = cc.resCfg;
 var jsRes = js.cctouch;
@@ -276,8 +276,8 @@ exports.gameModules = cc.gameModules;
 exports.jsRes = js;
 var js = js || {};
 js.ccshapenode = {
-    CCDrawNode_js : '../node_modules/ccshapenode/lib/CCDrawNode.js',
-    ShapeNodeTest_js : '../node_modules/ccshapenode/test/ShapeNodeTest.js'
+    CCDrawNode_js : '../node_modules/powder-cocos2d/ccshapenode/lib/CCDrawNode.js',
+    ShapeNodeTest_js : '../node_modules/powder-cocos2d/ccshapenode/test/ShapeNodeTest.js'
 };
 var resCfg = cc.resCfg;
 var jsRes = js.ccshapenode;
@@ -298,10 +298,10 @@ exports.gameModules = cc.gameModules;
 exports.jsRes = js;
 var js = js || {};
 js.cccliping = {
-    CCClippingNode_js : '../node_modules/cccliping/lib/CCClippingNode.js',
-    ScrollViewTest_js : '../node_modules/cccliping/test/ScrollViewTest.js',
-    SpriteStencilTest_js : '../node_modules/cccliping/test/SpriteStencilTest.js',
-    TriangleStencilTest_js : '../node_modules/cccliping/test/TriangleStencilTest.js'
+    CCClippingNode_js : '../node_modules/powder-cocos2d/cccliping/lib/CCClippingNode.js',
+    ScrollViewTest_js : '../node_modules/powder-cocos2d/cccliping/test/ScrollViewTest.js',
+    SpriteStencilTest_js : '../node_modules/powder-cocos2d/cccliping/test/SpriteStencilTest.js',
+    TriangleStencilTest_js : '../node_modules/powder-cocos2d/cccliping/test/TriangleStencilTest.js'
 };
 var resCfg = cc.resCfg;
 var jsRes = js.cccliping;
@@ -327,8 +327,8 @@ exports.gameModules = cc.gameModules;
 exports.jsRes = js;
 var js = js || {};
 js.ccrendertexture = {
-    CCRenderTexture_js : '../node_modules/ccrendertexture/lib/CCRenderTexture.js',
-    RenderTextureTest_js : '../node_modules/ccrendertexture/test/RenderTextureTest.js'
+    CCRenderTexture_js : '../node_modules/powder-cocos2d/ccrendertexture/lib/CCRenderTexture.js',
+    RenderTextureTest_js : '../node_modules/powder-cocos2d/ccrendertexture/test/RenderTextureTest.js'
 };
 var resCfg = cc.resCfg;
 var jsRes = js.ccrendertexture;
@@ -348,30 +348,30 @@ exports.gameModules = cc.gameModules;
 exports.jsRes = js;
 var js = js || {};
 js.ccactions = {
-    CCAction_js : '../node_modules/ccactions/lib/CCAction.js',
-    CCActionCamera_js : '../node_modules/ccactions/lib/CCActionCamera.js',
-    CCActionCatmullRom_js : '../node_modules/ccactions/lib/CCActionCatmullRom.js',
-    CCActionEase_js : '../node_modules/ccactions/lib/CCActionEase.js',
-    CCActionInstant_js : '../node_modules/ccactions/lib/CCActionInstant.js',
-    CCActionInterval_js : '../node_modules/ccactions/lib/CCActionInterval.js',
-    CCActionTween_js : '../node_modules/ccactions/lib/CCActionTween.js',
-    ActionAnimateTest_js : '../node_modules/ccactions/test/ActionAnimateTest.js',
-    ActionBezierTest_js : '../node_modules/ccactions/test/ActionBezierTest.js',
-    ActionBezierToCopyTest_js : '../node_modules/ccactions/test/ActionBezierToCopyTest.js',
-    ActionBlinkTest_js : '../node_modules/ccactions/test/ActionBlinkTest.js',
-    ActionFadeTest_js : '../node_modules/ccactions/test/ActionFadeTest.js',
-    ActionJumpTest_js : '../node_modules/ccactions/test/ActionJumpTest.js',
-    ActionManualTest_js : '../node_modules/ccactions/test/ActionManualTest.js',
-    ActionMoveTest_js : '../node_modules/ccactions/test/ActionMoveTest.js',
-    ActionRotateTest_js : '../node_modules/ccactions/test/ActionRotateTest.js',
-    ActionRotateXY_js : '../node_modules/ccactions/test/ActionRotateXY.js',
-    ActionScaleTest_js : '../node_modules/ccactions/test/ActionScaleTest.js',
-    ActionSequence2Test_js : '../node_modules/ccactions/test/ActionSequence2Test.js',
-    ActionSequenceTest_js : '../node_modules/ccactions/test/ActionSequenceTest.js',
-    ActionSkewRotateScaleTest_js : '../node_modules/ccactions/test/ActionSkewRotateScaleTest.js',
-    ActionSkewTest_js : '../node_modules/ccactions/test/ActionSkewTest.js',
-    ActionTintTest_js : '../node_modules/ccactions/test/ActionTintTest.js',
-    Issue1008Test_js : '../node_modules/ccactions/test/Issue1008Test.js'
+    CCAction_js : '../node_modules/powder-cocos2d/ccactions/lib/CCAction.js',
+    CCActionCamera_js : '../node_modules/powder-cocos2d/ccactions/lib/CCActionCamera.js',
+    CCActionCatmullRom_js : '../node_modules/powder-cocos2d/ccactions/lib/CCActionCatmullRom.js',
+    CCActionEase_js : '../node_modules/powder-cocos2d/ccactions/lib/CCActionEase.js',
+    CCActionInstant_js : '../node_modules/powder-cocos2d/ccactions/lib/CCActionInstant.js',
+    CCActionInterval_js : '../node_modules/powder-cocos2d/ccactions/lib/CCActionInterval.js',
+    CCActionTween_js : '../node_modules/powder-cocos2d/ccactions/lib/CCActionTween.js',
+    ActionAnimateTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionAnimateTest.js',
+    ActionBezierTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionBezierTest.js',
+    ActionBezierToCopyTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionBezierToCopyTest.js',
+    ActionBlinkTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionBlinkTest.js',
+    ActionFadeTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionFadeTest.js',
+    ActionJumpTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionJumpTest.js',
+    ActionManualTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionManualTest.js',
+    ActionMoveTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionMoveTest.js',
+    ActionRotateTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionRotateTest.js',
+    ActionRotateXY_js : '../node_modules/powder-cocos2d/ccactions/test/ActionRotateXY.js',
+    ActionScaleTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionScaleTest.js',
+    ActionSequence2Test_js : '../node_modules/powder-cocos2d/ccactions/test/ActionSequence2Test.js',
+    ActionSequenceTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionSequenceTest.js',
+    ActionSkewRotateScaleTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionSkewRotateScaleTest.js',
+    ActionSkewTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionSkewTest.js',
+    ActionTintTest_js : '../node_modules/powder-cocos2d/ccactions/test/ActionTintTest.js',
+    Issue1008Test_js : '../node_modules/powder-cocos2d/ccactions/test/Issue1008Test.js'
 };
 var resCfg = cc.resCfg;
 var jsRes = js.ccactions;
@@ -448,13 +448,13 @@ exports.gameModules = cc.gameModules;
 exports.jsRes = js;
 var js = js || {};
 js.ccprogress = {
-    CCActionProgressTimer_js : '../node_modules/ccprogress/lib/CCActionProgressTimer.js',
-    CCProgressTimer_js : '../node_modules/ccprogress/lib/CCProgressTimer.js',
-    ProgressTimerBarMidTest_js : '../node_modules/ccprogress/test/ProgressTimerBarMidTest.js',
-    ProgressTimerBarMidTest2_js : '../node_modules/ccprogress/test/ProgressTimerBarMidTest2.js',
-    ProgressTimerHorizontalTest_js : '../node_modules/ccprogress/test/ProgressTimerHorizontalTest.js',
-    ProgressTimerRadialTest_js : '../node_modules/ccprogress/test/ProgressTimerRadialTest.js',
-    ProgressTimerVerticalTest_js : '../node_modules/ccprogress/test/ProgressTimerVerticalTest.js'
+    CCActionProgressTimer_js : '../node_modules/powder-cocos2d/ccprogress/lib/CCActionProgressTimer.js',
+    CCProgressTimer_js : '../node_modules/powder-cocos2d/ccprogress/lib/CCProgressTimer.js',
+    ProgressTimerBarMidTest_js : '../node_modules/powder-cocos2d/ccprogress/test/ProgressTimerBarMidTest.js',
+    ProgressTimerBarMidTest2_js : '../node_modules/powder-cocos2d/ccprogress/test/ProgressTimerBarMidTest2.js',
+    ProgressTimerHorizontalTest_js : '../node_modules/powder-cocos2d/ccprogress/test/ProgressTimerHorizontalTest.js',
+    ProgressTimerRadialTest_js : '../node_modules/powder-cocos2d/ccprogress/test/ProgressTimerRadialTest.js',
+    ProgressTimerVerticalTest_js : '../node_modules/powder-cocos2d/ccprogress/test/ProgressTimerVerticalTest.js'
 };
 var resCfg = cc.resCfg;
 var jsRes = js.ccprogress;
@@ -479,34 +479,34 @@ exports.gameModules = cc.gameModules;
 exports.jsRes = js;
 var js = js || {};
 js.ccgui = {
-    CCControl_js : '../node_modules/ccgui/lib/CCControlExtension/CCControl.js',
-    CCControlButton_js : '../node_modules/ccgui/lib/CCControlExtension/CCControlButton.js',
-    CCControlColourPicker_js : '../node_modules/ccgui/lib/CCControlExtension/CCControlColourPicker.js',
-    CCControlHuePicker_js : '../node_modules/ccgui/lib/CCControlExtension/CCControlHuePicker.js',
-    CCControlPotentiometer_js : '../node_modules/ccgui/lib/CCControlExtension/CCControlPotentiometer.js',
-    CCControlSaturationBrightnessPicker_js : '../node_modules/ccgui/lib/CCControlExtension/CCControlSaturationBrightnessPicker.js',
-    CCControlSlider_js : '../node_modules/ccgui/lib/CCControlExtension/CCControlSlider.js',
-    CCControlStepper_js : '../node_modules/ccgui/lib/CCControlExtension/CCControlStepper.js',
-    CCControlSwitch_js : '../node_modules/ccgui/lib/CCControlExtension/CCControlSwitch.js',
-    CCControlUtils_js : '../node_modules/ccgui/lib/CCControlExtension/CCControlUtils.js',
-    CCInvocation_js : '../node_modules/ccgui/lib/CCControlExtension/CCInvocation.js',
-    CCMenuPassive_js : '../node_modules/ccgui/lib/CCControlExtension/CCMenuPassive.js',
-    CCScale9Sprite_js : '../node_modules/ccgui/lib/CCControlExtension/CCScale9Sprite.js',
-    CCScrollView_js : '../node_modules/ccgui/lib/CCScrollView/CCScrollView.js',
-    CCSorting_js : '../node_modules/ccgui/lib/CCScrollView/CCSorting.js',
-    CCTableView_js : '../node_modules/ccgui/lib/CCScrollView/CCTableView.js',
-    ButtonEventTest_js : '../node_modules/ccgui/test/ButtonEventTest.js',
-    ButtonStylingTest_js : '../node_modules/ccgui/test/ButtonStylingTest.js',
-    ColorPickerTest_js : '../node_modules/ccgui/test/ColorPickerTest.js',
-    ControlSliderTest_js : '../node_modules/ccgui/test/ControlSliderTest.js',
-    GuiTest_js : '../node_modules/ccgui/test/GuiTest.js',
-    PotentiometerTest_js : '../node_modules/ccgui/test/PotentiometerTest.js',
-    S9SpriteFromBatchNodeTest_js : '../node_modules/ccgui/test/S9SpriteFromBatchNodeTest.js',
-    S9SpriteFromSpriteSheetTest_js : '../node_modules/ccgui/test/S9SpriteFromSpriteSheetTest.js',
-    StepperTest_js : '../node_modules/ccgui/test/StepperTest.js',
-    SwitchButtonTest_js : '../node_modules/ccgui/test/SwitchButtonTest.js',
-    TableViewTest_js : '../node_modules/ccgui/test/TableViewTest.js',
-    VariableSizeButtonsTest_js : '../node_modules/ccgui/test/VariableSizeButtonsTest.js'
+    CCControl_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCControl.js',
+    CCControlButton_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCControlButton.js',
+    CCControlColourPicker_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCControlColourPicker.js',
+    CCControlHuePicker_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCControlHuePicker.js',
+    CCControlPotentiometer_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCControlPotentiometer.js',
+    CCControlSaturationBrightnessPicker_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCControlSaturationBrightnessPicker.js',
+    CCControlSlider_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCControlSlider.js',
+    CCControlStepper_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCControlStepper.js',
+    CCControlSwitch_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCControlSwitch.js',
+    CCControlUtils_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCControlUtils.js',
+    CCInvocation_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCInvocation.js',
+    CCMenuPassive_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCMenuPassive.js',
+    CCScale9Sprite_js : '../node_modules/powder-cocos2d/ccgui/lib/CCControlExtension/CCScale9Sprite.js',
+    CCScrollView_js : '../node_modules/powder-cocos2d/ccgui/lib/CCScrollView/CCScrollView.js',
+    CCSorting_js : '../node_modules/powder-cocos2d/ccgui/lib/CCScrollView/CCSorting.js',
+    CCTableView_js : '../node_modules/powder-cocos2d/ccgui/lib/CCScrollView/CCTableView.js',
+    ButtonEventTest_js : '../node_modules/powder-cocos2d/ccgui/test/ButtonEventTest.js',
+    ButtonStylingTest_js : '../node_modules/powder-cocos2d/ccgui/test/ButtonStylingTest.js',
+    ColorPickerTest_js : '../node_modules/powder-cocos2d/ccgui/test/ColorPickerTest.js',
+    ControlSliderTest_js : '../node_modules/powder-cocos2d/ccgui/test/ControlSliderTest.js',
+    GuiTest_js : '../node_modules/powder-cocos2d/ccgui/test/GuiTest.js',
+    PotentiometerTest_js : '../node_modules/powder-cocos2d/ccgui/test/PotentiometerTest.js',
+    S9SpriteFromBatchNodeTest_js : '../node_modules/powder-cocos2d/ccgui/test/S9SpriteFromBatchNodeTest.js',
+    S9SpriteFromSpriteSheetTest_js : '../node_modules/powder-cocos2d/ccgui/test/S9SpriteFromSpriteSheetTest.js',
+    StepperTest_js : '../node_modules/powder-cocos2d/ccgui/test/StepperTest.js',
+    SwitchButtonTest_js : '../node_modules/powder-cocos2d/ccgui/test/SwitchButtonTest.js',
+    TableViewTest_js : '../node_modules/powder-cocos2d/ccgui/test/TableViewTest.js',
+    VariableSizeButtonsTest_js : '../node_modules/powder-cocos2d/ccgui/test/VariableSizeButtonsTest.js'
 };
 var resCfg = cc.resCfg;
 var jsRes = js.ccgui;
@@ -590,9 +590,9 @@ exports.gameModules = cc.gameModules;
 exports.jsRes = js;
 var js = js || {};
 js.cceditbox = {
-    CCEditBox_js : '../node_modules/cceditbox/lib/CCEditBox.js',
-    CCdomNode_js : '../node_modules/cceditbox/lib/CCdomNode.js',
-    EditBoxTest_js : '../node_modules/cceditbox/test/EditBoxTest.js'
+    CCEditBox_js : '../node_modules/powder-cocos2d/cceditbox/lib/CCEditBox.js',
+    CCdomNode_js : '../node_modules/powder-cocos2d/cceditbox/lib/CCdomNode.js',
+    EditBoxTest_js : '../node_modules/powder-cocos2d/cceditbox/test/EditBoxTest.js'
 };
 var resCfg = cc.resCfg;
 var jsRes = js.cceditbox;

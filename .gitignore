@@ -34,10 +34,11 @@ build/Release
 # Posters
 public/posters/
 
-# Config files
-otaku.*.json
+*.orig
 
 # Cert/Key and Security Files
 *.pem
 *.pfx
 security/
+
+.DS_STORE

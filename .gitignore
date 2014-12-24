@@ -40,6 +40,6 @@ public/posters/
 security/
 
 # Custom
-node_modules/powder-cocos2d/
+node_modules/
 .DS_STORE
 *.orig

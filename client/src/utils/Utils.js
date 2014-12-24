@@ -84,6 +84,14 @@ document.getElementById("gameCanvas").onkeyup = function (event) {
 	}
 };
 
+var mouseDown = false;
+document.body.onmousedown = function() { 
+  mouseDown=true;
+}
+document.body.onmouseup = function() {
+  mouseDown=false;
+}
+
 autoLoginNextTime=false;
 rememberLoginNextTime=false;
 
@@ -694,6 +702,23 @@ var runResponses =function(responses,type,context,ignoreList,scriptData,j){
 						GameMap.goToMap(responses[newK]["data"]["mapnum"]);
 						GameMap.goToOffsetFromPosition(x*cellsize,y*cellsize);
 					};
+				case "Open/Close Shop":
+					return function(newK){
+						var show = responses[newK]["data"]["visible"]==1?true:false;
+						if(Shop!=null && !Shop._parent) Shop=null;
+						if(Shop){
+							Shop.willTerminate();
+							Shop.removeFromParent();
+							Shop=null;
+						} 
+						if(show==true){
+							Shop = new ShopPanel();
+							Shop.init(responses[newK]["data"]["id"]);
+							Shop.didBecomeActive();
+							MainScene.addChild(Shop);
+						}
+					};
+				break;
 				case "Open/Close Panel":
 					return function(newK){
 						var show = responses[newK]["data"]["visible"]==1?true:false;

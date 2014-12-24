@@ -421,6 +421,9 @@ var GameMap=cc.Layer.extend({
 				}
 			}
 		} else{
+			if((Shop && Shop._parent) || (Bank && Bank._parent)){
+				return;
+			}
 
 			for(var i in this.tileNodes){
 				if(i.substring(0,4)=="tile"){

@@ -1,5 +1,13 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+*.png binary
+
+*.js    diff=astextplain eol=lf
+*.json  diff=astextplain eol=lf
+*.html  diff=astextplain eol=lf
+*.md    diff=astextplain eol=lf
+.npm*   diff=astextplain eol=lf
+*.cfg   diff=astextplain eol=lf
 
 # Custom for Visual Studio
 *.cs     diff=csharp

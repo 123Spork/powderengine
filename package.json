@@ -1,13 +1,40 @@
 {
-    "name": "gamefolder",
-    "version": "0.0.1",
-    "description": "package for cocos command",
-    "dependencies" : {
-        "socket.io":"0.9.16",
-        "zlibjs": "0.2.0",
-        "jszip": "2.2.0",
-        "powder-cocos2d": "git://github.com/powderengine/powder-cocos2d#master"
-    },
-    "repository" : {},
-    "readme" : {}
+  "name": "powderengine",
+  "description": "2D MORPG Game Engine written in JS and HTML5.",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/123Spork/powderengine.git"
+  },
+  "author": {
+    "name": "Spork",
+    "email": "",
+    "url": "http://powderengine.net"
+  },
+  "homepage": "http://powderengine.net",
+  "bugs": {
+    "url": "https://github.com/123Spork/powderengine/issues",
+  },
+  "licenses": [
+  ],
+  "contributors": [
+    {
+      "name": "Pandacoder",
+      "email": "lodico.rj@gmail.com",
+      "url": "http://pandacoder.net"
+    }
+  ],
+  "scripts": {
+    "client": "node client/development_server.js",
+    "server": "node server/server.js"
+  },
+  "dependencies" : {
+    "socket.io":"0.9.16",
+    "zlibjs": "0.2.0",
+    "jszip": "2.2.0",
+    "powder-cocos2d": "git://github.com/powderengine/powder-cocos2d#master"
+  },
+  "engines": {
+    "node": "^0.10.33"
+  }
 }

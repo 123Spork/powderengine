@@ -4,7 +4,7 @@ document["ccConfig"] = {
     frameRate : 60,
     tag : "gameCanvas",
     renderMode:1,
-	"SERVER:PORT":"http://82.1.137.1:1337",
+	"SERVER:PORT":"http://localhost:1337",
 	"tileSize":32,
 	"characterSize":32,
 	"language":"EN",

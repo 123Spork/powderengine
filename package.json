@@ -29,9 +29,13 @@
     "jszip": "2.2.0",
     "node-xport": "*"
   },
+  "devDependencies": {
+    "cocos-utils": "git://github.com/powderengine/cocos-utils#master"
+  },
   "scripts": {
     "client": "node ./client/client_provider.js",
-    "server": "node ./server/server.js"
+    "server": "node ./server/server.js",
+    "build-client": "cd client && ant -f ./build.xml"
   },
   "engines": {
     "node": "^0.10.33"

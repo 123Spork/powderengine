@@ -1,10 +1,11 @@
 var socket;
-var io=null;
-var storedClientMessages=[];
-setupserver = function(){
-	socket = io.connect(ccconfig["SERVER:PORT"],{
-			'sync disconnect on unload':true,
-			'connect timeout':5000,
+var io = null;
+var storedClientMessages = [];
+
+setupserver = function() {
+	socket = io.connect(ccconfig["getServerURL"](), {
+			'sync disconnect on unload': true,
+			'connect timeout': 5000,
 			'reconnection delay ':100,
 		}
 	); 
@@ -343,7 +344,7 @@ function sendMessageToServer(message) {
 
 var script = document.createElement("SCRIPT");
 script.type = "text/javascript";
-script.src=document["ccConfig"]["SERVER:PORT"]+"/socket.io/socket.io.js";
+script.src = document["ccConfig"]["getServerURL"]() + "/socket.io/socket.io.js";
 script.onreadystatechange = setupserver;
 script.onload = setupserver;
 document.getElementById("gameCanvas").appendChild(script); 

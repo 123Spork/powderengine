@@ -30,8 +30,8 @@
     "node-xport": "*"
   },
   "scripts": {
-    "client": "node client/development_server.js",
-    "server": "node server/server.js"
+    "client": "node ./client/client_provider.js",
+    "server": "node ./server/server.js"
   },
   "engines": {
     "node": "^0.10.33"

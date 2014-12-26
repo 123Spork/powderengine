@@ -1,8 +1,13 @@
-﻿var http = require("http"),
+﻿/* Powder Engine Client Provider */
+process.chdir(__dirname);
+
+var config = require('../config.json');
+
+var http = require("http"),
     url = require("url"),
     path = require("path"),
     fs = require("fs")
-    port = process.argv[2] || 8888;
+    port = process.argv[2] || config.client.port || 8888;
 
 http.createServer(function(request, response) {
 

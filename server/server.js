@@ -1,10 +1,21 @@
-// Require HTTP module (to start server) and Socket.IO
-//Server file
-var http = require('http');
-var fs = require('fs');
-var io = require('socket.io');
+/* Powder Engine Server */
+process.chdir(__dirname);
 
-var config = require('./config.js');
+// Require HTTP module (to start server) and Socket.IO
+var http = require('http');
+var io = require('socket.io');
+var fs = require('fs');
+
+var config = require('../config.json');
+
+var TOBECHANGED = {};
+TOBECHANGED.requiredXpToNextLevel = function(currentLevel){
+	return 100*(Math.pow(1.08,currentLevel));
+};
+
+TOBECHANGED.healthModifierFromLevel = function(currentLevel){
+	return 100 + (currentLevel*50);
+};
   
 var positions = [];
 var mapplayers=[];
@@ -100,7 +111,7 @@ var server = http.createServer(function(req, res){
     res.end('<h1>Hello Socket Lover!</h1>');
 });
 
-server.listen(config.port);
+server.listen(config.server.port || 1337);
 
 // Create a Socket.IO instance, passing it our server
 var socket = io.listen(server, { origins: '*:*' });
@@ -269,7 +280,7 @@ socket.on('connection', function(client){
 						}
 
 						for(var i in playerData["skills"]){
-							playerData["skills"][i]["requirement"]=config.requiredXpToNextLevel(playerData["skills"][i]["level"]);
+							playerData["skills"][i]["requirement"]=TOBECHANGED.requiredXpToNextLevel(playerData["skills"][i]["level"]);
 						}
 
 						playerData={

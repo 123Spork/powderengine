@@ -6,17 +6,15 @@
     "type": "git",
     "url": "https://github.com/123Spork/powderengine.git"
   },
+  "homepage": "http://powderengine.net",
+  "bugs": {
+    "url": "https://github.com/123Spork/powderengine/issues"
+  },
   "author": {
     "name": "Spork",
     "email": "",
     "url": "http://powderengine.net"
   },
-  "homepage": "http://powderengine.net",
-  "bugs": {
-    "url": "https://github.com/123Spork/powderengine/issues",
-  },
-  "licenses": [
-  ],
   "contributors": [
     {
       "name": "Pandacoder",
@@ -24,15 +22,16 @@
       "url": "http://pandacoder.net"
     }
   ],
-  "scripts": {
-    "client": "node client/development_server.js",
-    "server": "node server/server.js"
-  },
-  "dependencies" : {
+  "dependencies": {
+    "powder-cocos2d": "git://github.com/powderengine/powder-cocos2d#master",
     "socket.io":"0.9.16",
     "zlibjs": "0.2.0",
     "jszip": "2.2.0",
-    "powder-cocos2d": "git://github.com/powderengine/powder-cocos2d#master"
+    "node-xport": "*"
+  },
+  "scripts": {
+    "client": "node client/development_server.js",
+    "server": "node server/server.js"
   },
   "engines": {
     "node": "^0.10.33"

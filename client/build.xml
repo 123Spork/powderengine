@@ -1,22 +1,27 @@
 <?xml version="1.0"?>
-<project name="Javascript compress project" basedir="/home/spork/gameFolder/client" default="compile">
+<project name="Javascript compress project" basedir="./" default="compile">
 
-    <taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
-             classpath="/usr/local/lib/node_modules/powder-cocos2d/cocos-utils/lib/jar/compiler.jar"/>
+    <taskdef
+        name="jscomp"
+        classname="com.google.javascript.jscomp.ant.CompileTask"
+        classpath="../node_modules/cocos-utils/lib/jar/compiler.jar"
+        />
 
     <target name="compile">
         <jscomp compilationLevel="advanced"
                 warning="quiet"
                 debug="false"
-				languageIn="ECMASCRIPT5"
-                output="/home/spork/gameFolder/client/mini.js"
-                sourceMapOutputFile="sourcemap"
-                sourceMapFormat="V3">
+                languageIn="ECMASCRIPT5"
+                output="./client.minified.js"
+                sourceMapOutputFile="./client.minified.map"
+                sourceMapFormat="V3"
+                >
 
             <externs dir="${basedir}">
                 <file name="../node_modules/powder-cocos2d/cocos2d-html5/lib/cocos2d_externs.js"/>
                 <file name="externs.js"/>
             </externs>
+
             <sources dir="${basedir}">
                 <file name="cfg/res.js"></file>
                 <file name="../node_modules/powder-cocos2d/cocos2d-html5/lib/cc4publish.js"></file>
@@ -143,7 +148,6 @@
                 <file name="./src/classes/client.js"></file>
                 <file name="./src/scenes/SceneManager.js"></file>
                 <file name="main.js"></file>
-                
             </sources>
         </jscomp>
     </target>

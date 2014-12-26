@@ -1,67 +1,68 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <title>Sample Game - Powder Engine</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <style>
-        body, canvas, div {
-           margin: 0px;
-           border: 0px;
-           -webkit-text-size-adjust: none;
-           -moz-user-select: none;
-           -webkit-user-select: none;
-           -ms-user-select: none;
-           -khtml-user-select: none;
-           -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-        }
+    <head>
+        <meta charset="utf-8">
+        <title>Powder Engine</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <style>
+            body, canvas, div {
+                margin: 0px;
+                border: 0px;
+                -webkit-text-size-adjust: none;
+                -moz-user-select: none;
+                -webkit-user-select: none;
+                -ms-user-select: none;
+                -khtml-user-select: none;
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            }
 
-        @media (orientation:landscape) {
-           html.ipad.ios7 > body {
-              position: fixed;
-              bottom: 0;
-              width:100%;
-              height: 691px !important;
-           }
-        }
-    </style>
+            @media (orientation:landscape) {
+                html.ipad.ios7 > body {
+                    position: fixed;
+                    bottom: 0;
+                    width:100%;
+                    height: 691px !important;
+                }
+            }
+        </style>
 
-    <script>
+        <script>
             window.onload = function () {
-               
-               // iOS
-               var eventCallback = (typeof iosEventCallback === 'function') ? iosEventCallback : null;
-               if (!eventCallback) {
-                  // Android
-                  if ((typeof Android !== 'undefined') && Android.pmlEventCallback) {
-                     eventCallback = function (name, data) {
-                        var to_json = {
-                           "name": name,
-                           "data": data
-                        };
-                        Android.pmlEventCallback (JSON.stringify(to_json));
-                     };
-                  }
-               }
+                /* iOS */
+                var eventCallback = (typeof iosEventCallback === 'function') ? iosEventCallback : null;
+                if (!eventCallback) {
+                    /* Android */
+                      if ((typeof Android !== 'undefined') && Android.pmlEventCallback) {
+                          eventCallback = function (name, data) {
+                              var to_json = {
+                                "name": name,
+                                "data": data
+                              };
 
-               // User agent check for Safari (but not Chrome) on iOS 7, in order to apply the height fix CSS
-               var matches = navigator.userAgent.match(/^.*(iPhone|iPad).*(OS\s[0-9]).*(CriOS|Version)\/[.0-9]*\sMobile.*$/i);
-               if (matches && matches[2] === 'OS 7' && matches[3] !== 'CriOS') {
-                  document.documentElement.className += " ipad ios7";
-               }
+                              Android.pmlEventCallback (JSON.stringify(to_json));
+                          };
+                      }
+                }
+
+                /* User agent check for Safari (but not Chrome) on iOS 7, in order to apply the height fix CSS */
+                var matches = navigator.userAgent.match(/^.*(iPhone|iPad).*(OS\s[0-9]).*(CriOS|Version)\/[.0-9]*\sMobile.*$/i);
+                if (matches && matches[2] === 'OS 7' && matches[3] !== 'CriOS') {
+                    document.documentElement.className += " ipad ios7";
+                }
             };
-    </script>
-</head>
-<body style="background: white;">
-    <!-- 
-      -- Note that there is no need to set the width or height for the canvas element here.  The Javascript code sets the
-      -- canvas to the full screen size when startGame is called.
-      -->
-<canvas id="gameCanvas"></canvas>
-<script src="baseCfg.js"></script>
-<script src="../node_modules/powder-cocos2d/cocos2d-html5/lib/cc.js"></script>
-
-</body>
+        </script>
+    </head>
+    <body style="background: white;">
+        <!-- 
+          -- Note that there is no need to set the width or height for the canvas element here.  The Javascript code sets the
+          -- canvas to the full screen size when startGame is called.
+          -->
+        <canvas id="gameCanvas"></canvas>
+        <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+        <!--script src="config.json"></script-->
+        <script src="baseCfg.js"></script>
+        <script src="../node_modules/powder-cocos2d/cocos2d-html5/lib/cc.js"></script>
+    </body>
 </html>

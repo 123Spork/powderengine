@@ -35,7 +35,7 @@
     "zlibjs": "0.2.0",
     "jszip": "2.2.0",
     "node-xport": "*",
-    "bcrypt": "~0.8.0",
+    "bcryptjs": "~2.1.0",
     "node-xport": ">= 0.2.0",
     "mongodb": "*",
     "mongoose": "^3.8.12"

@@ -4,7 +4,7 @@ process.chdir(__dirname);
 var xport 				= require('node-xport')(module)
   , io 					= require('socket.io')
   , fs 					= require('fs')
-  , bcrypt 				= require('bcrypt')
+  , bcrypt 				= require('bcryptjs')
   , networkConfig 		= require('../config.json')
   , config 				= require('./server.config.json')
   , NetworkBootstrap 	= require('../common/networkBootstrap.js')

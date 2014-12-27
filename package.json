@@ -27,7 +27,11 @@
     "socket.io":"0.9.16",
     "zlibjs": "0.2.0",
     "jszip": "2.2.0",
-    "node-xport": "*"
+    "node-xport": "*",
+    "bcrypt": "~0.8.0",
+    "node-xport": ">= 0.2.0",
+    "mongodb": "*",
+    "mongoose": "^3.8.12"
   },
   "devDependencies": {
     "cocos-utils": "git://github.com/powderengine/cocos-utils#master"

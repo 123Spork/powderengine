@@ -1,4 +1,8 @@
 {
+    "game": {
+        "name": "Powder Engine",
+        "website": "http://powderengine.net"
+    },
     "client": {
         "port": 8888
     },
@@ -7,6 +11,7 @@
         "port": 1337
     },
     "ssl": {
+        "enabled": true,
         "key": "powder.key",
         "cert": "powder.crt"
     }

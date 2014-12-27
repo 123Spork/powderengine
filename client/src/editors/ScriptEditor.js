@@ -1556,13 +1556,13 @@ ScriptEditor = Popup.extend({
 				if(data["index"]){
 					var mapSize = GameMap.getMapSizeForIndex(data["mapnum"]);
 					x=data["index"] % mapSize.width;
-					y=(Math.floor(data["index"]/mapSize.width));
+					y=(Math.floor(data["index"]/mapSize.width))-1;
 				} 
 				this.warpMapBox = new EntryBox(this.subEditor["mapNumberText"],cc.size(this.subEditor["mapNumberText"].getContentSize().width,this.subEditor["mapNumberText"].getContentSize().height), cc.p(0,this.subEditor["mapNumberText"].getContentSize().height), data["mapnum"]!=null && data["mapnum"]!=='undefined' ?  data["mapnum"] : "0", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.warpMapBox.setDefaultFineFlag(true);
-				this.warpXBox = new EntryBox(this.subEditor["mapXText"],cc.size(this.subEditor["mapXText"].getContentSize().width,this.subEditor["mapXText"].getContentSize().height), cc.p(0,this.subEditor["mapXText"].getContentSize().height), x, cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.warpXBox = new EntryBox(this.subEditor["mapXText"],cc.size(this.subEditor["mapXText"].getContentSize().width,this.subEditor["mapXText"].getContentSize().height), cc.p(0,this.subEditor["mapXText"].getContentSize().height), x+"", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.warpXBox.setDefaultFineFlag(true);
-				this.warpYBox = new EntryBox(this.subEditor["mapYText"],cc.size(this.subEditor["mapYText"].getContentSize().width,this.subEditor["mapYText"].getContentSize().height), cc.p(0,this.subEditor["mapYText"].getContentSize().height), y, cc.c4b(255,255,255), cc.c3b(0,0,0));
+				this.warpYBox = new EntryBox(this.subEditor["mapYText"],cc.size(this.subEditor["mapYText"].getContentSize().width,this.subEditor["mapYText"].getContentSize().height), cc.p(0,this.subEditor["mapYText"].getContentSize().height), y+"", cc.c4b(255,255,255), cc.c3b(0,0,0));
 				this.warpYBox.setDefaultFineFlag(true);
 			break;
 			case "Show Sign":
@@ -2459,9 +2459,9 @@ ScriptEditor = Popup.extend({
 				switch(this.subEditorType){
 					case "Warp Player":
 						var mapSize = GameMap.getMapSizeForIndex(this.warpMapBox.getText());
-						var index = indexFromPos(parseInt(this.warpXBox.getText()),(mapSize.width)-parseInt(this.warpYBox.getText()));
+						var index = indexFromPosAndGridSize(parseInt(this.warpXBox.getText()),parseInt(this.warpYBox.getText()),mapSize.width,mapSize.height);
 						this.data["data"][this.dataContext["event"]][this.dataContext["listtype"]][this.dataContext["id"]]["data"] = {
-							"mapnum":parseInt(this.warpMapBox.getText()),
+							"mapnum":this.warpMapBox.getText(),
 							"index":index,
 						}
 					break

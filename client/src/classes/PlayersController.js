@@ -148,10 +148,10 @@ PlayersController.movePlayer=function(data){
 			textureName: "sprites1.png",
 			spriteId: 1,
 		};
-		this.instance.players[id] = PlayerCharacter.create(withData);
+		this.instance.players[data["id"]] = PlayerCharacter.create(withData);
 		var index=data["location"]["position"];
 		var mapSize = GameMap.getMapSizeForIndex(data["location"]["mapnumber"]);
-		this.instance.players[id].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
+		this.instance.players[data["id"]].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
 		PlayersController.showPlayersInMapOnly();
 		this.instance.addChild(this.instance.players[data["id"]]);
 		var playerJoinString = settingsData["Join Message"]+"";
@@ -162,7 +162,9 @@ PlayersController.movePlayer=function(data){
 	
 PlayersController.positionPlayer=function(data){
 	if(this.instance.players[data["id"]]){
-		this.instance.players[data["id"]].setPosition(cc.p((data["location"]["position"] % gridWidth)*cellsize,(Math.floor(data["location"]["position"]/gridWidth))*cellsize));
+		var index = data["location"]["position"];
+		var mapSize = GameMap.getMapSizeForIndex(parseInt(data["location"]["mapnumber"]));
+		this.instance.players[data["id"]].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
 	} else{
 		var withData ={
 			name: data["id"],
@@ -175,6 +177,7 @@ PlayersController.positionPlayer=function(data){
 			spriteId: 1,
 		};
 		this.instance.players[data["id"]] = PlayerCharacter.create(withData);
+				this.instance.players[data["id"]].isWarping=false;
 		var index = data["location"]["position"];	var mapSize = GameMap.getMapSizeForIndex(data["location"]["mapnumber"]);
 		this.instance.players[data["id"]].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
 		PlayersController.showPlayersInMapOnly();
@@ -212,6 +215,6 @@ PlayersController.destroy = function(){
 
 PlayersController.changePlayerMap=function(id,mapnum){
 	this.instance.players[id].setMap(mapnum);
-	this.instance.players[id].setVisible((this.instance.you.getMap()==mapnum));
+	this.instance.players[id].setVisible((PlayersController.getYou().getMap()==mapnum));
 };
 	

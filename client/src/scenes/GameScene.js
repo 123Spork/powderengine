@@ -432,19 +432,22 @@ var GameScene = Scene.extend({
 			case "/whereami":
 				var you = PlayersController.getYou();
 				var pos = you.getGridPosition();
-				GameChat.addMessage("Map: "+GameMap.getMapNumber()+", XY: ("+pos.x+","+pos.y+")");
+				GameChat.addMessage("Map: "+GameMap.getMapNumber()+", XY: ("+pos.x+","+(pos.y-1)+")");
 			break;
 		}
 
 		if(PlayersController.getYou().access>1){
 			if(command.substring(0,9)=="/warpmeto" && command.split(' ').length==4){
 				var operands=command.substring(10).split(' ');
-				var mapSize = GameMap.getMapSizeForIndex(operands[0]);
-				var position = ((operands[1]) + ((operands[2]) * mapSize.width))
-				sendMessageToServer({"changemap":operands[0], "setTo":position});
+				var mapSize = GameMap.getMapSizeForIndex(parseInt(operands[0]));
+			
+				var position = indexFromPosAndGridSize(parseInt(operands[1]),parseInt(operands[2]),mapSize.width,mapSize.height);
+				sendMessageToServer({"warpTo":position,"mapnumber":operands[0]});
 				GameMap.goToMap(operands[0]);
 				var you = PlayersController.getYou();
-				you.setPosition(operands[1]*cellsize,operands[2]*cellsize)
+				you.setPosition(operands[1]*cellsize,(parseInt(operands[2])+1)*cellsize);
+				you.isWalking=false;
+				GameMap.goToOffsetFromPosition(operands[1]*cellsize,(parseInt(operands[2]))*cellsize);
 				return;
 			}
 

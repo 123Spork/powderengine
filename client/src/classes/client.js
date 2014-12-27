@@ -108,6 +108,9 @@ reactToSocketMessage=function(data){
 				PlayersController.destroyPlayer(data["playerLeft"]);
 			} 
 			else if(data["setTo"]){
+				if(PlayersController.getPlayer(data["id"])){
+					PlayersController.getPlayer(data["id"]).resetIsWalking();
+				}
 				if(!PlayersController.getPlayer(data["id"])|| (PlayersController.getPlayer(data["id"]) && PlayersController.getPlayer(data["id"]).isWalking ==false)){
 					for(var i=0;i<storedClientMessages.length;i++){
 						var msg = JSON.parse(storedClientMessages[i]);
@@ -116,20 +119,19 @@ reactToSocketMessage=function(data){
 							i--;
 						}
 					}
-
 					PlayersController.positionPlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}});
-				
 					if(PlayersController.getPlayer(data["id"]).getMap()==PlayersController.getYou().getMap()) {
 						MapMaster=false;
 					}
 					PlayersController.changePlayerMap(data["id"],data["mapnumber"]);
-
-
 				}else{
 					storedClientMessages.push(JSON.stringify(data));
 				}
 			}
 			else if(data["moveTo"]){
+				if(PlayersController.getPlayer(data["id"])){
+					PlayersController.getPlayer(data["id"]).resetIsWalking();
+				}
 				if(!PlayersController.getPlayer(data["id"]) || (PlayersController.getPlayer(data["id"]) && PlayersController.getPlayer(data["id"]).isWalking ==false)){
 					PlayersController.movePlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}});
 				}else{

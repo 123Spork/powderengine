@@ -296,6 +296,10 @@ function indexFromPos(x,y){
 	return parseInt((gridWidth*((gridHeight)-y)))+parseInt(x);
 };
 
+function indexFromPosAndGridSize(x,y,width,height){
+	return parseInt((width*(y+1)))+parseInt(x);
+};
+
 function merge_objects(obj1,obj2){
 	var obj3 = {};
 	for (var attrname in obj1) { obj3[attrname] = cloneObj(obj1[attrname]); }
@@ -695,12 +699,13 @@ var runResponses =function(responses,type,context,ignoreList,scriptData,j){
 					};
 				case "Warp Player":
 					return function(newK){
-						var x=responses[newK]["data"]["index"] % gridWidth;
-						var y=Math.floor(responses[newK]["data"]["index"]/gridWidth)+1;
-						PlayersController.getYou().setPosition(x*cellsize,y*cellsize);
-						sendMessageToServer({"changemap":""+responses[newK]["data"]["mapnum"], "setTo":responses[newK]["data"]["index"]});
+						var mapSize = GameMap.getMapSizeForIndex(responses[newK]["data"]["mapnum"]);
+						var x=responses[newK]["data"]["index"] % mapSize.width;
+						var y=Math.floor(responses[newK]["data"]["index"]/mapSize.width);
+						sendMessageToServer({"mapnumber":""+responses[newK]["data"]["mapnum"], "warpTo":responses[newK]["data"]["index"]});
 						GameMap.goToMap(responses[newK]["data"]["mapnum"]);
-						GameMap.goToOffsetFromPosition(x*cellsize,y*cellsize);
+						PlayersController.getYou().setPosition(x*cellsize,y*cellsize);
+						PlayersController.getYou().isWalking=false;
 					};
 				case "Open/Close Shop":
 					return function(newK){

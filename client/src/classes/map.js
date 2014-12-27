@@ -224,9 +224,11 @@ var GameMap=cc.Layer.extend({
 					var gp = PlayersController.getYou().getGridPosition()
 					if(gp.y>this.mapHeight){
 						PlayersController.getYou().setPositionY(cellsize*(this.mapHeight))
+						PlayersController.getYou().isWalking=false;
 					}
 					if(gp.x>this.mapWidth-1){
 						PlayersController.getYou().setPositionX(cellsize*(this.mapWidth-1))
+						PlayersController.getYou().isWalking=false;
 					}
 				}
 				this.tileNodes.removeFromParent();
@@ -319,9 +321,11 @@ var GameMap=cc.Layer.extend({
 					var gp = PlayersController.getYou().getGridPosition()
 					if(gp.y>this.mapHeight){
 						PlayersController.getYou().setPositionY(cellsize*(this.mapHeight))
+						PlayersController.getYou().isWalking=false;
 					}
 					if(gp.x>this.mapWidth-1){
 						PlayersController.getYou().setPositionX(cellsize*(this.mapWidth-1))
+						PlayersController.getYou().isWalking=false;
 					}
 				}
 				this.tileNodes.removeFromParent();
@@ -361,8 +365,9 @@ var GameMap=cc.Layer.extend({
 			}
 		}
 		if(PlayersController && PlayersController.getYou()){
+			var mapSize = GameMap.getMapSizeForIndex(mapnumber);
 			var pos = PlayersController.getYou().getGridPosition();
-			GameMap.goToOffsetFromPosition(pos.x*cellsize,pos.y*cellsize);
+			GameMap.goToOffsetFromPosition(pos.x*cellsize,(pos.y-mapSize.height)*cellsize);
 			this.schedule(this.refreshRenderTexture);
 		}
 	},

@@ -97,16 +97,6 @@ Character = cc.Sprite.extend({
 	velocity: ((60/1000)*4),
 	distToMove: 2,
 	
-	warpPlayer:function(data){
-		var x=data["position"] % gridWidth;
-		var y=Math.floor(data["position"]/gridWidth);
-		this.setPosition(x*cellsize,y*cellsize);
-		sendMessageToServer({"changemap":data["mapTo"], "setTo":data["position"]});
-		GameMap.goToMap(data["mapTo"]);
-		GameMap.goToOffsetFromPosition(x*cellsize,y*cellsize);
-	},
-
-
 	interactWithTile:function(){
 		if(!this.isWalking){
 			var gp = this.getGridPosition();
@@ -116,7 +106,9 @@ Character = cc.Sprite.extend({
 					this.pickupItem(tile.getTopItem());
 				}
 				if(tile.getScript()){
-					handleScript("Interact On",tile,"Tile");
+					if(this.name==PlayersController.getYou().name){
+						handleScript("Interact On",tile,"Tile");
+					}
 				}
 			}
 		}
@@ -133,7 +125,9 @@ Character = cc.Sprite.extend({
 					return;
 				}
 				if(tile.getScript()){
-					handleScript("Interact On",tile,"Tile");
+					if(this.name==PlayersController.getYou().name){
+						handleScript("Interact On",tile,"Tile");
+					}
 				}
 			}
 		}
@@ -156,7 +150,9 @@ Character = cc.Sprite.extend({
 			var tile = GameMap.getTileNodeForXY(gp.x,gp.y);
 			if(tile){
 				if(tile.getScript()){
-					handleScript("Interact Facing",tile,"Tile");
+					if(this.name==PlayersController.getYou().name){
+						handleScript("Interact Facing",tile,"Tile");
+					}
 				}
 			}
 
@@ -182,21 +178,25 @@ Character = cc.Sprite.extend({
 			
 		if(this.toPosition.x<pos.x){
 			this.setPositionX(pos.x-this.distToMove);
+			this.isWalking=false;
 			if(this.isPlayer){
 				GameMap.updateOffset(+this.distToMove,0);
 			}
 		} else if(this.toPosition.x>pos.x){
 			this.setPositionX(pos.x+this.distToMove);
+			this.isWalking=false;
 			if(this.isPlayer){
 				GameMap.updateOffset(-this.distToMove,0);
 			}
 		} else if(this.toPosition.y<pos.y){
 			this.setPositionY(pos.y-this.distToMove);
+			this.isWalking=false;
 			if(this.isPlayer){
 				GameMap.updateOffset(0,this.distToMove);
 			}
 		} else if(this.toPosition.y>pos.y){
 			this.setPositionY(pos.y+this.distToMove);
+			this.isWalking=false;
 			if(this.isPlayer){
 				GameMap.updateOffset(0,-this.distToMove);
 			}
@@ -204,10 +204,14 @@ Character = cc.Sprite.extend({
 		if(pos.y==this.toPosition.y && pos.x==this.toPosition.x){
 			this.isWalking=false;
 			if(this.leavePosition){
-				handleScript("On Leave",GameMap.getTileNodeForXY(this.leavePosition.x,this.leavePosition.y),"Tile");
+				if(this.name==PlayersController.getYou().name){
+					handleScript("On Leave",GameMap.getTileNodeForXY(this.leavePosition.x,this.leavePosition.y),"Tile");
+				}
 			}
 			this.leavePosition=null;
-			handleScript("On Enter",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y),"Tile");
+			if(this.name==PlayersController.getYou().name){
+				handleScript("On Enter",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y),"Tile");
+			}
 			this.unschedule(this.walk);
 			if(this.path!=null){
 				this.beginPathWalk();
@@ -237,19 +241,22 @@ Character = cc.Sprite.extend({
 			if(this.isPlayer && Mapeditor==null){
 				if(gp.x<x && GameMap.hasMapRight()){
 					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapRight());
-					this.setPosition(0,cellsize*y)
+					this.setPosition(0,cellsize*y);
+					this.isWalking=false;
 					sendMessageToServer({"changemap":parseInt(GameMap.getMapRight()), "setTo":((0) + ((y) * newMapSize.width))});
 					GameMap.goToMapRight();
 					GameMap.goToOffsetLeft();
 				} else if(gp.x>x && GameMap.hasMapLeft()){
 					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapLeft());
-					this.setPosition(cellsize*(newMapSize.width-1),cellsize*y)
+					this.setPosition(cellsize*(newMapSize.width-1),cellsize*y);
+					this.isWalking=false;
 					sendMessageToServer({"changemap":parseInt(GameMap.getMapLeft()), "setTo":((newMapSize.width-1) + ((y) * newMapSize.width))});
 					GameMap.goToMapLeft();
 					GameMap.goToOffsetRight();
 				} if(gp.y<y && GameMap.hasMapUp()){
 					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapUp());
 					this.setPosition(cellsize*x,cellsize);
+					this.isWalking=false;
 					sendMessageToServer({"changemap":parseInt(GameMap.getMapUp()), "setTo":((x) + ((1) * newMapSize.width))});
 					GameMap.goToMapUp();
 					GameMap.goToOffsetUp();
@@ -257,6 +264,7 @@ Character = cc.Sprite.extend({
 					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapDown());
 					sendMessageToServer({"changemap":parseInt(GameMap.getMapDown()),"setTo":((x) + ((newMapSize.height) * newMapSize.width))});
 					this.setPosition(cellsize*x,cellsize*(newMapSize.height));
+					this.isWalking=false;
 					GameMap.goToMapDown();
 					GameMap.goToOffsetDown();
 				}
@@ -267,11 +275,15 @@ Character = cc.Sprite.extend({
 			if(gameMapInstance.isTileBlocked(tile)){
 				return;
 			}
-			handleScript("Will Leave",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y),"Tile");
+			if(this.name==PlayersController.getYou().name){
+				handleScript("Will Leave",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y),"Tile");
+			}
 			this.leavePosition=cc.p(this.getGridPosition().x,this.getGridPosition().y);
 			this.toPosition = cc.p(cellsize*x,cellsize*y);
 			this.isWalking=true;
-			handleScript("Will Enter",GameMap.getTileNodeForXY(x,y),"Tile");
+			if(this.name==PlayersController.getYou().name){
+				handleScript("Will Enter",GameMap.getTileNodeForXY(x,y),"Tile");
+			}
 			this.schedule(this.walk);
 			this.walk(0);
 			if(this.isPlayer){
@@ -280,6 +292,18 @@ Character = cc.Sprite.extend({
 				sendMessageToServer({"npcID":(this.isNPC+""),"mapnumber":this.onMap, "moveNPC":((this.toPosition.x/cellsize) + ((this.toPosition.y/cellsize) * gridWidth))});
 			}
 		}
+	},
+
+	resetIsWalking:function(){
+		var gp = this.getGridPosition();
+		if(!(gp.x>0)){
+			gp.x=0;
+		}
+		if(!(gp.y>0)){
+			gp.y=0;
+		}
+		this.setPosition(Math.floor(gp.x)*32,Math.floor(gp.y)*32);
+		this.isWalking=false;
 	},
 	
 	beginPathWalk:function(){
@@ -314,6 +338,7 @@ Character = cc.Sprite.extend({
 			var gp = this.getGridPosition();
 			if(Math.abs(cc.pDistance(cc.p(x,y),gp))>4){
 				this.setPosition(cc.p(cellsize*x,cellsize*y));
+				this.isWalking=false;
 				return;
 			}
 			if(gp.x>x){
@@ -351,6 +376,7 @@ PlayerCharacter = Character.extend({
 			var x=withData.position % mapSize.width;
 			var y=Math.floor(withData.position/mapSize.width);
 			this.setPosition(x*cellsize,y*cellsize);
+			this.isWalking=false;
 			GameMap.goToMapWithoutPlayer(withData.map);
 			GameMap.goToOffsetFromPosition(x*cellsize,y*cellsize);
 			this.onMap=withData.map;

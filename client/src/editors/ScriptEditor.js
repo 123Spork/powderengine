@@ -228,7 +228,7 @@ ScriptEditor = Popup.extend({
 										break;
 										case "Add":
 											var resArray = ["Talk","Destroy","Give/ Take Item","Set Quest Point", "Warp Player", "Wait", "Repeat Responses", "Open/Close Panel", "Modify Player Stats","Script Response","Open/Close Shop"];
-											var resSetup = [{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true}]
+											var resSetup = [{"enabled":true},{"enabled":false},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":false},{"enabled":false},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true}]
 											for( var i=0;i<self.data["data"][this.identifier]["responses"].length;i++){
 												if(self.data["data"][this.identifier]["responses"][i]["type"]=="Repeat Responses"){
 													resSetup[7]["enabled"]=false;
@@ -238,7 +238,7 @@ ScriptEditor = Popup.extend({
 											switch(self.data["specifier"]){
 												case "NPC": 
 													resArray.push("Attack","Run Away","Defend","Modify NPC Stats");
-													resSetup.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true});
+													resSetup.push({"enabled":false},{"enabled":false},{"enabled":false},{"enabled":false});
 												break;
 												case "Item": 
 													resArray.push("Equip Item","Read Item");
@@ -345,16 +345,18 @@ ScriptEditor = Popup.extend({
 										break;
 										case "Add":
 											var reqArr = ["Has Player Item","Is Player Statistics","Is Quest Point","Is Panel Visibility","Is Player Inventory Space","Script Requirement"];						
-																			
+											var allowArr = [{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true}]				
 											switch(self.data["specifier"]){
 												case "Tile": 
 													reqArr.push("Is Event Fired By"); 
+													allowArr.push({"enabled":false})
 												break;
 												case "NPC":
 													reqArr.push("Is NPC Statistics","Is NPC Actioning");
-												break;											}
-
-											self._parent.addChild(DropDownList.createWithListAndPosition(self,self.addRequireListElement,reqArr,touch._point));
+													allowArr.push({"enabled":false},{"enabled":false})
+												break;		
+											}									
+											self._parent.addChild(DropDownList.createWithListAndPosition(self,self.addRequireListElement,reqArr,touch._point,allowArr));
 											self.listContext=this.identifier;
 										break;
 										case "Use":
@@ -426,10 +428,10 @@ ScriptEditor = Popup.extend({
 				break;
 				case "Add":
 					var eventArray = ["Default Interaction","On Examine","On Talk Close", "On Talk Option Selected", "On Game Load"];
-					var setupOptions = [{"enabled":true},{"enabled":false},{"enabled":false},{"enabled":false},{"enabled":true}];
+					var setupOptions = [{"enabled":true},{"enabled":false},{"enabled":false},{"enabled":false},{"enabled":false}];
 					
 
-					for(var i in self.data["data"]){
+					/*for(var i in self.data["data"]){
 						if(self.data["data"][i]){
 							for(var j=0;j<self.data["data"][i]["responses"].length;j++){
 								if(self.data["data"][i]["responses"][j]["type"]=="Talk"){
@@ -438,7 +440,7 @@ ScriptEditor = Popup.extend({
 								}
 							}
 						}
-					}
+					}*/
 
 					if(self.data["data"].length==0){
 						setupOptions[1]["enabled"]=false;
@@ -453,11 +455,11 @@ ScriptEditor = Popup.extend({
 					switch(self.data["specifier"]){
 						case "Item": 
 							eventArray.push("On Pickup","On Drop","On Dequip","On Trade")
-							setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true})
+							setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":false})
 						break;
 						case "Tile":
 							eventArray.push("Interact On","Interact Facing","Will Enter","On Enter","Will Leave","On Leave","On Come Near");
-							setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true});
+							setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":false});
 							setupOptions[0]["enabled"]=false;
 						break;
 					}

@@ -1,7 +1,14 @@
 {
   "name": "powderengine",
   "description": "2D MORPG Game Engine written in JS and HTML5.",
-  "version": "0.0.1",
+  "version": "0.8.0",
+  "license": "GPL-3.0",
+  "licenses": [
+    {
+        "name": "GPL-3.0",
+        "url": "https://github.com/powderengine/powderengine/blob/master/LICENSE"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/123Spork/powderengine.git"

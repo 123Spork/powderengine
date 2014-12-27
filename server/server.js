@@ -2,12 +2,12 @@
 process.chdir(__dirname);
 
 // Require HTTP module (to start server) and Socket.IO
-var http = require('http');
 var io = require('socket.io');
 var fs = require('fs');
 var bcrypt = require('bcrypt');
 
 var config = require('../config.json');
+var NetworkBootstrap = require('../common/networkbootstrap.js');
 
 var TOBECHANGED = {};
 TOBECHANGED.requiredXpToNextLevel = function(currentLevel){
@@ -105,14 +105,17 @@ if(fs.existsSync('./tools/updatedata.json')){
 	}
 }
 
-// Start the server at port 8080
-var server = http.createServer(function(req, res){ 
+var requestHandler = function(req, res){ 
     // Send HTML headers and message
     res.writeHead(200,{ 'Content-Type': 'text/html' }); 
     res.end('<h1>Hello Socket Lover!</h1>');
-});
+};
 
-server.listen(config.server.port || 1337);
+var parsedPort = parseInt(config.server.port || 1337);
+var networkBootstrap = new NetworkBootstrap(config);
+var server = networkBootstrap.createServerInstance(requestHandler);
+
+server.listen(parsedPort);
 
 // Create a Socket.IO instance, passing it our server
 var socket = io.listen(server, { origins: '*:*' });

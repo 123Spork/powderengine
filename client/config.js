@@ -15,6 +15,12 @@ var config = {
         "host": "localhost",
         "port": 1337
     },
+    "getProtocol": function() {
+        return this.server.protocol;
+    },
+    "setProtocol": function(protocol) {
+        this.server.protocol = protocol;
+    },
     "getHost": function() {
         return this.server.host;
     },
@@ -30,17 +36,18 @@ var config = {
     "getServer": function() {
         return this.server;
     },
-    "setServer": function(host, port) {
+    "setServer": function(protocol, host, port) {
+        this.setProtocol(protocol);
         this.setHost(host);
         this.setPort(port);
     },
     "getServerURL": function() {
-        return "http://" + (this.server.host || "localhost") + ":" + (this.server.port || 1337);
-    },
+        return ((this.server.protocol || "http") + "://" + (this.server.host || "localhost") + ":" + (this.server.port || 1337));
+    }
 };
 
 $.getJSON("config.json", function(data) {
-    config.setServer(data.server.host, data.server.port);
+    config.setServer(data.server.protocol, data.server.host, data.server.port);
 });
 
 document["ccConfig"] = config;

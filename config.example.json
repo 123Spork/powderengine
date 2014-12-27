@@ -5,5 +5,9 @@
     "server": {
         "host": "localhost",
         "port": 1337
+    },
+    "ssl": {
+        "key": "powder.key",
+        "cert": "powder.crt"
     }
 }

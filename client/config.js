@@ -47,7 +47,13 @@ var config = {
 };
 
 $.getJSON("config.json", function(data) {
+<<<<<<< HEAD
     config.setServer(data.server.protocol, data.server.host, data.server.port);
+=======
+    document["config"] = data;
+    config.setServer(data.server.host, data.server.port);
+    document.title = (data.game.name || "Powder Engine");
+>>>>>>> e2f1a40b43de533512948cb33ef058512996ff34
 });
 
 document["ccConfig"] = config;

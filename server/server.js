@@ -7,7 +7,7 @@ var xport 				= require('node-xport')(module)
   , bcrypt 				= require('bcrypt')
   , networkConfig 		= require('../config.json')
   , config 				= require('./server.config.json')
-  , NetworkBootstrap 	= require('../common/networkbootstrap.js')
+  , NetworkBootstrap 	= require('../common/networkBootstrap.js')
   ;
 
 var formulas = {};

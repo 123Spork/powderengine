@@ -3,7 +3,7 @@ process.chdir(__dirname);
 
 var xport               = require('node-xport')(module)
   , config              = require('../config.json')
-  , NetworkBootstrap    = require('../common/networkbootstrap.js')
+  , NetworkBootstrap    = require('../common/networkBootstrap.js')
   , url                 = require('url')
   , path                = require('path')
   , fs                  = require('fs')

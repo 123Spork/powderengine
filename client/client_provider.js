@@ -53,8 +53,6 @@ var requestHandler = function(request, response) {
 var parsedPort = parseInt(process.argv[2] || config.client.port || 8888, 10);
 var networkBootstrap = new NetworkBootstrap(config);
 
-config.server.protocol = networkBootstrap.getTransferProtocolName();
-
 var server = networkBootstrap.createServerInstance(requestHandler);
 
 server.listen(parsedPort);

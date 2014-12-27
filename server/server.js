@@ -1,21 +1,22 @@
 /* Powder Engine Server */
 process.chdir(__dirname);
 
-// Require HTTP module (to start server) and Socket.IO
-var io = require('socket.io');
-var fs = require('fs');
-var bcrypt = require('bcrypt');
+var xport 				= require('node-xport')(module)
+  , io 					= require('socket.io')
+  , fs 					= require('fs')
+  , bcrypt 				= require('bcrypt')
+  , networkConfig 		= require('../config.json')
+  , config 				= require('./server.config.json')
+  , NetworkBootstrap 	= require('../common/networkbootstrap.js')
+  ;
 
-var config = require('../config.json');
-var NetworkBootstrap = require('../common/networkbootstrap.js');
-
-var TOBECHANGED = {};
-TOBECHANGED.requiredXpToNextLevel = function(currentLevel){
-	return 100*(Math.pow(1.08,currentLevel));
+var formulas = {};
+formulas.xpTNL = function(currentLevel) {
+	return eval(config.game.formulae.xp || "100 * Math.pow(1.08, currentLevel)");
 };
 
-TOBECHANGED.healthModifierFromLevel = function(currentLevel){
-	return 100 + (currentLevel*50);
+formulas.baseHealth = function(currentLevel, previousHealth) {
+	return eval(config.game.formulae.hp || "100 + (currentLevel * 50)");
 };
   
 var positions = [];
@@ -111,8 +112,8 @@ var requestHandler = function(req, res){
     res.end('<h1>Hello Socket Lover!</h1>');
 };
 
-var parsedPort = parseInt(config.server.port || 1337);
-var networkBootstrap = new NetworkBootstrap(config);
+var parsedPort = parseInt(networkConfig.server.port || 1337);
+var networkBootstrap = new NetworkBootstrap(networkConfig);
 var server = networkBootstrap.createServerInstance(requestHandler);
 
 server.listen(parsedPort);
@@ -284,7 +285,7 @@ socket.on('connection', function(client){
 						}
 
 						for(var i in playerData["skills"]){
-							playerData["skills"][i]["requirement"]=TOBECHANGED.requiredXpToNextLevel(playerData["skills"][i]["level"]);
+							playerData["skills"][i]["requirement"]=formulas.xpTNL(playerData["skills"][i]["level"]);
 						}
 
 						playerData={

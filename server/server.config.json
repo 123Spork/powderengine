@@ -1,0 +1,35 @@
+{
+    "game": {
+        "defaultPosition": {
+            "map": 0,
+            "x": 0,
+            "y": 0,
+            "dir": "north"
+        },
+        "limits": {
+            "level": 10
+        },
+        "formulae": {
+            "xp": "100 * Math.pow(1.08, currentLevel)",
+            "hp": "100 + (currentLevel * 50)"
+        }
+    },
+    "users": {
+        "allowRegistration": true
+    },
+    "network": {
+        "connectionLimit": 0,
+        "restrictAccess": false
+    },
+    "dataSystem": "filesystem",
+    "filesystem": {
+        "root": "./data/"
+    },
+    "database": {
+        "host": "localhost",
+        "port": 27017,
+        "name": "powder",
+        "user": null,
+        "pass": null
+    }
+}

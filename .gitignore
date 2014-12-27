@@ -43,3 +43,6 @@ security/
 node_modules/
 .DS_STORE
 *.orig
+
+# Ignore SSL
+ssl/

@@ -1,10 +1,22 @@
-// Require HTTP module (to start server) and Socket.IO
-//Server file
-var http = require('http');
-var fs = require('fs');
-var io = require('socket.io');
+/* Powder Engine Server */
+process.chdir(__dirname);
 
-var config = require('./config.js');
+// Require HTTP module (to start server) and Socket.IO
+var io = require('socket.io');
+var fs = require('fs');
+var bcrypt = require('bcrypt');
+
+var config = require('../config.json');
+var NetworkBootstrap = require('../common/networkbootstrap.js');
+
+var TOBECHANGED = {};
+TOBECHANGED.requiredXpToNextLevel = function(currentLevel){
+	return 100*(Math.pow(1.08,currentLevel));
+};
+
+TOBECHANGED.healthModifierFromLevel = function(currentLevel){
+	return 100 + (currentLevel*50);
+};
   
 var positions = [];
 var mapplayers=[];
@@ -93,14 +105,17 @@ if(fs.existsSync('./tools/updatedata.json')){
 	}
 }
 
-// Start the server at port 8080
-var server = http.createServer(function(req, res){ 
+var requestHandler = function(req, res){ 
     // Send HTML headers and message
     res.writeHead(200,{ 'Content-Type': 'text/html' }); 
     res.end('<h1>Hello Socket Lover!</h1>');
-});
+};
 
-server.listen(config.port);
+var parsedPort = parseInt(config.server.port || 1337);
+var networkBootstrap = new NetworkBootstrap(config);
+var server = networkBootstrap.createServerInstance(requestHandler);
+
+server.listen(parsedPort);
 
 // Create a Socket.IO instance, passing it our server
 var socket = io.listen(server, { origins: '*:*' });
@@ -201,9 +216,9 @@ socket.on('connection', function(client){
 
 
 				var newPlayerData = {
-					"pass":event["password"],
-					"email":event["email"],
-					"registrationdate":Date.now(),
+					"pass": bcrypt.hashSync(event["password"], 10),
+					"email": event["email"],
+					"registrationdate": Date.now(),
 					"rank":3,
 					"location":{"mapnumber":1,"position":100},
 					"race":0,
@@ -257,7 +272,7 @@ socket.on('connection', function(client){
 					client.send(JSON.stringify({"login_fail":"Login failed, Username doesn't exist."}));
 				}else{
 					var playerData = require("./users/"+event["username"]+".json");
-					if(event["password"]!=playerData["pass"]){
+					if(!bcrypt.compareSync(event["password"], playerData["pass"])){
 						client.send(JSON.stringify({"login_fail":"Login failed, password is incorrect."}))
 					}else{
 
@@ -269,7 +284,7 @@ socket.on('connection', function(client){
 						}
 
 						for(var i in playerData["skills"]){
-							playerData["skills"][i]["requirement"]=config.requiredXpToNextLevel(playerData["skills"][i]["level"]);
+							playerData["skills"][i]["requirement"]=TOBECHANGED.requiredXpToNextLevel(playerData["skills"][i]["level"]);
 						}
 
 						playerData={

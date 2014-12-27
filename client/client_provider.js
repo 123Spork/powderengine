@@ -1,13 +1,13 @@
 ﻿/* Powder Engine Client Provider */
 process.chdir(__dirname);
 
-var config = require('../config.json');
-var NetworkBootstrap = require('../common/networkbootstrap.js');
-
-var url = require("url"),
-    path = require("path"),
-    fs = require("fs")
-    ;
+var xport               = require('node-xport')(module)
+  , config              = require('../config.json')
+  , NetworkBootstrap    = require('../common/networkbootstrap.js')
+  , url                 = require('url')
+  , path                = require('path')
+  , fs                  = require('fs')
+  ;
 
 var requestHandler = function(request, response) {
     var uri = url.parse(request.url).pathname;
@@ -23,7 +23,7 @@ var requestHandler = function(request, response) {
         }
 
         fs.exists(filename, function(exists) {
-            if(!exists) {
+            if (!exists) {
                 response.writeHead(404, {"Content-Type": "text/plain"});
                 response.write("404 Not Found\n");
                 response.end();
@@ -34,12 +34,11 @@ var requestHandler = function(request, response) {
                 filename += '/index.html';
             }
     
-            fs.readFile(filename, "binary", function(err, file) {
-                if(err) {        
-                    response.writeHead(500, {"Content-Type": "text/plain"});
-                    response.write(err + "\n");
-                    response.end();
-                    return;
+            fs.readFile(filename, "binary", function(error, file) {
+                if (error) {        
+                    response.writeHead(500, { "Content-Type": "text/plain" });
+                    response.write(error);
+                    return response.end();
                 }
                 
                 response.writeHead(200);
@@ -57,4 +56,7 @@ var server = networkBootstrap.createServerInstance(requestHandler);
 
 server.listen(parsedPort);
 
-console.log("Client server running on port " + parsedPort + " in " + networkBootstrap.getTransferProtocolName() + " mode.\nCTRL + C to shutdown");
+console.log("Client server running on port " + parsedPort + " in " + networkBootstrap.getTransferProtocolName().toUpperCase() + "-mode.\nCTRL + C to shutdown");
+
+/* Module Export */
+xport(server);

@@ -5,6 +5,7 @@ process.chdir(__dirname);
 var http = require('http');
 var io = require('socket.io');
 var fs = require('fs');
+var bcrypt = require('bcrypt');
 
 var config = require('../config.json');
 
@@ -212,9 +213,9 @@ socket.on('connection', function(client){
 
 
 				var newPlayerData = {
-					"pass":event["password"],
-					"email":event["email"],
-					"registrationdate":Date.now(),
+					"pass": bcrypt.hashSync(event["password"], 10),
+					"email": event["email"],
+					"registrationdate": Date.now(),
 					"rank":3,
 					"location":{"mapnumber":1,"position":100},
 					"race":0,
@@ -268,7 +269,7 @@ socket.on('connection', function(client){
 					client.send(JSON.stringify({"login_fail":"Login failed, Username doesn't exist."}));
 				}else{
 					var playerData = require("./users/"+event["username"]+".json");
-					if(event["password"]!=playerData["pass"]){
+					if(!bcrypt.compareSync(event["password"], playerData["pass"])){
 						client.send(JSON.stringify({"login_fail":"Login failed, password is incorrect."}))
 					}else{
 

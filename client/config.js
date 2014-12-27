@@ -35,7 +35,6 @@ var config = {
         this.setPort(port);
     },
     "getServerURL": function() {
-        console.log(this.server.host);
         return (window.location.protocol + "//" + (this.server.host || "localhost") + ":" + (this.server.port || 1337));
     }
 };

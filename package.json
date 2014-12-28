@@ -11,11 +11,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/123Spork/powderengine.git"
+    "url": "https://github.com/powderengine/powderengine.git"
   },
   "homepage": "http://powderengine.net",
   "bugs": {
-    "url": "https://github.com/123Spork/powderengine/issues"
+    "url": "https://github.com/powderengine/powderengine/issues"
   },
   "author": {
     "name": "Spork",

@@ -11,7 +11,7 @@
         "port": 1337
     },
     "ssl": {
-        "enabled": true,
+        "enabled": false,
         "key": "powder.key",
         "cert": "powder.crt"
     }

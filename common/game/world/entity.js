@@ -1,6 +1,8 @@
-var xport       = require('node-xport')(module)
-  , Direction   = require('./direction')
-  ;
+/*jslint node: true, stupid: true, plusplus: true*/
+"use strict";
+
+var xport       = require('node-xport')(module),
+    Direction   = require('./direction');
 
 function Entity() {
     this.position = {
@@ -18,20 +20,20 @@ function Entity() {
     this.spawned = false;
 }
 
-Entity.prototype.update = function(time) {
-    this.position.x += this.velocity.x *= time;
-    this.position.y += this.velocity.y *= time;
+Entity.prototype.update = function (time) {
+    this.position.x += this.velocity.x * time;
+    this.position.y += this.velocity.y * time;
 };
 
-Entity.prototype.move = function(x, y) {
+Entity.prototype.move = function (x, y) {
     if (x === undefined) {
         return;
     }
 
-    x = new Number(x);
-    y = new Number(y);
+    x = Number(x);
+    y = Number(y);
 
-    if (new Number(x) == Number.NaN) {
+    if (Number(x) === Number.NaN) {
         return this.move(x.x, x.y);
     }
 

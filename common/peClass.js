@@ -1,20 +1,14 @@
-var xport = require('node-xport')
-  ;
+/*jslint node: true, stupid: true, plusplus: true*/
+"use strict";
 
-var PEClass = (function() {
-    function PEClass() {}
+var xport = require('node-xport');
 
-    PEClass.prototype.constructor = function() {
-        this.super = null;
-    };
+function PEClass() {
+    this.super = null;
+}
 
-    PEClass.prototype.toString = function() {
-        return "[object PEClass]";
-    };
-})();
-
-PEClass.extend = function() {
-
+PEClass.prototype.toString = function () {
+    return "[object PEClass]";
 };
 
 xport(PEClass);

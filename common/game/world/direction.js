@@ -1,24 +1,26 @@
-var xport = require('node-xport')(module)
-  ;
+/*jslint node: true, stupid: true, plusplus: true*/
+"use strict";
+
+var xport = require('node-xport')(module);
 
 function Direction(id, name) {
-    this.id = Direction.count;
+    this.id = id;
     this.name = name;
 }
 
-Direction.add = function(name) {
-    var direction = new Direction(name);
+Direction.add = function (name) {
+    var direction = new Direction(Direction.count++, name);
     Direction.lookup[direction.id]   = direction;
     Direction.lookup[direction.name] = direction;
-
-    Direction.count++;
 
     return direction.id;
 };
 
-Direction.find = function(lookup) {
-    if ((lookup = new Number(lookup)) == Number.NaN) {
-        lookup = new String(lookup).toLowerCase();
+Direction.find = function (lookup) {
+    lookup = Number(lookup);
+
+    if (lookup === Number.NaN) {
+        lookup = String(lookup).toLowerCase();
     }
 
     return Direction[lookup];

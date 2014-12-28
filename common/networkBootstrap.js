@@ -1,4 +1,4 @@
-/*jslint node: true, stupid: true*/
+/*jslint node: true, stupid: true, plusplus: true*/
 "use strict";
 
 var xport   = require('node-xport')(module),

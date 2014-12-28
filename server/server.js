@@ -56,63 +56,72 @@ var updateShopIndex = 9;
 var droppedItems = {};
 
 fs.readdirSync("./maps").forEach(function (file) {
-	var n = parseInt(file.split('.')[0], 10);
+    var n = parseInt(file.split('.')[0], 10);
     maps[n] = require("./maps/" + file);
     playersOnMapsCount[n] = 0;
     mapNPCS[n] = [];
 });
 
 fs.readdirSync("./additionals").forEach(function (file) {
-  if (file === "warps.json") {
-    warps = require("./additionals/warps.json");
-  }  
-  if (file === "items.json") {
-    items = require("./additionals/items.json");
-  }
-  if (file === "skills.json") {
-    skills = require("./additionals/skills.json");
-  }
-  if (file === "signs.json") {
-    signs = require("./additionals/signs.json");
-  }
-  if (file === "npcs.json") {
-    npcs = require("./additionals/npcs.json");
-  }
-  if (file === "quests.json") {
-    quests = require("./additionals/quests.json");
-  }
-  if (file === "shops.json") {
-    shops = require("./additionals/shops.json");
-  }
-  if (file === "settings.json") {
-    settings = require("./additionals/settings.json");
-  }
-  if (file === "scripts.json") {
-      scripts=[
-        {"data":[{"type":"Will Enter","responses":[{"type":"Block Entry","data":{}}],"requirements":[],"data":{}}],"name":"Block","specifier":"Default","implementsAs":"Tile","abbr":"BLK"},
-        {"data":[{"type":"On Game load","responses":[{"type":"Spawn NPC","data":{}}],"requirements":[],"data":{}}],"name":"Spawn NPC","specifier":"Default","implementsAs":"Tile","isTemplate":"1","abbr":"NPC"},
-        {"data":[{"type":"On Game load","responses":[{"type":"Spawn Item","data":{}}],"requirements":[],"data":{}}],"name":"Spawn Item","specifier":"Default","implementsAs":"Tile","isTemplate":"1","abbr":"ITM"},
-        {"data":[{"type":"On Enter","responses":[{"type":"Warp Player","data":{}}],"requirements":[],"data":{}}],"name":"Warp Player","specifier":"Default","implementsAs":"Tile","isTemplate":"1","abbr":"WRP"}
-      ];
-    var userscripts = require("./additionals/scripts.json");
-    for(var i in userscripts) {
-        scripts.push(userscripts[i]);
+    if (file === "warps.json") {
+        warps = require("./additionals/warps.json");
     }
-  }
+
+    if (file === "items.json") {
+        items = require("./additionals/items.json");
+    }
+
+    if (file === "skills.json") {
+        skills = require("./additionals/skills.json");
+    }
+
+    if (file === "signs.json") {
+        signs = require("./additionals/signs.json");
+    }
+
+    if (file === "npcs.json") {
+        npcs = require("./additionals/npcs.json");
+    }
+
+    if (file === "quests.json") {
+        quests = require("./additionals/quests.json");
+    }
+
+    if (file === "shops.json") {
+        shops = require("./additionals/shops.json");
+    }
+
+    if (file === "settings.json") {
+        settings = require("./additionals/settings.json");
+    }
+
+    if (file === "scripts.json") {
+        scripts = [
+            { "data": [{ "type": "Will Enter", "responses": [{ "type": "Block Entry", "data": {}}], "requirements": [], "data": {}}], "name": "Block", "specifier": "Default", "implementsAs": "Tile", "abbr": "BLK" },
+            { "data": [{ "type": "On Game load", "responses": [{ "type": "Spawn NPC", "data": {}}], "requirements": [], "data": {}}], "name": "Spawn NPC", "specifier": "Default", "implementsAs": "Tile", "isTemplate": "1", "abbr": "NPC" },
+            { "data": [{ "type": "On Game load", "responses": [{ "type": "Spawn Item", "data": {}}], "requirements": [], "data": {}}], "name": "Spawn Item", "specifier": "Default", "implementsAs": "Tile", "isTemplate": "1", "abbr": "ITM" },
+            { "data": [{ "type": "On Enter", "responses": [{ "type": "Warp Player", "data": {}}], "requirements": [], "data": {}}], "name": "Warp Player", "specifier": "Default", "implementsAs": "Tile", "isTemplate": "1", "abbr": "WRP" }
+        ];
+
+        var userscripts = require("./additionals/scripts.json");
+        for (var i in userscripts) {
+            scripts.push(userscripts[i]);
+        }
+    }
 });
 
 
-if(fs.existsSync('./tools/updatedata.json')) {
-    try{
-        last= require('./tools/updatedata.json');
-    }catch(e) {
+if (fs.existsSync('./tools/updatedata.json')) {
+    try {
+        last = require('./tools/updatedata.json');
+    } catch(e) {
 
     }
 }
 
-var requestHandler = function (req, res) { 
+var requestHandler = function (req, res) {
     // Send HTML headers and message
-    res.writeHead(200,{ 'Content-Type': 'text/html' }); 
+    res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end('<h1>Hello Socket Lover!</h1>');
 };
 
@@ -126,20 +135,20 @@ server.listen(parsedPort);
 var socket = io.listen(server, { origins: '*:*' });
 
 socket.on('message',function (data) {
-  console.log('Received a message from the server!',data);
+    console.log('Received a message from the server!',data);
 });
 
 saveNewPlayer = function (client,playerName,playerData) {
     var outputFilename = 'users/'+playerName+'.json';
     fs.writeFile(outputFilename, JSON.stringify(playerData), function (err) {
-        client.send(JSON.stringify({"registrationsuccess":1}));
+        client.send(JSON.stringify({ "registrationsuccess":1}));
     });
 };
 
 savePlayer = function (client,playerName,playerData) {
     var outputFilename = 'users/'+playerName+'.json';
     fs.writeFile(outputFilename, JSON.stringify(playerData), function (err) {
-        client.send(JSON.stringify({"savesuccess":1}));
+        client.send(JSON.stringify({ "savesuccess":1}));
     });
 };
 
@@ -186,7 +195,7 @@ var setShopData = function (data) {
 var setScriptData = function (data) {
     var outputFilename = './additionals/scripts.json';
     var newData = [];
-    for(var i=4;i<data.length;i++) {
+    for (var i = 4; i < data.length; i++) {
         newData.push(data[i]);
     }
     fs.writeFile(outputFilename, JSON.stringify(newData), function (err) {});
@@ -205,18 +214,18 @@ var saveLastAccessData = function () {
 
 
 // Add a connect listener
-socket.on('connection', function (client) { 
+socket.on('connection', function (client) {
     // Success!  Now listen to messages to be received
     client.on('message',function (event) {
         event = JSON.parse(event);
         if(event["newUser"]) {
 
             if(fs.existsSync("users/"+event["name"]+".json")) {
-                client.send(JSON.stringify({"registrationfailed":"UserTaken"}));
+                client.send(JSON.stringify({ "registrationfailed": "UserTaken" }));
             }else{
                 var skillLevels = {};
                 for(var i in skills) {
-                    skillLevels[skills[i]["name"]]={"level":0,"experience":0,"currenthealth":100,"maxhealth":100, "modifier":0};
+                    skillLevels[skills[i]["name"]]={ "level":0, "experience":0, "currenthealth":100, "maxhealth":100, "modifier":0};
                 }
 
 
@@ -224,22 +233,22 @@ socket.on('connection', function (client) {
                     "pass": bcrypt.hashSync(event["password"], 10),
                     "email": event["email"],
                     "registrationdate": Date.now(),
-                    "rank":3,
-                    "location":{"mapnumber":1,"position":100},
-                    "race":0,
-                    "class":0,
-                    "clan":"",
-                    "guilds":[],
-                    "quests":[],
-                    "friends":[],
-                    "skills":skillLevels,
-                    "pets":[],
-                    "pmessages":[],
-                    "lastchats":[],
-                    "inventory":[],
-                    "bank":[],
-                    "equipment":{},
-                    "extraData":[],
+                    "rank": 3,
+                    "location": { "mapnumber":1, "position":100},
+                    "race": 0,
+                    "class": 0,
+                    "clan": "",
+                    "guilds": [],
+                    "quests": [],
+                    "friends": [],
+                    "skills": skillLevels,
+                    "pets": [],
+                    "pmessages": [],
+                    "lastchats": [],
+                    "inventory": [],
+                    "bank": [],
+                    "equipment": {},
+                    "extraData": [],
                 }
                 saveNewPlayer(client,event["name"],newPlayerData);
             }
@@ -268,23 +277,23 @@ socket.on('connection', function (client) {
         if(event["login"]) {
             for(var i in names) {
                 if(names[i]==event["username"]) {
-                    client.send(JSON.stringify({"login_fail":"Login failed, user is already online."}));
+                    client.send(JSON.stringify({ "login_fail": "Login failed, user is already online." }));
                     return;
                 }
             }
             if(names.indexOf(event["username"])==-1) {
                 if(!fs.existsSync("users/"+event["username"]+".json")) {
-                    client.send(JSON.stringify({"login_fail":"Login failed, Username doesn't exist."}));
+                    client.send(JSON.stringify({ "login_fail": "Login failed, Username doesn't exist." }));
                 }else{
                     var playerData = require("./users/"+event["username"]+".json");
                     if(!bcrypt.compareSync(event["password"], playerData["pass"])) {
-                        client.send(JSON.stringify({"login_fail":"Login failed, password is incorrect."}))
+                        client.send(JSON.stringify({ "login_fail": "Login failed, password is incorrect." }))
                     }else{
 
                         var skillLevels = {};
                         for(var i in skills) {
                             if(!playerData["skills"][skills[i]["name"]]) {
-                                playerData["skills"][skills[i]["name"]]={"level":0,"experience":0,"currenthealth":100,"maxhealth":100,"modifier":0};
+                                playerData["skills"][skills[i]["name"]]={ "level":0, "experience":0, "currenthealth":100, "maxhealth":100, "modifier":0};
                             }
                         }
 
@@ -311,20 +320,20 @@ socket.on('connection', function (client) {
                             "equipment":playerData["equipment"],
                             "extraData":playerData["extraData"],
                         };
-                        client.send(JSON.stringify({"login_success":playerData}));
+                        client.send(JSON.stringify({ "login_success":playerData}));
                         names[client.id]=event["username"];
                         clients[client.id]=client;
                         mapplayers[event["username"]]=playerData["location"]["mapnumber"];
                         if(playersOnMapsCount[playerData["location"]["mapnumber"]]==0) {
                             mapMasters[playerData["location"]["mapnumber"]]=names[client.id];
-                            client.send(JSON.stringify({"mapmaster":true}));
+                            client.send(JSON.stringify({ "mapmaster":true}));
                         }
                         playersOnMapsCount[playerData["location"]["mapnumber"]]++;
-                        client.broadcast.send(JSON.stringify({"newPlayer":1,"id":event["username"],"position":playerData["location"]["position"],"mapnumber":playerData["location"]["mapnumber"]}));
+                        client.broadcast.send(JSON.stringify({ "newPlayer":1, "id":event["username"], "position":playerData["location"]["position"], "mapnumber":playerData["location"]["mapnumber"]}));
                         for(var i in clients) {
                             if(i!=client.id && clients[i]) {
                                 if(positions[i]) {
-                                    client.send(JSON.stringify({"id":names[i],"mapnumber":mapplayers[names[i]], "position":positions[i], "setTo":1}));
+                                    client.send(JSON.stringify({ "id":names[i], "mapnumber":mapplayers[names[i]], "position":positions[i], "setTo":1}));
                                 }
                             }
                         }
@@ -332,15 +341,15 @@ socket.on('connection', function (client) {
                             client.send(JSON.stringify(droppedItems[playerData["location"]["mapnumber"]][i]));
                         }
                         for(var i in mapNPCS[playerData["location"]["mapnumber"]]) {
-                            client.send(JSON.stringify({"changeNPCPosition":mapNPCS[playerData["location"]["mapnumber"]][i],"npcID":i}));
+                            client.send(JSON.stringify({ "changeNPCPosition":mapNPCS[playerData["location"]["mapnumber"]][i], "npcID":i}));
                         }
                     }
                 }
             }
         }
-        
+
         if(event["sync"]) {
-            var returner = {"sync":true};
+            var returner = { "sync":true};
             if(!last[updateMapIndex] || event["mapupdate"]<last[updateMapIndex]) {
                 if(!last[updateMapIndex]) {
                     last[updateMapIndex]=Date.now();
@@ -427,22 +436,22 @@ socket.on('connection', function (client) {
             client.send(JSON.stringify(returner));
         }
 
-        
+
         if(event["moveTo"]) {
-            client.broadcast.send(JSON.stringify({"moveTo":1,"position":event["moveTo"],"mapnumber":mapplayers[names[client.id]],"id":names[client.id]}));
+            client.broadcast.send(JSON.stringify({ "moveTo":1, "position":event["moveTo"], "mapnumber":mapplayers[names[client.id]], "id":names[client.id]}));
             positions[client.id]= event["moveTo"];
         }
         if(event["droppeditem"]) {
-            client.send(JSON.stringify({"droppeditem":event["droppeditem"], "mapnumber":event["mapnumber"], "index":event["index"],"amount":event["amount"]}));
-            client.broadcast.send(JSON.stringify({"droppeditem":event["droppeditem"],"mapnumber":event["mapnumber"],"index":event["index"],"amount":event["amount"]}));
+            client.send(JSON.stringify({ "droppeditem":event["droppeditem"], "mapnumber":event["mapnumber"], "index":event["index"], "amount":event["amount"]}));
+            client.broadcast.send(JSON.stringify({ "droppeditem":event["droppeditem"], "mapnumber":event["mapnumber"], "index":event["index"], "amount":event["amount"]}));
             if(!droppedItems[event["mapnumber"]]) {
                 droppedItems[event["mapnumber"]]=[];
             }
-            droppedItems[event["mapnumber"]].push({"droppeditem":event["droppeditem"],"mapnumber":event["mapnumber"],"index":event["index"],"amount":event["amount"]});
+            droppedItems[event["mapnumber"]].push({ "droppeditem":event["droppeditem"], "mapnumber":event["mapnumber"], "index":event["index"], "amount":event["amount"]});
         }
         if(event["pickupitem"]) {
-            client.send(JSON.stringify({"pickupitem":event["pickupitem"],"mapnumber":event["mapnumber"]}));
-            client.broadcast.send(JSON.stringify({"pickupitem":event["pickupitem"],"mapnumber":event["mapnumber"]}));
+            client.send(JSON.stringify({ "pickupitem":event["pickupitem"], "mapnumber":event["mapnumber"]}));
+            client.broadcast.send(JSON.stringify({ "pickupitem":event["pickupitem"], "mapnumber":event["mapnumber"]}));
             if(event["temp"]) {
                 var droppedarr = droppedItems[event["mapnumber"]];
                 for(var i=droppedarr.length-1;i>=0;i--) {
@@ -619,23 +628,23 @@ socket.on('connection', function (client) {
             client.send(JSON.stringify(event));
         }
         if(event["chatMessage"]) {
-            client.broadcast.send(JSON.stringify({"chatMessage":names[client.id]+": "+event["chatMessage"]}));
+            client.broadcast.send(JSON.stringify({ "chatMessage":names[client.id]+": "+event["chatMessage"]}));
         }
         if(event["logout"]) {
-            client.broadcast.send(JSON.stringify({"playerLeft":names[client.id]}));
+            client.broadcast.send(JSON.stringify({ "playerLeft":names[client.id]}));
             names[client.id]=undefined;
             positions[client.id]=undefined;
         }
         if(event["disconnect"]) {
-            client.broadcast.send(JSON.stringify({"playerLeft":names[client.id]}));
+            client.broadcast.send(JSON.stringify({ "playerLeft":names[client.id]}));
             clients[client.id]=undefined;
             names[client.id]=undefined;
             positions[client.id]=undefined;
         }
         if(event["changemap"]) {
-            client.broadcast.send(JSON.stringify({"id":names[client.id],"position":positions[client.id],"mapnumber":event["changemap"],"setTo":1}));
+            client.broadcast.send(JSON.stringify({ "id":names[client.id], "position":positions[client.id], "mapnumber":event["changemap"], "setTo":1}));
             if(playersOnMapsCount[event["changemap"]]==0) {
-                client.send(JSON.stringify({"mapmaster":true}));
+                client.send(JSON.stringify({ "mapmaster":true}));
                 mapMasters[event["changemap"]]=names[client.id];
             }
             playersOnMapsCount[event["changemap"]]++;
@@ -646,24 +655,24 @@ socket.on('connection', function (client) {
                 for(var i in clients) {
                     if(mapplayers[names[i]]==mapNumberFrom) {
                         console.log("New Master is " + i)
-                        clients[i].send(JSON.stringify({"mapmaster":true}));
+                        clients[i].send(JSON.stringify({ "mapmaster":true}));
                         mapMasters[mapplayers[names[i]]]=mapplayers[names[i]];
                         break;
                     }
                 }
             }
             for(var i in droppedItems[event["changemap"]]) {
-                client.send(JSON.stringify({"droppeditem":droppedItems[event["changemap"]][i]["droppeditem"],"mapnumber":event["changemap"],"index":droppedItems[event["changemap"]][i]["index"],"amount":event["amount"]}));
+                client.send(JSON.stringify({ "droppeditem":droppedItems[event["changemap"]][i]["droppeditem"], "mapnumber":event["changemap"], "index":droppedItems[event["changemap"]][i]["index"], "amount":event["amount"]}));
             }
             for(var i in mapNPCS[event["changemap"]]) {
-                client.send(JSON.stringify({"changeNPCPosition":mapNPCS[event["changemap"]][i],"npcID":i}));
+                client.send(JSON.stringify({ "changeNPCPosition":mapNPCS[event["changemap"]][i], "npcID":i}));
             }
         }
         if(event["warpTo"]) {
-            client.broadcast.send(JSON.stringify({"id":names[client.id],"position":event["warpTo"],"mapnumber":event["mapnumber"],"setTo":1}));
+            client.broadcast.send(JSON.stringify({ "id":names[client.id], "position":event["warpTo"], "mapnumber":event["mapnumber"], "setTo":1}));
             positions[client.id]= event["warpTo"];
             if(playersOnMapsCount[event["changemap"]]==0) {
-                client.send(JSON.stringify({"mapmaster":true}));
+                client.send(JSON.stringify({ "mapmaster":true}));
                 mapMasters[event["changemap"]]=names[client.id];
             }
             playersOnMapsCount[event["changemap"]]++;
@@ -674,39 +683,39 @@ socket.on('connection', function (client) {
                 for(var i in clients) {
                     if(mapplayers[names[i]]==mapNumberFrom) {
                         console.log("New Master is " + i)
-                        clients[i].send(JSON.stringify({"mapmaster":true}));
+                        clients[i].send(JSON.stringify({ "mapmaster":true}));
                         mapMasters[mapplayers[names[i]]]=mapplayers[names[i]];
                         break;
                     }
                 }
             }
             for(var i in droppedItems[event["changemap"]]) {
-                client.send(JSON.stringify({"droppeditem":droppedItems[event["changemap"]][i]["droppeditem"],"mapnumber":event["changemap"],"index":droppedItems[event["changemap"]][i]["index"],"amount":event["amount"]}));
+                client.send(JSON.stringify({ "droppeditem":droppedItems[event["changemap"]][i]["droppeditem"], "mapnumber":event["changemap"], "index":droppedItems[event["changemap"]][i]["index"], "amount":event["amount"]}));
             }
             for(var i in mapNPCS[event["changemap"]]) {
-                client.send(JSON.stringify({"changeNPCPosition":mapNPCS[event["changemap"]][i],"npcID":i}));
+                client.send(JSON.stringify({ "changeNPCPosition":mapNPCS[event["changemap"]][i], "npcID":i}));
             }
         }
         if(event["diceroll"]) {
-            client.broadcast.send(JSON.stringify({"diceroll":event["diceroll"]}));
+            client.broadcast.send(JSON.stringify({ "diceroll":event["diceroll"]}));
         }
         if(event["coinflip"]) {
-            client.broadcast.send(JSON.stringify({"coinflip":event["coinflip"]}));
+            client.broadcast.send(JSON.stringify({ "coinflip":event["coinflip"]}));
         }
         if(event["dance"]) {
-            client.broadcast.send(JSON.stringify({"dance":event["dance"]}));
+            client.broadcast.send(JSON.stringify({ "dance":event["dance"]}));
         }
         if(event["afk"]) {
             var number = Math.floor( Math.random() * (6 - 1) + 1);
-            client.broadcast.send(JSON.stringify({"afk":names[client.id]}));
+            client.broadcast.send(JSON.stringify({ "afk":names[client.id]}));
         }
     });
 
     client.on('disconnect',function () {
        if(names[client.id]) {
            var mapNumberFrom = mapplayers[names[client.id]];
-           client.broadcast.send(JSON.stringify({"playerLeft":names[client.id]}));
-           client.send(JSON.stringify({"disconnect":true}));
+           client.broadcast.send(JSON.stringify({ "playerLeft":names[client.id]}));
+           client.send(JSON.stringify({ "disconnect":true}));
            console.log(names[client.id]+" HAS DISCONNECTED");
            playersOnMapsCount[mapplayers[names[client.id]]]--;
            mapplayers[names[client.id]]=undefined;
@@ -716,7 +725,7 @@ socket.on('connection', function (client) {
             for(var i in clients) {
                 if(clients[i]) {
                     if(mapplayers[names[i]]==mapNumberFrom) {
-                        clients[i].send(JSON.stringify({"mapmaster":true}));
+                        clients[i].send(JSON.stringify({ "mapmaster":true}));
                         mapMasters[mapplayers[names[i]]]=mapplayers[names[i]];
                         break;
                     }
@@ -726,10 +735,10 @@ socket.on('connection', function (client) {
     });
 });
 
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
 

@@ -11,6 +11,8 @@ resCfg[jsRes.SceneManager_js] = {
     ref : [
     	jsRes.EN_js,
     	jsRes.CZ_js,
+    	jsRes.SK_js,
+    	jsRes.DE_js,
     	jsRes.LA_js,
     	jsRes.SingleLineBox_js,
 	    jsRes.MultiLineBox_js,

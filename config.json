@@ -14,7 +14,5 @@
         "enabled": false,
         "key": "powder.key",
         "cert": "powder.crt",
-        "bla":true
     }
 }
-//TEST UPDATE!

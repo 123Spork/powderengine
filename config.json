@@ -13,6 +13,6 @@
     "ssl": {
         "enabled": false,
         "key": "powder.key",
-        "cert": "powder.crt"
+        "cert": "powder.crt",
     }
 }

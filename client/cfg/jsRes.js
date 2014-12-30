@@ -26,6 +26,8 @@ js.client = {
     CZ_js : '[%client%]src/lang/CZ.js',
     EN_js : '[%client%]src/lang/EN.js',
     LA_js : '[%client%]src/lang/LA.js',
+    SK_js : '[%client%]src/lang/SK.js',
+    DE_js : '[%client%]src/lang/DE.js',
     Bank_js : '[%client%]src/popups/Bank.js',
     Book_js : '[%client%]src/popups/Book.js',
     Credits_js : '[%client%]src/popups/Credits.js',

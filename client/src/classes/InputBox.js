@@ -13,6 +13,10 @@ var InputBox = cc.Class.extend({
 		}
 	},
 	
+	setBackgroundInvisible:function(){
+		this.inputBox.setBackgroundInvisible();
+	},
+
 	isFocused:function(){
 		console.log("isfocused="+document.activeElement == this.inputBox._edTxt);
 		return document.activeElement == this.inputBox._edTxt;

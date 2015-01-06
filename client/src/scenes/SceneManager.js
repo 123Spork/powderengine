@@ -10,7 +10,7 @@ var SceneManager = cc.Layer.extend({
 		var screenSize = cc.EGLView.getInstance().getFrameSize();
 		this.background_node = cc.Sprite.create();
 		this.background_node.setColor(cc.c3b(0,0,0));
-		this.background_node.setTextureRect(cc.rect(0,0,screenSize.width,screenSize.height));
+		this.background_node.setTextureRect(cc.rect(0,0,screenSize.width,(screenSize.height-sizeReducer)));
 		this.background_node.setAnchorPoint(cc.p(0,0));
 		this.addChild(this.background_node);
 
@@ -29,7 +29,7 @@ var SceneManager = cc.Layer.extend({
 		if(SceneManager.getInstance().currentScene){
 			var egl = cc.EGLView.getInstance();
 	        screenSize=cc.size(egl.getFrameSize().width,egl.getFrameSize().height);
-	        SceneManager.getInstance().background_node.setTextureRect(cc.rect(0,0,screenSize.width,screenSize.height));
+	        SceneManager.getInstance().background_node.setTextureRect(cc.rect(0,0,screenSize.width,(screenSize.height-sizeReducer)));
 			SceneManager.getInstance().currentScene.onOrientationChanged();
 		}
 	},

@@ -272,6 +272,8 @@ var GameMap=cc.Layer.extend({
 			var pos = PlayersController.getYou().getGridPosition();
 			GameMap.goToOffsetFromPosition(pos.x*cellsize,pos.y*cellsize);
 			this.schedule(this.refreshRenderTexture);
+			MainScene.updateEditorMap();
+			SkillBars.update();
 		}
 	},
 	
@@ -369,6 +371,8 @@ var GameMap=cc.Layer.extend({
 			var pos = PlayersController.getYou().getGridPosition();
 			GameMap.goToOffsetFromPosition(pos.x*cellsize,(pos.y-mapSize.height)*cellsize);
 			this.schedule(this.refreshRenderTexture);
+			MainScene.updateEditorMap();
+			SkillBars.update();
 		}
 	},
 	
@@ -692,12 +696,12 @@ GameMap.updateOffset=function(x,y){
 	if((gameMapInstance.mapOffset.x+(gameGridSize.width-(screenSize.width/2))+x>=0&&PlayersController.getYou().getPosition().x<(gameGridSize.width-(screenSize.width/2))) && (gameMapInstance.mapOffset.x+x<=0 && PlayersController.getYou().getPosition().x>screenSize.width/2)) {
 		gameMapInstance.mapOffset.x+=x;
 	}
-	if((gameMapInstance.mapOffset.y+(gameGridSize.height-(screenSize.height/2))+y>=0&&PlayersController.getYou().getPosition().y<(gameGridSize.height-(screenSize.height/2))) && (gameMapInstance.mapOffset.y+y<=0 && PlayersController.getYou().getPosition().y>screenSize.height/2)) {
+	if((gameMapInstance.mapOffset.y+(gameGridSize.height-((screenSize.height-sizeReducer)/2))+y>=0&&PlayersController.getYou().getPosition().y<(gameGridSize.height-((screenSize.height-sizeReducer)/2))) && (gameMapInstance.mapOffset.y+y<=0 && PlayersController.getYou().getPosition().y>(screenSize.height-sizeReducer)/2)) {
 		gameMapInstance.mapOffset.y+=y;
 	}
 
-	if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+	if(gameGridSize.height<(screenSize.height-sizeReducer)){
+		gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 	}
 	if(gameGridSize.width<screenSize.width){
 		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
@@ -722,19 +726,19 @@ GameMap.goToOffsetFromPosition=function(x,y){
 		} else{
 			gameMapInstance.mapOffset.x = -(x-(screenSize.width/2));
 		}
-		if(y>gameGridSize.height-(screenSize.height/2)){
-			gameMapInstance.mapOffset.y = -(gameGridSize.height-screenSize.height);
-		} else if(y<screenSize.height/2){
+		if(y>gameGridSize.height-((screenSize.height-sizeReducer)/2)){
+			gameMapInstance.mapOffset.y = -(gameGridSize.height-(screenSize.height-sizeReducer));
+		} else if(y<(screenSize.height-sizeReducer)/2){
 			gameMapInstance.mapOffset.y = 0;
 		} else{
-			gameMapInstance.mapOffset.y = -(y-(screenSize.height/2));
+			gameMapInstance.mapOffset.y = -(y-((screenSize.height-sizeReducer)/2));
 		}
 		offsetFromPositionScheduledX=0;
 		offsetFromPositionScheduledY=0;
 		gameMapInstance.unschedule(GameMap.scheduledOffsetFromPosition);
 
-	    if(gameGridSize.height<screenSize.height){
-			gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+	    if(gameGridSize.height<(screenSize.height-sizeReducer)){
+			gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 		}
 		if(gameGridSize.width<screenSize.width){
 			gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
@@ -755,8 +759,8 @@ GameMap.goToOffsetRight=function(){
 	} else{
 		gameMapInstance.unschedule(GameMap.goToOffsetRight);
 		gameMapInstance.mapOffset.x = -(gameGridSize.width-screenSize.width);
-		if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+		if(gameGridSize.height<(screenSize.height-sizeReducer)){
+		gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 	}
 	if(gameGridSize.width<screenSize.width){
 		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
@@ -772,8 +776,8 @@ GameMap.goToOffsetLeft=function(){
 	} else{
 		gameMapInstance.unschedule(GameMap.goToOffsetLeft);
 		gameMapInstance.mapOffset.x = 0;
-		if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+		if(gameGridSize.height<(screenSize.height-sizeReducer)){
+		gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 	}
 	if(gameGridSize.width<screenSize.width){
 		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
@@ -789,9 +793,9 @@ GameMap.goToOffsetDown=function(){
 		return;
 	} else{
 		gameMapInstance.unschedule(GameMap.goToOffsetDown);
-		gameMapInstance.mapOffset.y = -(gameGridSize.height-screenSize.height);
-		if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+		gameMapInstance.mapOffset.y = -(gameGridSize.height-(screenSize.height-sizeReducer));
+		if(gameGridSize.height<(screenSize.height-sizeReducer)){
+		gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 	}
 	if(gameGridSize.width<screenSize.width){
 		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
@@ -809,8 +813,8 @@ GameMap.goToOffsetUp=function(){
 	} else{
 		gameMapInstance.unschedule(GameMap.goToOffsetUp);
 		gameMapInstance.mapOffset.y = 0;
-		if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+		if(gameGridSize.height<(screenSize.height-sizeReducer)){
+		gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 	}
 	if(gameGridSize.width<screenSize.width){
 		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)

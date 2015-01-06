@@ -58,7 +58,7 @@ Popup = Scene.extend({
 			var obj = JSON.parse(panelPos)[this.getIdentifier()];
 			if(obj){
 				var pos = cc.p(obj["x"],obj["y"]);
-				if(pos.x>screenSize.width-10 || pos.y>screenSize.height){
+				if(pos.x>screenSize.width-10 || pos.y>(screenSize.height-sizeReducer)){
 					pos = cc.p(8,100);
 				}
 				this.panels.setPosition(pos);

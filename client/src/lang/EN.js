@@ -35,7 +35,7 @@ lang["EN"]={
 	"Welcome Message":"powderengine.net or /help for some help.",
 	"Join Message":"<PLAYER> has joined the game!",
 	"Leave Message":"<PLAYER> has left the game!",
-	"Default ChatBar Message": "C to popup/dismiss, enter for chat. Say /help for help.",
+	"Default ChatBar Message": "Press enter to chat. For help say /help.",
 
 	"ITEMS":"ISSECTION",
 	"Item Dropdown Pick Up": "Pick up <ITEM>",

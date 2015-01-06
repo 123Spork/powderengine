@@ -2,6 +2,7 @@
 
 MainScene=null;
 MapMaster=false;
+var sizeReducer=0;
 var GameScene = Scene.extend({
 	
 	isSaving:false,
@@ -20,6 +21,121 @@ var GameScene = Scene.extend({
 		 return {
 		 "panels":{
 			 children:{	
+ 				"game_menu":{
+	 				size:cc.size(80,20),
+	 				color:cc.c4b(60,60,60),
+	 				position:cc.p(screenSize.width-80,0),
+	 				children:{
+	 					"lbl":{
+	 						label:"Menu",
+	 						fontSize:12,
+	 						position:cc.p(40,3),
+	 						anchorPoint:cc.p(0.5,0),
+	 						color:cc.c3b(255,255,255),
+	 					},
+	 				}
+			 	},
+			 	"menu_bar":{
+			 		color:cc.c4b(60,60,60),
+			 		size:cc.size(screenSize.width,20),
+			 		position:cc.p(0,screenSize.height-20),
+			 		anchorPoint:cc.p(0,0),
+			 		children:{
+			 			"game_list":{
+			 				size:cc.size(60,20),
+			 				position:cc.p(0,0),
+			 				color:cc.c3b(60,60,60),
+			 				children:{
+			 					"lbl":{
+							 		label:"Game",
+							 		anchorPoint:cc.p(0.5,0),
+							 		fontSize:12,
+							 		color:cc.c3b(255,255,255),
+							 		position:cc.p(30,3),
+							 	}
+			 				}
+			 			},
+			 			"script_list":{
+			 				size:cc.size(80,20),
+			 				position:cc.p(60,0),
+			 				color:cc.c3b(60,60,60),
+			 				children:{
+			 					"lbl":{
+							 		label:"Scripts",
+							 		anchorPoint:cc.p(0.5,0),
+							 		fontSize:12,
+							 		color:cc.c3b(255,255,255),
+							 		position:cc.p(40,3),
+							 	}
+			 				}
+			 			},
+			 			"editor_list":{
+			 				size:cc.size(80,20),
+			 				position:cc.p(140,0),
+			 				color:cc.c3b(60,60,60),
+			 				children:{
+			 					"lbl":{
+							 		label:"Editors",
+							 		anchorPoint:cc.p(0.5,0),
+							 		fontSize:12,
+							 		color:cc.c3b(255,255,255),
+							 		position:cc.p(40,3),
+							 	}
+			 				}
+			 			},
+			 			"location":{
+			 				size:cc.size(150,20),
+			 				position:cc.p(screenSize.width-150,0),
+			 				children:{
+			 					"maplbl":{
+			 						label:"Map: ",
+			 						fontSize:12,
+			 						position:cc.p(0,3),
+			 						anchorPoint:cc.p(0,0),
+			 						color:cc.c3b(255,255,255),
+			 					},
+			 					"mapnum":{
+			 						label:"0",
+			 						position:cc.p(32,3),
+			 						fontSize:12,
+			 						anchorPoint:cc.p(0,0),
+			 						color:cc.c3b(255,255,255),
+			 					},
+			 					"xlbl":{
+			 						label:"x: ",
+			 						position:cc.p(70,3),
+			 						fontSize:12,
+			 						anchorPoint:cc.p(0,0),
+			 						color:cc.c3b(255,255,255),
+			 					},
+			 					"xnum":{
+			 						label:"0",
+			 						position:cc.p(81,3),
+			 						fontSize:12,
+			 						anchorPoint:cc.p(0,0),
+			 						color:cc.c3b(255,255,255),
+			 					},
+			 					"ylbl":{
+			 						label:"y: ",
+			 						position:cc.p(110,3),
+			 						fontSize:12,
+			 						anchorPoint:cc.p(0,0),
+			 						color:cc.c3b(255,255,255),
+			 					},
+			 					"ynum":{
+			 						label:"0",
+			 						position:cc.p(121,3),
+			 						fontSize:12,
+			 						anchorPoint:cc.p(0,0),
+			 						color:cc.c3b(255,255,255),
+			 					},
+
+			 				}
+
+			 			}
+			 		}
+			 	},
+			 	
 			 	"saving_icon":{
 			 		visible:false,
 			 		position:cc.p(screenSize.width-52,4),
@@ -27,98 +143,6 @@ var GameScene = Scene.extend({
 			 		size:cc.size(48,48),
 			 		texture:"GUI/save_icon.png",
 			 	},
-				"logout_button":{
-					position:cc.p(screenSize.width-52,screenSize.height-52),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/logout.png",
-				},
-				"quicknav_button":{
-					position:cc.p(screenSize.width-30,Math.floor(screenSize.height/2)-24),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/quickmenu_closed_icon.png",
-				},
-				"inventory_button":{
-					position:cc.p(screenSize.width-52,Math.floor(screenSize.height/2)+60),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/inventory_icon.png",
-				},
-				"equipment_button":{
-					position:cc.p(screenSize.width-82,Math.floor(screenSize.height/2)+4),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/equipment_icon.png",
-				},
-				"skill_button":{
-					position:cc.p(screenSize.width-82,Math.floor(screenSize.height/2)-52),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/skills_icon.png",
-				},
-				"chat_button":{
-					position:cc.p(screenSize.width-52,Math.floor(screenSize.height/2)-108),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/chat_icon.png",
-				},
-
-				"quickedit_button":{
-					position:cc.p(0,Math.floor(screenSize.height/2)-24),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/quickedit_closed_icon.png",
-				},
-				"mapedit_button":{
-					position:cc.p(4,Math.floor(screenSize.height/2)+116),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/mapeditor_icon.png",
-				},
-				"npcedit_button":{
-					position:cc.p(34,Math.floor(screenSize.height/2)+60),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/npceditor_icon.png",
-				},
-				"itemedit_button":{
-					position:cc.p(64,Math.floor(screenSize.height/2)+4),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/itemeditor_icon.png",
-				},
-				"skilledit_button":{
-					position:cc.p(64,Math.floor(screenSize.height/2)-52),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/skilleditor_icon.png",
-				},
-				"scriptedit_button":{
-					position:cc.p(34,Math.floor(screenSize.height/2)-108),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/scripteditor_icon.png",
-				},
-				"settings_button":{
-					position:cc.p(4,Math.floor(screenSize.height/2)-164),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/settings_icon.png",
-				},
-				"shopedit_button":{
-					position:cc.p(120,Math.floor(screenSize.height/2)+4),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/shopeditor_icon.png",
-				},
-				"questedit_button":{
-					position:cc.p(120,Math.floor(screenSize.height/2)-52),
-					anchorPoint:cc.p(0,0),
-					size:cc.size(48,48),
-					texture:"GUI/questeditor_icon.png",
-				},
-
 			}
 			}
 		}
@@ -127,6 +151,17 @@ var GameScene = Scene.extend({
 	isQuickVis:false,
 	isEditVis:false,
 	
+	updateEditorMap:function(){
+		this.panels["menu_bar"]["location"]["mapnum"].setString(GameMap.getMapNumber()+"");	
+	},
+
+	updateEditorPos:function(){
+		var you = PlayersController.getYou();
+		var pos = you.getGridPosition();
+		this.panels["menu_bar"]["location"]["xnum"].setString(Math.floor((pos.x))+"");
+		this.panels["menu_bar"]["location"]["ynum"].setString(Math.floor((pos.y-1))+"");
+	},
+
 	setServerConnected:function(active){
 		if(active==false){
 			this.destroyGame();
@@ -136,6 +171,7 @@ var GameScene = Scene.extend({
 	
 	destroyGame:function(){
 		GameMap.destroy();
+		this.unschedule(this.updateEditorPos);
 		GameMap.setInstanceNull();
 		if(Equipment!=null){
 			Equipment.willTerminate();
@@ -169,69 +205,130 @@ var GameScene = Scene.extend({
 		GameChat.setInstanceNull();
 	},
 
+	gameClicked:function(clicknum){
+		this.delegate.panels["menu_bar"]["game_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["script_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["editor_list"].setColor(cc.c3b(60,60,60));
+		switch(clicknum){
+			//settingsbtn
+			case 0: 
+				this.delegate.runCommand("/editsettings");
+			break;
+		}
+	},
+
+	scriptClicked:function(clicknum){
+		this.delegate.panels["menu_bar"]["game_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["script_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["editor_list"].setColor(cc.c3b(60,60,60));
+		switch(clicknum){
+			//defaults
+			case 0: 
+			break;
+			//items
+			case 1:
+			break;
+			//npcs
+			case 2:
+			break;
+			//tiles:
+			case 3:
+			break;
+		}
+	},
+
+	editorClicked:function(clicknum){
+		this.delegate.panels["menu_bar"]["game_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["script_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["editor_list"].setColor(cc.c3b(60,60,60));
+		switch(clicknum){
+			//mapeditor
+			case 0:
+				this.delegate.runCommand("/editmap"); 
+			break;
+			//itemeditor
+			case 1:
+				this.delegate.runCommand("/edititem");
+			break;
+			//npceditor
+			case 2:
+				this.delegate.runCommand("/editnpc");
+			break;
+			//shopeditor
+			case 3:
+				this.delegate.runCommand("/editshop");
+			break;
+			//questeditor
+			case 4:
+				this.delegate.runCommand("/editquest");
+			break;
+			//skilleditor
+			case 5:
+				this.delegate.runCommand("/editskill");
+			break;
+		}
+
+	},
+
+	menuClicked:function(clicknum){
+		switch(clicknum){
+			//logoutbtn
+			case 0:
+				this.delegate.destroyGame();
+				SceneManager.getInstance().goToScene("Login",{logout:true, serverConnected:true});
+			break;
+		}
+	},
+
+	noSelectedMenu:function(touch){
+		this.delegate.onTouchBegan(touch);
+	},
+
 	onTouchBegan:function(touch){
-		if(cc.rectContainsPoint(cc.rect(this.panels["logout_button"].getPositionX(),this.panels["logout_button"].getPositionY(),this.panels["logout_button"].getContentSize().width,this.panels["logout_button"].getContentSize().height),touch._point)){
-			this.destroyGame();
-			SceneManager.getInstance().goToScene("Login",{logout:true, serverConnected:true});
+		this.panels["menu_bar"]["game_list"].setColor(cc.c3b(60,60,60));
+		this.panels["menu_bar"]["script_list"].setColor(cc.c3b(60,60,60));
+		this.panels["menu_bar"]["editor_list"].setColor(cc.c3b(60,60,60));
+		var pos = touch._point;
+		var truePos = this.panels["menu_bar"].convertToNodeSpace(pos);
+		if(cc.rectContainsPoint(cc.rect(this.panels["menu_bar"]["game_list"].getPositionX(),this.panels["menu_bar"]["game_list"].getPositionY(),this.panels["menu_bar"]["game_list"].getContentSize().width,this.panels["menu_bar"]["game_list"].getContentSize().height),truePos)){
+			this.panels["menu_bar"]["game_list"].setColor(cc.c3b(127,127,127));
+			var ddown = DropDownList.createWithListAndPosition(this,this.gameClicked,["Settings"],cc.p(0,(screenSize.height)-20));
+			ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+			ddown.setMinimumWidth(60);
+			this.addChild(ddown);
 			return true;
 		}
-		SceneManager.setActiveScene(this);
-		if(cc.rectContainsPoint(this.panels["chat_button"].getBoundingBox(),touch._point) && this.panels["chat_button"].isVisible()){
-			this.onKeyUp("C");
-			return true;
-		}
-		if(cc.rectContainsPoint(this.panels["inventory_button"].getBoundingBox(),touch._point) && this.panels["inventory_button"].isVisible()){
-			this.onKeyUp("I");
-			return true;
-		}
-		if(cc.rectContainsPoint(this.panels["equipment_button"].getBoundingBox(),touch._point) &&  this.panels["equipment_button"].isVisible()){
-			this.onKeyUp("E");
-			return true;
-		}
-		if(cc.rectContainsPoint(this.panels["skill_button"].getBoundingBox(),touch._point) && this.panels["skill_button"].isVisible()){
-			this.onKeyUp("S");
-			return true;
-		}
-		if(this.panels["quickedit_button"].isVisible() && cc.rectContainsPoint(this.panels["quickedit_button"].getBoundingBox(),touch._point) && this.panels["quickedit_button"].isVisible()){
-			this.showEditControls(!this.isEditVis);
-			return true;
-		}
-		if(cc.rectContainsPoint(this.panels["quicknav_button"].getBoundingBox(),touch._point) && this.panels["quicknav_button"].isVisible()){
-			this.showQuickControls(!this.isQuickVis);
-			return true;
-		}
-		if(cc.rectContainsPoint(this.panels["mapedit_button"].getBoundingBox(),touch._point) && this.panels["mapedit_button"].isVisible()){
-			this.runCommand("/editmap");
-			return true;
-		}
-		if(cc.rectContainsPoint(this.panels["npcedit_button"].getBoundingBox(),touch._point) && this.panels["npcedit_button"].isVisible()){
-			this.runCommand("/editnpc");
-			return true;
-		}	
-		if(cc.rectContainsPoint(this.panels["itemedit_button"].getBoundingBox(),touch._point) && this.panels["itemedit_button"].isVisible()){
-			this.runCommand("/edititem");
-			return true;
-		}	
-		if(cc.rectContainsPoint(this.panels["skilledit_button"].getBoundingBox(),touch._point) && this.panels["skilledit_button"].isVisible()){
-			this.runCommand("/editskill");
-			return true;
-		}
-		if(cc.rectContainsPoint(this.panels["scriptedit_button"].getBoundingBox(),touch._point) && this.panels["scriptedit_button"].isVisible()){
+		if(cc.rectContainsPoint(cc.rect(this.panels["menu_bar"]["script_list"].getPositionX(),this.panels["menu_bar"]["script_list"].getPositionY(),this.panels["menu_bar"]["script_list"].getContentSize().width,this.panels["menu_bar"]["script_list"].getContentSize().height),truePos)){
+		//	this.panels["menu_bar"]["script_list"].setColor(cc.c3b(127,127,127));
 			this.runCommand("/editscript");
+		//	this.addChild(DropDownList.createWithListAndPosition(this,this.scriptClicked,["Defaults","Items","NPCs","Tiles"],cc.p(60,(screenSize.height)-20)));
 			return true;
-		}		
-		if(cc.rectContainsPoint(this.panels["settings_button"].getBoundingBox(),touch._point) && this.panels["settings_button"].isVisible()){
-			this.runCommand("/editsettings");
+		}
+		if(cc.rectContainsPoint(cc.rect(this.panels["menu_bar"]["editor_list"].getPositionX(),this.panels["menu_bar"]["editor_list"].getPositionY(),this.panels["menu_bar"]["editor_list"].getContentSize().width,this.panels["menu_bar"]["editor_list"].getContentSize().height),truePos)){
+			this.panels["menu_bar"]["editor_list"].setColor(cc.c3b(127,127,127));
+			var ddown = DropDownList.createWithListAndPosition(this,this.editorClicked,["Map Editor","Item Editor","NPC Editor","Shop Editor","Quest Editor","Skill Editor"],cc.p(140,(screenSize.height)-20));
+			ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+			ddown.setMinimumWidth(80);
+			this.addChild(ddown);
 			return true;
-		}	
-		if(cc.rectContainsPoint(this.panels["shopedit_button"].getBoundingBox(),touch._point) && this.panels["shopedit_button"].isVisible()){
-			this.runCommand("/editshop");
+		}
+
+
+		if(cc.rectContainsPoint(cc.rect(this.panels["game_menu"].getPositionX(),this.panels["game_menu"].getPositionY(),this.panels["game_menu"].getContentSize().width,this.panels["game_menu"].getContentSize().height),pos)){
+			this.panels["game_menu"].setColor(cc.c3b(127,127,127));
+			var ddown = DropDownList.createWithListAndPosition(this,this.menuClicked,["Logout"],cc.p(screenSize.width-80,44))
+			ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+			ddown.setMinimumWidth(80);
+			this.addChild(ddown);
 			return true;
-		}	
-		if(cc.rectContainsPoint(this.panels["questedit_button"].getBoundingBox(),touch._point) && this.panels["questedit_button"].isVisible()){
-			this.runCommand("/editquest");
-			return true;
-		}	
+		}
+
+
+
+
+
+	
+		SceneManager.setActiveScene(this);
 	},
 	
 	showSign:function(name,content){
@@ -286,14 +383,6 @@ var GameScene = Scene.extend({
 	
 	onKeyUp:function(key){
 		switch(key){
-			case "C":
-				if(GameChat.isShowing()){
-					GameChat.hide();
-				}
-				else{
-					GameChat.show();
-				}
-			break;
 			case "ENTER":
 				GameChat.setFocused(!GameChat.isFocused());
 			break;
@@ -400,28 +489,6 @@ var GameScene = Scene.extend({
 				case "DOWNARROW":  PlayersController.getYou().walkTo(gp.x,gp.y-1); break;
 			}
 		}
-	},
-	
-	showQuickControls:function(visible){
-		this.isQuickVis = visible;
-		this.panels["chat_button"].setVisible(visible);
-		this.panels["inventory_button"].setVisible(visible);
-		this.panels["equipment_button"].setVisible(visible);
-		this.panels["skill_button"].setVisible(visible);
-		this.panels["quicknav_button"].setTexture(cc.TextureCache.getInstance().addImage(visible==true?"GUI/quickmenu_opened_icon.png":"GUI/quickmenu_closed_icon.png"));
-	},
-	
-	showEditControls:function(visible){
-		this.isEditVis = visible;
-		this.panels["mapedit_button"].setVisible(visible);
-		this.panels["npcedit_button"].setVisible(visible);
-		this.panels["itemedit_button"].setVisible(visible);
-		this.panels["skilledit_button"].setVisible(visible);
-		this.panels["scriptedit_button"].setVisible(visible);
-		this.panels["settings_button"].setVisible(visible);
-		this.panels["shopedit_button"].setVisible(visible);
-		this.panels["questedit_button"].setVisible(visible);
-		this.panels["quickedit_button"].setTexture(cc.TextureCache.getInstance().addImage(visible==true?"GUI/quickedit_opened_icon.png":"GUI/quickedit_closed_icon.png"));
 	},
 
 	runCommand:function(command){
@@ -604,7 +671,7 @@ var GameScene = Scene.extend({
 	
 	init:function(withData){
 		this._super();
-	//	var bgLayer = cc.LayerColor.create(cc.c3b(0,0,0),screenSize.width,screenSize.height);
+	//	var bgLayer = cc.LayerColor.create(cc.c3b(0,0,0),screenSize.width,(screenSize.height-sizeReducer));
 	//	bgLayer.setAnchorPoint(cc.p(0,0));
 	//	bgLayer.setPosition(cc.p(0,0));
 	//	this.addChild(bgLayer);
@@ -642,16 +709,21 @@ var GameScene = Scene.extend({
 		
 		this.addChild(GameChat.create());
 		this.addChild(SkillBars.create(withData.playerData["skills"]));
-
-		this.showQuickControls(false);
-		this.showEditControls(false);
-
+		this.schedule(this.updateEditorPos);
 		this.setupEditAccess();
 
 		this.addChild(this.panels);		
 		this.schedule(this.storedMessages);	
 		this.schedule(this.serverProcess);
 		this.schedule(this.saveSchedule,120);
+		if(PlayersController.getYou().access>1){
+			this.updateEditorPos();
+			this.updateEditorMap();
+			sizeReducer=20;
+		}else{
+			this.panels["menu_bar"].setVisible(false);
+		}
+		SkillBars.update();
 
 	},
 

@@ -7,6 +7,7 @@ DropDownList = Scene.extend({
 	delegateFunc:null,
 	previousScene:null,
 	setupOptions:null,
+	noSelectedTouch:null,
 
 	ctor:function(){
 		this._super()
@@ -40,12 +41,17 @@ DropDownList = Scene.extend({
 
 	onTouchBegan:function(touch){
 		var menuPos = this.panels["control_menu"].convertToNodeSpace(touch._point);
+		var selected =false;
 		for(var i =0;i<this.list.length;i++){
 			if(!this.setupOptions || this.setupOptions[i]["enabled"]==true){
 				if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"][i+""].getPositionX(),this.panels["control_menu"][i+""].getPositionY(),this.panels["control_menu"][i+""].getContentSize().width,this.panels["control_menu"][i+""].getContentSize().height),menuPos)){
+					selected=true;
 					this.delegateFunc(i,touch,this.list,this.extras);
 				}
 			}
+		}
+		if(selected==false && this.noSelectedTouch){
+			this.noSelectedTouch(touch);
 		}
 		this.prepareExit();
 		return true;
@@ -78,12 +84,12 @@ DropDownList = Scene.extend({
 				position: cc.p(0,((this.list.length-1)*24)-(i*24)),
 				size: cc.size(96,24),
 				anchorPoint:cc.p(0,0),
-				color: cc.c4b(200,200,200,200),
+				color: cc.c4b(0,0,0,180),
 				children:{	
 					"content":{
 						label:this.list[i],
-						fontSize:20,
-						color:cc.c3b(0,0,0),
+						fontSize:12,
+						color:cc.c3b(255,255,255),
 						anchorPoint:cc.p(0,0.5),
 						position:cc.p(4,12),
 					}
@@ -97,7 +103,6 @@ DropDownList = Scene.extend({
 			 children:{	
 					"control_menu":{
 						position:cc.p(0,0),
-						color:cc.c4b(200,200,200,0),
 						size:cc.size(96,24),
 						children:listOptions,
 					}
@@ -106,15 +111,27 @@ DropDownList = Scene.extend({
 		}
 	},
 
+	setNoSelectedTouchCallback:function(callback){
+		this.noSelectedTouch=callback;
+	},
+
+	setMinimumWidth:function(w){
+		this.panels.setContentSize(w,this.panels.getContentSize().height);
+		for(var i =0;i<this.list.length;i++){
+			this.panels["control_menu"][i+""].setContentSize(w,this.panels["control_menu"][i+""].getContentSize().height);
+		}
+	},
 
 	onMouseMoved:function(event){
 		var pos = event.getLocation();
 		var menuPos = this.panels["control_menu"].convertToNodeSpace(pos);
 		for(var i =0;i<this.list.length;i++){
-			this.panels["control_menu"][i+""].setColor(cc.c4b(200,200,200,200));
+			this.panels["control_menu"][i+""].setColor(cc.c4b(0,0,0,180));
+			this.panels["control_menu"][i+""]["content"].setColor(cc.c3b(255,255,255));
 			if(!this.setupOptions || this.setupOptions[i]["enabled"]==true){
 				if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"][i+""].getPositionX(),this.panels["control_menu"][i+""].getPositionY(),this.panels["control_menu"][i+""].getContentSize().width,this.panels["control_menu"][i+""].getContentSize().height),menuPos)){
-					this.panels["control_menu"][i+""].setColor(cc.c4b(255,0,0,255));
+					this.panels["control_menu"][i+""].setColor(cc.c4b(255,255,255,180));
+					this.panels["control_menu"][i+""]["content"].setColor(cc.c3b(0,0,0));
 				}
 			}
 		}

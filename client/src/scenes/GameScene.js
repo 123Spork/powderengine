@@ -3,9 +3,11 @@
 MainScene=null;
 MapMaster=false;
 var sizeReducer=0;
+var showingEditor=0;
 var GameScene = Scene.extend({
 	
 	isSaving:false,
+	editSprite:null,
 	ctor:function(){
 		this._super();
 	},
@@ -21,10 +23,17 @@ var GameScene = Scene.extend({
 		 return {
 		 "panels":{
 			 children:{	
+			 	"editorbg":{
+			 		visible:(showingEditor>0),
+			 		color:cc.c3b(80,80,80),
+			 		size:cc.size(352,screenSize.height),
+			 		position:cc.p(screenSize.width-352,0),
+			 		anchorPoint:cc.p(0,0),
+			 	},
  				"game_menu":{
 	 				size:cc.size(80,20),
 	 				color:cc.c4b(60,60,60),
-	 				position:cc.p(screenSize.width-80,0),
+	 				position:cc.p((screenSize.width-showingEditor)-80,0),
 	 				children:{
 	 					"lbl":{
 	 						label:"Menu",
@@ -41,6 +50,36 @@ var GameScene = Scene.extend({
 			 		position:cc.p(0,screenSize.height-20),
 			 		anchorPoint:cc.p(0,0),
 			 		children:{
+			 			"settings_editorBtn":{
+			 				visible:showingEditor>0,
+			 				size:cc.size(80,20),
+			 				position:cc.p((screenSize.width-350),0),
+			 				anchorPoint:cc.p(0,0),
+			 				color:cc.c4b(60,60,60),
+			 				children:{
+			 					"lbl":{
+			 						label:"Editor",
+			 						fontSize:12,
+			 						anchorPoint:cc.p(0.5,0),
+			 						position:cc.p(40,3),
+			 					}
+			 				}
+			 			},
+			 			"close_editorBtn":{
+			 				visible:showingEditor>0,
+			 				size:cc.size(80,20),
+			 				position:cc.p((screenSize.width-350)+80,0),
+			 				anchorPoint:cc.p(0,0),
+			 				color:cc.c4b(60,60,60),
+			 				children:{
+			 					"lbl":{
+			 						label:"Close Editor",
+			 						fontSize:12,
+			 						anchorPoint:cc.p(0.5,0),
+			 						position:cc.p(40,3),
+			 					}
+			 				}
+			 			},
 			 			"game_list":{
 			 				size:cc.size(60,20),
 			 				position:cc.p(0,0),
@@ -85,7 +124,7 @@ var GameScene = Scene.extend({
 			 			},
 			 			"location":{
 			 				size:cc.size(150,20),
-			 				position:cc.p(screenSize.width-150,0),
+			 				position:cc.p((screenSize.width-showingEditor)-150,0),
 			 				children:{
 			 					"maplbl":{
 			 						label:"Map: ",
@@ -138,7 +177,7 @@ var GameScene = Scene.extend({
 			 	
 			 	"saving_icon":{
 			 		visible:false,
-			 		position:cc.p(screenSize.width-52,4),
+			 		position:cc.p((screenSize.width-showingEditor)-52,4),
 			 		anchorPoint:cc.p(0,0),
 			 		size:cc.size(48,48),
 			 		texture:"GUI/save_icon.png",
@@ -209,6 +248,8 @@ var GameScene = Scene.extend({
 		this.delegate.panels["menu_bar"]["game_list"].setColor(cc.c3b(60,60,60));
 		this.delegate.panels["menu_bar"]["script_list"].setColor(cc.c3b(60,60,60));
 		this.delegate.panels["menu_bar"]["editor_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["close_editorBtn"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["settings_editorBtn"].setColor(cc.c3b(60,60,60));
 		switch(clicknum){
 			//settingsbtn
 			case 0: 
@@ -221,6 +262,8 @@ var GameScene = Scene.extend({
 		this.delegate.panels["menu_bar"]["game_list"].setColor(cc.c3b(60,60,60));
 		this.delegate.panels["menu_bar"]["script_list"].setColor(cc.c3b(60,60,60));
 		this.delegate.panels["menu_bar"]["editor_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["close_editorBtn"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["settings_editorBtn"].setColor(cc.c3b(60,60,60));
 		switch(clicknum){
 			//defaults
 			case 0: 
@@ -241,6 +284,8 @@ var GameScene = Scene.extend({
 		this.delegate.panels["menu_bar"]["game_list"].setColor(cc.c3b(60,60,60));
 		this.delegate.panels["menu_bar"]["script_list"].setColor(cc.c3b(60,60,60));
 		this.delegate.panels["menu_bar"]["editor_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["close_editorBtn"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["settings_editorBtn"].setColor(cc.c3b(60,60,60));
 		switch(clicknum){
 			//mapeditor
 			case 0:
@@ -284,10 +329,39 @@ var GameScene = Scene.extend({
 		this.delegate.onTouchBegan(touch);
 	},
 
+	closeEditorClicked:function(clicknum){
+		this.delegate.panels["menu_bar"]["game_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["script_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["editor_list"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["close_editorBtn"].setColor(cc.c3b(60,60,60));
+		this.delegate.panels["menu_bar"]["settings_editorBtn"].setColor(cc.c3b(60,60,60));
+		switch(clicknum){
+			//Cancelbtn
+			case 0: break;
+			//Save & Exit
+			case 1: 
+				Mapeditor.saveEditor();
+				if(Mapeditor){
+					Mapeditor.willTerminate();
+					Mapeditor.removeFromParent();
+					Mapeditor=null;
+					GameMap.setInteractionDelegate(null);
+				} 
+				this.delegate.hideEditor();
+			break;
+		}
+	},
+
+	changeEditorTab:function(clicknum){
+		Mapeditor.setTab(clicknum+1);
+	},
+
 	onTouchBegan:function(touch){
 		this.panels["menu_bar"]["game_list"].setColor(cc.c3b(60,60,60));
 		this.panels["menu_bar"]["script_list"].setColor(cc.c3b(60,60,60));
 		this.panels["menu_bar"]["editor_list"].setColor(cc.c3b(60,60,60));
+		this.panels["menu_bar"]["close_editorBtn"].setColor(cc.c3b(60,60,60));
+		this.panels["menu_bar"]["settings_editorBtn"].setColor(cc.c3b(60,60,60));
 		var pos = touch._point;
 		var truePos = this.panels["menu_bar"].convertToNodeSpace(pos);
 		if(cc.rectContainsPoint(cc.rect(this.panels["menu_bar"]["game_list"].getPositionX(),this.panels["menu_bar"]["game_list"].getPositionY(),this.panels["menu_bar"]["game_list"].getContentSize().width,this.panels["menu_bar"]["game_list"].getContentSize().height),truePos)){
@@ -313,10 +387,29 @@ var GameScene = Scene.extend({
 			return true;
 		}
 
+		if(cc.rectContainsPoint(cc.rect(this.panels["menu_bar"]["close_editorBtn"].getPositionX(),this.panels["menu_bar"]["close_editorBtn"].getPositionY(),this.panels["menu_bar"]["close_editorBtn"].getContentSize().width,this.panels["menu_bar"]["close_editorBtn"].getContentSize().height),truePos)){
+			this.panels["menu_bar"]["close_editorBtn"].setColor(cc.c3b(127,127,127));
+			var ddown = DropDownList.createWithListAndPosition(this,this.closeEditorClicked,["Cancel","Save & Exit"],cc.p((screenSize.width-350)+80,(screenSize.height)-20));
+			ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+			ddown.setMinimumWidth(80);
+			this.addChild(ddown);
+			return true;
+		}
+
+		if(cc.rectContainsPoint(cc.rect(this.panels["menu_bar"]["settings_editorBtn"].getPositionX(),this.panels["menu_bar"]["settings_editorBtn"].getPositionY(),this.panels["menu_bar"]["settings_editorBtn"].getContentSize().width,this.panels["menu_bar"]["settings_editorBtn"].getContentSize().height),truePos)){
+			this.panels["menu_bar"]["settings_editorBtn"].setColor(cc.c3b(127,127,127));
+			var ddown = DropDownList.createWithListAndPosition(this,this.changeEditorTab,Mapeditor.getTabOptions(),cc.p((screenSize.width-350),(screenSize.height)-20));
+			ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+			ddown.setMinimumWidth(80);
+			this.addChild(ddown);
+			return true;
+		}
+
+
 
 		if(cc.rectContainsPoint(cc.rect(this.panels["game_menu"].getPositionX(),this.panels["game_menu"].getPositionY(),this.panels["game_menu"].getContentSize().width,this.panels["game_menu"].getContentSize().height),pos)){
 			this.panels["game_menu"].setColor(cc.c3b(127,127,127));
-			var ddown = DropDownList.createWithListAndPosition(this,this.menuClicked,["Logout"],cc.p(screenSize.width-80,44))
+			var ddown = DropDownList.createWithListAndPosition(this,this.menuClicked,["Logout"],cc.p((screenSize.width-showingEditor)-80,44))
 			ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
 			ddown.setMinimumWidth(80);
 			this.addChild(ddown);
@@ -357,6 +450,16 @@ var GameScene = Scene.extend({
 			Book.didBecomeActive();
 			this.addChild(Book);
 		}
+	},
+
+	showEditor:function(){
+		showingEditor=352;
+		this.onOrientationChanged();
+	},
+
+	hideEditor:function(){
+		showingEditor=0;
+		this.onOrientationChanged();
 	},
 
 	showNPCTalk:function(npc,script,eventnumber,name,content,options){
@@ -556,8 +659,9 @@ var GameScene = Scene.extend({
 						Mapeditor = new MapEditor();
 						Mapeditor.init();
 						Mapeditor.didBecomeActive();
-						this.addChild(Mapeditor);
+						this.editSprite.addChild(Mapeditor);
 						GameMap.setInteractionDelegate(Mapeditor);
+						this.showEditor();
 					}
 				break;
 				case "/editsettings":
@@ -671,7 +775,7 @@ var GameScene = Scene.extend({
 	
 	init:function(withData){
 		this._super();
-	//	var bgLayer = cc.LayerColor.create(cc.c3b(0,0,0),screenSize.width,(screenSize.height-sizeReducer));
+	//	var bgLayer = cc.LayerColor.create(cc.c3b(0,0,0),(screenSize.width-showingEditor),(screenSize.height-sizeReducer));
 	//	bgLayer.setAnchorPoint(cc.p(0,0));
 	//	bgLayer.setPosition(cc.p(0,0));
 	//	this.addChild(bgLayer);
@@ -720,11 +824,12 @@ var GameScene = Scene.extend({
 			this.updateEditorPos();
 			this.updateEditorMap();
 			sizeReducer=20;
+			this.editSprite=this.panels["editorbg"];
 		}else{
 			this.panels["menu_bar"].setVisible(false);
+
 		}
 		SkillBars.update();
-
 	},
 
 	saveSchedule:function(){

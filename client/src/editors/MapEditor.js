@@ -1,5 +1,5 @@
 Mapeditor=null;
-MapEditor = Popup.extend({
+MapEditor = Scene.extend({
 	map:null,
 	mapOffset:cc.p(0,0),
 	editMode:"tiles",
@@ -7,22 +7,25 @@ MapEditor = Popup.extend({
 	currentLayer:"ground1",
 	currentTexture:tileTextureList[0]["name"],
 	currentTextureNumber:0,
+	mapSize:null,
+
+	getTabOptions:function(clicknum){
+		return ["Tiles","Scripts","Settings"];
+	},
 	
 	getLayoutObject:function(){
+		this.mapSize = (screenSize.height-40)-(((screenSize.height-40)-16)%cellsize);
+
 		return { "panels":{
-				position:cc.p(300,10),
 				children:{	
 					"main_panel":{
 						anchorPoint:cc.p(0,0),
-						position: cc.p(0,0),
-						size: cc.size(420,400),
-						color: cc.c4b(0,0,100,120),
 						children: {
 							"tab1":{
 								children:{
 									"tiles" : {
 										anchorPoint:cc.p(0,1),
-										position:cc.p(16,336),
+										position:cc.p(16,this.mapSize),
 										texture:tileTextureList[0]["name"],
 									},
 									"scriptbtn" : {
@@ -40,52 +43,12 @@ MapEditor = Popup.extend({
 											}
 										}
 									},
-									"textureleftbtn" : {
-										position:cc.p(200,360),
-										size:cc.size(16,32),
-										texture:"GUI/texture_change_left.png",
-										anchorPoint:cc.p(0,0),
-									},
-									"texturerightbtn" : {
-										position:cc.p(310,360),
-										size:cc.size(16,32),
-										texture:"GUI/texture_change_right.png",
-										anchorPoint:cc.p(0,0),
-									},
-									"textureName" : {
-										position:cc.p(214,360),
-										size:cc.size(96,32),
-										texture:"GUI/texture_change_middle.png",
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:tileTextureList[0]["name"],
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(48,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
 									
-									"deletebtn" : {
-										position:cc.p(360,308),
-										size:cc.size(60,32),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Erase",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(32,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
+									
+									
 									"leftbtn" : {
 										position:cc.p(0,16),
-										size:cc.size(16,320),
+										size:cc.size(16,this.mapSize-16),
 										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
@@ -93,14 +56,14 @@ MapEditor = Popup.extend({
 												label:"<",
 												fontSize:12,
 												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(8,160),
+												position:cc.p(8,(this.mapSize-16)/2),
 												color:cc.c3b(255,255,255),
 											}
 										}
 									},
 									"rightbtn" : {
 										position:cc.p(336,16),
-										size:cc.size(16,320),
+										size:cc.size(16,this.mapSize-16),
 										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
 										children:{
@@ -108,13 +71,13 @@ MapEditor = Popup.extend({
 												label:">",
 												fontSize:12,
 												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(8,160),
+												position:cc.p(8,(this.mapSize-16)/2),
 												color:cc.c3b(255,255,255),
 											}
 										}
 									},
 									"upbtn" : {
-										position:cc.p(16,336),
+										position:cc.p(16,this.mapSize),
 										size:cc.size(320,16),
 										color: cc.c4b(0,0,255,255),
 										anchorPoint:cc.p(0,0),
@@ -143,156 +106,74 @@ MapEditor = Popup.extend({
 											}
 										}
 									},
-									"fillbtn" : {
-										position:cc.p(428,308),
-										size:cc.size(60,32),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
+
+									"menu_bar":{
+										size:cc.size(352,20),
+										position:cc.p(0,screenSize.height-40),
+										color:cc.c3b(127,127,127),
 										children:{
-											"text":{
-												label:"Fill",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(32,16),
-												color:cc.c3b(0,0,0),
-											}
+											"layerDropDown":{
+												position:cc.p(0,0),
+												size:cc.size(80,20),
+												color: cc.c3b(127,127,127),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"lbl":{
+														label:"Ground 1",
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0),
+														position:cc.p(40,3),
+													}
+												}
+											},
+											"textureDropDown": {
+												position:cc.p(80,0),
+												size:cc.size(80,20),
+												color: cc.c3b(127,127,127),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"lbl":{
+														label:(tileTextureList[0]["name"].substring(0,12)),
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0),
+														position:cc.p(40,3),
+													}
+												}
+											},
+											"fillbtn": {
+												position:cc.p(160,0),
+												size:cc.size(80,20),
+												color: cc.c3b(127,127,127),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"lbl":{
+														label:"Fill All",
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0),
+														position:cc.p(40,3),
+													}
+												}
+											},
+											"deletebtn": {
+												position:cc.p(240,0),
+												size:cc.size(80,20),
+												color: cc.c3b(127,127,127),
+												anchorPoint:cc.p(0,0),
+												children:{
+													"lbl":{
+														label:"Delete",
+														fontSize:12,
+														anchorPoint:cc.p(0.5,0),
+														position:cc.p(40,3),
+													}
+												}
+											},
 										}
 									},
-									"ground1btn" : {
-										position:cc.p(360,278),
-										size:cc.size(128,26),
-										color: GREEN,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Ground 1",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"ground2btn" : {
-										position:cc.p(360,248),
-										size:cc.size(128,26),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Ground 2",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"ground3btn" : {
-										position:cc.p(360,218),
-										size:cc.size(128,26),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Ground 3",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"mask1btn" : {
-										position:cc.p(360,188),
-										size:cc.size(128,26),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Mask 1",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"mask2btn" : {
-										position:cc.p(360,158),
-										size:cc.size(128,26),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Mask 2",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"mask3btn" : {
-										position:cc.p(360,128),
-										size:cc.size(128,26),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Mask 3",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"fringe1btn" : {
-										position:cc.p(360,98),
-										size:cc.size(128,26),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Fringe 1",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"fringe2btn" : {
-										position:cc.p(360,68),
-										size:cc.size(128,26),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Fringe 2",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"fringe3btn" : {
-										position:cc.p(360,8),
-										size:cc.size(128,26),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Fringe 3",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
+
+									
+
+									
 									
 									"highlightnode" : {
 										anchorPoint:cc.p(0,0),
@@ -310,12 +191,16 @@ MapEditor = Popup.extend({
 							},
 							"tab2":{
 								children:{
-									"saveBack":{
-										position:cc.p(0,78),
-										size:cc.size(200,60),
-										color: cc.c4b(0,255,0,100),
+									"scriptList":{
+										position:cc.p(0,0),
+										size:cc.size(352,screenSize.height-20),
 										anchorPoint:cc.p(0,0),
-									},
+									}
+								}
+							},
+							"tab3":{
+								children:{
+									
 									"deleteback":{
 										position:cc.p(0,138),
 										size:cc.size(200,60),
@@ -458,128 +343,100 @@ MapEditor = Popup.extend({
 											}
 										}
 									},
-									"savebtn" : {
-										position:cc.p(70,16),
-										size:cc.size(60,32),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"Save",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(32,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"save_text":{
-										label:"Save Map: You sure?",
-										fontSize:14,
-										anchorPoint:cc.p(0.5,0),
-										position: cc.p(100,52),
-									},
-									"savebtnNo" : {
-										position:cc.p(10,16),
-										size:cc.size(60,32),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"NO",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(32,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"savebtnYes" : {
-										position:cc.p(130,16),
-										size:cc.size(60,32),
-										color: WHITE,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"YES",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(32,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
 								}
 							},
-							"tab1Clickable":{
-								position:cc.p(0,380),
-								size:cc.size(60,20),
-								color: WHITE,
-								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"Editor",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(32,10),
-										color:cc.c3b(0,0,0),
-									}
-								}
-							},
-							"tab2Clickable":{
-								position:cc.p(62,380),
-								size:cc.size(60,20),
-								color: WHITE,
-								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"Settings",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(32,10),
-										color:cc.c3b(0,0,0),
-									}
-								}
-							}
-						}
-					},
-					"control_panel":{
-						anchorPoint:cc.p(0,0),
-						position: cc.p(0,400),
-						size: cc.size(420,32),
-						color: cc.c4b(255,0,0,200),
-						children:{	
-							"header":{
-								label:"Map Editor - Map #" + GameMap.getMapNumber(),
-								fontSize:20,
-								anchorPoint:cc.p(0,0.5),
-								position:cc.p(8,16),
-							},
-							"exitBtn":{
-								position: cc.p(391,3),
-								size: cc.size(26,26),
-								anchorPoint:cc.p(0,0),
-								color: cc.c4b(255,255,255,200),
-								children:{	
-								"content":{
-									label:"X",
-									fontSize:20,
-									color:cc.c3b(0,0,0),
-									anchorPoint:cc.p(0.5,0.5),
-									position:cc.p(13,13),
-									}
-								}
-							}
+							
 						}
 					},
 				}
 			}
 		};
 	},
+
+	updateScriptList:function(){
+		var list = ObjectLists.getScriptList();
+		if(this.panels["main_panel"]["tab2"]["scriptList"].listView!=null){
+			this.panels["main_panel"]["tab2"]["scriptList"].listView.removeFromParent();
+			this.panels["main_panel"]["tab2"]["scriptList"].listView=null;
+		}
+
+		var listnodes = [];
+		var callBackList=[];
+		for(var i=0;i<list.length;i++){
+			listnodes[i]=cc.Node.create();	
+			if(list[i]["specifier"]=="Tile"){
+				listnodes[i]=cc.Sprite.create();
+				listnodes[i].setColor(cc.c3b(80,80,80));
+				listnodes[i].setAnchorPoint(cc.p(0,0));
+				var text = cc.LabelTTF.create(list[i]["name"],"Arial",12);
+				text.setAnchorPoint(cc.p(0,0));
+				var bottomLine= cc.LayerColor.create(cc.c4b(0,0,0,127),326,1);
+				bottomLine.setPosition(cc.p(0,0))
+				text.setPosition(cc.p(2,2));
+				text.setDimensions(cc.size(326,0));
+				listnodes[i].setTextureRect(cc.rect(0,0,326,text.getContentSize().height+4));
+				listnodes[i].setContentSize(326,text.getContentSize().height+4);
+				listnodes[i].addChild(text);
+				listnodes[i].addChild(bottomLine);
+				callBackList.push([listnodes[i]]);
+				if(this.typeData==i){
+					listnodes[i].setColor(cc.c3b(200,200,200));
+					text.setColor(cc.c3b(0,0,0));
+					listnodes[i].callBack="Use";	
+				}
+			}else{
+				callBackList.push([]);
+				listnodes[i].setContentSize(0,0);
+			}
+		}
+		var self=this;
+		this.panels["main_panel"]["tab2"]["scriptList"].getListSize = function(){
+			var height =0;
+			for(var i=0;i<listnodes.length;i++){
+				height+=listnodes[i].getContentSize().height;
+			}
+			return cc.size(330,height);
+		};
+		this.panels["main_panel"]["tab2"]["scriptList"].getListElementAmount=function(){
+			return listnodes.length;
+		};
+		this.panels["main_panel"]["tab2"]["scriptList"].getSizeForElement=function(elementID){
+			return listnodes[elementID].getContentSize();
+		};
+		this.panels["main_panel"]["tab2"]["scriptList"].getListNodeForIndex=function(elementID){
+			return listnodes[elementID];
+		};
+		this.panels["main_panel"]["tab2"]["scriptList"].getHighlightNode = function(elementID){
+			return listnodes[elementID].highlightNode;
+		};
+		this.panels["main_panel"]["tab2"]["scriptList"].runListCallBack=function(name,listelement){
+			console.log(listelement);
+			self.typeData=listelement;
+			self.updateScriptList();
+		};
+		this.panels["main_panel"]["tab2"]["scriptList"].listView = ListView.create(this.panels["main_panel"]["tab2"]["scriptList"]);
+		
+		if(this.panels["main_panel"]["tab2"]["scriptList"].listView.scrollBar){
+			this.panels["main_panel"]["tab2"]["scriptList"].listView.scrollBar.setPositionX(330);
+			this.panels["main_panel"]["tab2"]["scriptList"].listView.scrollBar.setContentSize(20,60);
+			this.panels["main_panel"]["tab2"]["scriptList"].listView.scrollBar.setColor(cc.c4b(200,200,200,100));
+			this.panels["main_panel"]["tab2"]["scriptList"].listView.scrollBarBack.setVisible(false);
+		}
+		this.panels["main_panel"]["tab2"]["scriptList"].listView.setCallBackList(callBackList);
+		this.panels["main_panel"]["tab2"]["scriptList"].addChild(this.panels["main_panel"]["tab2"]["scriptList"].listView);
+	},
+
+
 	
 	getIdentifier:function(){
 		return "MapEditor";
 	},
+
+	saveEditor:function(){
+		GameMap.setMapInfo({"up": this.mapUpBox.getText(),"down":this.mapDownBox.getText(),"left":this.mapLeftBox.getText(),"right":this.mapRightBox.getText(),"width":this.mapWidthBox.getText(),"height":this.mapHeightBox.getText()});
+		GameMap.updateServer();
+	},
+
 	mapOffset:null,
 	mapUpBox:null,
 	mapDownBox:null,
@@ -594,6 +451,7 @@ MapEditor = Popup.extend({
 	init:function(_map){
 		this._super();
 		this.map =_map;
+		this.setTouchPriority(-100);
 		this.mapOffset=cc.p(0,0);
 		this.tabWidths=[null,496,200];
 	},
@@ -602,42 +460,55 @@ MapEditor = Popup.extend({
 		this._super();
 		this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
 		this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(0);
-		this.mapUpBox = new EntryBox(this.panels["main_panel"]["tab2"]["mapUp_entry"],cc.size(this.panels["main_panel"]["tab2"]["mapUp_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["mapUp_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["mapUp_entry"].getContentSize().height), GameMap.hasMapUp() ? GameMap.getMapUp():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.mapUpBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapUp_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapUp_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapUp_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapUp_entry"].getContentSize().height), GameMap.hasMapUp() ? GameMap.getMapUp():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapUpBox.setDefaultFineFlag(true);
 		this.mapUpBox.setNullAllowed(true);
-		this.mapDownBox = new EntryBox(this.panels["main_panel"]["tab2"]["mapDown_entry"],cc.size(this.panels["main_panel"]["tab2"]["mapDown_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["mapDown_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["mapDown_entry"].getContentSize().height), GameMap.hasMapDown() ? GameMap.getMapDown():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.mapDownBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapDown_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapDown_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapDown_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapDown_entry"].getContentSize().height), GameMap.hasMapDown() ? GameMap.getMapDown():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapDownBox.setDefaultFineFlag(true);
 	    this.mapDownBox.setNullAllowed(true);
-		this.mapLeftBox = new EntryBox(this.panels["main_panel"]["tab2"]["mapLeft_entry"],cc.size(this.panels["main_panel"]["tab2"]["mapLeft_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["mapLeft_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["mapLeft_entry"].getContentSize().height), GameMap.hasMapLeft() ? GameMap.getMapLeft():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.mapLeftBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapLeft_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapLeft_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapLeft_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapLeft_entry"].getContentSize().height), GameMap.hasMapLeft() ? GameMap.getMapLeft():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapLeftBox.setDefaultFineFlag(true);
 		this.mapLeftBox.setNullAllowed(true);
-		this.mapRightBox = new EntryBox(this.panels["main_panel"]["tab2"]["mapRight_entry"],cc.size(this.panels["main_panel"]["tab2"]["mapRight_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["mapRight_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["mapRight_entry"].getContentSize().height), GameMap.hasMapRight() ? GameMap.getMapRight():"" , cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.mapRightBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapRight_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapRight_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapRight_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapRight_entry"].getContentSize().height), GameMap.hasMapRight() ? GameMap.getMapRight():"" , cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapRightBox.setDefaultFineFlag(true);
 		this.mapRightBox.setNullAllowed(true);
 
 
-		this.mapWidthBox = new EntryBox(this.panels["main_panel"]["tab2"]["mapWidth_entry"],cc.size(this.panels["main_panel"]["tab2"]["mapWidth_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["mapWidth_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["mapWidth_entry"].getContentSize().height), GameMap.getMapWidth() ? GameMap.getMapWidth():36 , cc.c4b(255,255,255), cc.c3b(0,0,0));
+		this.mapWidthBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapWidth_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapWidth_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapWidth_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapWidth_entry"].getContentSize().height), GameMap.getMapWidth() ? GameMap.getMapWidth():36 , cc.c4b(255,255,255), cc.c3b(0,0,0));
 		this.mapWidthBox.setDefaultFineFlag(true);
 
-		this.mapHeightBox = new EntryBox(this.panels["main_panel"]["tab2"]["mapHeight_entry"],cc.size(this.panels["main_panel"]["tab2"]["mapHeight_entry"].getContentSize().width,this.panels["main_panel"]["tab2"]["mapHeight_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab2"]["mapHeight_entry"].getContentSize().height), GameMap.getMapHeight() ? GameMap.getMapHeight():36 , cc.c4b(255,255,255), cc.c3b(0,0,0));
+		this.mapHeightBox = new EntryBox(this.panels["main_panel"]["tab3"]["mapHeight_entry"],cc.size(this.panels["main_panel"]["tab3"]["mapHeight_entry"].getContentSize().width,this.panels["main_panel"]["tab3"]["mapHeight_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["mapHeight_entry"].getContentSize().height), GameMap.getMapHeight() ? GameMap.getMapHeight():36 , cc.c4b(255,255,255), cc.c3b(0,0,0));
 		this.mapHeightBox.setDefaultFineFlag(true);
 
 
 		this.showAreYouSureClear(false);
-		this.showAreYouSureSave(false);
 		this.setTab(1);
 		this.updateMapOffset();
 		GameMap.setStringsVisible(true);
 	},
 	
-	setTypeData:function(value){
-		if(Scripteditor){
-			Scripteditor.willTerminate();
-			this.scheduleOnce(function(){Scripteditor.removeFromParent(); Scripteditor=null;});
-			this.typeData=value;
-			this.setTouchEnabled(true);
+	selectLayer:function(layerNum){
+		this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["layerDropDown"].setColor(cc.c3b(127,127,127));
+		this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["textureDropDown"].setColor(cc.c3b(127,127,127));
+this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127));
+	
+		var layerName="ground1";
+		var showName="Ground 1";
+		switch(layerNum){
+			case 0: layerName="ground1"; showName="Ground 1"; break;
+			case 1: layerName="ground2"; showName="Ground 2"; break;
+			case 2: layerName="ground3"; showName="Ground 3"; break;
+			case 3: layerName="mask1"; showName="Mask 1"; break;
+			case 4: layerName="mask2"; showName="Mask 2"; break;
+			case 5: layerName="mask3"; showName="Mask 3"; break;
+			case 6: layerName="fringe1"; showName = "Fringe 1"; break;
+			case 7: layerName="fringe2"; showName = "Fringe 2"; break;
+			case 8: layerName="fringe3"; showName = "Fringe 3"; break;
 		}
+		this.delegate.currentLayer=layerName;
+		this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["layerDropDown"]["lbl"].setString(showName);
 	},
+
 	
 	willTerminate:function(){
 		this._super();
@@ -651,7 +522,7 @@ MapEditor = Popup.extend({
 			var truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);
 			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().height){
 				truePos.x = truePos.x-(truePos.x%cellsize)+16;
-				truePos.y = truePos.y-(truePos.y%cellsize)+16;
+				truePos.y = truePos.y-(truePos.y%cellsize)+17;
 				
 				this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(127);
 				this.panels["main_panel"]["tab1"]["highlightnode"].setPosition(truePos);
@@ -663,14 +534,14 @@ MapEditor = Popup.extend({
 	setTab:function(value){
 		if(value!=this.currentTab){
 			this.panels["main_panel"].setContentSize(this.tabWidths[value],this.panels["main_panel"].getContentSize().height);
-			this.panels["control_panel"].setContentSize(this.tabWidths[value],this.panels["control_panel"].getContentSize().height);
-			if(this.currentTab==2 || this.currentTab==0){
-				this.panels["main_panel"]["tab2"]["mapUp_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapUp_entry"].getPositionX()-1000);
-				this.panels["main_panel"]["tab2"]["mapLeft_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapLeft_entry"].getPositionX()-1000);
-				this.panels["main_panel"]["tab2"]["mapDown_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapDown_entry"].getPositionX()-1000);
-				this.panels["main_panel"]["tab2"]["mapRight_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapRight_entry"].getPositionX()-1000);
-				this.panels["main_panel"]["tab2"]["mapWidth_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapWidth_entry"].getPositionX()-1000);
-				this.panels["main_panel"]["tab2"]["mapHeight_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapHeight_entry"].getPositionX()-1000);
+			
+			if(this.currentTab==3 || this.currentTab==0){
+				this.panels["main_panel"]["tab3"]["mapUp_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapUp_entry"].getPositionX()-1000);
+				this.panels["main_panel"]["tab3"]["mapLeft_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapLeft_entry"].getPositionX()-1000);
+				this.panels["main_panel"]["tab3"]["mapDown_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapDown_entry"].getPositionX()-1000);
+				this.panels["main_panel"]["tab3"]["mapRight_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapRight_entry"].getPositionX()-1000);
+				this.panels["main_panel"]["tab3"]["mapWidth_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapWidth_entry"].getPositionX()-1000);
+				this.panels["main_panel"]["tab3"]["mapHeight_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapHeight_entry"].getPositionX()-1000);
 			}
 			if(this.currentTab==1){
 				if(this.editMode=="erasing" || this.editMode=="tiles"){
@@ -680,19 +551,28 @@ MapEditor = Popup.extend({
 			this.currentTab=value;
 			this.panels["main_panel"]["tab1"].setVisible(false);
 			this.panels["main_panel"]["tab2"].setVisible(false);
-			this.panels["main_panel"]["tab1Clickable"].setColor(WHITE);
-			this.panels["main_panel"]["tab2Clickable"].setColor(WHITE);
+			this.panels["main_panel"]["tab3"].setVisible(false);
 			this.panels["main_panel"]["tab"+value].setVisible(true);
-			this.panels["main_panel"]["tab"+value+"Clickable"].setColor(cc.c4b(255,255,0,255));
-			if(value==2){
-				this.panels["main_panel"]["tab2"]["mapUp_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapUp_entry"].getPositionX()+1000);
-				this.panels["main_panel"]["tab2"]["mapLeft_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapLeft_entry"].getPositionX()+1000);
-				this.panels["main_panel"]["tab2"]["mapDown_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapDown_entry"].getPositionX()+1000);
-				this.panels["main_panel"]["tab2"]["mapRight_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapRight_entry"].getPositionX()+1000);
-				this.panels["main_panel"]["tab2"]["mapWidth_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapWidth_entry"].getPositionX()+1000);
-				this.panels["main_panel"]["tab2"]["mapHeight_entry"].setPositionX(this.panels["main_panel"]["tab2"]["mapHeight_entry"].getPositionX()+1000);
+		
+			if(value==1){
+				this.editMode="tiles";
+				this.panels["main_panel"]["tab1"]["menu_bar"]["deletebtn"].setColor(cc.c3b(127,127,127));
 			}
-			this.panels["control_panel"]["exitBtn"].setPositionX(this.tabWidths[value]-29);
+
+			if(value==2){
+				this.editMode="script";
+				this.updateScriptList();
+			}
+
+			if(value==3){
+				this.panels["main_panel"]["tab3"]["mapUp_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapUp_entry"].getPositionX()+1000);
+				this.panels["main_panel"]["tab3"]["mapLeft_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapLeft_entry"].getPositionX()+1000);
+				this.panels["main_panel"]["tab3"]["mapDown_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapDown_entry"].getPositionX()+1000);
+				this.panels["main_panel"]["tab3"]["mapRight_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapRight_entry"].getPositionX()+1000);
+				this.panels["main_panel"]["tab3"]["mapWidth_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapWidth_entry"].getPositionX()+1000);
+				this.panels["main_panel"]["tab3"]["mapHeight_entry"].setPositionX(this.panels["main_panel"]["tab3"]["mapHeight_entry"].getPositionX()+1000);
+			}
+			
 		}
 	},
 	
@@ -700,46 +580,55 @@ MapEditor = Popup.extend({
 		this.schedule(this.updateMapOffset);
 		if(this.panels["main_panel"]["tab1"]["tiles"].getTexture() && this.panels["main_panel"]["tab1"]["tiles"].getTexture()._isLoaded==true){
 			this.unschedule(this.updateMapOffset);
-			this.panels["main_panel"]["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(cellsize*this.mapOffset.x),Math.floor(cellsize*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:320,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:320));
+			this.panels["main_panel"]["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(cellsize*this.mapOffset.x),Math.floor(cellsize*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:320,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<this.mapSize?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:this.mapSize));
 		}
 	},
+
+	noSelectedMenu:function(touch){
+		this.delegate.onTouchBegan(touch);
+	},
+
+	selectFillMap:function(number){
+		this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["layerDropDown"].setColor(cc.c3b(127,127,127));
+		this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["textureDropDown"].setColor(cc.c3b(127,127,127));
+		this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127));
 	
-	onTouchBegan:function(touch){
-		if(this._super(touch)){
-			return true;
+		if(number==1){
+			if(this.delegate.panels["main_panel"]["tab1"]["selectednode"].getOpacity()!=0){
+				var ySize = Math.floor(this.delegate.mapSize/cellsize)-1;
+				GameMap.fillMap(tileTextureList[this.delegate.currentTextureNumber]["name"],cc.p(((this.delegate.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/cellsize)+this.delegate.mapOffset.x,(ySize-((this.delegate.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/cellsize))+this.delegate.mapOffset.y),this.delegate.currentLayer);
+				GameMap.updateMap();
+			}
 		}
-		this.prevMovPos=null;
+	},
+
+	onTouchBegan:function(touch){
 		var pos = touch._point;
 		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
-
-		if(isTouching(this.panels["main_panel"]["tab1Clickable"],truePos)){
-			this.setTab(1);
-			return true;
-		}		
-	
-		if(isTouching(this.panels["main_panel"]["tab2Clickable"],truePos)){
-			this.setTab(2);
-			return true;
-		}	
+		this.panels["main_panel"]["tab1"]["menu_bar"]["layerDropDown"].setColor(cc.c3b(127,127,127));
+		this.panels["main_panel"]["tab1"]["menu_bar"]["textureDropDown"].setColor(cc.c3b(127,127,127));
+		this.panels["main_panel"]["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127));
 		
 		if(this.currentTab==1){
+			if(isTouching(this.panels["main_panel"]["tab1"]["menu_bar"]["layerDropDown"],this.panels["main_panel"]["tab1"]["menu_bar"].convertToNodeSpace(pos))){
+				this.panels["main_panel"]["tab1"]["menu_bar"]["layerDropDown"].setColor(cc.c3b(60,60,60));
+				var ddown = DropDownList.createWithListAndPosition(this,this.selectLayer,["Ground 1","Ground 2","Ground 3","Mask 1","Mask 2","Mask 3","Fringe 1","Fringe 2","Fringe 3"],cc.p(0,screenSize.height-40));
+				ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+				ddown.setMinimumWidth(80);
+				this.addChild(ddown);
+				return true;
+			}
 
-			if(isTouching(this.panels["main_panel"]["tab1"]["scriptbtn"],truePos)){
-				this.editMode = this.editMode=="script" ? "tiles" : "script";
-				if(this.editMode=="script"){
-					if(Scripteditor!=null && !Scripteditor._parent) Scripteditor=null;
-					if(Scripteditor){
-						Scripteditor.willTerminate();
-						Scripteditor.removeFromParent();
-						Scripteditor=null;
-					}
-					Scripteditor = new ScriptingList();
-					Scripteditor.init({delegate:this,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
-					Scripteditor.didBecomeActive();
-					this._parent.addChild(Scripteditor);
-					this.setTouchEnabled(false);
-					this.panels["main_panel"]["tab1"]["scriptbtn"].setColor(RED);
-				} 
+			if(isTouching(this.panels["main_panel"]["tab1"]["menu_bar"]["textureDropDown"],this.panels["main_panel"]["tab1"]["menu_bar"].convertToNodeSpace(pos))){
+				var nameList = [];
+				for(var i in tileTextureList){
+					nameList.push(tileTextureList[i]["name"].substring(0,12));
+				}
+				this.panels["main_panel"]["tab1"]["menu_bar"]["textureDropDown"].setColor(cc.c3b(60,60,60));
+				var ddown = DropDownList.createWithListAndPosition(this,this.useTexture,nameList,cc.p(80,screenSize.height-40));
+				ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+				ddown.setMinimumWidth(80);
+				this.addChild(ddown);
 				return true;
 			}
 
@@ -750,6 +639,9 @@ MapEditor = Popup.extend({
 				}
 				return true;
 			}
+
+
+
 			if(isTouching(this.panels["main_panel"]["tab1"]["rightbtn"],truePos)){
 				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>320 && this.mapOffset.x<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width-320)/cellsize)){
 					this.mapOffset.x++;	this.updateMapOffset();
@@ -757,65 +649,35 @@ MapEditor = Popup.extend({
 				return true;
 			}
 			if(isTouching(this.panels["main_panel"]["tab1"]["upbtn"],truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>320 && this.mapOffset.y>0){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>this.mapSize && this.mapOffset.y>0){
 					this.mapOffset.y--;	this.updateMapOffset();
 				}
 				return true;
 			}
 			if(isTouching(this.panels["main_panel"]["tab1"]["downbtn"],truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>320 && this.mapOffset.y<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height-320)/cellsize)){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>this.mapSize && this.mapOffset.y<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height-this.mapSize)/cellsize)){
 					this.mapOffset.y++;	this.updateMapOffset();
 				}
 				return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["ground1btn"],truePos)){
-				this.updateCurrentLayer("ground1"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["ground2btn"],truePos)){
-				this.updateCurrentLayer("ground2");	return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["ground3btn"],truePos)){
-				this.updateCurrentLayer("ground3"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["mask1btn"],truePos)){
-				this.updateCurrentLayer("mask1"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["mask2btn"],truePos)){
-				this.updateCurrentLayer("mask2"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["mask3btn"],truePos)){
-				this.updateCurrentLayer("mask3"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["fringe1btn"],truePos)){
-				this.updateCurrentLayer("fringe1");	return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["fringe2btn"],truePos)){
-				this.updateCurrentLayer("fringe2"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["fringe3btn"],truePos)){
-				this.updateCurrentLayer("fringe3"); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["texturerightbtn"],truePos)){
-				this.useNextTexture(); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["textureleftbtn"],truePos)){
-				this.usePrevTexture(); return true;
-			}
+			
 
-			if(isTouching(this.panels["main_panel"]["tab1"]["deletebtn"],truePos)){
+			if(isTouching(this.panels["main_panel"]["tab1"]["menu_bar"]["deletebtn"],this.panels["main_panel"]["tab1"]["menu_bar"].convertToNodeSpace(pos))){
 				this.editMode=this.editMode=="erasing" ? "tiles" : "erasing";
-				this.panels["main_panel"]["tab1"]["deletebtn"].setColor(WHITE);
+				this.panels["main_panel"]["tab1"]["menu_bar"]["deletebtn"].setColor(cc.c3b(127,127,127));
 				if(this.editMode=="erasing"){
-					this.panels["main_panel"]["tab1"]["deletebtn"].setColor(RED);
+					this.panels["main_panel"]["tab1"]["menu_bar"]["deletebtn"].setColor(RED);
 				}
 				return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["fillbtn"],truePos)){
-				if(this.panels["main_panel"]["tab1"]["selectednode"].getOpacity()!=0){
-					var ySize = Math.floor(320/cellsize)-1;
-					GameMap.fillMap(tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/cellsize)+this.mapOffset.x,(ySize-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/cellsize))+this.mapOffset.y),this.currentLayer);
-					GameMap.updateMap();
-				}
+			
+			if(isTouching(this.panels["main_panel"]["tab1"]["menu_bar"]["fillbtn"],this.panels["main_panel"]["tab1"]["menu_bar"].convertToNodeSpace(pos))){
+				var nameList = [];
+				this.panels["main_panel"]["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(60,60,60));
+				var ddown = DropDownList.createWithListAndPosition(this,this.selectFillMap,["Cancel","Fill Layer"],cc.p(160,screenSize.height-40));
+				ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+				ddown.setMinimumWidth(80);
+				this.addChild(ddown);
 				return true;
 			}
 
@@ -832,25 +694,15 @@ MapEditor = Popup.extend({
 			} 
 		
 		}
-		if(this.currentTab==2){
-			if(isTouching(this.panels["main_panel"]["tab2"]["clearbtn"],truePos)){
+		if(this.currentTab==3){
+			if(isTouching(this.panels["main_panel"]["tab3"]["clearbtn"],truePos)){
 				this.showAreYouSureClear(true); return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["clearbtnNo"],truePos)){
+			if(isTouching(this.panels["main_panel"]["tab3"]["clearbtnNo"],truePos)){
 				this.showAreYouSureClear(false); return true;
 			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["clearbtnYes"],truePos)){
+			if(isTouching(this.panels["main_panel"]["tab3"]["clearbtnYes"],truePos)){
 				GameMap.destroy(); this.showAreYouSureClear(false); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["savebtn"],truePos)){
-				this.showAreYouSureSave(true); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["savebtnNo"],truePos)){
-				this.showAreYouSureSave(false); return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab2"]["savebtnYes"],truePos)){
-				GameMap.setMapInfo({"up": this.mapUpBox.getText(),"down":this.mapDownBox.getText(),"left":this.mapLeftBox.getText(),"right":this.mapRightBox.getText(),"width":this.mapWidthBox.getText(),"height":this.mapHeightBox.getText()});
-				GameMap.updateServer(); this.showAreYouSureSave(false); return true;
 			}
 		}
 
@@ -871,43 +723,27 @@ MapEditor = Popup.extend({
 		this.currentLayer=layerName;
 	},
 	
-	useNextTexture:function(){
-		if(this.currentTextureNumber>=tileTextureList.length-1){
-			this.currentTextureNumber=-1;
-		}
-		this.currentTextureNumber++;
-		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
-		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
-		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
-		this.mapOffset=cc.p(0,0);
-		this.updateMapOffset();
-	},
+	useTexture:function(number){
+		this.delegate.currentTextureNumber=number;
+		this.delegate.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.delegate.currentTextureNumber]["texture"]);
+		this.delegate.currentTexture = tileTextureList[this.delegate.currentTextureNumber]["name"];
+		this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["textureDropDown"]["lbl"].setString(this.delegate.currentTexture);
+		this.delegate.mapOffset=cc.p(0,0);
+		this.delegate.updateMapOffset();
+				this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["layerDropDown"].setColor(cc.c3b(127,127,127));
+		this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["textureDropDown"].setColor(cc.c3b(127,127,127));
+this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127));
 	
-	usePrevTexture:function(){
-		if(this.currentTextureNumber<=0){
-			this.currentTextureNumber=tileTextureList.length;
-		}
-		this.currentTextureNumber--;
-		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
-		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
-		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
-		this.mapOffset=cc.p(0,0);
-		this.updateMapOffset();
+	this.delegate.panels["main_panel"]["tab1"]["menu_bar"]["textureDropDown"]["lbl"].setString(tileTextureList[this.delegate.currentTextureNumber]["name"].substring(0,12));
 	},
 	
 	showAreYouSureClear:function(visible){
-		this.panels["main_panel"]["tab2"]["clearbtnYes"].setVisible(visible);
-		this.panels["main_panel"]["tab2"]["clearbtnNo"].setVisible(visible);	
-		this.panels["main_panel"]["tab2"]["clear_text"].setVisible(visible);	
-		this.panels["main_panel"]["tab2"]["clearbtn"].setVisible(!visible);
+		this.panels["main_panel"]["tab3"]["clearbtnYes"].setVisible(visible);
+		this.panels["main_panel"]["tab3"]["clearbtnNo"].setVisible(visible);	
+		this.panels["main_panel"]["tab3"]["clear_text"].setVisible(visible);	
+		this.panels["main_panel"]["tab3"]["clearbtn"].setVisible(!visible);
 	},
 	
-	showAreYouSureSave:function(visible){
-		this.panels["main_panel"]["tab2"]["savebtnYes"].setVisible(visible);
-		this.panels["main_panel"]["tab2"]["savebtnNo"].setVisible(visible);	
-		this.panels["main_panel"]["tab2"]["save_text"].setVisible(visible);	
-		this.panels["main_panel"]["tab2"]["savebtn"].setVisible(!visible);
-	},
 	
 	tilePressed:function(tiles,tilenum,touchtype){
 		if(tiles[tilenum]==this.lastTile && touchtype=="moved"){
@@ -917,7 +753,7 @@ MapEditor = Popup.extend({
 		switch(this.editMode){
 			case "tiles":
 				if(this.panels["main_panel"]["tab1"]["selectednode"].getOpacity()!=0){
-					var ySize = Math.floor(320/cellsize)-1;
+					var ySize = Math.floor(this.mapSize/cellsize)-1;
 					GameMap.setLayer(tilenum,tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/cellsize)+this.mapOffset.x,(ySize-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/cellsize))+this.mapOffset.y),this.currentLayer);
 				}
 			break;

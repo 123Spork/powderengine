@@ -209,10 +209,14 @@ var SkillBars=cc.Layer.extend({
 
 	createSkillBar:function(name,color,i){
 		var newCol = hex2rgba(color);
-		var bar = cc.LayerColor.create(cc.c4b(newCol.r,newCol.g,newCol.b,newCol.a),this.skillsData[name]["currenthealth"]>0 ? 300*(this.skillsData[name]["currenthealth"]/this.skillsData[name]["maxhealth"]) : 1,15);
+		var bar = cc.Sprite.create()
+		bar.setTextureRect(cc.rect(0,0,this.skillsData[name]["currenthealth"]>0 ? 300*(this.skillsData[name]["currenthealth"]/this.skillsData[name]["maxhealth"]) : 1,15));
+		bar.setColor(cc.c3b(newCol.r,newCol.g,newCol.b));
+		//bar.setOpacity(newCol.a);
 		
 		bar.setPosition(0,((i-1)*-17));
 		bar.setAnchorPoint(cc.p(0,0));
+		bar._setOutlineEnabled(true);
 		return bar;
 	},
 

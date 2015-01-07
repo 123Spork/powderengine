@@ -288,7 +288,7 @@ var gridWidth = Math.floor(36);
 
 function updateScreenSize(){
  	screenSize=cc.EGLView.getInstance().getFrameSize();
- 	gamePanelSize = cc.size(screenSize.width,(screenSize.height-sizeReducer));
+ 	gamePanelSize = cc.size(screenSize.width,screenSize.height);
 	gameGridSize=cc.size(gridWidth*cellsize,gridHeight*cellsize);
 };
 

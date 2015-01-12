@@ -101,6 +101,7 @@
                 <file name="../node_modules/powder-cocos2d/ccgui/lib/CCScrollView/CCTableView.js"></file>
                 <file name="../node_modules/powder-cocos2d/cceditbox/lib/CCdomNode.js"></file>
                 <file name="../node_modules/powder-cocos2d/cceditbox/lib/CCEditBox.js"></file>
+                <file name="../node_modules/powder-cocos2d/ccaudio/lib/SimpleAudioEngine.js"></file>
                 <file name="./src/lang/EN.js"></file>
                 <file name="./src/lang/CZ.js"></file>
                 <file name="./src/lang/LA.js"></file>

@@ -13,7 +13,9 @@ var SceneManager = cc.Layer.extend({
 		this.background_node.setTextureRect(cc.rect(0,0,(screenSize.width-showingEditor),(screenSize.height-sizeReducer)));
 		this.background_node.setAnchorPoint(cc.p(0,0));
 		this.addChild(this.background_node);
-
+		if(soundList.indexOf("menu")>-1){
+			playBackgroundMusic("menu");
+		}
 		if(LocalStorage.getInstance() && isGameInSync){
 			settingsData = mergeSettings(settingsData,LocalStorage.getSettingsData());
 			this.goToScene("Login",{});	

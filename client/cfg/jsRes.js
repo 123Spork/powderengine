@@ -47,5 +47,6 @@ js.client = {
     MainScene_js : '[%client%]src/scenes/MainScene.js',
     Scene_js : '[%client%]src/scenes/Scene.js',
     SceneManager_js : '[%client%]src/scenes/SceneManager.js',
-    Utils_js : '[%client%]src/utils/Utils.js'
+    Utils_js : '[%client%]src/utils/Utils.js',
+    sound_js : '[%client%]src/utils/sound.js'
 };

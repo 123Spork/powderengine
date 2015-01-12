@@ -5,7 +5,7 @@ var PLAYMODE = LIVE;
 var keyMap = {};
 var isGameInSync=false;
 
-var tileTextureList = [], characterTextureList=[];
+var tileTextureList = [], characterTextureList=[], soundList=[];
 cc.FileUtils.getInstance().setSearchPaths(["res/Graphics"]);
 for(var i in document["ccConfig"]["tileSheets"]){
     tileTextureList.push({"name":document["ccConfig"]["tileSheets"][i],"texture":cc.TextureCache.getInstance().addImage(document["ccConfig"]["tileSheets"][i])});
@@ -14,8 +14,7 @@ for(var i in document["ccConfig"]["characterSheets"]){
     characterTextureList.push({"name":document["ccConfig"]["characterSheets"][i],"texture":cc.TextureCache.getInstance().addImage(document["ccConfig"]["characterSheets"][i])});
 }
 
-
-
+soundList = document["ccConfig"]["sounds"];
 
 document.getElementById("gameCanvas").onkeydown = function (event) {
 	event.preventDefault();

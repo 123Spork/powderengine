@@ -5,9 +5,34 @@ waitingOnServer:false,
 onOrientationChanged:function(){
 	resetLayoutsFromObject(this.getLayoutObject(),this.panels);
 },
-
+	
+musicStop:function(){
+	var musicPlaying=true;
+	for(var i in soundList){
+		if(isAudioLoading(soundList[i])){
+			musicPlaying=false;
+		}
+	}
+	if(musicPlaying){
+		stopBackgroundMusic();
+		this.unschedule(this.musicStop);	
+		playBackgroundMusic("menu");		
+	}
+},
 
 init:function(withData){
+	var waitingforMusic=false;
+	for(var i in soundList){
+		if(isAudioLoading(soundList[i])){
+			this.schedule(this.musicStop);
+			waitingforMusic=true;
+			break;		
+		}
+	}
+	if(waitingforMusic==false && soundList.indexOf("menu")>-1){
+		stopBackgroundMusic();
+		playBackgroundMusic("menu");
+	}
 	settingsData = mergeSettings(settingsData,LocalStorage.getSettingsData());
 	this._super();
 	SceneManager.setActiveScene(this);

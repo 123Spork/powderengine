@@ -15,6 +15,7 @@ var GameMap=cc.Layer.extend({
 	mapHeight:null,
 	mapOffset:cc.p(0,0),
 	currentMap:1,
+	mapMusic:null,
 	
 	isTileBlocked:function(tileid){
 		if(typeof tileid ==='string'){
@@ -179,8 +180,31 @@ var GameMap=cc.Layer.extend({
 	},
 	
 	
-	
+	musicStop:function(){
+		var musicPlaying=true;
+		for(var i in soundList){
+			if(isAudioLoading(soundList[i])){
+				musicPlaying=false;
+			}
+		}
+		if(musicPlaying){
+			stopBackgroundMusic();
+			this.unschedule(this.musicStop);	
+			if(this.mapMusic!=null && this.mapMusic!=='undefined'){
+				playBackgroundMusic(soundList[this.mapMusic]);	
+			}	
+		}
+	},
+
 	setupFromServer:function(data){
+		var waitingforMusic=false;
+		for(var i in soundList){
+			if(isAudioLoading(soundList[i])){
+				this.schedule(this.musicStop);
+				waitingforMusic=true;
+				break;		
+			}
+		}
 		this.tileData={}
 		this.tileData["mapdata"]={};
 		for(var i in this.tileNodes){
@@ -192,10 +216,27 @@ var GameMap=cc.Layer.extend({
 		
 		if(data){
 			if(data["mapdata"]){
+				if(data["mapdata"]["mapMusic"]!=null && data["mapdata"]["mapMusic"]!=='undefined'){
+					if(this.mapMusic==data["mapdata"]["mapMusic"]){
+						this.unschedule(this.musicStop);
+					}else{
+						stopBackgroundMusic();
+						if(waitingforMusic==false){	
+							if(data["mapdata"]["mapMusic"]!=null && data["mapdata"]["mapMusic"]!=='undefined'){
+								playBackgroundMusic(soundList[data["mapdata"]["mapMusic"]]);	
+							}
+						}
+					}
+					this.mapMusic=data["mapdata"]["mapMusic"];	
+				}else{
+					this.mapMusic=null;
+					stopBackgroundMusic();
+				}
 				this.mapUp = (data["mapdata"]["mapConnectors"]["up"]!="" && data["mapdata"]["mapConnectors"]["up"]!=null) ? data["mapdata"]["mapConnectors"]["up"] : null;
 				this.mapDown = (data["mapdata"]["mapConnectors"]["down"]!="" && data["mapdata"]["mapConnectors"]["down"]!=null) ? data["mapdata"]["mapConnectors"]["down"] : null;
 				this.mapLeft = (data["mapdata"]["mapConnectors"]["left"]!="" && data["mapdata"]["mapConnectors"]["left"]!=null) ? data["mapdata"]["mapConnectors"]["left"] : null;
 				this.mapRight = (data["mapdata"]["mapConnectors"]["right"]!="" && data["mapdata"]["mapConnectors"]["right"]!=null) ? data["mapdata"]["mapConnectors"]["right"] : null;
+				
 				if(gameMapInstance.mapWidth!=data["mapdata"]["mapConnectors"]["width"] || gameMapInstance.mapHeight!=data["mapdata"]["mapConnectors"]["height"]){
 					gridWidth=data["mapdata"]["mapConnectors"]["width"];
 					gridHeight=data["mapdata"]["mapConnectors"]["height"];
@@ -278,6 +319,16 @@ var GameMap=cc.Layer.extend({
 	},
 	
 	setup:function(mapnumber){
+
+		var waitingforMusic=false;
+		for(var i in soundList){
+			if(isAudioLoading(soundList[i])){
+				this.schedule(this.musicStop);
+				waitingforMusic=true;
+				break;		
+			}
+		}
+
 		var data = LocalStorage.getMapData(mapnumber);
 		this.tileData={}
 		this.tileData["mapdata"]={};
@@ -290,6 +341,22 @@ var GameMap=cc.Layer.extend({
 		
 		if(data){
 			if(data["mapdata"]){
+				if(data["mapdata"]["mapMusic"]!=null && data["mapdata"]["mapMusic"]!=='undefined'){
+					if(this.mapMusic==data["mapdata"]["mapMusic"]){
+						this.unschedule(this.musicStop);
+					}else{
+						stopBackgroundMusic();
+						if(waitingforMusic==false){	
+							if(data["mapdata"]["mapMusic"]!=null && data["mapdata"]["mapMusic"]!=='undefined'){
+								playBackgroundMusic(soundList[data["mapdata"]["mapMusic"]]);	
+							}
+						}
+					}
+					this.mapMusic=data["mapdata"]["mapMusic"];	
+				}else{
+					this.mapMusic=null;
+					stopBackgroundMusic();
+				}
 				this.mapUp = (data["mapdata"]["mapConnectors"]["up"]!="" && data["mapdata"]["mapConnectors"]["up"]!=null) ? data["mapdata"]["mapConnectors"]["up"] : null;
 				this.mapDown = (data["mapdata"]["mapConnectors"]["down"]!="" && data["mapdata"]["mapConnectors"]["down"]!=null) ? data["mapdata"]["mapConnectors"]["down"] : null;
 				this.mapLeft = (data["mapdata"]["mapConnectors"]["left"]!="" && data["mapdata"]["mapConnectors"]["left"]!=null) ? data["mapdata"]["mapConnectors"]["left"] : null;
@@ -914,6 +981,17 @@ GameMap.setMapInfo=function(data){
 	gameMapInstance.mapDown = data["down"];
 	gameMapInstance.mapLeft = data["left"];
 	gameMapInstance.mapRight = data["right"];
+	if(data["mapMusic"]!=null && data["mapMusic"]!=='undefined'){
+		gameMapInstance.mapMusic = data["mapMusic"];
+		gameMapInstance.tileData["mapdata"]["mapMusic"]=data["mapMusic"];
+		delete 	gameMapInstance.tileData["mapdata"]["mapConnectors"]["mapMusic"];
+	}else{
+		if(gameMapInstance.tileData["mapdata"]["mapMusic"]!=null && gameMapInstance.tileData["mapdata"]["mapMusic"]!=='undefined'){
+			delete gameMapInstance.tileData["mapdata"]["mapMusic"];
+		}
+		gameMapInstance.mapMusic = null;
+		stopBackgroundMusic();
+	}
 
 	if(gameMapInstance.mapWidth!=data["width"] || gameMapInstance.mapHeight!=data["height"]){
 		gridWidth=data["width"];
@@ -993,6 +1071,10 @@ GameMap.getMapNumber=function(){
 
 GameMap.getMapUp=function(){
 	return gameMapInstance.mapUp;
+};
+
+GameMap.getMusicNumber=function(){
+	return gameMapInstance.mapMusic;
 };
 
 GameMap.getMapDown=function(){

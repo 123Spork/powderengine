@@ -17,6 +17,7 @@ resCfg[jsRes.SceneManager_js] = {
     	jsRes.SingleLineBox_js,
 	    jsRes.MultiLineBox_js,
 	    jsRes.Utils_js,
+	    jsRes.sound_js,
 	    jsRes.LocalStorage_js,
 	    jsRes.ListView_js,
 	    jsRes.GameTile_js,

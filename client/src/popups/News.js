@@ -135,14 +135,6 @@ News = Popup.extend({
 		
 	},
 
-	runSaveNewData:function(num){
-		sendMessageToServer({"savequests":num+"","questdata":this.data});
-	},
-	
-	deleteSave:function(num,list){
-		sendMessageToServer({"savequestswhole":list});
-	},
-
 	didBecomeActive:function(){
 		this._super();
 		this.prepareList();

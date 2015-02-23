@@ -36,7 +36,6 @@ DropDownList = Scene.extend({
 		this.previousScene = SceneManager.getActiveScene();
 		SceneManager.setActiveScene(this);
 		this.setTouchPriority(-1001);
-		this.setMouseEnabled(true);
 	},
 
 	onTouchBegan:function(touch){
@@ -74,7 +73,7 @@ DropDownList = Scene.extend({
 		for(var i =0;i<this.list.length;i++){
 			this.panels["control_menu"][i+""].setContentSize(biggest+8,	this.panels["control_menu"][i+""].getContentSize().height);
 		}
-					this.panels["control_menu"].setContentSize(biggest+8,this.panels["control_menu"].getContentSize().height);
+		this.panels["control_menu"].setContentSize(biggest+8,this.panels["control_menu"].getContentSize().height);
 	},
 
 	getLayoutObject:function(){
@@ -96,8 +95,6 @@ DropDownList = Scene.extend({
 				}
 			};
 		}
-
-
 		return {
 		 "panels":{
 			 children:{	
@@ -127,7 +124,8 @@ DropDownList = Scene.extend({
 		var menuPos = this.panels["control_menu"].convertToNodeSpace(pos);
 		for(var i =0;i<this.list.length;i++){
 			this.panels["control_menu"][i+""].setColor(cc.c4b(0,0,0,180));
-			this.panels["control_menu"][i+""]["content"].setColor(cc.c3b(255,255,255));
+			var color1 = (this.setupOptions && this.setupOptions[i] && this.setupOptions[i]["enabled"]==false)?cc.c3b(100,100,100):cc.c3b(255,255,255); 
+			this.panels["control_menu"][i+""]["content"].setColor(color1);
 			if(!this.setupOptions || this.setupOptions[i]["enabled"]==true){
 				if(cc.rectContainsPoint(cc.rect(this.panels["control_menu"][i+""].getPositionX(),this.panels["control_menu"][i+""].getPositionY(),this.panels["control_menu"][i+""].getContentSize().width,this.panels["control_menu"][i+""].getContentSize().height),menuPos)){
 					this.panels["control_menu"][i+""].setColor(cc.c4b(255,255,255,180));

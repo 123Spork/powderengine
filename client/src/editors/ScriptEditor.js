@@ -1,5 +1,4 @@
-Scripteditor=null,
-ScriptEditor = Popup.extend({
+ScriptEditor = Scene.extend({
 	data:null,
 	listPanel:null,
 	elementContext:null,
@@ -15,12 +14,37 @@ ScriptEditor = Popup.extend({
 	subEditor:null,
 	subEditorType:null,
 
+	getTabOptions:function(){
+		return ["Events"];
+	},
+
+	getCloseOptions:function(clicknum){
+		return ["Cancel","Don't Save","Save"];
+	},
+	
+	willExitEditor:function(clicknum){
+		switch(clicknum){
+			case 1:
+				this.ignoreTerminate=true; var self= this.delegate;
+				this.delegate.scheduleOnce(function(){self.endedEdit(null)});
+			break;
+			case 2:
+				this.data["name"]=this.nameBox.getText();
+				if(this.panels["abbrEntry"]){
+					this.data["abbr"]=this.abbrBox.getText();
+				}
+				this.ignoreTerminate=true;
+				this.delegate.endedEdit(this.data);
+			break;
+		}
+	},
+
 	runSaveNewData:function(num){
-		sendMessageToServer({"savescripts":num+"","scriptsdata":this.data});
+		sendToServer("saveNewScriptMessage",{"savescripts":num+"","scriptsdata":this.data});
 	},
 	
 	deleteSave:function(num,list){
-		sendMessageToServer({"savescriptswhole":list});
+		sendToServer("deleteScriptMessage",list);
 	},
 
 	getIdentifier:function(){
@@ -40,6 +64,7 @@ ScriptEditor = Popup.extend({
 
 	init:function(withData){
 		this._super();
+		this.setTouchPriority(-100);
 		this.data={"data":[],"name":null};
 		this.nameBox=null;
 		if(withData.data){
@@ -53,11 +78,13 @@ ScriptEditor = Popup.extend({
 
 	didBecomeActive:function(){
 		this._super();
-		this.nameBox = new EntryBox(this.panels["main_panel"]["nameEntry"],cc.size(this.panels["main_panel"]["nameEntry"].getContentSize().width,this.panels["main_panel"]["nameEntry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["nameEntry"].getContentSize().height), this.data["name"], cc.c4b(255,255,255), cc.c3b(0,0,0));
+		this.nameBox = new EntryBox(this.panels["name_entry"],cc.size(this.panels["name_entry"].getContentSize().width,this.panels["name_entry"].getContentSize().height+4), cc.p(0,this.panels["name_entry"].getContentSize().height+4), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(0,0,0));
 		this.nameBox.setDefaultFineFlag(true);
-		if(this.panels["main_panel"]["abbrEntry"]){
-			this.abbrBox = new EntryBox(this.panels["main_panel"]["abbrEntry"],cc.size(this.panels["main_panel"]["abbrEntry"].getContentSize().width,this.panels["main_panel"]["abbrEntry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["abbrEntry"].getContentSize().height), this.data["abbr"], cc.c4b(255,255,255), cc.c3b(0,0,0));
+		this.nameBox.setBackgroundInvisible();
+		if(this.panels["abbrEntry"]){
+			this.abbrBox = new EntryBox(this.panels["abbrEntry"],cc.size(this.panels["abbrEntry"].getContentSize().width,this.panels["abbrEntry"].getContentSize().height+4), cc.p(0,this.panels["abbrEntry"].getContentSize().height+4), this.data["abbr"], cc.c4b(255,255,255), cc.c3b(0,0,0));
 			this.abbrBox.setDefaultFineFlag(true);
+			this.abbrBox.setBackgroundInvisible();
 		}
 		this.prepareList();
 	},
@@ -96,29 +123,28 @@ ScriptEditor = Popup.extend({
 			listnodes[i].setContentSize(758,100);				
 			var bottomLine= cc.LayerColor.create(cc.c4b(0,0,0,127),750,1);
 			bottomLine.setPosition(cc.p(4,0));	
-			var responseLine= cc.LayerColor.create(cc.c4b(0,0,0,127),1,92);
-			responseLine.setPosition(cc.p(152,4));
-			var requirementsLine= cc.LayerColor.create(cc.c4b(0,0,0,127),1,92);
-			requirementsLine.setPosition(cc.p(451,4));	
+			var responseLine= cc.LayerColor.create(cc.c4b(0,0,0,127),1,100);
+			responseLine.setPosition(cc.p(152,0));
+			var requirementsLine= cc.LayerColor.create(cc.c4b(0,0,0,127),1,100);
+			requirementsLine.setPosition(cc.p(451,0));	
 
 			var eventString = this.data["data"][i]["type"];
 			if(eventString=="On Talk Close"){
 				eventString+= (" (" +this.data["data"][i]["data"]["attachedEvent"]+":"+this.data["data"][this.data["data"][i]["data"]["attachedEvent"]]["type"]+")");
 			}
 
-			var eventName = cc.LabelTTF.create(i+": "+eventString,"Arial",15);
-			eventName.setColor(cc.c3b(0,0,0));
+			var eventName = cc.LabelTTF.create(i+": "+eventString,"Arial",12);
 			eventName.setAnchorPoint(cc.p(0,1));
 			eventName.setPosition(cc.p(4,96));
 			eventName.setDimensions(cc.size(100,0));
 
-			var reqNode = cc.LayerColor.create(cc.c4b(0,255,0,60),259,100);
+			var reqNode = cc.LayerColor.create(cc.c4b(100,100,100,255),259,100);
 			reqNode.setContentSize(cc.size(259,100));
 			reqNode.setPositionX(451);
 			reqNode.setAnchorPoint(cc.p(0,0));
 			listnodes[i].addChild(reqNode);
 
-			var resNode = cc.LayerColor.create(cc.c4b(0,255,0,60),259,100);
+			var resNode = cc.LayerColor.create(cc.c4b(100,100,100,255),259,100);
 			resNode.setContentSize(cc.size(259,100));
 			resNode.setPositionX(152);
 			resNode.setAnchorPoint(cc.p(0,0));
@@ -131,13 +157,7 @@ ScriptEditor = Popup.extend({
 			dElement.callBack = "Delete";		
 			listnodes[i].addChild(dElement);
 
-			var eElement = cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
-			eElement.setPosition(cc.p(96,4));
-			eElement.setAnchorPoint(cc.p(0,0));
-			eElement.callBack = "Edit";		
-			listnodes[i].addChild(eElement);
-
-			mainCallBackList.push([dElement,eElement]);
+			mainCallBackList.push([dElement]);
 
 
 
@@ -148,7 +168,6 @@ ScriptEditor = Popup.extend({
 									responsesNodes[i][j].setContentSize(259,32);
 									var allowResponseEdit=true;
 									var responseName = cc.LabelTTF.create((j+1)+": " + this.data["data"][i]["responses"][j]["type"],"Arial",15);
-									responseName.setColor(cc.c3b(0,0,0));
 									responseName.setAnchorPoint(cc.p(0,0));
 									responseName.setPosition(cc.p(4,4));
 									responseName.setDimensions(cc.size(180,0));
@@ -162,7 +181,7 @@ ScriptEditor = Popup.extend({
 									responsesNodes[i][j].addChild(delElement);
 
 									switch(this.data["data"][i]["responses"][j]["type"]){
-										case "Destroy": case "Attack": case "Run Away":
+										case "Destroy": case "Aggro NPC": case "Run Away":
 										 allowResponseEdit=false; break;
 									}
 
@@ -237,8 +256,8 @@ ScriptEditor = Popup.extend({
 
 											switch(self.data["specifier"]){
 												case "NPC": 
-													resArray.push("Attack","Run Away","Defend","Modify NPC Stats");
-													resSetup.push({"enabled":false},{"enabled":false},{"enabled":false},{"enabled":false});
+													resArray.push("Aggro NPC","Run Away","Defend","Modify NPC Stats");
+													resSetup.push({"enabled":true},{"enabled":false},{"enabled":false},{"enabled":false});
 												break;
 												case "Item": 
 													resArray.push("Equip Item","Read Item");
@@ -271,7 +290,6 @@ ScriptEditor = Popup.extend({
 									requirementsNodes[i][j].setContentSize(259,32);
 									var allowRequireEdit=true;
 									var requireName = cc.LabelTTF.create((j+1)+": " + this.data["data"][i]["requirements"][j]["type"],"Arial",15);
-									requireName.setColor(cc.c3b(0,0,0));
 									requireName.setAnchorPoint(cc.p(0,0));
 									requireName.setPosition(cc.p(4,4));
 									requireName.setDimensions(cc.size(180,0));
@@ -379,17 +397,7 @@ ScriptEditor = Popup.extend({
 
 		}
 
-		var addButton = cc.LayerColor.create(cc.c4b(70,200,70,255),90,26);
-		var plus = cc.LabelTTF.create("+","Arial",20);
-		plus.setPosition(45,13);
-		plus.setAnchorPoint(cc.p(0.5,0.5));
-		addButton.setPosition(cc.p((758/2)-45,0));
-		addButton.callBack="Add";
-		addButton.addChild(plus);
-		mainCallBackList.push([addButton]);
-		listnodes.push(addButton);
-
-		this.listPanel = this.panels["main_panel"]["list"];
+		this.listPanel = this.panels["list"];
 		var self=this;
 		this.listPanel.getListSize = function(){
 			var height =0;
@@ -425,48 +433,6 @@ ScriptEditor = Popup.extend({
 				break;
 				case "Edit":
 
-				break;
-				case "Add":
-					var eventArray = ["Default Interaction","On Examine","On Talk Close", "On Talk Option Selected", "On Game Load"];
-					var setupOptions = [{"enabled":true},{"enabled":false},{"enabled":false},{"enabled":false},{"enabled":false}];
-					
-
-					/*for(var i in self.data["data"]){
-						if(self.data["data"][i]){
-							for(var j=0;j<self.data["data"][i]["responses"].length;j++){
-								if(self.data["data"][i]["responses"][j]["type"]=="Talk"){
-									setupOptions[2]["enabled"]=true;
-									break;break;
-								}
-							}
-						}
-					}*/
-
-					if(self.data["data"].length==0){
-						setupOptions[1]["enabled"]=false;
-					}
-					if(self.eventsHaveChatOptions()){
-						setupOptions[3]["enabled"]=true;
-					}
-
-
-
-
-					switch(self.data["specifier"]){
-						case "Item": 
-							eventArray.push("On Pickup","On Drop","On Dequip","On Trade")
-							setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":false})
-						break;
-						case "Tile":
-							eventArray.push("Interact On","Interact Facing","Will Enter","On Enter","Will Leave","On Leave","On Come Near");
-							setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":false});
-							setupOptions[0]["enabled"]=false;
-						break;
-					}
-
-				
-					self._parent.addChild(DropDownList.createWithListAndPosition(self,self.addListElement,eventArray,touch._point,setupOptions));
-					self.elementContext =listelement;
 				break;
 				case "Use":
 					self.delegate.setTypeData(listelement,self.editList[listelement]);
@@ -657,7 +623,7 @@ ScriptEditor = Popup.extend({
 			switch(this.delegate.data["specifier"]){
 				case "NPC": 
 					switch(clicknum){
-						case 11: responseText = "Attack"; break;
+						case 11: responseText = "Aggro NPC"; break;
 						case 12: responseText = "Run Away"; break;
 						case 13: responseText = "Defend"; break;
 						case 14: responseText = "Modify NPC Stats"
@@ -722,94 +688,72 @@ ScriptEditor = Popup.extend({
 			return { 
 			"panels":{
 				children:{	
-					"background_image":{
-						texture:"GUI/event_panel.png",
+					"list":{
+						size:cc.size(758,screenSize.height-80),
+						position:cc.p(0,0),
 						anchorPoint:cc.p(0,0),
 					},
-					"main_panel":{
+					"abbrlbl":this.data["specifier"]=="Tile"?{
+						label:"Abbr",
+						fontSize:12,
 						anchorPoint:cc.p(0,0),
-						size: cc.size(1000,400),
-						children: {
-							"list":{
-								size:cc.size(758,360),
-								color:cc.c4b(0,200,200,200),
-								position:cc.p(0,0),
-								anchorPoint:cc.p(0,0),
-							},
-							"okbtn" : {
-								position:cc.p(4,364),
-								size:cc.size(32,32),
-								texture:"GUI/tick_icon.png",
-								anchorPoint:cc.p(0,0),
-							},
-							"cancelbtn" : {
-								position:cc.p(46,364),
-								size:cc.size(32,32),
-								texture:"GUI/cross_icon.png",
-								anchorPoint:cc.p(0,0),
-							},
+						position:cc.p(500,screenSize.height-64),
+					}:null,
 
-
-							"abbrlbl":this.data["specifier"]=="Tile"?{
-								label:"Abbr",
-								fontSize:20,
-								anchorPoint:cc.p(0,0),
-								position:cc.p(550,368),
-								size:cc.size(36,32),
-								color:cc.c3b(0,0,0),
-							}:null,
-
-							"abbrEntry":this.data["specifier"]=="Tile"?{
-								position:cc.p(595,364),
-								size:cc.size(36,32),
-								color:cc.c3b(255,255,255),
-							}:null,
-
-							"namelbl" : {
-								label:"Name:",
-								fontSize:20,
-								anchorPoint:cc.p(0,0),
-								position:cc.p(110,368),
-								color:cc.c3b(0,0,0),
-							},
-							"nameEntry":{
-								position:cc.p(180,364),
-								size:cc.size(340,32),
-								color:cc.c4b(255,255,255,255),
-							},
-						},
-					},
-					"control_panel":{
+					"abbrEntry":this.data["specifier"]=="Tile"?{
+						position:cc.p(540,screenSize.height-64),
+						size:cc.size(36,16),
 						anchorPoint:cc.p(0,0),
-						position: cc.p(0,400),
-						size: cc.size(1000,32),
-						children:{	
-							"header":{
-								label:"Script Editor",
-								fontSize:20,
-								anchorPoint:cc.p(0,0.5),
-								position:cc.p(8,16),
-							},
-							"exitBtn":{
-								position: cc.p(976,6),
-								size: cc.size(20,20),
-								anchorPoint:cc.p(0,0),
-								texture: "GUI/close.png",	
-							}
-						}
+						color:cc.c3b(180,180,180),
+					}:null,
+					"namelbl":{
+						label:"Name:",
+						fontSize:12,
+						anchorPoint:cc.p(0,0),
+						position: cc.p(4,screenSize.height-64),
 					},
+					"name_entry":{
+						position:cc.p(74,screenSize.height-64),
+						size:cc.size(290,16),
+						anchorPoint:cc.p(0,0),
+						color:cc.c3b(180,180,180)
+					},	
+
 					"subEditorOver":{
 						visible:false,
 						color:cc.c4b(0,0,0,127),
 						position:cc.p(0,0),
-						size:cc.size(800,400),
+						size:cc.size(800,screenSize.height-40),
 					},
 					"mainEditorOver":{
 						color:cc.c4b(0,0,0,127),
 						position:cc.p(800,0),
-						size:cc.size(200,400),
+						size:cc.size(200,screenSize.height-40),
 					},
-				}	
+
+					"menu_bar":{
+						size:cc.size(showingEditor,20),
+						position:cc.p(0,screenSize.height-40),
+						color:cc.c3b(127,127,127),
+						children:{
+							"addEventDropDown": {
+								position:cc.p(0,0),
+								size:cc.size(80,20),
+								color: cc.c3b(127,127,127),
+								anchorPoint:cc.p(0,0),
+								children:{
+									"lbl":{
+										label:"+ Event",
+										fontSize:12,
+										anchorPoint:cc.p(0.5,0),
+										position:cc.p(40,3),
+									}
+								}
+							},
+						},	
+					},	
+
+				}
 			}
 		};
 	},
@@ -2427,9 +2371,7 @@ ScriptEditor = Popup.extend({
 
 
 	onTouchBegan:function(touch){
-		if(this._super(touch)){
-			return true;
-		}
+		this.panels["menu_bar"]["addEventDropDown"].setColor(cc.c3b(127,127,127));
 		var pos = cc.p(touch._point.x,touch._point.y);
 		if(this.subsubEditor){
 			var truePos = this.subsubEditor.convertToNodeSpace(pos);
@@ -2611,32 +2553,32 @@ ScriptEditor = Popup.extend({
 			}
 
 		} else{
-			var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
-
-			if(isTouching(this.panels["main_panel"]["okbtn"],truePos)){
-				if(this.panels["main_panel"]["abbrEntry"] && (this.abbrBox.getText()==null || this.abbrBox.getText()=="")){
-					return;
+			var truePos = this.panels.convertToNodeSpace(pos);
+			if(isTouching(this.panels["menu_bar"]["addEventDropDown"],this.panels["menu_bar"].convertToNodeSpace(pos))){
+				var eventArray = ["Default Interaction","On Examine","On Talk Close", "On Talk Option Selected", "On Game Load"];
+				var setupOptions = [{"enabled":true},{"enabled":false},{"enabled":false},{"enabled":false},{"enabled":false}];
+				if(this.data["data"].length==0){
+					setupOptions[1]["enabled"]=false;
 				}
-				if(this.nameBox.getText()==null || this.nameBox.getText()==""){
-					return;
+				if(this.eventsHaveChatOptions()){
+					setupOptions[3]["enabled"]=true;
 				}
-				this.data["name"]=this.nameBox.getText();
-				if(this.panels["main_panel"]["abbrEntry"]){
-					this.data["abbr"]=this.abbrBox.getText();
+				switch(this.data["specifier"]){
+					case "Item": 
+						eventArray.push("On Pickup","On Drop","On Dequip","On Trade")
+						setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":false})
+					break;
+					case "Tile":
+						eventArray.push("Interact On","Interact Facing","Will Enter","On Enter","Will Leave","On Leave","On Come Near");
+						setupOptions.push({"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":true},{"enabled":false});
+						setupOptions[0]["enabled"]=false;
+					break;
 				}
-				this.ignoreTerminate=true;
-				this.delegate.endedEdit(this.data);
-				return;
-			}
-			if(isTouching(this.panels["main_panel"]["cancelbtn"],truePos)){
-				this.ignoreTerminate=true;
-				var self= this.delegate;
-				this.delegate.scheduleOnce(function(){self.endedEdit(null)});
-				return;
-			}
-
-			if(isTouching(this.panels["main_panel"],truePos)){
-				return;
+				var ddown = DropDownList.createWithListAndPosition(this,this.addListElement,eventArray,cc.p(0,screenSize.height-40),setupOptions);
+				ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+				this.panels["menu_bar"]["addEventDropDown"].setColor(cc.c3b(60,60,60));
+				this.addChild(ddown);
+				return true;
 			}
 			return;
 		}

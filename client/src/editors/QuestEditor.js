@@ -1,5 +1,4 @@
-Questeditor=null,
-QuestEditor = Popup.extend({
+QuestEditor = Scene.extend({
 	data:null,
 	listPanel:null,
 	delegate:null,
@@ -9,6 +8,34 @@ QuestEditor = Popup.extend({
 		return "Quest Editor";
 	},
 	
+	getTabOptions:function(){
+		return ["Objectives"];
+	},
+
+	setTab:function(){
+
+	},
+
+	getCloseOptions:function(clicknum){
+		return ["Cancel","Don't Save","Save"];
+	},
+
+	willExitEditor:function(clicknum){
+		switch(clicknum){
+			case 1:
+				this.ignoreTerminate=true; var self= this.delegate;
+				this.delegate.scheduleOnce(function(){self.endedEdit(null)});
+			break;
+			case 2:
+				this.ignoreTerminate=true;
+				this.data["name"]=this.nameBox.getText();
+				this.delegate.endedEdit(this.data);
+			break;
+		}
+	},
+
+		
+
 	willTerminate:function(ignoreTerminate){
 		this._super();
 		if(this.delegate){
@@ -18,6 +45,11 @@ QuestEditor = Popup.extend({
 			}
 			this.delegate.scheduleOnce(function(){self.endedEdit(null)});
 		}
+	},
+
+	addNewElement:function(){
+		this.data["objectiveList"].splice(this.data["objectiveList"].length-1,0,"Blank Objective");
+		this.prepareList();
 	},
 
 	init:function(withData){
@@ -30,30 +62,31 @@ QuestEditor = Popup.extend({
 	},
 
 	runSaveNewData:function(num){
-		sendMessageToServer({"savequests":num+"","questdata":this.data});
+		sendToServer("saveNewQuestMessage",{"savequests":num+"","questdata":this.data});
 	},
 	
 	deleteSave:function(num,list){
-		sendMessageToServer({"savequestswhole":list});
+		sendToServer("deleteQuestMessage",{"savequestswhole":list});
 	},
 
 	didBecomeActive:function(){
 		this._super();
 		this.prepareList();
-		this.nameBox = new EntryBox(this.panels["main_panel"]["nameBox"],cc.size(this.panels["main_panel"]["nameBox"].getContentSize().width,this.panels["main_panel"]["nameBox"].getContentSize().height), cc.p(0,this.panels["main_panel"]["nameBox"].getContentSize().height), this.data["name"]?this.data["name"]:"", cc.c4b(255,255,255,255), cc.c3b(0,0,0));
+		this.nameBox = new EntryBox(this.panels["name_entry"],cc.size(this.panels["name_entry"].getContentSize().width,this.panels["name_entry"].getContentSize().height+4), cc.p(0,this.panels["name_entry"].getContentSize().height+4), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(0,0,0));
 		this.nameBox.setDefaultFineFlag(true);
+		this.nameBox.setBackgroundInvisible();
 	},
 
 	prepareList:function(){
 		if(this.listPanel){
-			this.listPanel.removeAllChildren();
+			this.listPanel.listView.removeFromParent();
+			this.listPanel.listView=null;
 		}
 		var listnodes = [];
 		var callBackList=[];
 		var tc = cc.TextureCache.getInstance();
 		this.defaultPositions={};
 		var i;
-		console.log(this.data["objectiveList"])
 		for(i=0;i<this.data["objectiveList"].length-1;i++){
 			listnodes[i]=cc.Node.create();
 			listnodes[i].setContentSize(324,32);
@@ -66,10 +99,6 @@ QuestEditor = Popup.extend({
 			element.setColor(cc.c4b(0,0,0,127));
 			element.setAnchorPoint(cc.p(0,0));
 			element.setPosition(cc.p(4,0));			
-
-			var editElement=cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
-			editElement.setPosition(cc.p(272,0));
-			editElement.setAnchorPoint(cc.p(0,0));
 		
 			var delElement=cc.Sprite.createWithTexture(tc.addImage("GUI/trash.png"));
 			delElement.setPosition(cc.p(300,0));
@@ -82,9 +111,13 @@ QuestEditor = Popup.extend({
 			text.setColor(cc.c3b(0,0,0));
 
 			if(i>0){
-				editElement.callBack = "Edit";
+				var extraBg = cc.LayerColor.create(cc.c4b(255,255,255,255),text.getContentSize().width,text.getContentSize().height);
+				extraBg.setPosition(text.getPosition());
+				listnodes[i].addChild(extraBg);
+
+				text.callBack = "Edit";
 				var touchableNodes =[];
-				touchableNodes.push(editElement);
+				touchableNodes.push(text);
 			}
 			if(i>1){
 				delElement.callBack = "Delete";
@@ -94,15 +127,11 @@ QuestEditor = Popup.extend({
 
 
 			listnodes[i].addChild(element);
-			if(i>0){
-				listnodes[i].addChild(editElement);
-			}
 			if(i>1){
 				listnodes[i].addChild(delElement);	
 			}
 			listnodes[i].addChild(text);
 			listnodes[i].setContentSize(324,text.getContentSize().height+8);
-			editElement.setPositionY(((text.getContentSize().height+8)/2)-10);
 			delElement.setPositionY(((text.getContentSize().height+8)/2)-10);
 		}
 
@@ -135,19 +164,18 @@ QuestEditor = Popup.extend({
 		listnodes[i+1].addChild(element);
 		listnodes[i+1].addChild(text);
 		listnodes[i+1].setContentSize(324,text.getContentSize().height+8);
-		editElement.setPositionY(((text.getContentSize().height+8)/2)-10);
 		delElement.setPositionY(((text.getContentSize().height+8)/2)-10);
 
 		delete i;
 
-		this.listPanel = this.panels["main_panel"]["list"];
+		this.listPanel = this.panels["list"];
 		var self=this;
 		this.listPanel.getListSize = function(){
 			var height =0;
 			for(var i=0;i<listnodes.length;i++){
 				height+=listnodes[i].getContentSize().height;
 			}
-			return cc.size(324,height);
+			return cc.size(showingEditor-20,height);
 		};
 		this.listPanel.getListElementAmount=function(){
 			return listnodes.length;
@@ -158,27 +186,16 @@ QuestEditor = Popup.extend({
 		this.listPanel.getListNodeForIndex=function(elementID){
 			return listnodes[elementID];
 		};
-		this.listPanel.runListCallBack=function(name,listelement,touch){
-			var pos = touch._point;
-			var truePos = self.convertToNodeSpace(pos);
-			if(self.showingEditor==true){
-				return;
-			}
+		this.listPanel.runListCallBack=function(name,listelement,touch,object){
+			console.log(name);
 			switch(name){
 				case "Delete":
-					if(self.editBox!=null){
-						self.editBox.removeAllChildren();
-						self.entryBox=null;
-						self.editBox.removeFromParent();
-						self.editBox=null;
-						self.elementContext =null;
-					}
-					self._parent.addChild(DropDownList.createWithListAndPosition(self,self.deleteClicked,["Cancel","Delete"],touch._point));
+					MainScene.addChild(DropDownList.createWithListAndPosition(self,self.deleteClicked,["Cancel","Delete"],touch._point));
 					self.elementContext =listelement;
 				break;
 				case "Edit":
 					self.elementContext =listelement;
-					self.editElement(listelement);
+					self.resetValueBoxWithObject(object);
 				break;
 				case "Add":
 					self.addNewElement()
@@ -190,95 +207,69 @@ QuestEditor = Popup.extend({
 		this.listPanel.addChild(this.listPanel.listView);
 	},
 
+
+	resetValueBoxWithObject:function(object){
+		if(this.editBox){
+			this.confirmEditBox();
+		}
+		this.editBox = new EntryBox(object,cc.size(object.getContentSize().width,object.getContentSize().height+4), cc.p(-4,object.getContentSize().height+4),this.data["objectiveList"][this.elementContext], cc.c4b(255,255,255), cc.c3b(0,0,0),true,null,this);
+		this.editBox.setDefaultFineFlag(true);
+		this.schedule(this.checkMouseDown);
+	},
+
+	checkMouseDown:function(){
+		if(!mouseDown && this.editBox){
+			this.editBox.setFocused(true)
+			this.unschedule(this.checkMouseDown);
+		}
+	},
+
+	hasActiveEditBox:function(){
+		if(this.editBox){
+			return true;
+		}
+		return false;
+	},
+
+	updateFromEnd:function(){
+		this.confirmEditBox();
+	},
+
+	confirmEditBox:function(){
+		this.data["objectiveList"][this.elementContext]=this.editBox.getText();
+		this.editBox.setFocused(false);
+		this.editBox.removeFromParent();
+		this.editBox=null;
+		this.prepareList();
+	},
 	
 	getLayoutObject:function(){
 			return { 
 			"panels":{
-				position:cc.p(300,200),
 				children:{	
-					"background_image":{
-						texture:"GUI/list_panel.png",
+					"name_lbl":{
+						label:"Name:",
+						fontSize:12,
+						anchorPoint:cc.p(0,0),
+						position: cc.p(4,screenSize.height-44),
+					},
+					"name_entry":{
+						position:cc.p(74,screenSize.height-44),
+						size:cc.size(290,16),
+						anchorPoint:cc.p(0,0),
+						color:cc.c3b(180,180,180)
+					},	
+					"objectivesLabel":{
+						label:"Objectives:",
+						position:cc.p(4,screenSize.height-70),
 						anchorPoint:cc.p(0,0),
 					},
-					"main_panel":{
+					"list":{
+						size:cc.size(showingEditor-20,screenSize.height-74),
+						color:cc.c3b(180,180,180),
+						position:cc.p(2,0),
 						anchorPoint:cc.p(0,0),
-						size: cc.size(365,328),
-						children: {
-							"nameLabel":{
-								label:"Quest Name",
-								color:cc.c3b(0,0,0),
-								position:cc.p(8,312),
-								anchorPoint:cc.p(0,0),
-							},
-							"nameBox":{
-								size:cc.size(150,32),
-								color:cc.c4b(255,255,255,255),
-								position:cc.p(8,277),
-								anchorPoint:cc.p(0,0),
-							},
-							"savebtn":{
-								size:cc.size(64,32),
-								color:cc.c4b(0,255,0,255),
-								position:cc.p(175,277),
-								anchorPoint:cc.p(0,0),
-								children:{
-									"content":{
-										label:"Save",
-										color:cc.c3b(0,0,0),
-										position:cc.p(32,16),
-										anchorPoint:cc.p(0.5,0.5),
-									}
-								}
-							},
-
-							"exitbtn":{
-								size:cc.size(64,32),
-								color:cc.c4b(255,0,0,255),
-								position:cc.p(253,277),
-								anchorPoint:cc.p(0,0),
-								children:{
-									"content":{
-										label:"Exit",
-										color:cc.c3b(0,0,0),
-										position:cc.p(32,16),
-										anchorPoint:cc.p(0.5,0.5),
-									}
-								}
-							},
-
-							"objectivesLabel":{
-								label:"Objectives",
-								color:cc.c3b(0,0,0),
-								position:cc.p(8,254),
-								anchorPoint:cc.p(0,0),
-							},
-							"list":{
-								size:cc.size(324,250),
-								color:cc.c4b(0,200,200,200),
-								position:cc.p(0,0),
-								anchorPoint:cc.p(0,0),
-							},
-						},
-					},
-					"control_panel":{
-						anchorPoint:cc.p(0,0),
-						position: cc.p(0,328),
-						size: cc.size(365,32),
-						children:{	
-							"header":{
-								label:"Quest Editor",
-								fontSize:20,
-								anchorPoint:cc.p(0,0.5),
-								position:cc.p(8,16),
-							},
-							"exitBtn":{
-								position: cc.p(337,6),
-								size: cc.size(20,20),
-								anchorPoint:cc.p(0,0),
-								texture: "GUI/close.png",	
-							}
-						}
-					},
+					},			
 				}	
 			}
 		};
@@ -296,103 +287,4 @@ QuestEditor = Popup.extend({
 			break;
 		}
 	},
-
-	addNewElement:function(){
-		this.data["objectiveList"].splice(this.data["objectiveList"].length-1,0,"Blank Objective");
-		this.prepareList();
-	},
-
-	entryBox:null,
-	editBox:null,
-
-	editElement:function(elementNum){
-		if(this.editBox!=null){
-			this.editBox.removeAllChildren();
-			this.entryBox=null;
-			this.editBox.removeFromParent();
-			this.editBox=null;
-			this.elementContext =null;
-		}
-		this.editBox = cc.Sprite.create()
-		this.editBox.setTextureRect(cc.rect(0,0,200,200));
-		this.editBox.setColor(cc.c4b(255,255,255,200));
-		this.editBox.setAnchorPoint(cc.p(0,0));
-		this.editBox.setPosition(cc.p((this.panels["main_panel"].getContentSize().width-200)/2,((this.panels["main_panel"].getContentSize().height-200)/2)));
-		this.entryBox = new EntryBox(this.editBox,cc.size(190,150), cc.p(0,this.editBox.getContentSize().height), this.data["objectiveList"][elementNum], cc.c4b(100,100,100), cc.c3b(255,255,255),true);
-		this.entryBox.setDefaultFineFlag(true);
-		this.entryBox.setDontClear(true);
-		var okButton = cc.LayerColor.create(cc.c4b(0,200,255,255),64,32);
-		okButton.setPosition(cc.p(14,9))
-		var okLabel = cc.LabelTTF.create("OK","Arial",16);
-		okLabel.setColor(cc.c3b(0,0,0));
-		okLabel.setPosition(32,16);
-		okLabel.setAnchorPoint(cc.p(0.5,0.5));
-		okButton.addChild(okLabel);
-		var cancelButton = cc.LayerColor.create(cc.c4b(200,0,0,255),64,32);
-		cancelButton.setPosition(cc.p(120,9))
-		var cancelLabel = cc.LabelTTF.create("Cancel","Arial",16);
-		cancelLabel.setColor(cc.c3b(0,0,0));
-		cancelLabel.setPosition(32,16);
-		cancelLabel.setAnchorPoint(cc.p(0.5,0.5));
-		cancelButton.addChild(cancelLabel);
-		this.panels["main_panel"].addChild(this.editBox);
-		this.editBox.addChild(okButton);
-		this.editBox.ok = okButton;
-		this.editBox.addChild(cancelButton);
-		this.editBox.cancel = cancelButton;
-	},
-
-	onTouchBegan:function(touch){
-		if(this._super(touch)){
-			return true;
-		}
-		var pos = cc.p(touch._point.x,touch._point.y);
-		if(this.editBox!=null){
-			var truePos = this.editBox.convertToNodeSpace(pos);
-			if(isTouching(this.editBox.ok,truePos)){
-				var newString = this.entryBox.getText();
-				this.data["objectiveList"][this.elementContext] = newString;
-				this.editBox.removeAllChildren();
-				this.entryBox=null;
-				this.editBox.removeFromParent();
-				this.editBox=null;
-				this.elementContext =null;
-				this.prepareList();
-				return true;
-			}
-			if(isTouching(this.editBox.cancel,truePos)){
-				this.editBox.removeAllChildren();
-				this.entryBox=null;
-				this.editBox.removeFromParent();
-				this.editBox=null;
-				this.elementContext =null;
-				return true;
-			}
-			return true;
-		} else{
-			var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
-			if(isTouching(this.panels["main_panel"]["savebtn"],truePos)){
-				if(this.nameBox.getText()==null || this.nameBox.getText()==""){
-					return true;
-				}
-				this.ignoreTerminate=true;
-				this.data["name"]=this.nameBox.getText();
-				this.delegate.endedEdit(this.data);
-				return true;
-			}
-			
-			if(isTouching(this.panels["main_panel"]["exitbtn"],truePos)){
-				this.ignoreTerminate=true; var self= this.delegate;
-				this.delegate.scheduleOnce(function(){self.endedEdit(null)});
-				return true;
-			}
-
-			if(isTouching(this.panels["main_panel"],truePos)){
-				return true;
-			}
-		}
-		return false;
-	},
-
-	
 });

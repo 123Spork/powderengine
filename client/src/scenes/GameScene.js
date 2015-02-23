@@ -1,7 +1,7 @@
 //Editing character.js to provide map number to server so can save npc positions.
 
 MainScene=null;
-MapMaster=false;
+Editor=null;
 var sizeReducer=0;
 var showingEditor=0;
 var GameScene = Scene.extend({
@@ -26,8 +26,8 @@ var GameScene = Scene.extend({
 			 	"editorbg":{
 			 		visible:(showingEditor>0),
 			 		color:cc.c3b(80,80,80),
-			 		size:cc.size(352,screenSize.height),
-			 		position:cc.p(screenSize.width-352,0),
+			 		size:cc.size(showingEditor,screenSize.height),
+			 		position:cc.p(screenSize.width-showingEditor,0),
 			 		anchorPoint:cc.p(0,0),
 			 	},
  				"game_menu":{
@@ -53,7 +53,7 @@ var GameScene = Scene.extend({
 			 			"settings_editorBtn":{
 			 				visible:showingEditor>0,
 			 				size:cc.size(80,20),
-			 				position:cc.p((screenSize.width-350),0),
+			 				position:cc.p((screenSize.width-showingEditor),0),
 			 				anchorPoint:cc.p(0,0),
 			 				color:cc.c4b(60,60,60),
 			 				children:{
@@ -68,7 +68,7 @@ var GameScene = Scene.extend({
 			 			"close_editorBtn":{
 			 				visible:showingEditor>0,
 			 				size:cc.size(80,20),
-			 				position:cc.p((screenSize.width-350)+80,0),
+			 				position:cc.p((screenSize.width-showingEditor)+80,0),
 			 				anchorPoint:cc.p(0,0),
 			 				color:cc.c4b(60,60,60),
 			 				children:{
@@ -81,6 +81,7 @@ var GameScene = Scene.extend({
 			 				}
 			 			},
 			 			"game_list":{
+			 				visible:showingEditor==0,
 			 				size:cc.size(60,20),
 			 				position:cc.p(0,0),
 			 				color:cc.c3b(60,60,60),
@@ -95,6 +96,7 @@ var GameScene = Scene.extend({
 			 				}
 			 			},
 			 			"script_list":{
+			 				visible:showingEditor==0,
 			 				size:cc.size(80,20),
 			 				position:cc.p(60,0),
 			 				color:cc.c3b(60,60,60),
@@ -109,6 +111,7 @@ var GameScene = Scene.extend({
 			 				}
 			 			},
 			 			"editor_list":{
+			 				visible:showingEditor==0,
 			 				size:cc.size(80,20),
 			 				position:cc.p(140,0),
 			 				color:cc.c3b(60,60,60),
@@ -335,25 +338,17 @@ var GameScene = Scene.extend({
 		this.delegate.panels["menu_bar"]["editor_list"].setColor(cc.c3b(60,60,60));
 		this.delegate.panels["menu_bar"]["close_editorBtn"].setColor(cc.c3b(60,60,60));
 		this.delegate.panels["menu_bar"]["settings_editorBtn"].setColor(cc.c3b(60,60,60));
-		switch(clicknum){
-			//Cancelbtn
-			case 0: break;
-			//Save & Exit
-			case 1: 
-				Mapeditor.saveEditor();
-				if(Mapeditor){
-					Mapeditor.willTerminate();
-					Mapeditor.removeFromParent();
-					Mapeditor=null;
-					GameMap.setInteractionDelegate(null);
-				} 
-				this.delegate.hideEditor();
-			break;
+		if(Editor.willExitEditor(clicknum)){
+			Editor.willTerminate();
+			Editor.removeFromParent();
+			Editor=null;
+			GameMap.setInteractionDelegate(null);
+			this.delegate.hideEditor();
 		}
 	},
 
 	changeEditorTab:function(clicknum){
-		Mapeditor.setTab(clicknum+1);
+		Editor.setTab(clicknum+1);
 	},
 
 	onTouchBegan:function(touch){
@@ -389,7 +384,7 @@ var GameScene = Scene.extend({
 
 		if(cc.rectContainsPoint(cc.rect(this.panels["menu_bar"]["close_editorBtn"].getPositionX(),this.panels["menu_bar"]["close_editorBtn"].getPositionY(),this.panels["menu_bar"]["close_editorBtn"].getContentSize().width,this.panels["menu_bar"]["close_editorBtn"].getContentSize().height),truePos)){
 			this.panels["menu_bar"]["close_editorBtn"].setColor(cc.c3b(127,127,127));
-			var ddown = DropDownList.createWithListAndPosition(this,this.closeEditorClicked,["Cancel","Save & Exit"],cc.p((screenSize.width-350)+80,(screenSize.height)-20));
+			var ddown = DropDownList.createWithListAndPosition(this,this.closeEditorClicked,Editor.getCloseOptions(),cc.p((screenSize.width-showingEditor)+80,(screenSize.height)-20));
 			ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
 			ddown.setMinimumWidth(80);
 			this.addChild(ddown);
@@ -398,7 +393,7 @@ var GameScene = Scene.extend({
 
 		if(cc.rectContainsPoint(cc.rect(this.panels["menu_bar"]["settings_editorBtn"].getPositionX(),this.panels["menu_bar"]["settings_editorBtn"].getPositionY(),this.panels["menu_bar"]["settings_editorBtn"].getContentSize().width,this.panels["menu_bar"]["settings_editorBtn"].getContentSize().height),truePos)){
 			this.panels["menu_bar"]["settings_editorBtn"].setColor(cc.c3b(127,127,127));
-			var ddown = DropDownList.createWithListAndPosition(this,this.changeEditorTab,Mapeditor.getTabOptions(),cc.p((screenSize.width-350),(screenSize.height)-20));
+			var ddown = DropDownList.createWithListAndPosition(this,this.changeEditorTab,Editor.getTabOptions(),cc.p((screenSize.width-showingEditor),(screenSize.height)-20));
 			ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
 			ddown.setMinimumWidth(80);
 			this.addChild(ddown);
@@ -452,8 +447,11 @@ var GameScene = Scene.extend({
 		}
 	},
 
-	showEditor:function(){
-		showingEditor=352;
+	showEditor:function(value){
+		if(!value){
+			var value=352;
+		}
+		showingEditor=value;
 		this.onOrientationChanged();
 	},
 
@@ -586,10 +584,10 @@ var GameScene = Scene.extend({
 
 		if(gp.x%1==0 && gp.y%1==0){
 			switch(keys){
-				case "RIGHTARROW": PlayersController.getYou().walkTo(gp.x+1,gp.y);  break;
-				case "LEFTARROW":  PlayersController.getYou().walkTo(gp.x-1,gp.y);   break;
-				case "UPARROW": PlayersController.getYou().walkTo(gp.x,gp.y+1);  break;
-				case "DOWNARROW":  PlayersController.getYou().walkTo(gp.x,gp.y-1); break;
+				case "RIGHTARROW": 	sendToServer('movePlayerMessage',indexFromPos(gp.x+1,gp.y)); break;
+				case "LEFTARROW":  sendToServer('movePlayerMessage',indexFromPos(gp.x-1,gp.y));   break;
+				case "UPARROW": sendToServer('movePlayerMessage',indexFromPos(gp.x,gp.y+1));  break;
+				case "DOWNARROW":  sendToServer('movePlayerMessage',indexFromPos(gp.x,gp.y-1)); break;
 			}
 		}
 	},
@@ -612,7 +610,7 @@ var GameScene = Scene.extend({
 				var mapSize = GameMap.getMapSizeForIndex(parseInt(operands[0]));
 			
 				var position = indexFromPosAndGridSize(parseInt(operands[1]),parseInt(operands[2]),mapSize.width,mapSize.height);
-				sendMessageToServer({"warpTo":position,"mapnumber":operands[0]});
+				sendToServer("warpPlayerMessage",{"warpTo":position,"mapnumber":operands[0]});
 				GameMap.goToMap(operands[0]);
 				var you = PlayersController.getYou();
 				you.setPosition(operands[1]*cellsize,(parseInt(operands[2])+1)*cellsize);
@@ -623,113 +621,128 @@ var GameScene = Scene.extend({
 
 			switch(command){
 				case "/editscript":
-					if(Scripteditor!=null && !Scripteditor._parent) Scripteditor=null;
-					if(Scripteditor){
-						Scripteditor.willTerminate();
-						Scripteditor.removeFromParent();
+					if(Editor!=null && !Editor._parent) Editor=null;
+					if(Editor){
+						Editor.willTerminate();
+						Editor.removeFromParent();
+						this.hideEditor();
 						Scripteditor=null;
 					} else{
-						Scripteditor = new ScriptingList();
-						Scripteditor.init({delegate:null,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
-						Scripteditor.didBecomeActive();
-						this.addChild(Scripteditor);
+						this.showEditor(1000);
+						Editor = new ScriptingList();
+						Editor.init({delegate:null,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
+						Editor.didBecomeActive();
+						this.editSprite.addChild(Editor);
 					}
 				break;
 				case "/editshop":
-					if(Shopeditor!=null && !Shopeditor._parent) Shopeditor=null;
-					if(Shopeditor){
-						Shopeditor.willTerminate();
-						Shopeditor.removeFromParent();
-						Shopeditor=null;
+					if(Editor!=null && !Editor._parent) Editor=null;
+					if(Editor){
+						Editor.willTerminate();
+						Editor.removeFromParent();
+						this.hideEditor();
+						Editor=null;
 					} else{
-						Shopeditor = new PopupList();
-						Shopeditor.init({delegate:null,editor:new ShopEditor(),list:ObjectLists.getShopList(),name:"Shop List"});
-						Shopeditor.didBecomeActive();
-						this.addChild(Shopeditor);
+						this.showEditor();
+						Editor = new PopupList();
+						Editor.init({delegate:null,editor:new ShopEditor(),list:ObjectLists.getShopList(),name:"Shop List"});
+						Editor.didBecomeActive();
+						this.editSprite.addChild(Editor);
 					}
 				break;
 				case "/editmap":
-					if(Mapeditor!=null && !Mapeditor._parent) Mapeditor=null;
-					if(Mapeditor){
-						Mapeditor.willTerminate();
-						Mapeditor.removeFromParent();
-						Mapeditor=null;
+					if(Editor!=null && !Editor._parent) Editor=null;
+					if(Editor){
+						Editor.willTerminate();
+						Editor.removeFromParent();
+						Editor=null;
+						this.hideEditor();
 						GameMap.setInteractionDelegate(null);
 					} else{
-						Mapeditor = new MapEditor();
-						Mapeditor.init();
-						Mapeditor.didBecomeActive();
-						this.editSprite.addChild(Mapeditor);
-						GameMap.setInteractionDelegate(Mapeditor);
 						this.showEditor();
+						Editor = new MapEditor();
+						Editor.init();
+						Editor.didBecomeActive();
+						this.editSprite.addChild(Editor);
+						GameMap.setInteractionDelegate(Editor);
 					}
 				break;
 				case "/editsettings":
-					if(Settingseditor!=null && !Settingseditor._parent) Settingseditor=null;
-					if(Settingseditor){
-						Settingseditor.willTerminate();
-						Settingseditor.removeFromParent();
-						Settingseditor=null;
+					if(Editor!=null && !Editor._parent) Editor=null;
+					if(Editor){
+						Editor.willTerminate();
+						Editor.removeFromParent();
+						Editor=null;
+						this.hideEditor();
 					} else{
-						Settingseditor = new SettingsEditor();
-						Settingseditor.init();
-						Settingseditor.didBecomeActive();
-						this.addChild(Settingseditor);
+						this.showEditor();
+						Editor = new SettingsEditor();
+						Editor.init();
+						Editor.didBecomeActive();
+						this.editSprite.addChild(Editor);
 					}
 				break;
 				case "/editskill": 
-					if(Skillseditor!=null && !Skillseditor._parent) Skillseditor=null;
-					if(Skillseditor){
-						Skillseditor.willTerminate();
-						Skillseditor.removeFromParent();
-						Skillseditor=null;
+					if(Editor!=null && !Editor._parent) Editor=null;
+					if(Editor){
+						Editor.willTerminate();
+						Editor.removeFromParent();
+						Editor=null;
+						this.hideEditor();
 					} else{
-						Skillseditor = new PopupList();
-						Skillseditor.init({delegate:null,editor:new SkillsEditor(),list:ObjectLists.getSkillsList(),name:"Skills List"});
-						Skillseditor.didBecomeActive();
-						this.addChild(Skillseditor);
+						this.showEditor();
+						Editor = new PopupList();
+						Editor.init({delegate:null,editor:new SkillsEditor(),list:ObjectLists.getSkillsList(),name:"Skills List"});
+						Editor.didBecomeActive();
+						this.editSprite.addChild(Editor);
 					}
 				break;		
 				case "/edititem": 
-					if(Itemeditor!=null && !Itemeditor._parent) Itemeditor=null;
-					if(Itemeditor){
-						Itemeditor.willTerminate();
-						Itemeditor.removeFromParent();
-						Itemeditor=null;
+					if(Editor!=null && !Editor._parent) Editor=null;
+					if(Editor){
+						Editor.willTerminate();
+						Editor.removeFromParent();
+						Editor=null;
+						this.hideEditor();
 						GameMap.setInteractionDelegate(null);
 					} else{
-						Itemeditor = new PopupList();
-						Itemeditor.init({delegate:null,editor:new ItemEditor(),list:ObjectLists.getItemList(),name:"Item List"});
-						Itemeditor.didBecomeActive();
-						this.addChild(Itemeditor);
+						this.showEditor(466);
+						Editor = new PopupList();
+						Editor.init({delegate:null,editor:new ItemEditor(),list:ObjectLists.getItemList(),name:"Item List"});
+						Editor.didBecomeActive();
+						this.editSprite.addChild(Editor);
 					}
 				break;
 				case "/editnpc": 
-					if(NPCeditor!=null && !NPCeditor._parent) NPCeditor=null;
-					if(NPCeditor){
-						NPCeditor.willTerminate();
-						NPCeditor.removeFromParent();
-						NPCeditor=null;
+					if(Editor!=null && !Editor._parent) Editor=null;
+					if(Editor){
+						Editor.willTerminate();
+						Editor.removeFromParent();
+						Editor=null;
 						GameMap.setInteractionDelegate(null);
+						this.hideEditor();
 					} else{
-						NPCeditor = new PopupList();
-						NPCeditor.init({delegate:null,editor:new NPCEditor(),list:ObjectLists.getNPCList(),name:"NPC List"});
-						NPCeditor.didBecomeActive();
-						this.addChild(NPCeditor);
+						this.showEditor();
+						Editor = new PopupList();
+						Editor.init({delegate:null,editor:new NPCEditor(),list:ObjectLists.getNPCList(),name:"NPC List"});
+						Editor.didBecomeActive();
+						this.editSprite.addChild(Editor);
 					}
 				break;
 				case "/editquest": 
-					if(Questeditor!=null && !Questeditor._parent) Questeditor=null;
-					if(Questeditor){
-						Questeditor.willTerminate();
-						Questeditor.removeFromParent();
-						Questeditor=null;
+					if(Editor!=null && !Editor._parent) Editor=null;
+					if(Editor){
+						Editor.willTerminate();
+						Editor.removeFromParent();
+						Editor=null;
 						GameMap.setInteractionDelegate(null);
+						this.hideEditor();
 					} else{
-						Questeditor = new PopupList();
-						Questeditor.init({delegate:null,editor:new QuestEditor(),list:ObjectLists.getQuestList(),name:"Quest List"});
-						Questeditor.didBecomeActive();
-						this.addChild(Questeditor);
+						this.showEditor();
+						Editor = new PopupList();
+						Editor.init({delegate:null,editor:new QuestEditor(),list:ObjectLists.getQuestList(),name:"Quest List"});
+						Editor.didBecomeActive();
+						this.editSprite.addChild(Editor);
 					}
 				break;
 			}
@@ -748,7 +761,7 @@ var GameScene = Scene.extend({
 				dicerollString = dicerollString.replace("<PLAYER>",PlayersController.getYou().getName());
 				dicerollString = dicerollString.replace("<VALUE>",number);
 				GameChat.addMessage(dicerollString);
-				sendMessageToServer({"diceroll":dicerollString});
+				sendToServer("diceRollMessage",dicerollString);
 			break;
 			case "/coinflip":
 				var coin = Math.floor( (Math.random() * 3) + 1) == 1 ? "Heads" : "Tails";
@@ -756,17 +769,17 @@ var GameScene = Scene.extend({
 				coinflipString = coinflipString.replace("<PLAYER>",PlayersController.getYou().getName());
 				coinflipString = coinflipString.replace("<VALUE>",coin);
 				GameChat.addMessage(coinflipString);
-				sendMessageToServer({"coinflip":coinflipString});
+				sendToServer("coinFlipMessage",coinflipString);
 			break;
 			case "/dance":
 				var danceString = settingsData["/dance"];
 				danceString = danceString.replace("<PLAYER>",PlayersController.getYou().getName());
 				GameChat.addMessage(danceString);
-				sendMessageToServer({"dance":danceString});
+				sendToServer("danceMessage",danceString);
 			break;
 			case "/afk":
 				PlayersController.getYou().updateStatus("AFK");
-				sendMessageToServer({"afk":true});
+				sendToServer("afkMessage",null);
 			break;
 		}
 
@@ -775,10 +788,6 @@ var GameScene = Scene.extend({
 	
 	init:function(withData){
 		this._super();
-	//	var bgLayer = cc.LayerColor.create(cc.c3b(0,0,0),(screenSize.width-showingEditor),(screenSize.height-sizeReducer));
-	//	bgLayer.setAnchorPoint(cc.p(0,0));
-	//	bgLayer.setPosition(cc.p(0,0));
-	//	this.addChild(bgLayer);
 		MainScene=this;	
 		this.addChild(GameMap.create());
 		ObjectLists.getInstance();
@@ -804,12 +813,9 @@ var GameScene = Scene.extend({
 
 		PlayersController.create(playerData);
 		GameMap.addPlayersController(PlayersController.getInstance());
-	
-
 
 		this.panels.removeFromParent();
 		this.setTouchPriority(-20);
-		sendMessageToServer({"moveTo":((PlayersController.getYou().getGridPosition().x) + ((PlayersController.getYou().getGridPosition().y) * gridWidth))});
 		
 		this.addChild(GameChat.create());
 		this.addChild(SkillBars.create(withData.playerData["skills"]));
@@ -818,7 +824,6 @@ var GameScene = Scene.extend({
 
 		this.addChild(this.panels);		
 		this.schedule(this.storedMessages);	
-		this.schedule(this.serverProcess);
 		this.schedule(this.saveSchedule,120);
 		if(PlayersController.getYou().access>1){
 			this.updateEditorPos();
@@ -827,14 +832,15 @@ var GameScene = Scene.extend({
 			this.editSprite=this.panels["editorbg"];
 		}else{
 			this.panels["menu_bar"].setVisible(false);
-
 		}
+
+
+
 		SkillBars.update();
 	},
 
 	saveSchedule:function(){
 		var saveData = {
-			"saveUser":true,
 			"name":PlayersController.getYou().getName(),
 			"location":{"mapnumber":GameMap.getMapNumber(),"position":((PlayersController.getYou().getGridPosition().x) + ((PlayersController.getYou().getGridPosition().y) * gridWidth))},
 			"inventory":PlayersController.getYou().getInventory(),
@@ -853,7 +859,7 @@ var GameScene = Scene.extend({
 		};
 		this.panels["saving_icon"].setVisible(true);
 		this.isSaving=true;
-		sendMessageToServer(saveData)
+		sendToServer("saveGameMessage",saveData)
 		console.log("SAVING NOW!");
 	},
 
@@ -881,26 +887,5 @@ var GameScene = Scene.extend({
 				}
 			}
 		}
-	},
-
-	serverProcess:function(){
-		if(MapMaster==true){
-			var NPCsInMap = PlayersController.NPCsInMap(GameMap.getMapNumber());
-			for(var i in NPCsInMap){
-				if(NPCsInMap[i].isPreparing()==false){
-					var delay = Math.random()*10+1;
-					var currentGridPos = NPCsInMap[i].getGridPosition();
-					switch(Math.floor(Math.random() * 4) + 1){
-						case 1: currentGridPos.x++; break;
-						case 2: currentGridPos.y++; break;
-						case 3: currentGridPos.x--; break;
-						case 4: currentGridPos.y--; break;
-					}
-					NPCsInMap[i].setPreparing(currentGridPos,delay);
-				}
-			}
-		}
-	},
-
-	
+	},	
 });

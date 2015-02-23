@@ -108,6 +108,7 @@
                 <file name="./src/classes/SingleLineBox.js"></file>
                 <file name="./src/classes/MultiLineBox.js"></file>
                 <file name="./src/utils/Utils.js"></file>
+                <file name="./src/utils/sound.js"></file>
                 <file name="./src/classes/LocalStorage.js"></file>
                 <file name="./src/classes/ListView.js"></file>
                 <file name="./src/classes/GameTile.js"></file>

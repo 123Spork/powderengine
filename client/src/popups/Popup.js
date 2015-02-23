@@ -50,20 +50,4 @@ Popup = Scene.extend({
 		cc.log("No id given... using default 'Popup'");
 		return "Popup";
 	},
-
-	didBecomeActive:function(){
-		this._super();
-		var panelPos = LocalStorage.getPanelPosition();
-		if(panelPos!="null" && panelPos!=null){
-			var obj = JSON.parse(panelPos)[this.getIdentifier()];
-			if(obj){
-				var pos = cc.p(obj["x"],obj["y"]);
-				if(pos.x>(screenSize.width-showingEditor)-10 || pos.y>(screenSize.height-sizeReducer)){
-					pos = cc.p(8,100);
-				}
-				this.panels.setPosition(pos);
-			}
-		}
-	},
-
 });

@@ -34,6 +34,10 @@ var InputBox = cc.Class.extend({
 		cc.log("Ovveride inputbox init call if necessary");
 	},
 
+	setInputFlag:function(_in){
+		this.inputBox.setInputFlag(_in);
+	},
+
 	removeFromParent:function(){
 		this.inputBox.removeFromParent();
 	},

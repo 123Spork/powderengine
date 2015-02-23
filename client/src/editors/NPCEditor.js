@@ -1,87 +1,86 @@
-NPCeditor=null,
-NPCEditor = Popup.extend({
+NPCEditor = Scene.extend({
 	currentTexture:characterTextureList[0]["name"],
 	currentTextureNumber:0,
+	currentTab:null,
 	
-	setTypeData:function(value,data){
-		if(Scripteditor){
-			Scripteditor.willTerminate();
-			Scripteditor.removeFromParent();
-			this.typeData=value;
-			this.setTouchEnabled(true);
-			this.panels["main_panel"]["scriptbtn"]["text"].setString(data["name"]);
-			this.panels["main_panel"]["scriptbtn"].setColor(cc.c4b(0,255,0,255));
+	getTabOptions:function(){
+		return ["Sprite","Script"];
+	},
+
+
+	getCloseOptions:function(clicknum){
+		return ["Cancel","Don't Save","Save"];
+	},
+
+	willExitEditor:function(clicknum){
+		switch(clicknum){
+			case 1:
+				this.ignoreTerminate=true; var self= this.delegate;
+				this.delegate.scheduleOnce(function(){self.endedEdit(null)});
+			break;
+			case 2:
+				this.ignoreTerminate=true;
+				this.data["name"]=this.nameBox.getText();
+				this.data["sprite"]["number"]=this.mapOffset.y;
+				this.data["script"]=this.typeData;
+				this.delegate.endedEdit(this.data);
+			break;
 		}
 	},
 
-	setNoType:function(){
-		this.panels["main_panel"]["scriptbtn"]["text"].setString("None");
-		this.panels["main_panel"]["scriptbtn"].setColor(cc.c4b(255,0,0,255));
-	},
-
-
 	getLayoutObject:function(){
 		return { "panels":{
-				position:cc.p(300,10),
 				children:{	
-					"background":{
-						texture:"GUI/itemeditor_bg.png",
-						anchorPoint:cc.p(0,0),
-					},
-					"main_panel":{
-						anchorPoint:cc.p(0,0),
-						position: cc.p(0,0),
-						size: cc.size(500,330),
-						children: {
-							"namelbl" : {
+					"tab1":{
+						children:{
+							"menu_bar":{
+								size:cc.size(466,20),
+								position:cc.p(0,screenSize.height-40),
+								color:cc.c3b(127,127,127),
+								children:{
+									"textureDropDown": {
+										position:cc.p(0,0),
+										size:cc.size(80,20),
+										color: cc.c3b(127,127,127),
+										anchorPoint:cc.p(0,0),
+										children:{
+											"lbl":{
+												label:(characterTextureList[0]["name"].substring(0,12)),
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0),
+												position:cc.p(40,3),
+											}
+										}
+									},
+								},	
+							},				
+							"namelbl":{
 								label:"Name:",
-								fontSize:20,
+								fontSize:12,
 								anchorPoint:cc.p(0,0),
-								position:cc.p(4,292),
-								color:cc.c3b(0,0,0),
+								position: cc.p(4,screenSize.height-70),
 							},
 							"name_entry":{
-								position:cc.p(74,292),
-								size:cc.size(266,32),
-								color:cc.c4b(255,255,255,255),
+								position:cc.p(74,screenSize.height-70),
+								size:cc.size(290,16),
+								anchorPoint:cc.p(0,0),
+								color:cc.c3b(180,180,180)
+							},	
+							"spritelbl":{
+								label:"Sprite:",
+								fontSize:12,
+								anchorPoint:cc.p(0,0),
+								position: cc.p(4,screenSize.height-100),
 							},
 
 							"tiles" : {
 								anchorPoint:cc.p(0,1),
-								position:cc.p(374,232),
+								position:cc.p(74,screenSize.height-100),
 								texture:characterTextureList[0]["name"],
 							},
 							
-							"textureleftbtn" : {
-								position:cc.p(362,292),
-								size:cc.size(16,32),
-								texture:"GUI/texture_change_left.png",
-								anchorPoint:cc.p(0,0),
-							},
-							"texturerightbtn" : {
-								position:cc.p(471,292),
-								size:cc.size(16,32),
-								texture:"GUI/texture_change_right.png",
-								anchorPoint:cc.p(0,0),
-							},
-							"textureName" : {
-								position:cc.p(375,292),
-								size:cc.size(96,32),
-								texture:"GUI/texture_change_middle.png",
-								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:tileTextureList[0]["name"],
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(48,16),
-										color:cc.c3b(0,0,0),
-									}
-								}
-							},
-							
 							"upbtn" : {
-								position:cc.p(374,236),
+								position:cc.p(74,screenSize.height-100),
 								size:cc.size(96,16),
 								color: cc.c4b(0,0,255,255),
 								anchorPoint:cc.p(0,0),
@@ -96,7 +95,7 @@ NPCEditor = Popup.extend({
 								}
 							},
 							"downbtn" : {
-								position:cc.p(374,86),
+								position:cc.p(74,screenSize.height-116-(charactersize*4)),
 								size:cc.size(96,16),
 								color: cc.c4b(0,0,255,255),
 								anchorPoint:cc.p(0,0),
@@ -110,69 +109,125 @@ NPCEditor = Popup.extend({
 									}
 								}
 							},
-
-							"scriptlbl" : {
-								label:"Script:",
+							"walklbl" : {
+								label:"Walks?:",
 								fontSize:12,
 								anchorPoint:cc.p(0,0),
-								position:cc.p(8,262),
-								color:cc.c3b(0,0,0),
+								position:cc.p(7,screenSize.height-144-(charactersize*4)),
 							},
-							"scriptbtn" : {
-								position:cc.p(8,232),
-								size:cc.size(128,26),
+							"walkbtn" : {
+								position:cc.p(74,screenSize.height-154-(charactersize*4)),
+								size:cc.size(64,26),
 								color: RED,
 								anchorPoint:cc.p(0,0),
 								children:{
 									"text":{
-										label:"None",
+										label:"No",
 										fontSize:12,
 										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(64,13),
+										position:cc.p(32,13),
 										color:cc.c3b(0,0,0),
 									}
 								}
 							},
-							
-						
-							"okbtn" : {
-								position:cc.p(434,16),
-								size:cc.size(32,32),
-								texture:"GUI/tick_icon.png",
-								anchorPoint:cc.p(0,0),
-							},
-							"cancelbtn" : {
-								position:cc.p(384,16),
-								size:cc.size(32,32),
-								texture:"GUI/cross_icon.png",
-								anchorPoint:cc.p(0,0),
-							},
 						}
 					},
-					"control_panel":{
-						anchorPoint:cc.p(0,0),
-						position: cc.p(0,330),
-						size: cc.size(500,32),
-						children:{	
-							"header":{
-								label:"Item Editor",
-								fontSize:20,
-								anchorPoint:cc.p(0,0.5),
-								position:cc.p(8,16),
-							},
-							"exitBtn":{
-								position: cc.p(476,6),
-								size: cc.size(20,20),
+					"tab2":{
+						children:{
+							"scriptList":{
+								position:cc.p(0,0),
+								size:cc.size(328,screenSize.height-20),
 								anchorPoint:cc.p(0,0),
-								texture:"GUI/close.png"
 							}
 						}
-					},
+					}
 				}
 			}
 		};
 	},
 	
+	updateScriptList:function(){
+		var list = ObjectLists.getScriptList();
+		if(this.panels["tab2"]["scriptList"].listView!=null){
+			this.panels["tab2"]["scriptList"].listView.removeFromParent();
+			this.panels["tab2"]["scriptList"].listView=null;
+		}
+
+		var listnodes = [];
+		var callBackList=[];
+		for(var i=0;i<list.length;i++){
+			listnodes[i]=cc.Node.create();	
+			if(list[i]["specifier"]=="NPC"){
+				listnodes[i]=cc.Sprite.create();
+				listnodes[i].setColor(cc.c3b(80,80,80));
+				listnodes[i].setAnchorPoint(cc.p(0,0));
+				var text = cc.LabelTTF.create(list[i]["name"],"Arial",12);
+				text.setAnchorPoint(cc.p(0,0));
+				var bottomLine= cc.LayerColor.create(cc.c4b(0,0,0,127),328,1);
+				bottomLine.setPosition(cc.p(0,0))
+				text.setPosition(cc.p(2,2));
+				text.setDimensions(cc.size(328,0));
+				listnodes[i].setTextureRect(cc.rect(0,0,328,text.getContentSize().height+4));
+				listnodes[i].setContentSize(328,text.getContentSize().height+4);
+				listnodes[i].addChild(text);
+				listnodes[i].addChild(bottomLine);
+				callBackList.push([listnodes[i]]);
+				if(this.typeData==i){
+					listnodes[i].setColor(cc.c3b(200,200,200));
+					text.setColor(cc.c3b(0,0,0));
+					listnodes[i].callBack="Use";	
+				}
+			}else{
+				callBackList.push([]);
+				listnodes[i].setContentSize(0,0);
+			}
+		}
+		var self=this;
+		this.panels["tab2"]["scriptList"].getListSize = function(){
+			var height =0;
+			for(var i=0;i<listnodes.length;i++){
+				height+=listnodes[i].getContentSize().height;
+			}
+			return cc.size(328,height);
+		};
+		this.panels["tab2"]["scriptList"].getListElementAmount=function(){
+			return listnodes.length;
+		};
+		this.panels["tab2"]["scriptList"].getSizeForElement=function(elementID){
+			return listnodes[elementID].getContentSize();
+		};
+		this.panels["tab2"]["scriptList"].getListNodeForIndex=function(elementID){
+			return listnodes[elementID];
+		};
+		this.panels["tab2"]["scriptList"].getHighlightNode = function(elementID){
+			return listnodes[elementID].highlightNode;
+		};
+		this.panels["tab2"]["scriptList"].runListCallBack=function(name,listelement){
+			self.typeData=listelement;
+			self.updateScriptList();
+		};
+		this.panels["tab2"]["scriptList"].listView = ListView.create(this.panels["tab2"]["scriptList"]);
+		
+		if(this.panels["tab2"]["scriptList"].listView.scrollBar){
+			this.panels["tab2"]["scriptList"].listView.scrollBar.setPositionX(328);
+			this.panels["tab2"]["scriptList"].listView.scrollBar.setContentSize(20,60);
+			this.panels["tab2"]["scriptList"].listView.scrollBar.setColor(cc.c4b(200,200,200,100));
+			this.panels["tab2"]["scriptList"].listView.scrollBarBack.setVisible(false);
+		}
+		this.panels["tab2"]["scriptList"].listView.setCallBackList(callBackList);
+		this.panels["tab2"]["scriptList"].addChild(this.panels["tab2"]["scriptList"].listView);
+	},
+
+	setTab:function(value){
+		this.panels["tab1"].setVisible(false);
+		this.panels["tab2"].setVisible(false);
+		if(value==2){
+			this.updateScriptList();
+		}
+		this.panels["tab"+value].setVisible(true);
+		this.currentTab=value;
+	},
+
 	getIdentifier:function(){
 		return "npcEditor";
 	},
@@ -182,6 +237,8 @@ NPCEditor = Popup.extend({
 	
 	init:function(withData){
 		this._super();	
+		this.setTouchPriority(-100);
+		
 		this.data={"name":"","sprite":{"texture":null,"number":null},"script":null};;
 		this.currentTexture=characterTextureList[0]["name"],
 		this.currentTextureNumber=0,
@@ -202,34 +259,40 @@ NPCEditor = Popup.extend({
 	},
 	
 	runSaveNewData:function(num){
-		sendMessageToServer({"savenpcs":num+"","npcsdata":this.data});
+		sendToServer("saveNewNPCMessage",{"savenpcs":num+"","npcsdata":this.data});
 	},
 	
 	deleteSave:function(num,list){
-		sendMessageToServer({"savenpcswhole":list});
+		sendToServer("deleteNPCMessage",{"savenpcswhole":list});
 	},
 	
 	
 	didBecomeActive:function(){
 		this._super();
+		this.setTab(1);
 		for(var i in characterTextureList){
 			if(characterTextureList[i]["name"]==this.data["sprite"]["texture"]){
 				this.currentTextureNumber=i;
 				this.currentTexture=characterTextureList[i]["name"];
 			}
 		}
-		this.panels["main_panel"]["textureName"]["text"].setString(this.currentTexture);
-		this.panels["main_panel"]["tiles"].setTexture(characterTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["tab1"]["menu_bar"]["textureDropDown"]["lbl"].setString(this.currentTexture);
+		this.panels["tab1"]["tiles"].setTexture(characterTextureList[this.currentTextureNumber]["texture"]);
 		
 		if(this.data["script"]!=null){
-			this.panels["main_panel"]["scriptbtn"].setColor(cc.c4b(0,255,0,255));
-			this.panels["main_panel"]["scriptbtn"]["text"].setString(ObjectLists.getScriptList()[this.data["script"]]["name"]);
 			this.typeData=this.data["script"];
 		}
-
-		this.nameBox = new EntryBox(this.panels["main_panel"]["name_entry"],cc.size(this.panels["main_panel"]["name_entry"].getContentSize().width,this.panels["main_panel"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["name_entry"].getContentSize().height), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.nameBox = new EntryBox(this.panels["tab1"]["name_entry"],cc.size(this.panels["tab1"]["name_entry"].getContentSize().width,this.panels["tab1"]["name_entry"].getContentSize().height+4), cc.p(0,this.panels["tab1"]["name_entry"].getContentSize().height+4), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(0,0,0));
 		this.nameBox.setDefaultFineFlag(true);
+		this.nameBox.setBackgroundInvisible();
 		this.updateMapOffset();
+
+		this.panels["tab1"]["walkbtn"].setColor(RED);
+		this.panels["tab1"]["walkbtn"]["text"].setString("No");
+		if(this.data["walkable"]==true){
+			this.panels["tab1"]["walkbtn"].setColor(GREEN);
+			this.panels["tab1"]["walkbtn"]["text"].setString("Yes");
+		}
 	},
 
 	willTerminate:function(ignoreTerminate){
@@ -245,82 +308,71 @@ NPCEditor = Popup.extend({
 	
 	updateMapOffset:function(){
 		this.schedule(this.updateMapOffset);
-		if(this.panels["main_panel"]["tiles"].getTexture() && this.panels["main_panel"]["tiles"].getTexture()._isLoaded==true){
+		if(this.panels["tab1"]["tiles"].getTexture() && this.panels["tab1"]["tiles"].getTexture()._isLoaded==true){
 			this.unschedule(this.updateMapOffset);
-			this.panels["main_panel"]["tiles"].setTextureRect(cc.rect(Math.floor(96*this.mapOffset.x),Math.floor(128*this.mapOffset.y),characterTextureList[this.currentTextureNumber]["texture"].getContentSize().width<96?characterTextureList[this.currentTextureNumber]["texture"].getContentSize().width:96,characterTextureList[this.currentTextureNumber]["texture"].getContentSize().height<128?characterTextureList[this.currentTextureNumber]["texture"].getContentSize().height:128));
+			this.panels["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(96*this.mapOffset.x),Math.floor(128*this.mapOffset.y),characterTextureList[this.currentTextureNumber]["texture"].getContentSize().width<96?characterTextureList[this.currentTextureNumber]["texture"].getContentSize().width:96,characterTextureList[this.currentTextureNumber]["texture"].getContentSize().height<128?characterTextureList[this.currentTextureNumber]["texture"].getContentSize().height:128));
 		}
 	},
 	
+	useTexture:function(number){
+		this.delegate.currentTextureNumber=number;
+		this.delegate.panels["tiles"].setTexture(characterTextureList[this.delegate.currentTextureNumber]["texture"]);
+		this.delegate.currentTexture = characterTextureList[this.delegate.currentTextureNumber]["name"];
+		this.delegate.panels["menu_bar"]["textureDropDown"]["lbl"].setString(this.delegate.currentTexture);
+		this.delegate.mapOffset=cc.p(0,0);
+		this.delegate.updateMapOffset();
+		this.delegate.panels["menu_bar"]["textureDropDown"].setColor(cc.c3b(127,127,127));
+		this.delegate.panels["menu_bar"]["textureDropDown"]["lbl"].setString(characterTextureList[this.delegate.currentTextureNumber]["name"].substring(0,12));
+	},
+
 	onTouchBegan:function(touch){
-		if(this._super(touch)){
-			return true;
-		}
 		this.prevMovPos=null;
 		var pos = touch._point;
-		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
-		
-		if(isTouching(this.panels["main_panel"]["okbtn"],truePos)){
-			if(this.nameBox.getText()==null || this.nameBox.getText()==""){
+		var truePos = this.panels["tab1"].convertToNodeSpace(pos);
+		if(this.currentTab==1){
+			this.panels["tab1"]["menu_bar"]["textureDropDown"].setColor(cc.c3b(127,127,127));
+			if(isTouching(this.panels["tab1"]["menu_bar"]["textureDropDown"],this.panels["tab1"]["menu_bar"].convertToNodeSpace(pos))){
+				var nameList = [];
+				for(var i in characterTextureList){
+					nameList.push(characterTextureList[i]["name"].substring(0,12));
+				}
+				this.panels["tab1"]["menu_bar"]["textureDropDown"].setColor(cc.c3b(60,60,60));
+				var ddown = DropDownList.createWithListAndPosition(this,this.useTexture,nameList,cc.p(0,screenSize.height-40));
+				ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+				ddown.setMinimumWidth(80);
+				this.addChild(ddown);
 				return true;
-			}
-			this.ignoreTerminate=true;
-			this.data["name"]=this.nameBox.getText();
-			this.data["sprite"]["number"]=this.mapOffset.y;
-			this.data["script"]=this.typeData;
-			this.delegate.endedEdit(this.data);
-			return true;
-		}
-			
-		if(isTouching(this.panels["main_panel"]["cancelbtn"],truePos)){
-			this.ignoreTerminate=true; var self= this.delegate;
-			this.delegate.scheduleOnce(function(){self.endedEdit(null)});
-			return true;
-		}
+			}	
 
-	
-		if(isTouching(this.panels["main_panel"]["scriptbtn"],truePos)){
-			if(Scripteditor){
-				Scripteditor.willTerminate();
-				Scripteditor.removeFromParent();
-				Scripteditor=null;
-			} else{
-				Scripteditor = new PopupList();
-				Scripteditor.init({delegate:this,editor:new ScriptEditor(),list:ObjectLists.getScriptList(),name:"Script List"});
-				Scripteditor.didBecomeActive();
-				this.addChild(Scripteditor);
-			}
-		}
-
-			if(isTouching(this.panels["main_panel"]["upbtn"],truePos)){
+			if(isTouching(this.panels["tab1"]["upbtn"],truePos)){
 				if(characterTextureList[this.currentTextureNumber]["texture"].getContentSize().height>320 && this.mapOffset.y>0){
 					this.mapOffset.y--;	this.updateMapOffset();
 				}
 				return true;
 			}
-			if(isTouching(this.panels["main_panel"]["downbtn"],truePos)){
+			if(isTouching(this.panels["tab1"]["downbtn"],truePos)){
 				if(characterTextureList[this.currentTextureNumber]["texture"].getContentSize().height>320 && this.mapOffset.y<((characterTextureList[this.currentTextureNumber]["texture"].getContentSize().height-320)/32)){
 					this.mapOffset.y++; this.updateMapOffset();
 				}
 				return true;
 			}
-			if(isTouching(this.panels["main_panel"]["texturerightbtn"],truePos)){
-				this.useNextTexture();
-				return true;
+			if(isTouching(this.panels["tab1"]["walkbtn"],truePos)){
+				this.swapWalkable(); return true;
 			}
-			if(isTouching(this.panels["main_panel"]["textureleftbtn"],truePos)){
-				this.usePrevTexture();
-				return true;
-			}
+
+		}
+		
 		return false;
 	},	
 
-	swapStackable:function(){
-		this.data["stackable"]=!this.data["stackable"];
-		this.panels["main_panel"]["stackbtn"].setColor(RED);
-		this.panels["main_panel"]["stackbtn"]["text"].setString("NOT STACKABLE");
-		if(this.data["stackable"]==true){
-			this.panels["main_panel"]["stackbtn"].setColor(GREEN);
-			this.panels["main_panel"]["stackbtn"]["text"].setString("IS STACKABLE");
+
+	swapWalkable:function(){
+		this.data["walkable"]=!this.data["walkable"];
+		this.panels["tab1"]["walkbtn"].setColor(RED);
+		this.panels["tab1"]["walkbtn"]["text"].setString("No");
+		if(this.data["walkable"]==true){
+			this.panels["tab1"]["walkbtn"].setColor(GREEN);
+			this.panels["tab1"]["walkbtn"]["text"].setString("Yes");
 		}
 	},
 	
@@ -332,9 +384,9 @@ NPCEditor = Popup.extend({
 			this.currentTextureNumber=-1;
 		}
 		this.currentTextureNumber++;
-		this.panels["main_panel"]["tiles"].setTexture(characterTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["tab1"]["tiles"].setTexture(characterTextureList[this.currentTextureNumber]["texture"]);
 		this.currentTexture = characterTextureList[this.currentTextureNumber]["name"];
-		this.panels["main_panel"]["textureName"]["text"].setString(this.currentTexture);
+		this.panels["tab1"]["textureName"]["text"].setString(this.currentTexture);
 		this.data["sprite"]["texture"]=this.currentTexture;
 		this.mapOffset=cc.p(0,0);
 		this.updateMapOffset();
@@ -345,9 +397,9 @@ NPCEditor = Popup.extend({
 			this.currentTextureNumber=characterTextureList.length;
 		}
 		this.currentTextureNumber--;
-		this.panels["main_panel"]["tiles"].setTexture(characterTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["tab1"]["tiles"].setTexture(characterTextureList[this.currentTextureNumber]["texture"]);
 		this.currentTexture = characterTextureList[this.currentTextureNumber]["name"];
-		this.panels["main_panel"]["textureName"]["text"].setString(this.currentTexture);
+		this.panels["tab1"]["textureName"]["text"].setString(this.currentTexture);
 		this.mapOffset=cc.p(0,0);
 		this.updateMapOffset();
 	},

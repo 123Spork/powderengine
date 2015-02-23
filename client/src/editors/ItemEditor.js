@@ -1,6 +1,5 @@
-Itemeditor=null,
 Itemeditor2=null,
-ItemEditor = Popup.extend({
+ItemEditor = Scene.extend({
 	currentTexture:tileTextureList[0]["name"],
 	currentTextureNumber:0,
 	currentTab:1,
@@ -8,357 +7,176 @@ ItemEditor = Popup.extend({
 	contextItem:null,
 	contextStore:null,
 	addingSell:false,
+	mapSize:null,
+
+	getTabOptions:function(){
+		return ["Sprite","Value","Script"];
+	},
 
 
+	getCloseOptions:function(clicknum){
+		return ["Cancel","Don't Save","Save"];
+	},
+	
 
-	setTypeData:function(value,data){
-		if(Scripteditor){
-			Scripteditor.willTerminate();
-			Scripteditor.removeFromParent();
-			this.typeData=value;
-			this.setTouchEnabled(true);
-			this.panels["main_panel"]["tab1"]["scriptbtn"]["text"].setString(data["name"]);
-			this.panels["main_panel"]["tab1"]["scriptbtn"].setColor(cc.c4b(0,255,0,255));
-		}
-		if(Shopeditor){
-			Shopeditor.willTerminate();
-			Shopeditor.removeFromParent();
-			Shopeditor=null;
-			this.addNewStoreFromId(value);
-		}
-		if(Itemeditor2 && this.addingSell==true){
-			Itemeditor2.willTerminate();
-			Itemeditor2.removeFromParent();
-			Itemeditor2=null;
-			this.addNewSellFromIdandData(this.contextStore,value,data);
-			this.contextStore=null;
-		}
-		if(Itemeditor2 && this.addingSell==false){
-			Itemeditor2.willTerminate();
-			Itemeditor2.removeFromParent();
-			Itemeditor2=null;
-			this.addNewBuyFromIdandData(this.contextStore,value,data);
-			this.contextStore=null;
+
+	willExitEditor:function(clicknum){
+		switch(clicknum){
+			case 1:
+				this.ignoreTerminate=true; var self= this.delegate;
+				this.delegate.scheduleOnce(function(){self.endedEdit(null)});
+			break;
+			case 2:
+				this.ignoreTerminate=true;
+				this.data["description"]=this.descriptionBox.getText();
+				this.data["name"]=this.nameBox.getText();
+				this.data["script"]=this.typeData;
+				this.delegate.endedEdit(this.data);
+			break;
 		}
 	},
 
 	setNoType:function(){
-		this.panels["main_panel"]["tab1"]["scriptbtn"]["text"].setString("None");
-		this.panels["main_panel"]["tab1"]["scriptbtn"].setColor(cc.c4b(255,0,0,255));
+		this.panels["tab1"]["scriptbtn"]["text"].setString("None");
+		this.panels["tab1"]["scriptbtn"].setColor(cc.c4b(255,0,0,255));
 	},
 
 	getLayoutObject:function(){
+		this.mapSize = (screenSize.height-140)-(((screenSize.height-140))%cellsize);
 		return { "panels":{
-				position:cc.p(300,10),
 				children:{	
-					"background":{
-						texture:"GUI/itemeditor_bg.png",
-						anchorPoint:cc.p(0,0),
-					},
-					"main_panel":{
-						anchorPoint:cc.p(0,0),
-						position: cc.p(0,0),
-						size: cc.size(500,368),
-						children: {
-							"tab1":{
+					"tab1":{
+						children:{
+							"namelbl":{
+								label:"Name:",
+								fontSize:12,
+								anchorPoint:cc.p(0,0),
+								position: cc.p(4,screenSize.height-70),
+							},
+							"name_entry":{
+								position:cc.p(74,screenSize.height-70),
+								size:cc.size(290,16),
+								anchorPoint:cc.p(0,0),
+								color:cc.c3b(180,180,180)
+							},	
+						
+							"tiles" : {
+								anchorPoint:cc.p(0,1),
+								position:cc.p(0,screenSize.height-140),
+								texture:tileTextureList[0]["name"],
+							},
+
+							"menu_bar":{
+								size:cc.size(466,20),
+								position:cc.p(0,screenSize.height-40),
+								color:cc.c3b(127,127,127),
 								children:{
-									"namelbl" : {
-										label:"Name:",
-										fontSize:20,
+									"textureDropDown": {
+										position:cc.p(0,0),
+										size:cc.size(80,20),
+										color: cc.c3b(127,127,127),
 										anchorPoint:cc.p(0,0),
-										position:cc.p(4,292),
+										children:{
+											"lbl":{
+												label:(tileTextureList[0]["name"].substring(0,12)),
+												fontSize:12,
+												anchorPoint:cc.p(0.5,0),
+												position:cc.p(40,3),
+											}
+										}
+									},
+								},	
+							},				
+
+							"stacklbl" : {
+								label:"Stackable:",
+								fontSize:12,
+								anchorPoint:cc.p(0,0),
+								position:cc.p(390,screenSize.height-70),
+							},
+							"stackbtn" : {
+								position:cc.p(390,screenSize.height-100),
+								size:cc.size(64,26),
+								color: RED,
+								anchorPoint:cc.p(0,0),
+								children:{
+									"text":{
+										label:"No",
+										fontSize:12,
+										anchorPoint:cc.p(0.5,0.5),
+										position:cc.p(32,13),
 										color:cc.c3b(0,0,0),
-									},
-									"name_entry":{
-										position:cc.p(74,292),
-										size:cc.size(266,32),
-										color:cc.c4b(255,255,255,255),
-									},
+									}
+								}
+							},
+							
+							"highlightnode" : {
+								anchorPoint:cc.p(0,0),
+								position:cc.p(0,0),
+								size:cc.size(32,32),
+								color:cc.c4b(255,100,100,255),
+							},
+							"selectednode" : {
+								anchorPoint:cc.p(0,0),
+								position:cc.p(0,0),
+								size:cc.size(32,32),
+								color:cc.c4b(100,255,100,255),
+							},
 								
-									"tiles" : {
-										anchorPoint:cc.p(0,1),
-										position:cc.p(16,272),
-										texture:tileTextureList[0]["name"],
-									},
-									
-									"textureleftbtn" : {
-										position:cc.p(362,292),
-										size:cc.size(16,32),
-										texture:"GUI/texture_change_left.png",
-										anchorPoint:cc.p(0,0),
-									},
-									"texturerightbtn" : {
-										position:cc.p(471,292),
-										size:cc.size(16,32),
-										texture:"GUI/texture_change_right.png",
-										anchorPoint:cc.p(0,0),
-									},
-									"textureName" : {
-										position:cc.p(375,292),
-										size:cc.size(96,32),
-										texture:"GUI/texture_change_middle.png",
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:tileTextureList[0]["name"],
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(48,16),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									"leftbtn" : {
-										position:cc.p(0,16),
-										size:cc.size(16,256),
-										color: cc.c4b(0,0,255,255),
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"<",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(8,160),
-												color:cc.c3b(255,255,255),
-											}
-										}
-									},
-									"rightbtn" : {
-										position:cc.p(336,16),
-										size:cc.size(16,256),
-										color: cc.c4b(0,0,255,255),
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:">",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(8,160),
-												color:cc.c3b(255,255,255),
-											}
-										}
-									},
-									"upbtn" : {
-										position:cc.p(16,272),
-										size:cc.size(320,16),
-										color: cc.c4b(0,0,255,255),
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"^",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(160,8),
-												color:cc.c3b(255,255,255),
-											}
-										}
-									},
-									"downbtn" : {
-										position:cc.p(16,0),
-										size:cc.size(320,16),
-										color: cc.c4b(0,0,255,255),
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"v",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(160,8),
-												color:cc.c3b(255,255,255),
-											}
-										}
-									},
-
-									"stacklbl" : {
-										label:"Stackable:",
-										fontSize:12,
-										anchorPoint:cc.p(0,0),
-										position:cc.p(360,206),
-										color:cc.c3b(0,0,0),
-									},
-									"stackbtn" : {
-										position:cc.p(360,176),
-										size:cc.size(128,26),
-										color: RED,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"No",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-
-									"scriptlbl" : {
-										label:"Script:",
-										fontSize:12,
-										anchorPoint:cc.p(0,0),
-										position:cc.p(360,262),
-										color:cc.c3b(0,0,0),
-									},
-									"scriptbtn" : {
-										position:cc.p(360,232),
-										size:cc.size(128,26),
-										color: RED,
-										anchorPoint:cc.p(0,0),
-										children:{
-											"text":{
-												label:"None",
-												fontSize:12,
-												anchorPoint:cc.p(0.5,0.5),
-												position:cc.p(64,13),
-												color:cc.c3b(0,0,0),
-											}
-										}
-									},
-									
-									"highlightnode" : {
-										anchorPoint:cc.p(0,0),
-										position:cc.p(0,0),
-										size:cc.size(32,32),
-										color:cc.c4b(255,100,100,255),
-									},
-									"selectednode" : {
-										anchorPoint:cc.p(0,0),
-										position:cc.p(0,0),
-										size:cc.size(32,32),
-										color:cc.c4b(100,255,100,255),
-									},
-										
-									
-									"okbtn" : {
-										position:cc.p(434,16),
-										size:cc.size(32,32),
-										texture:"GUI/tick_icon.png",
-										anchorPoint:cc.p(0,0),
-									},
-									"cancelbtn" : {
-										position:cc.p(384,16),
-										size:cc.size(32,32),
-										texture:"GUI/cross_icon.png",
-										anchorPoint:cc.p(0,0),
-									},
-									"descriptionLbl":{
-										label:"Description",
-										fontSize:12,
-										anchorPoint:cc.p(0,0),
-										position:cc.p(360,154),
-										color:cc.c3b(0,0,0),
-									},
-									"descriptionBox":{
-										size:cc.size(128,96),
-										position:cc.p(360,55),
-										color:cc.c3b(255,255,255),
-									}
-								}
-							},
-							"tab2":{
-								children:{
-									"list":{
-										size:cc.size(466,320),
-										position:cc.p(2,2),
-										anchorPoint:cc.p(0,0),
-									},
-									"shopName_label":{
-										label:"Store Name",
-										position:cc.p(4,328),
-										color:cc.c3b(255,255,255),
-										fontSize:15,
-										anchorPoint:cc.p(0,0),
-									},
-									"shopSell_label":{
-										label:"Sell Price",
-										position:cc.p(130,328),
-										color:cc.c3b(255,255,255),
-										fontSize:15,
-										anchorPoint:cc.p(0,0),
-									},
-									"shopBuy_label":{
-										label:"Buy Price",
-										position:cc.p(315,328),
-										color:cc.c3b(255,255,255),
-										fontSize:15,
-										anchorPoint:cc.p(0,0),
-									}
-								}
-							},
-							"tab3":{
-								size:cc.size(200,100),
-								color:cc.c3b(100,100,100),
-								children:{
-									"okbtn" : {
-										position:cc.p(20,32),
-										size:cc.size(32,32),
-										texture:"GUI/tick_icon.png",
-										anchorPoint:cc.p(0,0),
-									},
-									"cancelbtn" : {
-										position:cc.p(60,32),
-										size:cc.size(32,32),
-										texture:"GUI/cross_icon.png",
-										anchorPoint:cc.p(0,0),
-									},
-									"textBox":{
-										size:cc.size(100,20),
-										position:cc.p(20,72),
-										color:cc.c3b(255,255,255),
-									}
-								}
-							},
-							"tab1Clickable":{
-								position:cc.p(8,348),
-								size:cc.size(60,20),
-								color: WHITE,
+							"descriptionLbl":{
+								label:"Description:",
+								fontSize:12,
 								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"Details",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(32,10),
-										color:cc.c3b(0,0,0),
-									}
-								}
+								position:cc.p(4,screenSize.height-93),
 							},
-							"tab2Clickable":{
-								position:cc.p(70,348),
-								size:cc.size(60,20),
-								color: WHITE,
+							"descriptionBox":{
+								size:cc.size(290,40),
+								position:cc.p(74,screenSize.height-120),
+								color:cc.c3b(180,180,180),
 								anchorPoint:cc.p(0,0),
-								children:{
-									"text":{
-										label:"Value",
-										fontSize:12,
-										anchorPoint:cc.p(0.5,0.5),
-										position:cc.p(32,10),
-										color:cc.c3b(0,0,0),
-									}
-								}
 							}
 						}
 					},
-					"control_panel":{
-						anchorPoint:cc.p(0,0),
-						position: cc.p(0,368),
-						size: cc.size(500,32),
-						children:{	
-							"header":{
-								label:"Item Editor",
-								fontSize:20,
-								anchorPoint:cc.p(0,0.5),
-								position:cc.p(8,16),
-							},
-							"exitBtn":{
-								position: cc.p(476,6),
-								size: cc.size(20,20),
+					"tab2":{
+						children:{
+							"list":{
+								size:cc.size(466,screenSize.height-50),
+								position:cc.p(2,2),
 								anchorPoint:cc.p(0,0),
-								texture:"GUI/close.png"
+								color:cc.c3b(180,180,180),
+							},
+							"shopName_label":{
+								label:"Store Name",
+								position:cc.p(4,screenSize.height-40),
+								color:cc.c3b(255,255,255),
+								fontSize:12,
+								anchorPoint:cc.p(0,0),
+							},
+							"shopSell_label":{
+								label:"Sell Price",
+								position:cc.p(90,screenSize.height-40),
+								color:cc.c3b(255,255,255),
+								fontSize:12,
+								anchorPoint:cc.p(0,0),
+							},
+							"shopBuy_label":{
+								label:"Buy Price",
+								position:cc.p(275,screenSize.height-40),
+								color:cc.c3b(255,255,255),
+								fontSize:12,
+								anchorPoint:cc.p(0,0),
 							}
 						}
 					},
+					"tab3":{
+						children:{
+							"scriptList":{
+								position:cc.p(0,0),
+								size:cc.size(352,screenSize.height-20),
+								anchorPoint:cc.p(0,0),
+							}
+						}
+					}
 				}
 			}
 		};
@@ -375,6 +193,7 @@ ItemEditor = Popup.extend({
 	
 	init:function(withData){
 		this._super();	
+		this.setTouchPriority(-100);
 		this.data={"value":[],"sprite":{"texture":tileTextureList[0]["name"],"position":{x:0,y:0}},"script":null,"stackable":false, "name":""};
 		this.currentTexture=tileTextureList[0]["name"],
 		this.currentTextureNumber=0,
@@ -397,18 +216,18 @@ ItemEditor = Popup.extend({
 	},
 	
 	runSaveNewData:function(num){
-		sendMessageToServer({"saveitems":num+"","itemdata":this.data});
+		sendToServer("saveNewItemMessage",{"saveitems":num+"","itemdata":this.data});
 	},
 	
 	deleteSave:function(num,list){
-		sendMessageToServer({"saveitemswhole":list});
+		sendToServer("deleteItemMessage",{"saveitemswhole":list});
 	},
 	
 	
 	didBecomeActive:function(){
 		this._super();
-		this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
-		this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(127);
+		this.panels["tab1"]["highlightnode"].setOpacity(0);
+		this.panels["tab1"]["selectednode"].setOpacity(127);
 
 		for(var i in tileTextureList){
 			if(tileTextureList[i]["name"]==this.data["sprite"]["texture"]){
@@ -416,15 +235,9 @@ ItemEditor = Popup.extend({
 				this.currentTexture=tileTextureList[i]["name"];
 			}
 		}
-		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
-		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
+		this.panels["tab1"]["menu_bar"]["textureDropDown"]["lbl"].setString(this.currentTexture);
+		this.panels["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
 		
-		if(this.data["script"]!=null){
-			this.panels["main_panel"]["tab1"]["scriptbtn"].setColor(cc.c4b(0,255,0,255));
-			this.panels["main_panel"]["tab1"]["scriptbtn"]["text"].setString(ObjectLists.getScriptList()[this.data["script"]]["name"]);
-			this.typeData=this.data["script"];
-		}
-
 		var posX = this.data["sprite"]["position"].x;
 		while(posX>=10){
 			posX--;
@@ -436,21 +249,24 @@ ItemEditor = Popup.extend({
 			this.mapOffset.y++;
 		}
 		var tilePos = cc.p((this.data["sprite"]["position"].x-this.mapOffset.x)*32,(this.data["sprite"]["position"].y-this.mapOffset.y)*32);
-		this.panels["main_panel"]["tab1"]["selectednode"].setPosition(this.panels["main_panel"]["tab1"]["tiles"].getPosition().x+tilePos.x,this.panels["main_panel"]["tab1"]["tiles"].getPosition().y-(tilePos.y+32)) 
-		this.nameBox = new EntryBox(this.panels["main_panel"]["tab1"]["name_entry"],cc.size(this.panels["main_panel"]["tab1"]["name_entry"].getContentSize().width,this.panels["main_panel"]["tab1"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab1"]["name_entry"].getContentSize().height), this.data["name"]?this.data["name"]:"", cc.c4b(255,255,255), cc.c3b(0,0,0));
+		this.panels["tab1"]["selectednode"].setPosition(this.panels["tab1"]["tiles"].getPosition().x+tilePos.x,this.panels["tab1"]["tiles"].getPosition().y-(tilePos.y+32)) 
+		this.nameBox = new EntryBox(this.panels["tab1"]["name_entry"],cc.size(this.panels["tab1"]["name_entry"].getContentSize().width,this.panels["tab1"]["name_entry"].getContentSize().height+4), cc.p(0,this.panels["tab1"]["name_entry"].getContentSize().height+4), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(0,0,0));
 		this.nameBox.setDefaultFineFlag(true);
+		this.nameBox.setBackgroundInvisible();
 
-		this.amountBox = new EntryBox(this.panels["main_panel"]["tab3"]["textBox"],cc.size(this.panels["main_panel"]["tab3"]["textBox"].getContentSize().width,this.panels["main_panel"]["tab3"]["textBox"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab3"]["textBox"].getContentSize().height), "1", cc.c4b(255,255,255), cc.c3b(0,0,0));
+		/*this.amountBox = new EntryBox(this.panels["tab3"]["textBox"],cc.size(this.panels["tab3"]["textBox"].getContentSize().width,this.panels["tab3"]["textBox"].getContentSize().height), cc.p(0,this.panels["tab3"]["textBox"].getContentSize().height), "1", cc.c4b(255,255,255), cc.c3b(0,0,0));
 		this.amountBox.setDefaultFineFlag(true);
-
-		this.descriptionBox = new EntryBox(this.panels["main_panel"]["tab1"]["descriptionBox"],cc.size(this.panels["main_panel"]["tab1"]["descriptionBox"].getContentSize().width,this.panels["main_panel"]["tab1"]["descriptionBox"].getContentSize().height), cc.p(0,this.panels["main_panel"]["tab1"]["descriptionBox"].getContentSize().height), "", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
+		this.amountBox.setBackgroundInvisible();
+*/
+		this.descriptionBox = new EntryBox(this.panels["tab1"]["descriptionBox"],cc.size(this.panels["tab1"]["descriptionBox"].getContentSize().width,this.panels["tab1"]["descriptionBox"].getContentSize().height+4), cc.p(0,this.panels["tab1"]["descriptionBox"].getContentSize().height+4), "", cc.c4b(255,255,255), cc.c3b(0,0,0),true);
 		this.descriptionBox.setDefaultFineFlag(true);
+		this.descriptionBox.setBackgroundInvisible();
 
-		this.panels["main_panel"]["tab1"]["stackbtn"].setColor(RED);
-		this.panels["main_panel"]["tab1"]["stackbtn"]["text"].setString("No");
+		this.panels["tab1"]["stackbtn"].setColor(RED);
+		this.panels["tab1"]["stackbtn"]["text"].setString("No");
 		if(this.data["stackable"]==true){
-			this.panels["main_panel"]["tab1"]["stackbtn"].setColor(GREEN);
-			this.panels["main_panel"]["tab1"]["stackbtn"]["text"].setString("Yes");
+			this.panels["tab1"]["stackbtn"].setColor(GREEN);
+			this.panels["tab1"]["stackbtn"]["text"].setString("Yes");
 		}
 		this.updateValueList();
 		this.setTab(1);
@@ -459,31 +275,31 @@ ItemEditor = Popup.extend({
 
 	setTab:function(value){
 		if(value==2){
-			this.panels["main_panel"]["tab1"]["name_entry"].setPositionX(-10000);
-			this.panels["main_panel"]["tab3"]["textBox"].setPositionX(-10000);
-			this.panels["main_panel"]["tab1"]["descriptionBox"].setPositionX(-10000);
+			this.panels["tab1"]["name_entry"].setPositionX(-10000);
+			//this.panels["tab3"]["textBox"].setPositionX(-10000);
+			this.panels["tab1"]["descriptionBox"].setPositionX(-10000);
 		}
 		if(value==1){
-			this.panels["main_panel"]["tab1"]["name_entry"].setPositionX(74);
-			this.panels["main_panel"]["tab3"]["textBox"].setPositionX(-10000);
-			this.panels["main_panel"]["tab1"]["descriptionBox"].setPositionX(360);
+			this.panels["tab1"]["name_entry"].setPositionX(74);
+			//this.panels["tab3"]["textBox"].setPositionX(-10000);
+			this.panels["tab1"]["descriptionBox"].setPositionX(74);
 		}
 		if(value==3){
-			this.panels["main_panel"]["tab1"]["descriptionBox"].setPositionX(-10000);
-			this.panels["main_panel"]["tab2"].setVisible(true);
-			this.panels["main_panel"]["tab3"]["textBox"].setPositionX(20);
-			this.panels["main_panel"]["tab3"].setVisible(true);
+			this.updateScriptList();
+		}
+		if(value==4){
+			this.panels["tab1"]["descriptionBox"].setPositionX(-10000);
+			this.panels["tab2"].setVisible(true);
+		//	this.panels["tab3"]["textBox"].setPositionX(20);
+		//	this.panels["tab3"].setVisible(true);
 			this.currentTab=value;
 			return;
 		}
 		this.currentTab=value;
-		this.panels["main_panel"]["tab1"].setVisible(false);
-		this.panels["main_panel"]["tab2"].setVisible(false);
-		this.panels["main_panel"]["tab3"].setVisible(false);
-		this.panels["main_panel"]["tab1Clickable"].setColor(WHITE);
-		this.panels["main_panel"]["tab2Clickable"].setColor(WHITE);
-		this.panels["main_panel"]["tab"+value].setVisible(true);
-		this.panels["main_panel"]["tab"+value+"Clickable"].setColor(cc.c4b(255,255,0,255));
+		this.panels["tab1"].setVisible(false);
+		this.panels["tab2"].setVisible(false);
+		this.panels["tab3"].setVisible(false);
+		this.panels["tab"+value].setVisible(true);
 	},
 
 	willTerminate:function(ignoreTerminate){
@@ -499,21 +315,21 @@ ItemEditor = Popup.extend({
 	
 	onMouseMoved:function(event){
 		var pos = event.getLocation();
-		this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(0);
-		var truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);
-		if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().height){
-			truePos.x = truePos.x-(truePos.x%32)+16;
-			truePos.y = truePos.y-(truePos.y%32)+16;
-			this.panels["main_panel"]["tab1"]["highlightnode"].setOpacity(127);
-			this.panels["main_panel"]["tab1"]["highlightnode"].setPosition(truePos);
+		this.panels["tab1"]["highlightnode"].setOpacity(0);
+		var truePos = this.panels["tab1"]["tiles"].convertToNodeSpace(pos);
+		if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["tab1"]["tiles"].getContentSize().height){
+			truePos.x = truePos.x-(truePos.x%32);
+			truePos.y = truePos.y-(truePos.y%32)+((screenSize.height-140)-this.panels["tab1"]["tiles"].getContentSize().height);;
+			this.panels["tab1"]["highlightnode"].setOpacity(127);
+			this.panels["tab1"]["highlightnode"].setPosition(truePos);
 			return true;
 		}		
 	},
 
 	updateValueList:function(){
-		if(this.panels["main_panel"]["tab2"]["list"].listView){
-			this.panels["main_panel"]["tab2"]["list"].listView.removeFromParent();
-			this.panels["main_panel"]["tab2"]["list"].listView=null;
+		if(this.panels["tab2"]["list"].listView){
+			this.panels["tab2"]["list"].listView.removeFromParent();
+			this.panels["tab2"]["list"].listView=null;
 		}
 		var listnodes = [];
 		var callBackList=[];
@@ -521,13 +337,13 @@ ItemEditor = Popup.extend({
 		var self=this;
 		for(var i=0;i<panelList.length;i++){
 			listnodes[i]=cc.Node.create();
-			var element= cc.LayerColor.create(cc.c4b(255,0,0,127),456,1);		
+			var element= cc.LayerColor.create(cc.c4b(0,0,0,127),456,1);		
 			var shopname = ObjectLists.getShopList()[panelList[i]["shopid"]]["name"];
 			var text = cc.LabelTTF.create(shopname,"Arial",12);
 			text.setColor(cc.c3b(0,0,0));
 			text.setAnchorPoint(cc.p(0,0.5));
 			text.setPosition(cc.p(4,30));
-			text.setDimensions(cc.size(40,0));
+			text.setDimensions(cc.size(50,0));
 			var delElement=cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/trash.png"));
 			delElement.setPosition(cc.p(64,((60)/2)-12));
 			delElement.setAnchorPoint(cc.p(0,0));
@@ -607,32 +423,29 @@ ItemEditor = Popup.extend({
 			sublist1.getHighlightNode = function(elementID){
 				return sublist1nodes[elementID].highlightNode;
 			};
-			sublist1.runListCallBack=function(name,listelement,touch){
+			sublist1.runListCallBack=function(name,listelement,touch,object){
 				if(self.currentTab!=2){
 					return;
 				}
 				switch(name){
 					case "Add":
 						self.contextStore=this.listView.index;
-						self.addingSell=true;
-						if(Itemeditor2 && !Itemeditor2._parent) Itemeditor2=null;
-						if(Itemeditor2){
-							Itemeditor2.willTerminate();
-							Itemeditor2.removeFromParent();
-							Itemeditor2r=null;
-						} else{
-							Itemeditor2 = new PopupList();
-							Itemeditor2.init({delegate:self,editor:new ShopEditor(),list:ObjectLists.getItemList(),name:"Item List"},{del:false,edit:false,add:false});
-							Itemeditor2.didBecomeActive();
-							self.addChild(Itemeditor2);
-							Itemeditor2.setPosition(self.getPosition());
+						var itmlist=ObjectLists.getItemList();
+						var list=[];
+						for(var i in itmlist){
+							if(itmlist[i] && itmlist[i]["name"]!=""){
+								list[i]=itmlist[i]["name"];
+							}else{
+								list[i]=null;
+							}
 						}
+						self.createitemlist(list,true)
 					break;
 					case "Edit":
 						self.addingSell=true;
 						self.contextStore=this.listView.index;
 						self.contextItem=listelement;
-						self.setTab(3);
+						self.resetValueBoxWithObject(object);
 					break;
 					case "Delete":
 						self.contextStore=this.listView.index;
@@ -716,31 +529,29 @@ ItemEditor = Popup.extend({
 			sublist2.getHighlightNode = function(elementID){
 				return sublist2nodes[elementID].highlightNode;
 			};
-			sublist2.runListCallBack=function(name,listelement,touch){
+			sublist2.runListCallBack=function(name,listelement,touch,object){
 				if(self.currentTab!=2){
 					return;
 				}
 				switch(name){
 					case "Add":
 						self.contextStore=this.listView.index;
-						self.addingSell=false;
-						if(Itemeditor2 && !Itemeditor2._parent) Itemeditor2=null;
-						if(Itemeditor2){
-							Itemeditor2.willTerminate();
-							Itemeditor2.removeFromParent();
-							Itemeditor2r=null;
-						} else{
-							Itemeditor2 = new PopupList();
-							Itemeditor2.init({delegate:self,editor:new ShopEditor(),list:ObjectLists.getItemList(),name:"Item List"},{del:false,edit:false,add:false});
-							Itemeditor2.didBecomeActive();
-							self.addChild(Itemeditor2);
+						var itmlist=ObjectLists.getItemList();
+						var list=[];
+						for(var i in itmlist){
+							if(itmlist[i] && itmlist[i]["name"]!=""){
+								list[i]=itmlist[i]["name"];
+							}else{
+								list[i]=null;
+							}
 						}
+						self.createitemlist(list,false)
 					break;
 					case "Edit":
 						self.addingSell=false;
 						self.contextStore=this.listView.index;
 						self.contextItem=listelement;
-						self.setTab(3);
+						self.resetValueBoxWithObject(object);
 					break;
 					case "Delete":
 						self.contextStore=this.listView.index;
@@ -763,52 +574,42 @@ ItemEditor = Popup.extend({
 		addButton.addChild(plus);
 		callBackList.push([addButton]);
 		listnodes.push(addButton);
-		this.panels["main_panel"]["tab2"]["list"].getListSize = function(){
+		this.panels["tab2"]["list"].getListSize = function(){
 			var height =0;
 			for(var i=0;i<listnodes.length;i++){
 				height+=listnodes[i].getContentSize().height;
 			}
 			return cc.size(468,height);
 		};
-		this.panels["main_panel"]["tab2"]["list"].getListElementAmount=function(){
+		this.panels["tab2"]["list"].getListElementAmount=function(){
 			return listnodes.length;
 		};
-		this.panels["main_panel"]["tab2"]["list"].getSizeForElement=function(elementID){
+		this.panels["tab2"]["list"].getSizeForElement=function(elementID){
 			return listnodes[elementID].getContentSize();
 		};
-		this.panels["main_panel"]["tab2"]["list"].getListNodeForIndex=function(elementID){
+		this.panels["tab2"]["list"].getListNodeForIndex=function(elementID){
 			return listnodes[elementID];
 		};
-		this.panels["main_panel"]["tab2"]["list"].getHighlightNode = function(elementID){
+		this.panels["tab2"]["list"].getHighlightNode = function(elementID){
 			return listnodes[elementID].highlightNode;
 		};
-		this.panels["main_panel"]["tab2"]["list"].runListCallBack=function(name,listelement,touch){
+		this.panels["tab2"]["list"].runListCallBack=function(name,listelement,touch){
 			if(self.currentTab!=2){
 				return;
 			}
 			switch(name){
 				case "Add":
-					if(Shopeditor){
-						Shopeditor.willTerminate();
-						Shopeditor.removeFromParent();
-						Shopeditor=null;
-					} else{
-						Shopeditor = new PopupList();
-						var shoplist = ObjectLists.getShopList();
-						var delegatelist = [];
-						for(var i in shoplist){
-							delegatelist.push({"name":shoplist[i]["name"]});
-						}
-
-						for(var i=0;i<self.data["value"].length;i++){
-							delegatelist[self.data["value"][i]["shopid"]]={};
-						}
-						if(delegatelist.length>0){
-							Shopeditor.init({delegate:self,editor:new ShopEditor(),list:delegatelist,name:"Shop List"});
-							Shopeditor.didBecomeActive();
-							self.addChild(Shopeditor);
-						}
+					var shoplist = ObjectLists.getShopList();
+					var delegatelist = [];
+					for(var i in shoplist){
+						delegatelist.push(shoplist[i]["name"]);
 					}
+
+					for(var i=0;i<self.data["value"].length;i++){
+						delegatelist[self.data["value"][i]["shopid"]]=null;
+					}
+
+					self.createshoplist(delegatelist);
 				break;
 				case "Delete":
 					self.contextStore=listelement;
@@ -816,11 +617,169 @@ ItemEditor = Popup.extend({
 				break;
 			}
 		};
-		this.panels["main_panel"]["tab2"]["list"].listView = ListView.create(this.panels["main_panel"]["tab2"]["list"]);
-		this.panels["main_panel"]["tab2"]["list"].listView.setCallBackList(callBackList);
-		this.panels["main_panel"]["tab2"]["list"].addChild(this.panels["main_panel"]["tab2"]["list"].listView);
+		this.panels["tab2"]["list"].listView = ListView.create(this.panels["tab2"]["list"]);
+		this.panels["tab2"]["list"].listView.setCallBackList(callBackList);
+		this.panels["tab2"]["list"].addChild(this.panels["tab2"]["list"].listView);
+	},
+
+	createshoplist:function(list){
+		if(this.panels["tab2"]["list"].listView){
+			this.panels["tab2"]["list"].listView.removeFromParent();
+			this.panels["tab2"]["list"].listView=null;
+		}
+		var listnodes = [];
+		var callBackList=[];
+		var self=this;
+		for(var i=0;i<list.length;i++){
+			listnodes[i]=cc.Node.create();
+			if(list[i]==null){
+				listnodes[i].setContentSize(cc.size(0,0));
+				callBackList.push([]);
+			}else{
+				var element= cc.LayerColor.create(cc.c4b(0,0,0,127),456,1);		
+				var text = cc.LabelTTF.create(list[i],"Arial",12);
+				text.setColor(cc.c3b(0,0,0));
+				text.setAnchorPoint(cc.p(0,0));
+				text.setPosition(cc.p(4,4));
+				text.setDimensions(cc.size(456,0));
+				listnodes[i].setContentSize(468,text.getContentSize().height+8);
+				listnodes[i].callBack="Use";
+				callBackList.push([listnodes[i]]);
+				listnodes[i].addChild(element);
+				listnodes[i].addChild(text);
+			}
+		}
+		this.panels["tab2"]["list"].getListSize = function(){
+			var height =0;
+			for(var i=0;i<listnodes.length;i++){
+				height+=listnodes[i].getContentSize().height;
+			}
+			return cc.size(468,height);
+		};
+		this.panels["tab2"]["list"].getListElementAmount=function(){
+			return listnodes.length;
+		};
+		this.panels["tab2"]["list"].getSizeForElement=function(elementID){
+			return listnodes[elementID].getContentSize();
+		};
+		this.panels["tab2"]["list"].getListNodeForIndex=function(elementID){
+			return listnodes[elementID];
+		};
+		this.panels["tab2"]["list"].getHighlightNode = function(elementID){
+			return listnodes[elementID].highlightNode;
+		};
+		this.panels["tab2"]["list"].runListCallBack=function(name,listelement,touch){
+			self.addNewStoreFromId(listelement);
+			self.updateValueList();
+		};
+		this.panels["tab2"]["list"].listView = ListView.create(this.panels["tab2"]["list"]);
+		this.panels["tab2"]["list"].listView.setCallBackList(callBackList);
+		this.panels["tab2"]["list"].addChild(this.panels["tab2"]["list"].listView);
 	},
 	
+
+	createitemlist:function(list,isSell){
+		console.log(list);
+		if(this.panels["tab2"]["list"].listView){
+			this.panels["tab2"]["list"].listView.removeFromParent();
+			this.panels["tab2"]["list"].listView=null;
+		}
+		var listnodes = [];
+		var callBackList=[];
+		var self=this;
+		for(var i=0;i<list.length;i++){
+			listnodes[i]=cc.Node.create();
+			if(list[i]==null){
+				listnodes[i].setContentSize(cc.size(0,0));
+				callBackList.push([]);
+			}else{
+				var element= cc.LayerColor.create(cc.c4b(0,0,0,127),456,1);		
+				var text = cc.LabelTTF.create(list[i],"Arial",12);
+				text.setColor(cc.c3b(0,0,0));
+				text.setAnchorPoint(cc.p(0,0));
+				text.setPosition(cc.p(4,4));
+				text.setDimensions(cc.size(456,0));
+				listnodes[i].setContentSize(468,text.getContentSize().height+8);
+				listnodes[i].callBack="Use";
+				callBackList.push([listnodes[i]]);
+				listnodes[i].addChild(element);
+				listnodes[i].addChild(text);
+			}
+		}
+		this.panels["tab2"]["list"].getListSize = function(){
+			var height =0;
+			for(var i=0;i<listnodes.length;i++){
+				height+=listnodes[i].getContentSize().height;
+			}
+			return cc.size(468,height);
+		};
+		this.panels["tab2"]["list"].getListElementAmount=function(){
+			return listnodes.length;
+		};
+		this.panels["tab2"]["list"].getSizeForElement=function(elementID){
+			return listnodes[elementID].getContentSize();
+		};
+		this.panels["tab2"]["list"].getListNodeForIndex=function(elementID){
+			return listnodes[elementID];
+		};
+		this.panels["tab2"]["list"].getHighlightNode = function(elementID){
+			return listnodes[elementID].highlightNode;
+		};
+		this.panels["tab2"]["list"].runListCallBack=function(name,listelement,touch){
+			if(isSell){
+				self.addNewSellFromIdandData(self.contextStore,listelement)
+			}else{
+				self.addNewBuyFromIdandData(self.contextStore,listelement);
+			}
+			self.updateValueList();
+		};
+		this.panels["tab2"]["list"].listView = ListView.create(this.panels["tab2"]["list"]);
+		this.panels["tab2"]["list"].listView.setCallBackList(callBackList);
+		this.panels["tab2"]["list"].addChild(this.panels["tab2"]["list"].listView);
+	},
+
+		resetValueBoxWithObject:function(object){
+			if(this.editBox){
+				this.confirmEditBox();
+			}
+			this.editBox = new EntryBox(object,cc.size(object.getContentSize().width,object.getContentSize().height+4), cc.p(0,object.getContentSize().height+4),this.addingSell==true?this.data["value"][this.contextStore]["sell"][this.contextItem]["amount"]:this.data["value"][this.contextStore]["buy"][this.contextItem]["amount"], cc.c4b(255,255,255), cc.c3b(0,0,0),false,null,this);
+			this.editBox.setDefaultFineFlag(true);
+			this.schedule(this.checkMouseDown);
+		},
+
+		checkMouseDown:function(){
+			if(!mouseDown && this.editBox){
+				this.editBox.setFocused(true)
+				this.unschedule(this.checkMouseDown);
+			}
+		},
+
+		hasActiveEditBox:function(){
+			if(this.editBox){
+				return true;
+			}
+			return false;
+		},
+
+		updateFromEnd:function(){
+			this.confirmEditBox();
+		},
+
+		confirmEditBox:function(){
+			if(parseInt(this.editBox.getText())>0){
+				if(this.addingSell==true){
+					this.data["value"][this.contextStore]["sell"][this.contextItem]["amount"]=this.editBox.getText();
+				}else{
+					this.data["value"][this.contextStore]["buy"][this.contextItem]["amount"]=this.editBox.getText();
+				}
+			}
+			this.editBox.setFocused(false);
+			this.editBox.removeFromParent();
+			this.editBox=null;
+			this.updateValueList();
+		},
+
+
 
 	addNewStoreFromId:function(id){
 		var shop = ObjectLists.getShopList()[id];
@@ -829,7 +788,7 @@ ItemEditor = Popup.extend({
 	},
 
 	deleteSell:function(touch){
-		this._parent.addChild(DropDownList.createWithListAndPosition(this,this.deleteSellClicked,["Delete","Cancel"],touch._point));
+		MainScene.addChild(DropDownList.createWithListAndPosition(this,this.deleteSellClicked,["Delete","Cancel"],touch._point));
 	},
 
 	deleteSellClicked:function(index){
@@ -843,7 +802,7 @@ ItemEditor = Popup.extend({
 
 
 	deleteStore:function(touch){
-		this._parent.addChild(DropDownList.createWithListAndPosition(this,this.deleteStoreClicked,["Delete","Cancel"],touch._point));
+		MainScene.addChild(DropDownList.createWithListAndPosition(this,this.deleteStoreClicked,["Delete","Cancel"],touch._point));
 	},
 
 	deleteStoreClicked:function(index){
@@ -855,7 +814,7 @@ ItemEditor = Popup.extend({
 	},
 
 	deleteBuy:function(touch){
-		this._parent.addChild(DropDownList.createWithListAndPosition(this,this.deleteBuyClicked,["Delete","Cancel"],touch._point));
+		MainScene.addChild(DropDownList.createWithListAndPosition(this,this.deleteBuyClicked,["Delete","Cancel"],touch._point));
 	},
 
 	deleteBuyClicked:function(index){
@@ -880,69 +839,94 @@ ItemEditor = Popup.extend({
 
 	updateMapOffset:function(){
 		this.schedule(this.updateMapOffset);
-		if(this.panels["main_panel"]["tab1"]["tiles"].getTexture() && this.panels["main_panel"]["tab1"]["tiles"].getTexture()._isLoaded==true){
+		if(this.panels["tab1"]["tiles"].getTexture() && this.panels["tab1"]["tiles"].getTexture()._isLoaded==true){
 			this.unschedule(this.updateMapOffset);
-			this.panels["main_panel"]["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(32*this.mapOffset.x),Math.floor(32*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:320,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<256?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:256));
+			this.panels["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(cellsize*this.mapOffset.x),Math.floor(cellsize*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<466?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:466,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<this.mapSize?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:this.mapSize));
 		}
 	},
 	
-	onTouchBegan:function(touch){
-		if(this._super(touch)){
+	useTexture:function(number){
+		this.delegate.currentTextureNumber=number;
+		this.delegate.panels["tab1"]["tiles"].setTexture(tileTextureList[this.delegate.currentTextureNumber]["texture"]);
+		this.delegate.currentTexture = tileTextureList[this.delegate.currentTextureNumber]["name"];
+		this.delegate.panels["tab1"]["menu_bar"]["textureDropDown"]["lbl"].setString(this.delegate.currentTexture);
+		this.delegate.mapOffset=cc.p(0,0);
+		this.delegate.updateMapOffset();
+		this.delegate.panels["tab1"]["menu_bar"]["textureDropDown"].setColor(cc.c3b(127,127,127));
+		this.delegate.panels["tab1"]["menu_bar"]["textureDropDown"]["lbl"].setString(tileTextureList[this.delegate.currentTextureNumber]["name"].substring(0,12));
+	},
+
+
+	onTouchEnded:function(touch){
+		this.movePosition=null;
+	},
+
+	onTouchMoved:function(touch){
+		if(this.movePosition!=null){
+			this.panels["tab1"]["selectednode"].setOpacity(0);
+			this.panels["tab1"]["highlightnode"].setOpacity(0);
+			var pos = touch._point;
+			var truePos = this.panels.convertToNodeSpace(pos);
+			var dist = cc.p(this.movePosition.x-truePos.x,this.movePosition.y-truePos.y);
+			if(dist.x>32){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>466 && this.mapOffset.x<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width-466)/cellsize)){
+					this.mapOffset.x++;	this.updateMapOffset();
+					this.movePosition.x=truePos.x;
+				}
+			}
+			else if(dist.x<-32){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>466 && this.mapOffset.x>0){
+					this.mapOffset.x--; this.updateMapOffset();
+					this.movePosition.x=truePos.x;
+				}
+			}
+			else if(dist.y>32){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>466 && this.mapOffset.y>0){
+					this.mapOffset.y--;	this.updateMapOffset();
+					this.movePosition.y=truePos.y;
+				}
+			}
+			else if(dist.y<-32){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>466 && this.mapOffset.y<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height-this.mapSize)/cellsize)){
+					this.mapOffset.y++;	this.updateMapOffset();
+					this.movePosition.y=truePos.y;
+				}
+			}
 			return true;
 		}
-		this.prevMovPos=null;
+		return false;
+	},
+
+
+	onTouchBegan:function(touch){
+		
 		var pos = touch._point;
 
+		this.panels["tab1"]["menu_bar"]["textureDropDown"].setColor(cc.c3b(127,127,127));
 
-		var truePos = this.panels["main_panel"].convertToNodeSpace(cc.p(pos.x,pos.y));
 
-
-		if(isTouching(this.panels["main_panel"]["tab1Clickable"],truePos)){
-			this.setTab(1);
-			return true;
-		}		
-	
-		if(isTouching(this.panels["main_panel"]["tab2Clickable"],truePos)){
-			this.setTab(2);
-			return true;
-		}	
-
-		if(this.currentTab==3){
-			if(isTouching(this.panels["main_panel"]["tab3"]["okbtn"],truePos)){
-				if(this.amountBox.getText()==null || this.amountBox.getText()=="" || this.amountBox.getText()<=0){
-					return true;
-				}
-				if(this.addingSell==true){
-					this.data["value"][this.contextStore]["sell"][this.contextItem]["amount"]=this.amountBox.getText();
-				}else{
-					this.data["value"][this.contextStore]["buy"][this.contextItem]["amount"]=this.amountBox.getText();
-				}
-				this.setTab(2);
-				this.updateValueList();
-				return true;
-			}
-			
-			if(isTouching(this.panels["main_panel"]["tab3"]["cancelbtn"],truePos)){
-				this.setTab(2);
-				return true;
-			}
-		}
+		var truePos = this.panels.convertToNodeSpace(pos);
 
 		if(this.currentTab==1){
 		
-		if(isTouching(this.panels["main_panel"]["tab1"]["okbtn"],truePos)){
-			if(this.nameBox.getText()==null || this.nameBox.getText()==""){
+
+			if(isTouching(this.panels["tab1"]["menu_bar"]["textureDropDown"],this.panels["tab1"]["menu_bar"].convertToNodeSpace(pos))){
+				var nameList = [];
+				for(var i in tileTextureList){
+					nameList.push(tileTextureList[i]["name"].substring(0,12));
+				}
+				this.panels["tab1"]["menu_bar"]["textureDropDown"].setColor(cc.c3b(60,60,60));
+				var ddown = DropDownList.createWithListAndPosition(this,this.useTexture,nameList,cc.p(0,screenSize.height-40));
+				ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+				ddown.setMinimumWidth(80);
+				this.addChild(ddown);
 				return true;
 			}
-			this.ignoreTerminate=true;
-			this.data["description"]=this.descriptionBox.getText();
-			this.data["name"]=this.nameBox.getText();
-			this.data["script"]=this.typeData;
-			this.delegate.endedEdit(this.data);
-			return true;
-		}
 		
-		if(isTouching(this.panels["main_panel"]["tab1"]["scriptbtn"],truePos)){
+
+		
+		
+		if(isTouching(this.panels["tab1"]["scriptbtn"],truePos)){
 			if(Scripteditor){
 				Scripteditor.willTerminate();
 				Scripteditor.removeFromParent();
@@ -955,102 +939,121 @@ ItemEditor = Popup.extend({
 			}
 		}
 
-		if(isTouching(this.panels["main_panel"]["tab1"]["cancelbtn"],truePos)){
+		if(isTouching(this.panels["tab1"]["cancelbtn"],truePos)){
 			this.ignoreTerminate=true; var self= this.delegate;
 			this.delegate.scheduleOnce(function(){self.endedEdit(null)});
 			return true;
 		}
 
-			if(isTouching(this.panels["main_panel"]["tab1"]["leftbtn"],truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>264 && this.mapOffset.x>0){
-					this.mapOffset.x--;	this.updateMapOffset();
-				}
-				return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["rightbtn"],truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>320 && this.mapOffset.x<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width-320)/32)){
-					this.mapOffset.x++;	this.updateMapOffset();
-				}
-				return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["upbtn"],truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>320 && this.mapOffset.y>0){
-					this.mapOffset.y--;	this.updateMapOffset();
-				}
-				return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["downbtn"],truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>320 && this.mapOffset.y<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height-320)/32)){
-					this.mapOffset.y++; this.updateMapOffset();
-				}
-				return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["texturerightbtn"],truePos)){
-				this.useNextTexture();
-				return true;
-			}
-			if(isTouching(this.panels["main_panel"]["tab1"]["textureleftbtn"],truePos)){
-				this.usePrevTexture();
-				return true;
-			}
 		
-			if(isTouching(this.panels["main_panel"]["tab1"]["stackbtn"],truePos)){
+			if(isTouching(this.panels["tab1"]["stackbtn"],truePos)){
 				this.swapStackable(); return true;
 			}
 
-			truePos = this.panels["main_panel"]["tab1"]["tiles"].convertToNodeSpace(pos);
-			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["main_panel"]["tab1"]["tiles"].getContentSize().height){
-				
-				truePos.x = truePos.x-(truePos.x%32)+16;
-				truePos.y = truePos.y-(truePos.y%32)+16;
-				
-				this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(0);
-				if(this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()!=truePos.x || this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()!=truePos.y){
-					this.panels["main_panel"]["tab1"]["selectednode"].setOpacity(127);
-					this.panels["main_panel"]["tab1"]["selectednode"].setPosition(truePos);
+			truePos = this.panels["tab1"]["tiles"].convertToNodeSpace(pos);
+			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["tab1"]["tiles"].getContentSize().height){
+				this.movePosition=cc.p(truePos.x,truePos.y);
+				truePos.x = truePos.x-(truePos.x%cellsize);
+				truePos.y = truePos.y-(truePos.y%cellsize)+((screenSize.height-140)-this.panels["tab1"]["tiles"].getContentSize().height);
+					
+				this.panels["tab1"]["selectednode"].setOpacity(0);
+				if(this.panels["tab1"]["selectednode"].getPositionX()!=truePos.x || this.panels["tab1"]["selectednode"].getPositionY()!=truePos.y){
+					this.panels["tab1"]["selectednode"].setOpacity(127);
+					this.panels["tab1"]["selectednode"].setPosition(truePos);
 				}
-
-				var pos = cc.p(((this.panels["main_panel"]["tab1"]["selectednode"].getPositionX()-16)/32)+this.mapOffset.x,((8-((this.panels["main_panel"]["tab1"]["selectednode"].getPositionY()-16)/32))+this.mapOffset.y)-1);
+				var ySize = Math.floor(this.mapSize/cellsize)-1;
+				var pos =cc.p(((this.panels["tab1"]["selectednode"].getPositionX())/cellsize)+this.mapOffset.x,(ySize-((this.panels["tab1"]["selectednode"].getPositionY()-(((screenSize.height-140)-this.panels["tab1"]["tiles"].getContentSize().height)))/cellsize))+this.mapOffset.y)
 				this.data["sprite"]["position"]=pos;
 
 				return true;
 			} 
+
+
 		}	
 		return false;
 	},	
 
+	updateScriptList:function(){
+		var list = ObjectLists.getScriptList();
+		if(this.panels["tab3"]["scriptList"].listView!=null){
+			this.panels["tab3"]["scriptList"].listView.removeFromParent();
+			this.panels["tab3"]["scriptList"].listView=null;
+		}
+
+		var listnodes = [];
+		var callBackList=[];
+		for(var i=0;i<list.length;i++){
+			listnodes[i]=cc.Node.create();	
+			if(list[i]["specifier"]=="Item"){
+				listnodes[i]=cc.Sprite.create();
+				listnodes[i].setColor(cc.c3b(80,80,80));
+				listnodes[i].setAnchorPoint(cc.p(0,0));
+				var text = cc.LabelTTF.create(list[i]["name"],"Arial",12);
+				text.setAnchorPoint(cc.p(0,0));
+				var bottomLine= cc.LayerColor.create(cc.c4b(0,0,0,127),440,1);
+				bottomLine.setPosition(cc.p(0,0))
+				text.setPosition(cc.p(2,2));
+				text.setDimensions(cc.size(440,0));
+				listnodes[i].setTextureRect(cc.rect(0,0,440,text.getContentSize().height+4));
+				listnodes[i].setContentSize(440,text.getContentSize().height+4);
+				listnodes[i].addChild(text);
+				listnodes[i].addChild(bottomLine);
+				callBackList.push([listnodes[i]]);
+				if(this.typeData==i){
+					listnodes[i].setColor(cc.c3b(200,200,200));
+					text.setColor(cc.c3b(0,0,0));
+					listnodes[i].callBack="Use";	
+				}
+			}else{
+				callBackList.push([]);
+				listnodes[i].setContentSize(0,0);
+			}
+		}
+		var self=this;
+		this.panels["tab3"]["scriptList"].getListSize = function(){
+			var height =0;
+			for(var i=0;i<listnodes.length;i++){
+				height+=listnodes[i].getContentSize().height;
+			}
+			return cc.size(444,height);
+		};
+		this.panels["tab3"]["scriptList"].getListElementAmount=function(){
+			return listnodes.length;
+		};
+		this.panels["tab3"]["scriptList"].getSizeForElement=function(elementID){
+			return listnodes[elementID].getContentSize();
+		};
+		this.panels["tab3"]["scriptList"].getListNodeForIndex=function(elementID){
+			return listnodes[elementID];
+		};
+		this.panels["tab3"]["scriptList"].getHighlightNode = function(elementID){
+			return listnodes[elementID].highlightNode;
+		};
+		this.panels["tab3"]["scriptList"].runListCallBack=function(name,listelement){
+			self.typeData=listelement;
+			self.updateScriptList();
+		};
+		this.panels["tab3"]["scriptList"].listView = ListView.create(this.panels["tab3"]["scriptList"]);
+		
+		if(this.panels["tab3"]["scriptList"].listView.scrollBar){
+			this.panels["tab3"]["scriptList"].listView.scrollBar.setPositionX(444);
+			this.panels["tab3"]["scriptList"].listView.scrollBar.setContentSize(20,60);
+			this.panels["tab3"]["scriptList"].listView.scrollBar.setColor(cc.c4b(200,200,200,100));
+			this.panels["tab3"]["scriptList"].listView.scrollBarBack.setVisible(false);
+		}
+		this.panels["tab3"]["scriptList"].listView.setCallBackList(callBackList);
+		this.panels["tab3"]["scriptList"].addChild(this.panels["tab3"]["scriptList"].listView);
+	},
+
+
+
 	swapStackable:function(){
 		this.data["stackable"]=!this.data["stackable"];
-		this.panels["main_panel"]["tab1"]["stackbtn"].setColor(RED);
-		this.panels["main_panel"]["tab1"]["stackbtn"]["text"].setString("No");
+		this.panels["tab1"]["stackbtn"].setColor(RED);
+		this.panels["tab1"]["stackbtn"]["text"].setString("No");
 		if(this.data["stackable"]==true){
-			this.panels["main_panel"]["tab1"]["stackbtn"].setColor(GREEN);
-			this.panels["main_panel"]["tab1"]["stackbtn"]["text"].setString("Yes");
+			this.panels["tab1"]["stackbtn"].setColor(GREEN);
+			this.panels["tab1"]["stackbtn"]["text"].setString("Yes");
 		}
-	},
-	
-	useNextTexture:function(){
-		if(this.currentTextureNumber>=tileTextureList.length-1){
-			this.currentTextureNumber=-1;
-		}
-		this.currentTextureNumber++;
-		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
-		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
-		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
-		this.data["sprite"]["texture"]=this.currentTexture;
-		this.mapOffset=cc.p(0,0);
-		this.updateMapOffset();
-	},
-	
-	usePrevTexture:function(){
-		if(this.currentTextureNumber<=0){
-			this.currentTextureNumber=tileTextureList.length;
-		}
-		this.currentTextureNumber--;
-		this.panels["main_panel"]["tab1"]["tiles"].setTexture(tileTextureList[this.currentTextureNumber]["texture"]);
-		this.currentTexture = tileTextureList[this.currentTextureNumber]["name"];
-		this.panels["main_panel"]["tab1"]["textureName"]["text"].setString(this.currentTexture);
-		this.mapOffset=cc.p(0,0);
-		this.updateMapOffset();
 	},
 });

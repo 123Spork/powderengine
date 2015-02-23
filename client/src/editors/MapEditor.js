@@ -1,4 +1,4 @@
-Mapeditor=null;
+
 MapEditor = Scene.extend({
 	map:null,
 	mapOffset:cc.p(0,0),
@@ -10,19 +10,28 @@ MapEditor = Scene.extend({
 	currentSoundNumber:-1,
 	mapSize:null,
 
+	willExitEditor:function(clicknum){
+		this.saveEditor();
+		return true;
+	},
+
 	getTabOptions:function(clicknum){
 		return ["Tiles","Scripts","Settings"];
 	},
+
+	getCloseOptions:function(clicknum){
+		return ["Cancel","Save & Exit"];
+	},
 	
 	getLayoutObject:function(){
-		this.mapSize = (screenSize.height-40)-(((screenSize.height-40)-16)%cellsize);
+		this.mapSize = (screenSize.height-40)-(((screenSize.height-40))%cellsize);
 		return { "panels":{
 			children:{	
 				"tab1":{
 					children:{
 						"tiles" : {
 							anchorPoint:cc.p(0,1),
-							position:cc.p(16,this.mapSize),
+							position:cc.p(0,screenSize.height-40),
 							texture:tileTextureList[0]["name"],
 						},
 						"scriptbtn" : {
@@ -40,69 +49,7 @@ MapEditor = Scene.extend({
 								}
 							}
 						},
-								
-								
-								
-						"leftbtn" : {
-							position:cc.p(0,16),
-							size:cc.size(16,this.mapSize-16),
-							color: cc.c4b(0,0,255,255),
-							anchorPoint:cc.p(0,0),
-							children:{
-								"text":{
-									label:"<",
-									fontSize:12,
-									anchorPoint:cc.p(0.5,0.5),
-									position:cc.p(8,(this.mapSize-16)/2),
-									color:cc.c3b(255,255,255),
-								}
-							}
-						},
-						"rightbtn" : {
-							position:cc.p(336,16),
-							size:cc.size(16,this.mapSize-16),
-							color: cc.c4b(0,0,255,255),
-							anchorPoint:cc.p(0,0),
-							children:{
-								"text":{
-									label:">",
-									fontSize:12,
-									anchorPoint:cc.p(0.5,0.5),
-									position:cc.p(8,(this.mapSize-16)/2),
-									color:cc.c3b(255,255,255),
-								}
-							}
-						},
-						"upbtn" : {
-							position:cc.p(16,this.mapSize),
-							size:cc.size(320,16),
-							color: cc.c4b(0,0,255,255),
-							anchorPoint:cc.p(0,0),
-							children:{
-								"text":{
-									label:"^",
-									fontSize:12,
-									anchorPoint:cc.p(0.5,0.5),
-									position:cc.p(160,8),
-									color:cc.c3b(255,255,255),
-								}
-							}
-						},
-						"downbtn" : {
-							position:cc.p(16,0),
-							size:cc.size(320,16),
-							color: cc.c4b(0,0,255,255),
-							anchorPoint:cc.p(0,0),
-							children:{
-								"text":{
-									label:"v",
-									fontSize:12,
-									anchorPoint:cc.p(0.5,0.5),
-									position:cc.p(160,8),
-									color:cc.c3b(255,255,255),
-								}
-							}
-						},
+							
 						"menu_bar":{
 							size:cc.size(352,20),
 							position:cc.p(0,screenSize.height-40),
@@ -191,97 +138,152 @@ MapEditor = Scene.extend({
 				},
 				"tab3":{	
 					children:{
-						"mapmusic_lvl":{
+						"mapname_lbl":{
+							label:"Name:",
+							fontSize:12,
+							anchorPoint:cc.p(0,1),
+							position: cc.p(4,screenSize.height-29),
+						},
+						"mapName_entry":{
+							position:cc.p(60,screenSize.height-44),
+							size:cc.size(282,16),
+							anchorPoint:cc.p(0,0),
+							color:cc.c3b(180,180,180)
+						},	
+						"mapmusic_lbl":{
 							label:"Music:",
 							fontSize:12,
 							anchorPoint:cc.p(0,1),
-							position: cc.p(4,screenSize.height-23),
+							position: cc.p(4,screenSize.height-63),
 						},
 						"musicList":{
-							position:cc.p(0,screenSize.height-140),
-							size:cc.size(352,100),
+							position:cc.p(60,screenSize.height-162),
+							size:cc.size(282,100),
 							anchorPoint:cc.p(0,0),
 							color:cc.c3b(180,180,180)
-						},					
-						"mapUp_text":{
-							label:"Map Up",
-							fontSize:10,
-							anchorPoint:cc.p(0.5,0),
-							position: cc.p(100,344),
 						},
-						"mapUp_entry":{
-							size: cc.size(60,32),
-							position: cc.p(70,312),
+						"mapconnectors_lbl":{
+							label:"Joins:",
+							fontSize:12,
+							anchorPoint:cc.p(0,1),
+							position: cc.p(4,screenSize.height-180),
 						},
-						"mapDown_text":{
-							label:"Map Down",
-							fontSize:10,
-							anchorPoint:cc.p(0.5,0),
-							position: cc.p(100,232),
+						"mapsizers_lbl":{
+							label:"Size:",
+							fontSize:12,
+							anchorPoint:cc.p(0,1),
+							position: cc.p(4,screenSize.height-352),
 						},
-						"mapDown_entry":{
-							size: cc.size(60,32),
-							position: cc.p(70,200),
-						},
-						"mapLeft_text":{
-							label:"Map Left",
-							fontSize:10,
-							anchorPoint:cc.p(0.5,0),
-							position: cc.p(38,290),
-						},
-						"mapLeft_entry":{
-							size: cc.size(60,32),
-							position: cc.p(8,258),
-						},
-						"mapRight_text":{
-							label:"Map Right",
-							fontSize:10,
-							anchorPoint:cc.p(0.5,0),
-							position: cc.p(162,290),
-						},
-						"mapRight_entry":{
-							size: cc.size(60,32),
-							position: cc.p(132,258),
-						},
-						"mapHeight_text":{
-							label:"Map Height",
-							fontSize:10,
-							anchorPoint:cc.p(0.5,0),
-							position: cc.p(162,122),
-						},
-						"mapHeight_entry":{
-							size: cc.size(60,32),
-							position: cc.p(128,90),
-							color:cc.c3b(255,255,255),
-						},
-						"mapWidth_text":{
-							label:"Map Width",
-							fontSize:10,
+						"destroyMap":{
+							size:cc.size(282,20),
+							position:cc.p(60,56),
+							color:cc.c3b(255,0,0),
 							anchorPoint:cc.p(0,0),
-							position: cc.p(10,122),
-						},
-						"mapWidth_entry":{
-							size: cc.size(60,32),
-							position: cc.p(10,90),
-							color:cc.c3b(255,255,255),
-						},
-
-
-						"this_map":{
-							position:cc.p(70,248),
-							size:cc.size(60,60),
-							color: WHITE,
-							anchorPoint:cc.p(0,0),
-							children:{
-								"text":{
-									label:"THIS MAP\n#"+ GameMap.getMapNumber(),
+							children:{	
+								"lbl":{
+									label:"Destroy Map",
 									fontSize:12,
-									anchorPoint:cc.p(0.5,0.5),
-									position:cc.p(30,30),
-									color:cc.c3b(0,0,0),
-								}
+									anchorPoint:cc.p(0.5,0),
+									position:cc.p(141,3),
+									color:cc.c3b(255,255,255),
+								},	
 							}
 						},
+						"connectors":{	
+							size:cc.size(282,120),
+							position:cc.p(60,screenSize.height-302),
+							color:cc.c3b(180,180,180),
+							anchorPoint:cc.p(0,0),
+							children:{	
+								"this_map":{
+									label:"#"+ GameMap.getMapNumber(),
+									fontSize:12,
+									anchorPoint:cc.p(0.5,0),
+									position:cc.p(140,48),
+									color:cc.c3b(0,0,0),
+								},			
+								"mapUp_text":{
+									label:"Up",
+									fontSize:12,
+									anchorPoint:cc.p(0,0),
+									color:cc.c3b(0,0,0),
+									position: cc.p(111,104),
+								},
+								"mapUp_entry":{
+									size: cc.size(60,16),
+									position: cc.p(111,90),
+									color:cc.c3b(60,60,60),
+								},
+								"mapDown_text":{
+									label:"Down:",
+									color:cc.c3b(0,0,0),
+									fontSize:12,
+									anchorPoint:cc.p(0,0),
+									position: cc.p(111,18),
+								},
+								"mapDown_entry":{
+									size: cc.size(60,16),
+									position: cc.p(111,4),
+									color:cc.c3b(60,60,60),
+								},
+								"mapLeft_text":{
+									label:"Left:",
+									fontSize:12,
+									anchorPoint:cc.p(0,0),
+									position: cc.p(38,64),
+									color:cc.c3b(0,0,0)
+								},
+								"mapLeft_entry":{
+									size: cc.size(60,16),
+									position: cc.p(38,48),
+									color:cc.c3b(60,60,60),
+								},
+								"mapRight_text":{
+									label:"Right:",
+									fontSize:12,
+									anchorPoint:cc.p(0,0),
+									position: cc.p(182,64),
+									color:cc.c3b(0,0,0),
+								},
+								"mapRight_entry":{
+									size: cc.size(60,16),
+									position: cc.p(182,48),
+									color:cc.c3b(60,60,60),
+								},
+							}
+						},
+						"sizers":{
+							color:cc.c3b(180,180,180),
+							size:cc.size(282,38),
+							position:cc.p(60,screenSize.height-360),
+							children:{
+								"mapHeight_text":{
+									label:"Height:",
+									fontSize:12,
+									anchorPoint:cc.p(0,0),
+									position: cc.p(182,20),
+									color:cc.c3b(0,0,0),
+								},
+								"mapHeight_entry":{
+									size: cc.size(60,16),
+									position: cc.p(182,4),
+									color:cc.c3b(60,60,60),
+								},
+								"mapWidth_text":{
+									label:"Width:",
+									fontSize:12,
+									anchorPoint:cc.p(0,0),
+									position: cc.p(38,20),
+									color:cc.c3b(0,0,0),
+								},
+								"mapWidth_entry":{
+									size: cc.size(60,16),
+									position: cc.p(38,4),
+									color:cc.c3b(60,60,60),
+								},
+							}
+						}
+						
 					}
 				},
 			}
@@ -309,12 +311,12 @@ MapEditor = Scene.extend({
 			var text = cc.LabelTTF.create(list[i],"Arial",12);
 			text.setAnchorPoint(cc.p(0,0));
 			text.setColor(cc.c3b(0,0,0));
-			var bottomLine= cc.LayerColor.create(cc.c4b(0,0,0,127),326,1);
+			var bottomLine= cc.LayerColor.create(cc.c4b(0,0,0,127),282,1);
 			bottomLine.setPosition(cc.p(0,0))
 			text.setPosition(cc.p(2,2));
-			text.setDimensions(cc.size(326,0));
-			listnodes[i].setTextureRect(cc.rect(0,0,326,text.getContentSize().height+4));
-			listnodes[i].setContentSize(326,text.getContentSize().height+4);
+			text.setDimensions(cc.size(282,0));
+			listnodes[i].setTextureRect(cc.rect(0,0,282,text.getContentSize().height+4));
+			listnodes[i].setContentSize(282,text.getContentSize().height+4);
 			listnodes[i].addChild(text);
 			listnodes[i].addChild(bottomLine);
 			listnodes[i].callBack="Use";
@@ -330,7 +332,7 @@ MapEditor = Scene.extend({
 			for(var i=0;i<listnodes.length;i++){
 				height+=listnodes[i].getContentSize().height;
 			}
-			return cc.size(330,height);
+			return cc.size(282,height);
 		};
 		this.panels["tab3"]["musicList"].getListElementAmount=function(){
 			return listnodes.length;
@@ -351,7 +353,7 @@ MapEditor = Scene.extend({
 		this.panels["tab3"]["musicList"].listView = ListView.create(this.panels["tab3"]["musicList"]);
 		
 		if(this.panels["tab3"]["musicList"].listView.scrollBar){
-			this.panels["tab3"]["musicList"].listView.scrollBar.setPositionX(330);
+			this.panels["tab3"]["musicList"].listView.scrollBar.setPositionX(282);
 			this.panels["tab3"]["musicList"].listView.scrollBar.setContentSize(20,60);
 			this.panels["tab3"]["musicList"].listView.scrollBar.setColor(cc.c4b(200,200,200,100));
 			this.panels["tab3"]["musicList"].listView.scrollBarBack.setVisible(false);
@@ -441,7 +443,7 @@ MapEditor = Scene.extend({
 	},
 
 	saveEditor:function(){
-		var data={"up": this.mapUpBox.getText(),"down":this.mapDownBox.getText(),"left":this.mapLeftBox.getText(),"right":this.mapRightBox.getText(),"width":this.mapWidthBox.getText(),"height":this.mapHeightBox.getText()};
+		var data={"mapName":this.mapNameBox.getText(), "up": this.mapUpBox.getText(),"down":this.mapDownBox.getText(),"left":this.mapLeftBox.getText(),"right":this.mapRightBox.getText(),"width":this.mapWidthBox.getText(),"height":this.mapHeightBox.getText()};
 		data["mapMusic"]=this.currentSoundNumber>-1?this.currentSoundNumber:null;
 		if(data["mapMusic"]==null){
 			delete data["mapMusic"];
@@ -478,25 +480,42 @@ MapEditor = Scene.extend({
 		this._super();
 		this.panels["tab1"]["highlightnode"].setOpacity(0);
 		this.panels["tab1"]["selectednode"].setOpacity(0);
-		this.mapUpBox = new EntryBox(this.panels["tab3"]["mapUp_entry"],cc.size(this.panels["tab3"]["mapUp_entry"].getContentSize().width,this.panels["tab3"]["mapUp_entry"].getContentSize().height), cc.p(0,this.panels["tab3"]["mapUp_entry"].getContentSize().height), GameMap.hasMapUp() ? GameMap.getMapUp():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.mapUpBox = new EntryBox(this.panels["tab3"]["connectors"]["mapUp_entry"],cc.size(this.panels["tab3"]["connectors"]["mapUp_entry"].getContentSize().width,this.panels["tab3"]["connectors"]["mapUp_entry"].getContentSize().height+4), cc.p(0,this.panels["tab3"]["connectors"]["mapUp_entry"].getContentSize().height+4), GameMap.hasMapUp() ? GameMap.getMapUp():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapUpBox.setDefaultFineFlag(true);
-		this.mapUpBox.setNullAllowed(true);
-		this.mapDownBox = new EntryBox(this.panels["tab3"]["mapDown_entry"],cc.size(this.panels["tab3"]["mapDown_entry"].getContentSize().width,this.panels["tab3"]["mapDown_entry"].getContentSize().height), cc.p(0,this.panels["tab3"]["mapDown_entry"].getContentSize().height), GameMap.hasMapDown() ? GameMap.getMapDown():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+	    this.mapUpBox.setNullAllowed(true);
+	    this.mapUpBox.setBackgroundInvisible();
+	    this.mapUpBox.setInputFlag(5);
+		this.mapDownBox = new EntryBox(this.panels["tab3"]["connectors"]["mapDown_entry"],cc.size(this.panels["tab3"]["connectors"]["mapDown_entry"].getContentSize().width,this.panels["tab3"]["connectors"]["mapDown_entry"].getContentSize().height+4), cc.p(0,this.panels["tab3"]["connectors"]["mapDown_entry"].getContentSize().height+4), GameMap.hasMapDown() ? GameMap.getMapDown():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapDownBox.setDefaultFineFlag(true);
 	    this.mapDownBox.setNullAllowed(true);
-		this.mapLeftBox = new EntryBox(this.panels["tab3"]["mapLeft_entry"],cc.size(this.panels["tab3"]["mapLeft_entry"].getContentSize().width,this.panels["tab3"]["mapLeft_entry"].getContentSize().height), cc.p(0,this.panels["tab3"]["mapLeft_entry"].getContentSize().height), GameMap.hasMapLeft() ? GameMap.getMapLeft():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
+	    this.mapDownBox.setBackgroundInvisible();
+	    this.mapDownBox.setInputFlag(5);
+		this.mapLeftBox = new EntryBox(this.panels["tab3"]["connectors"]["mapLeft_entry"],cc.size(this.panels["tab3"]["connectors"]["mapLeft_entry"].getContentSize().width,this.panels["tab3"]["connectors"]["mapLeft_entry"].getContentSize().height+4), cc.p(0,this.panels["tab3"]["connectors"]["mapLeft_entry"].getContentSize().height+4), GameMap.hasMapLeft() ? GameMap.getMapLeft():"", cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapLeftBox.setDefaultFineFlag(true);
 		this.mapLeftBox.setNullAllowed(true);
-		this.mapRightBox = new EntryBox(this.panels["tab3"]["mapRight_entry"],cc.size(this.panels["tab3"]["mapRight_entry"].getContentSize().width,this.panels["tab3"]["mapRight_entry"].getContentSize().height), cc.p(0,this.panels["tab3"]["mapRight_entry"].getContentSize().height), GameMap.hasMapRight() ? GameMap.getMapRight():"" , cc.c4b(100,100,100), cc.c3b(255,255,255));
+		this.mapLeftBox.setBackgroundInvisible();
+	    this.mapLeftBox.setInputFlag(5);
+		this.mapRightBox = new EntryBox(this.panels["tab3"]["connectors"]["mapRight_entry"],cc.size(this.panels["tab3"]["connectors"]["mapRight_entry"].getContentSize().width,this.panels["tab3"]["connectors"]["mapRight_entry"].getContentSize().height+4), cc.p(0,this.panels["tab3"]["connectors"]["mapRight_entry"].getContentSize().height+4), GameMap.hasMapRight() ? GameMap.getMapRight():"" , cc.c4b(100,100,100), cc.c3b(255,255,255));
 		this.mapRightBox.setDefaultFineFlag(true);
 		this.mapRightBox.setNullAllowed(true);
+		this.mapRightBox.setBackgroundInvisible();
+	    this.mapRightBox.setInputFlag(5);
 
 
-		this.mapWidthBox = new EntryBox(this.panels["tab3"]["mapWidth_entry"],cc.size(this.panels["tab3"]["mapWidth_entry"].getContentSize().width,this.panels["tab3"]["mapWidth_entry"].getContentSize().height), cc.p(0,this.panels["tab3"]["mapWidth_entry"].getContentSize().height), GameMap.getMapWidth() ? GameMap.getMapWidth():36 , cc.c4b(255,255,255), cc.c3b(0,0,0));
+		this.mapWidthBox = new EntryBox(this.panels["tab3"]["sizers"]["mapWidth_entry"],cc.size(this.panels["tab3"]["sizers"]["mapWidth_entry"].getContentSize().width,this.panels["tab3"]["sizers"]["mapWidth_entry"].getContentSize().height+4), cc.p(0,this.panels["tab3"]["sizers"]["mapWidth_entry"].getContentSize().height+4), GameMap.getMapWidth() ? GameMap.getMapWidth():36 , cc.c4b(255,255,255), cc.c3b(255,255,255));
 		this.mapWidthBox.setDefaultFineFlag(true);
+		this.mapWidthBox.setBackgroundInvisible();
+	    this.mapWidthBox.setInputFlag(5);
 
-		this.mapHeightBox = new EntryBox(this.panels["tab3"]["mapHeight_entry"],cc.size(this.panels["tab3"]["mapHeight_entry"].getContentSize().width,this.panels["tab3"]["mapHeight_entry"].getContentSize().height), cc.p(0,this.panels["tab3"]["mapHeight_entry"].getContentSize().height), GameMap.getMapHeight() ? GameMap.getMapHeight():36 , cc.c4b(255,255,255), cc.c3b(0,0,0));
+		this.mapHeightBox = new EntryBox(this.panels["tab3"]["sizers"]["mapHeight_entry"],cc.size(this.panels["tab3"]["sizers"]["mapHeight_entry"].getContentSize().width,this.panels["tab3"]["sizers"]["mapHeight_entry"].getContentSize().height+4), cc.p(0,this.panels["tab3"]["sizers"]["mapHeight_entry"].getContentSize().height+4), GameMap.getMapHeight() ? GameMap.getMapHeight():36 , cc.c4b(255,255,255), cc.c3b(255,255,255));
 		this.mapHeightBox.setDefaultFineFlag(true);
+		this.mapHeightBox.setBackgroundInvisible();
+	    this.mapHeightBox.setInputFlag(5);
+
+	    this.mapNameBox = new EntryBox(this.panels["tab3"]["mapName_entry"],cc.size(this.panels["tab3"]["mapName_entry"].getContentSize().width,this.panels["tab3"]["mapName_entry"].getContentSize().height+4), cc.p(0,this.panels["tab3"]["mapName_entry"].getContentSize().height+4), GameMap.getMapName() ? GameMap.getMapName():"", cc.c4b(255,255,255), cc.c3b(0,0,0));
+		this.mapNameBox.setDefaultFineFlag(true);
+		this.mapNameBox.setBackgroundInvisible();
+
 		this.setTab(1);
 		this.updateMapOffset();
 		this.updateMusicList();
@@ -537,8 +556,8 @@ this.delegate.panels["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127)
 			this.panels["tab1"]["highlightnode"].setOpacity(0);
 			var truePos = this.panels["tab1"]["tiles"].convertToNodeSpace(pos);
 			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["tab1"]["tiles"].getContentSize().height){
-				truePos.x = truePos.x-(truePos.x%cellsize)+16;
-				truePos.y = truePos.y-(truePos.y%cellsize)+17;
+				truePos.x = truePos.x-(truePos.x%cellsize);
+				truePos.y = truePos.y-(truePos.y%cellsize)+((screenSize.height-40)-this.panels["tab1"]["tiles"].getContentSize().height);
 				
 				this.panels["tab1"]["highlightnode"].setOpacity(127);
 				this.panels["tab1"]["highlightnode"].setPosition(truePos);
@@ -556,14 +575,22 @@ this.delegate.panels["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127)
 			this.panels["tab"+value].setVisible(true);
 		
 			if(value==1){
+
+				this.panels["tab3"].setPosition(screenSize.width,0);
+
 				this.editMode="tiles";
 				this.panels["tab1"]["menu_bar"]["deletebtn"].setColor(cc.c3b(127,127,127));
 			}
 
 			if(value==2){
+				this.panels["tab3"].setPosition(screenSize.width,0);
 				this.editMode="script";
 				this.updateScriptList();
 			}			
+
+			if(value==3){
+				this.panels["tab3"].setPosition(0,0);
+			}
 		}
 	},
 	
@@ -571,7 +598,7 @@ this.delegate.panels["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127)
 		this.schedule(this.updateMapOffset);
 		if(this.panels["tab1"]["tiles"].getTexture() && this.panels["tab1"]["tiles"].getTexture()._isLoaded==true){
 			this.unschedule(this.updateMapOffset);
-			this.panels["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(cellsize*this.mapOffset.x),Math.floor(cellsize*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<320?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:320,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<this.mapSize?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:this.mapSize));
+			this.panels["tab1"]["tiles"].setTextureRect(cc.rect(Math.floor(cellsize*this.mapOffset.x),Math.floor(cellsize*this.mapOffset.y),tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width<352?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width:352,tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height<this.mapSize?tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height:this.mapSize));
 		}
 	},
 
@@ -587,10 +614,50 @@ this.delegate.panels["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127)
 		if(number==1){
 			if(this.delegate.panels["tab1"]["selectednode"].getOpacity()!=0){
 				var ySize = Math.floor(this.delegate.mapSize/cellsize)-1;
-				GameMap.fillMap(tileTextureList[this.delegate.currentTextureNumber]["name"],cc.p(((this.delegate.panels["tab1"]["selectednode"].getPositionX()-16)/cellsize)+this.delegate.mapOffset.x,(ySize-((this.delegate.panels["tab1"]["selectednode"].getPositionY()-16)/cellsize))+this.delegate.mapOffset.y),this.delegate.currentLayer);
+				GameMap.fillMap(tileTextureList[this.delegate.currentTextureNumber]["name"],cc.p(((this.delegate.panels["tab1"]["selectednode"].getPositionX())/cellsize)+this.delegate.mapOffset.x,(ySize-((this.delegate.panels["tab1"]["selectednode"].getPositionY())/cellsize))+this.delegate.mapOffset.y),this.delegate.currentLayer);
 				GameMap.updateMap();
 			}
 		}
+	},
+
+	onTouchEnded:function(touch){
+		this.movePosition=null;
+	},
+
+	onTouchMoved:function(touch){
+		if(this.movePosition!=null){
+			this.panels["tab1"]["selectednode"].setOpacity(0);
+			this.panels["tab1"]["highlightnode"].setOpacity(0);
+			var pos = touch._point;
+			var truePos = this.panels.convertToNodeSpace(pos);
+			var dist = cc.p(this.movePosition.x-truePos.x,this.movePosition.y-truePos.y);
+			if(dist.x>32){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>352 && this.mapOffset.x<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width-352)/cellsize)){
+					this.mapOffset.x++;	this.updateMapOffset();
+					this.movePosition.x=truePos.x;
+				}
+			}
+			else if(dist.x<-32){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>352 && this.mapOffset.x>0){
+					this.mapOffset.x--; this.updateMapOffset();
+					this.movePosition.x=truePos.x;
+				}
+			}
+			else if(dist.y>32){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>352 && this.mapOffset.y>0){
+					this.mapOffset.y--;	this.updateMapOffset();
+					this.movePosition.y=truePos.y;
+				}
+			}
+			else if(dist.y<-32){
+				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>352 && this.mapOffset.y<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height-this.mapSize)/cellsize)){
+					this.mapOffset.y++;	this.updateMapOffset();
+					this.movePosition.y=truePos.y;
+				}
+			}
+			return true;
+		}
+		return false;
 	},
 
 	onTouchBegan:function(touch){
@@ -623,30 +690,7 @@ this.delegate.panels["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127)
 				this.addChild(ddown);
 				return true;
 			}
-			if(isTouching(this.panels["tab1"]["leftbtn"],truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>320 && this.mapOffset.x>0){
-					this.mapOffset.x--; this.updateMapOffset();
-				}
-				return true;
-			}
-			if(isTouching(this.panels["tab1"]["rightbtn"],truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width>320 && this.mapOffset.x<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().width-320)/cellsize)){
-					this.mapOffset.x++;	this.updateMapOffset();
-				}
-				return true;
-			}
-			if(isTouching(this.panels["tab1"]["upbtn"],truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>this.mapSize && this.mapOffset.y>0){
-					this.mapOffset.y--;	this.updateMapOffset();
-				}
-				return true;
-			}
-			if(isTouching(this.panels["tab1"]["downbtn"],truePos)){
-				if(tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height>this.mapSize && this.mapOffset.y<((tileTextureList[this.currentTextureNumber]["texture"].getContentSize().height-this.mapSize)/cellsize)){
-					this.mapOffset.y++;	this.updateMapOffset();
-				}
-				return true;
-			}
+		
 			if(isTouching(this.panels["tab1"]["menu_bar"]["deletebtn"],this.panels["tab1"]["menu_bar"].convertToNodeSpace(pos))){
 				this.editMode=this.editMode=="erasing" ? "tiles" : "erasing";
 				this.panels["tab1"]["menu_bar"]["deletebtn"].setColor(cc.c3b(127,127,127));
@@ -666,8 +710,9 @@ this.delegate.panels["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127)
 			}
 			truePos = this.panels["tab1"]["tiles"].convertToNodeSpace(pos);
 			if(truePos.x>=0 && truePos.y>=0 && truePos.x<=this.panels["tab1"]["tiles"].getContentSize().width && truePos.y<=this.panels["tab1"]["tiles"].getContentSize().height){
-				truePos.x = truePos.x-(truePos.x%cellsize)+16;
-				truePos.y = truePos.y-(truePos.y%cellsize)+16;
+				this.movePosition=cc.p(truePos.x,truePos.y);
+				truePos.x = truePos.x-(truePos.x%cellsize);
+				truePos.y = truePos.y-(truePos.y%cellsize)+((screenSize.height-40)-this.panels["tab1"]["tiles"].getContentSize().height);;
 				this.panels["tab1"]["selectednode"].setOpacity(0);
 				if(this.panels["tab1"]["selectednode"].getPositionX()!=truePos.x || this.panels["tab1"]["selectednode"].getPositionY()!=truePos.y){
 					this.panels["tab1"]["selectednode"].setOpacity(127);
@@ -678,14 +723,24 @@ this.delegate.panels["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127)
 		}
 		if(this.currentTab==3){
 		
-			if(isTouching(this.panels["tab3"]["clearbtnYes"],truePos)){
-			//	GameMap.destroy(); this.showAreYouSureClear(false); return true;
+			if(isTouching(this.panels["tab3"]["destroyMap"],truePos)){
+				var ddown = DropDownList.createWithListAndPosition(this,this.destroySelect,["Cancel","Destroy"],cc.p(60,56));
+				ddown.setNoSelectedTouchCallback(this.noSelectedMenu);
+				ddown.setMinimumWidth(80);
+				this.addChild(ddown);
+			
 			}
 		}
 
 		return false;
 	},	
 	
+	destroySelect:function(number){
+		if(number==1){
+			GameMap.destroy(); this.delegate.setTab(3);
+		}
+	},
+
 	updateCurrentLayer:function(layerName){
 		this.panels["tab1"]["ground1btn"].setColor(WHITE);
 		this.panels["tab1"]["ground2btn"].setColor(WHITE);
@@ -736,7 +791,7 @@ this.delegate.panels["tab1"]["menu_bar"]["fillbtn"].setColor(cc.c3b(127,127,127)
 			case "tiles":
 				if(this.panels["tab1"]["selectednode"].getOpacity()!=0){
 					var ySize = Math.floor(this.mapSize/cellsize)-1;
-					GameMap.setLayer(tilenum,tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["tab1"]["selectednode"].getPositionX()-16)/cellsize)+this.mapOffset.x,(ySize-((this.panels["tab1"]["selectednode"].getPositionY()-16)/cellsize))+this.mapOffset.y),this.currentLayer);
+					GameMap.setLayer(tilenum,tileTextureList[this.currentTextureNumber]["name"],cc.p(((this.panels["tab1"]["selectednode"].getPositionX())/cellsize)+this.mapOffset.x,(ySize-((this.panels["tab1"]["selectednode"].getPositionY())/cellsize))+this.mapOffset.y),this.currentLayer);
 				}
 			break;
 			case "script":

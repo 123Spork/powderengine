@@ -1,65 +1,57 @@
 Shopeditor=null,
-ShopEditor = Popup.extend({
+ShopEditor = Scene.extend({
 	currentTexture:characterTextureList[0]["name"],
 	currentTextureNumber:0,
+
+	getTabOptions:function(clicknum){
+		return ["Basic"];
+	},
+
+	getCloseOptions:function(clicknum){
+		return ["Cancel","Don't Save","Save"];
+	},
+
+	willExitEditor:function(clicknum){
+		switch(clicknum){
+			case 1:
+				this.ignoreTerminate=true; 
+				var self= this.delegate;
+				this.delegate.scheduleOnce(function(){self.endedEdit(null)}); 
+			break;
+			case 2:
+				this.ignoreTerminate=true;
+				this.data["name"]=this.nameBox.getText();
+				this.delegate.endedEdit(this.data);
+			break;
+		}
+	},
 	
 	getLayoutObject:function(){
 		return { "panels":{
-				position:cc.p(300,10),
 				children:{	
-					"background":{
-						texture:"GUI/itemeditor_bg.png",
+					"name_lbl":{
+						label:"Name:",
+						fontSize:12,
+						anchorPoint:cc.p(0,1),
+						position: cc.p(4,screenSize.height-99),
+					},
+					"name_entry":{
+						position:cc.p(60,screenSize.height-114),
+						size:cc.size(282,16),
+						anchorPoint:cc.p(0,0),
+						color:cc.c3b(180,180,180)
+					},	
+					"okbtn" : {
+						position:cc.p(434,16),
+						size:cc.size(32,32),
+						texture:"GUI/tick_icon.png",
 						anchorPoint:cc.p(0,0),
 					},
-					"main_panel":{
+					"cancelbtn" : {
+						position:cc.p(384,16),
+						size:cc.size(32,32),
+						texture:"GUI/cross_icon.png",
 						anchorPoint:cc.p(0,0),
-						position: cc.p(0,0),
-						size: cc.size(500,330),
-						children: {
-							"namelbl" : {
-								label:"Name:",
-								fontSize:20,
-								anchorPoint:cc.p(0,0),
-								position:cc.p(4,292),
-								color:cc.c3b(0,0,0),
-							},
-							"name_entry":{
-								position:cc.p(74,292),
-								size:cc.size(266,32),
-								color:cc.c4b(255,255,255,255),
-							},
-							"okbtn" : {
-								position:cc.p(434,16),
-								size:cc.size(32,32),
-								texture:"GUI/tick_icon.png",
-								anchorPoint:cc.p(0,0),
-							},
-							"cancelbtn" : {
-								position:cc.p(384,16),
-								size:cc.size(32,32),
-								texture:"GUI/cross_icon.png",
-								anchorPoint:cc.p(0,0),
-							},
-						}
-					},
-					"control_panel":{
-						anchorPoint:cc.p(0,0),
-						position: cc.p(0,330),
-						size: cc.size(500,32),
-						children:{	
-							"header":{
-								label:"Item Editor",
-								fontSize:20,
-								anchorPoint:cc.p(0,0.5),
-								position:cc.p(8,16),
-							},
-							"exitBtn":{
-								position: cc.p(476,6),
-								size: cc.size(20,20),
-								anchorPoint:cc.p(0,0),
-								texture:"GUI/close.png"
-							}
-						}
 					},
 				}
 			}
@@ -87,19 +79,20 @@ ShopEditor = Popup.extend({
 	},
 	
 	runSaveNewData:function(num){
-		sendMessageToServer({"saveshops":num+"","shopsdata":this.data});
+		sendToServer("saveNewShopMessage",{"saveshops":num+"","shopsdata":this.data});
 	},
 	
 	deleteSave:function(num,list){
-		sendMessageToServer({"saveshopswhole":list});
+		sendToServer("deleteShopMessage",{"saveshopswhole":list});
 	},
 	
 	
 	didBecomeActive:function(){
 		this._super();
 
-		this.nameBox = new EntryBox(this.panels["main_panel"]["name_entry"],cc.size(this.panels["main_panel"]["name_entry"].getContentSize().width,this.panels["main_panel"]["name_entry"].getContentSize().height), cc.p(0,this.panels["main_panel"]["name_entry"].getContentSize().height), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(255,255,255));
-		this.nameBox.setDefaultFineFlag(true);;
+		this.nameBox = new EntryBox(this.panels["name_entry"],cc.size(this.panels["name_entry"].getContentSize().width,this.panels["name_entry"].getContentSize().height+4), cc.p(0,this.panels["name_entry"].getContentSize().height+4), this.data["name"]?this.data["name"]:"", cc.c4b(100,100,100), cc.c3b(0,0,0));
+		this.nameBox.setDefaultFineFlag(true);
+		this.nameBox.setBackgroundInvisible();
 	},
 
 	willTerminate:function(ignoreTerminate){
@@ -119,33 +112,20 @@ ShopEditor = Popup.extend({
 		}
 		this.prevMovPos=null;
 		var pos = touch._point;
-		var truePos = this.panels["main_panel"].convertToNodeSpace(pos);
+		var truePos = this.panels.convertToNodeSpace(pos);
 		
-		if(isTouching(this.panels["main_panel"]["okbtn"],truePos)){
-			if(this.nameBox.getText()==null || this.nameBox.getText()==""){
-				return true;
-			}
-			this.ignoreTerminate=true;
-			this.data["name"]=this.nameBox.getText();
-			this.delegate.endedEdit(this.data);
-			return true;
-		}
 			
-		if(isTouching(this.panels["main_panel"]["cancelbtn"],truePos)){
-			this.ignoreTerminate=true; var self= this.delegate;
-			this.delegate.scheduleOnce(function(){self.endedEdit(null)});
-			return true;
-		}			
+		
 		return false;
 	},	
 
 	swapStackable:function(){
 		this.data["stackable"]=!this.data["stackable"];
-		this.panels["main_panel"]["stackbtn"].setColor(RED);
-		this.panels["main_panel"]["stackbtn"]["text"].setString("NOT STACKABLE");
+		this.panels["stackbtn"].setColor(RED);
+		this.panels["stackbtn"]["text"].setString("NOT STACKABLE");
 		if(this.data["stackable"]==true){
-			this.panels["main_panel"]["stackbtn"].setColor(GREEN);
-			this.panels["main_panel"]["stackbtn"]["text"].setString("IS STACKABLE");
+			this.panels["stackbtn"].setColor(GREEN);
+			this.panels["stackbtn"]["text"].setString("IS STACKABLE");
 		}
 	},
 	

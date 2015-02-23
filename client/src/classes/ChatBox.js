@@ -150,7 +150,7 @@ GameChat.getInstance=function(){
 
 GameChat.addMessage=function(message,isPlayer){
 	if(isPlayer){
-		sendMessageToServer({"chatMessage":message});
+		sendToServer("chatMessage",message);
 		gameChatInstance.addChatMessage(PlayersController.getYou().getName()+": "+message);
 	} else{
 		gameChatInstance.addChatMessage(message);

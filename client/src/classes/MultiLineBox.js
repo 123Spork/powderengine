@@ -58,13 +58,6 @@ MultiLineBox = cc.ControlButton.extend({
             if (selfPointer._delegate && selfPointer._delegate.editBoxTextChanged)
                 selfPointer._delegate.editBoxTextChanged(selfPointer, this.value);
         });
-        this._edTxt.addEventListener("keyup", function (e) {
-            if ((e.keyCode === cc.KEY.enter) && (selfPointer._edittype==false)) {
-                e.stopPropagation();
-                e.preventDefault();
-                cc.canvas.focus();
-            }
-        });
         this._edTxt.addEventListener("focus", function () {
             if (this.value == selfPointer._placeholderText) {
                 this.value = "";

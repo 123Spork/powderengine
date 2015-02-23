@@ -1,3 +1,4 @@
+var pControllerInstance=null;
 var PlayersController=cc.Layer.extend({
 	instance:null,
 	players:[],
@@ -6,65 +7,78 @@ var PlayersController=cc.Layer.extend({
 });
 
 PlayersController.getInstance=function(){
-	return this.instance;
+	return pControllerInstance;
 };
 
 PlayersController.setInstanceNull = function(){
-	this.instance.removeFromParent();
-	this.instance=null;
+	pControllerInstance.removeFromParent();
+	pControllerInstance=null;
 };
 
 PlayersController.create=function(youData){
-	if(!this.instance){
-		this.instance = new PlayersController();
-		this.instance.you = PlayerCharacter.create(youData);
-		this.instance.addChild(this.instance.you);
+	if(!pControllerInstance){
+		pControllerInstance = new PlayersController();
+		pControllerInstance.you = PlayerCharacter.create(youData);
+		pControllerInstance.addChild(pControllerInstance.you);
 	}
-	return this.instance;
+	return pControllerInstance;
 };
 
 PlayersController.NPCsInMap = function(mapNumber){
 	var NPCList=[];
-	for(var i in this.instance.npcs){
-		if(this.instance.npcs[i].getMap()==mapNumber){
-			NPCList.push(this.instance.npcs[i]);
+	for(var i in pControllerInstance.npcs){
+		if(pControllerInstance.npcs[i].getMap()==mapNumber){
+			NPCList.push(pControllerInstance.npcs[i]);
 		}
 	}
 	return NPCList;
 };
 
 PlayersController.getNPC=function(id){
-	return this.instance.npcs[id];
+	return pControllerInstance.npcs[id];
+};
+
+PlayersController.pathNPC=function(id,path,map){
+	if(pControllerInstance.npcs[id] && path){
+		if(pControllerInstance.you.getMap()==map){
+			pControllerInstance.npcs[id].setWalkingPath(path);
+		}
+	}
+};
+
+PlayersController.killPlayer=function(){
+	sendToServer('playerDiedMessage',null);
+	GameChat.addMessage("You died!");
 };
 
 PlayersController.moveNPC=function(id,index,map){
-	if(this.instance.npcs[id] && index!="default"){
-		if(this.instance.you.getMap()==map){
-			this.instance.npcs[id].walkToIndex(index);
+	if(pControllerInstance.npcs[id] && index!="default"){
+		if(pControllerInstance.you.getMap()==map){
+			pControllerInstance.npcs[id].walkToIndex(index);
 		}
 	}
 };
 
 PlayersController.repositionNPC=function(id,index){
-	if(this.instance.npcs[id] && index!="default"){
-		this.instance.npcs[id].setPosition(cc.p((index % gridWidth)*cellsize,(Math.floor(index/gridWidth))*cellsize));
+	if(pControllerInstance.npcs[id] && index!="default"){
+		pControllerInstance.npcs[id].setPosition(cc.p((index % gridWidth)*cellsize,(Math.floor(index/gridWidth))*cellsize));
 	}
 };
 
 
 
 PlayersController.destroyNPCs=function(){
-	for(var i in this.instance.npcs){
-		this.instance.npcs[i].removeFromParent();
+	for(var i in pControllerInstance.npcs){
+		pControllerInstance.npcs[i].removeFromParent();
 	}
-	this.instance.npcs=[];
+	pControllerInstance.npcs=[];
 };
 
 PlayersController.addNPC=function(data,position,map){
 	if(!data || !data["sprite"]){
 		return;
 	}
-	var npcID = parseInt(this.instance.npcs.length);
+	var npcID = data["npcID"];
 	var withData ={
 		name: data["name"],
 		stats: {
@@ -77,49 +91,62 @@ PlayersController.addNPC=function(data,position,map){
 		isNPC:npcID,
 		script:data["script"]
 	};
-	this.instance.npcs.push(NonPlayerCharacter.create(withData));
-	this.instance.npcs[npcID].setPosition(position.x*cellsize,position.y*cellsize);
-	this.instance.addChild(this.instance.npcs[npcID]);
+	var mapSize = GameMap.getMapSizeForIndex(map);
+	var x =position % mapSize.width;
+	var y=mapSize.height-Math.floor(position/mapSize.width);
+	pControllerInstance.npcs[npcID]=NonPlayerCharacter.create(withData);
+	pControllerInstance.npcs[npcID].setPosition(x*cellsize,y*cellsize);
+	pControllerInstance.addChild(pControllerInstance.npcs[npcID]);
 };
 
 
 PlayersController.getYou = function(){
-	return this.instance.you;
+	return pControllerInstance.you;
 };
 
 PlayersController.getPlayer=function(id){
-	return this.instance.players[id];
+	if(pControllerInstance){
+		if(pControllerInstance.you && id==pControllerInstance.you.getName()){
+			return pControllerInstance.you;
+		}
+		if(pControllerInstance.players[id]){
+			return pControllerInstance.players[id];
+		}
+	}
+	return null;
 };
 
-PlayersController.addPlayer=function(data){
-		var withData ={
-			name: data["id"],
-			stats: {
-				"health":{level:1,value:100,maxval:200,maxlvl:900},
-				"mana":{level:1,value:100,maxval:200,maxlvl:99},
-			},
-			map:data["location"]["mapnumber"],
-			textureName: "sprites1.png",
-			spriteId: 1,
-		};
-		this.instance.players[data["id"]] = PlayerCharacter.create(withData);
-		var position=data["location"]["position"];
+PlayersController.addPlayer=function(data,ignoreAddMessage){
+	var withData ={
+		name: data["id"],
+		stats: {
+			"health":{level:1,value:100,maxval:200,maxlvl:900},
+			"mana":{level:1,value:100,maxval:200,maxlvl:99},
+		},
+		map:data["location"]["mapnumber"],
+		textureName: "sprites1.png",
+		spriteId: 1,
+	};
+	pControllerInstance.players[data["id"]] = PlayerCharacter.create(withData);
+	var position=data["location"]["position"];
 
-		var mapSize = GameMap.getMapSizeForIndex(data["location"]["mapnumber"]);
-		var x =position % mapSize.width;
-		var y=Math.floor(position/mapSize.width);
-		this.instance.players[data["id"]].setPosition(x*cellsize,y*cellsize);
-		PlayersController.showPlayersInMapOnly();
-		this.instance.addChild(this.instance.players[data["id"]]);
-		var playerJoinString = settingsData["Join Message"]+"";
-		playerJoinString = playerJoinString.replace("<PLAYER>",data["id"]);
+	var mapSize = GameMap.getMapSizeForIndex(data["location"]["mapnumber"]);
+	var x =position % mapSize.width;
+	var y=Math.floor(position/mapSize.width);
+	pControllerInstance.players[data["id"]].setPosition(x*cellsize,y*cellsize);
+	PlayersController.showPlayersInMapOnly();
+	pControllerInstance.addChild(pControllerInstance.players[data["id"]]);
+	var playerJoinString = settingsData["Join Message"]+"";
+	playerJoinString = playerJoinString.replace("<PLAYER>",data["id"]);
+	if(!ignoreAddMessage){
 		GameChat.addMessage(playerJoinString);
+	}
 };
 
 PlayersController.destroyPlayer=function(id){
-	if(this.instance.players[id]){
-		this.instance.players[id].removeFromParent();
-		this.instance.players[id]=null;
+	if(pControllerInstance.players[id]){
+		pControllerInstance.players[id].removeFromParent();
+		pControllerInstance.players[id]=null;
 		var playerLeaveString = settingsData["Leave Message"]+"";
 		playerLeaveString = playerLeaveString.replace("<PLAYER>",id);
 		GameChat.addMessage(playerLeaveString);
@@ -134,9 +161,9 @@ PlayersController.destroyPlayer=function(id){
 };
 
 PlayersController.movePlayer=function(data){
-	console.log(data["location"]["position"]);
-	if(this.instance.players[data["id"]]){
-		this.instance.players[data["id"]].walkToIndex(data["location"]["position"]);
+	var pContext = PlayersController.getPlayer(data["id"]);
+	if(pContext){
+		pContext.walkToIndex(data["location"]["position"]);
 	} else{
 		var withData ={
 			name: data["id"],
@@ -148,12 +175,12 @@ PlayersController.movePlayer=function(data){
 			textureName: "sprites1.png",
 			spriteId: 1,
 		};
-		this.instance.players[data["id"]] = PlayerCharacter.create(withData);
+		pControllerInstance.players[data["id"]] = PlayerCharacter.create(withData);
 		var index=data["location"]["position"];
 		var mapSize = GameMap.getMapSizeForIndex(data["location"]["mapnumber"]);
-		this.instance.players[data["id"]].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
+		pControllerInstance.players[data["id"]].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
 		PlayersController.showPlayersInMapOnly();
-		this.instance.addChild(this.instance.players[data["id"]]);
+		pControllerInstance.addChild(pControllerInstance.players[data["id"]]);
 		var playerJoinString = settingsData["Join Message"]+"";
 		playerJoinString = playerJoinString.replace("<PLAYER>",data["id"]);
 		GameChat.addMessage(playerJoinString);
@@ -161,10 +188,10 @@ PlayersController.movePlayer=function(data){
 };
 	
 PlayersController.positionPlayer=function(data){
-	if(this.instance.players[data["id"]]){
+	if(pControllerInstance.players[data["id"]]){
 		var index = data["location"]["position"];
 		var mapSize = GameMap.getMapSizeForIndex(parseInt(data["location"]["mapnumber"]));
-		this.instance.players[data["id"]].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
+		pControllerInstance.players[data["id"]].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
 	} else{
 		var withData ={
 			name: data["id"],
@@ -176,12 +203,12 @@ PlayersController.positionPlayer=function(data){
 			textureName: "sprites1.png",
 			spriteId: 1,
 		};
-		this.instance.players[data["id"]] = PlayerCharacter.create(withData);
-				this.instance.players[data["id"]].isWarping=false;
+		pControllerInstance.players[data["id"]] = PlayerCharacter.create(withData);
+				pControllerInstance.players[data["id"]].isWarping=false;
 		var index = data["location"]["position"];	var mapSize = GameMap.getMapSizeForIndex(data["location"]["mapnumber"]);
-		this.instance.players[data["id"]].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
+		pControllerInstance.players[data["id"]].setPosition(cc.p((index % mapSize.width)*cellsize,(Math.floor(index/mapSize.width))*cellsize)); 
 		PlayersController.showPlayersInMapOnly();
-		this.instance.addChild(this.instance.players[data["id"]]);
+		pControllerInstance.addChild(pControllerInstance.players[data["id"]]);
 		var string = settingsData["Join Message"];
 		string = string.replace("<PLAYER>",data["id"]);
 		GameChat.addMessage(string);
@@ -189,32 +216,32 @@ PlayersController.positionPlayer=function(data){
 };
 
 PlayersController.changePlayerStatus=function(id,status){
-	if(this.instance.players[id]){
-		this.instance.players[id].updateStatus(status);
+	if(pControllerInstance.players[id]){
+		pControllerInstance.players[id].updateStatus(status);
 	}
 };
 
 PlayersController.showPlayersInMapOnly=function(){
-	var map = this.instance.you.getMap();
-	for(var i in this.instance.players){
-		if(this.instance.players[i]!=null){
-			this.instance.players[i].setVisible((this.instance.players[i].getMap()==map));
+	var map = pControllerInstance.you.getMap();
+	for(var i in pControllerInstance.players){
+		if(pControllerInstance.players[i]!=null){
+			pControllerInstance.players[i].setVisible((pControllerInstance.players[i].getMap()==map));
 		}
 	}
 };
 
 PlayersController.destroy = function(){
-	for(var i in this.instance.players){
-		if(this.instance.players[i]!=null){
+	for(var i in pControllerInstance.players){
+		if(pControllerInstance.players[i]!=null){
 			PlayersController.destroyPlayer(i);
 		}
 	}
-	this.instance.you.removeFromParent();
-	this.instance.you=null;
+	pControllerInstance.you.removeFromParent();
+	pControllerInstance.you=null;
 };
 
 PlayersController.changePlayerMap=function(id,mapnum){
-	this.instance.players[id].setMap(mapnum);
-	this.instance.players[id].setVisible((PlayersController.getYou().getMap()==mapnum));
+	pControllerInstance.players[id].setMap(mapnum);
+	pControllerInstance.players[id].setVisible((PlayersController.getYou().getMap()==mapnum));
 };
 	

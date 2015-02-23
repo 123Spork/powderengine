@@ -223,10 +223,7 @@ Character = cc.Sprite.extend({
 		if(this.isVisible()==false){
 			return;
 		}
-		var tile = GameMap.getTileNodeForXY(x,y);
-		var sf = this.spriteFrame;
-		var gp = this.getGridPosition();
-		
+	
 		if(gp.x>x){
 			this.setSpriteFrame(sf.x,1,"LEFT");
 		} else if(gp.x<x){
@@ -236,62 +233,7 @@ Character = cc.Sprite.extend({
 		} else if(gp.y<y){
 			this.setSpriteFrame(sf.x,3,"UP");
 		}
-		if(!tile){
-			if(Mapeditor!=null && !Mapeditor._parent) Mapeditor=null;
-			if(this.isPlayer && Mapeditor==null){
-				if(gp.x<x && GameMap.hasMapRight()){
-					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapRight());
-					this.setPosition(0,cellsize*y);
-					this.isWalking=false;
-					sendMessageToServer({"changemap":parseInt(GameMap.getMapRight()), "setTo":((0) + ((y) * newMapSize.width))});
-					GameMap.goToMapRight();
-					GameMap.goToOffsetLeft();
-				} else if(gp.x>x && GameMap.hasMapLeft()){
-					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapLeft());
-					this.setPosition(cellsize*(newMapSize.width-1),cellsize*y);
-					this.isWalking=false;
-					sendMessageToServer({"changemap":parseInt(GameMap.getMapLeft()), "setTo":((newMapSize.width-1) + ((y) * newMapSize.width))});
-					GameMap.goToMapLeft();
-					GameMap.goToOffsetRight();
-				} if(gp.y<y && GameMap.hasMapUp()){
-					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapUp());
-					this.setPosition(cellsize*x,cellsize);
-					this.isWalking=false;
-					sendMessageToServer({"changemap":parseInt(GameMap.getMapUp()), "setTo":((x) + ((1) * newMapSize.width))});
-					GameMap.goToMapUp();
-					GameMap.goToOffsetUp();
-				} else if(gp.y>y && GameMap.hasMapDown()){
-					var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapDown());
-					sendMessageToServer({"changemap":parseInt(GameMap.getMapDown()),"setTo":((x) + ((newMapSize.height) * newMapSize.width))});
-					this.setPosition(cellsize*x,cellsize*(newMapSize.height));
-					this.isWalking=false;
-					GameMap.goToMapDown();
-					GameMap.goToOffsetDown();
-				}
-			}
-			return;
-		}
-		if(this.isWalking==false && tile){	
-			if(gameMapInstance.isTileBlocked(tile)){
-				return;
-			}
-			if(this.name==PlayersController.getYou().name){
-				handleScript("Will Leave",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y),"Tile");
-			}
-			this.leavePosition=cc.p(this.getGridPosition().x,this.getGridPosition().y);
-			this.toPosition = cc.p(cellsize*x,cellsize*y);
-			this.isWalking=true;
-			if(this.name==PlayersController.getYou().name){
-				handleScript("Will Enter",GameMap.getTileNodeForXY(x,y),"Tile");
-			}
-			this.schedule(this.walk);
-			this.walk(0);
-			if(this.isPlayer){
-				sendMessageToServer({"moveTo":((this.toPosition.x/cellsize) + ((this.toPosition.y/cellsize) * gridWidth))});
-			} else if(this.isNPC>-1){
-				sendMessageToServer({"npcID":(this.isNPC+""),"mapnumber":this.onMap, "moveNPC":((this.toPosition.x/cellsize) + ((this.toPosition.y/cellsize) * gridWidth))});
-			}
-		}
+	
 	},
 
 	resetIsWalking:function(){
@@ -311,12 +253,16 @@ Character = cc.Sprite.extend({
 			this.path=null;
 			return;
 		}
+		if(this.isPlayer){
+			sendToServer('updateServerPosMessage',indexFromPos(this.path[0].x,this.path[0].y));
+		}
 		this.path.splice(0,1);
 		if(this.path.length==0){
 			this.path=null;
 			return;
 		}
-		this.walkTo(this.path[0].x,this.path[0].y);
+		var index = indexFromPos(this.path[0].x,this.path[0].y);
+		this.walkToIndex(index);
 	},
 	
 	setWalkingPath:function(path){
@@ -331,16 +277,21 @@ Character = cc.Sprite.extend({
 		if(this.isVisible()==false){
 			return;
 		}
-		var x=index % gridWidth;
-		var y=Math.floor(index/gridWidth); 
+		var mapSize = GameMap.getMapSizeForIndex(this.onMap);
+		var x =index % mapSize.width;
+		var y=mapSize.height-Math.floor(index/mapSize.width);
+
 		if(this.isWalking==false){
+			var tile = GameMap.getTileNodeForXY(x,y);
 			var sf = this.spriteFrame;
 			var gp = this.getGridPosition();
-			if(Math.abs(cc.pDistance(cc.p(x,y),gp))>4){
+		
+		/*	var dist = Math.abs(gp.x-x)+Math.abs(gp.y-y);
+			if(Math.abs(cc.pDistance(cc.p(x,y),gp))>1){
 				this.setPosition(cc.p(cellsize*x,cellsize*y));
 				this.isWalking=false;
 				return;
-			}
+			}*/
 			if(gp.x>x){
 				this.setSpriteFrame(sf.x,1,"LEFT");
 			} else if(gp.x<x){
@@ -349,6 +300,54 @@ Character = cc.Sprite.extend({
 				this.setSpriteFrame(sf.x,0,"DOWN");
 			} else if(gp.y<y){
 				this.setSpriteFrame(sf.x,3,"UP");
+			}
+		
+			if(!tile){
+				if(this.isPlayer && Editor==null){
+					if(gp.x<x && GameMap.hasMapRight()){
+						var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapRight());
+						this.setPosition(0,cellsize*y);
+						this.isWalking=false;
+						sendToServer("changePlayerMap",{"changemap":parseInt(GameMap.getMapRight()), "setTo":((0) + ((y) * newMapSize.width))});
+						GameMap.goToMapRight();
+						GameMap.goToOffsetLeft();
+					} else if(gp.x>x && GameMap.hasMapLeft()){
+						var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapLeft());
+						this.setPosition(cellsize*(newMapSize.width-1),cellsize*y);
+						this.isWalking=false;
+						sendToServer("changePlayerMap",{"changemap":parseInt(GameMap.getMapLeft()), "setTo":((newMapSize.width-1) + ((y) * newMapSize.width))});
+						GameMap.goToMapLeft();
+						GameMap.goToOffsetRight();
+					} if(gp.y<y && GameMap.hasMapUp()){
+						var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapUp());
+						this.setPosition(cellsize*x,cellsize);
+						this.isWalking=false;
+						sendToServer("changePlayerMap",{"changemap":parseInt(GameMap.getMapUp()), "setTo":((x) + ((1) * newMapSize.width))});
+						GameMap.goToMapUp();
+						GameMap.goToOffsetUp();
+					} else if(gp.y>y && GameMap.hasMapDown()){
+						var newMapSize = GameMap.getMapSizeForIndex(GameMap.getMapDown());
+						sendToServer("changePlayerMap",{"changemap":parseInt(GameMap.getMapDown()),"setTo":((x) + ((newMapSize.height) * newMapSize.width))});
+						this.setPosition(cellsize*x,cellsize*(newMapSize.height));
+						this.isWalking=false;
+						GameMap.goToMapDown();
+						GameMap.goToOffsetDown();
+					}
+				}
+				return;
+			}
+			if(this.isWalking==false && tile){	
+				if(gameMapInstance.isTileBlocked(tile)){
+					return;
+				}
+				if(this.name==PlayersController.getYou().name){
+					handleScript("Will Leave",GameMap.getTileNodeForXY(this.getGridPosition().x,this.getGridPosition().y),"Tile");
+				}
+				this.leavePosition=cc.p(this.getGridPosition().x,this.getGridPosition().y);
+				this.toPosition = cc.p(cellsize*x,cellsize*y);
+				if(this.name==PlayersController.getYou().name){
+					handleScript("Will Enter",GameMap.getTileNodeForXY(x,y),"Tile");
+				}
 			}
 			this.toPosition = cc.p(cellsize*x,cellsize*y);
 			this.isWalking=true;
@@ -379,6 +378,8 @@ PlayerCharacter = Character.extend({
 			this.isWalking=false;
 			GameMap.goToMapWithoutPlayer(withData.map);
 			GameMap.goToOffsetFromPosition(x*cellsize,y*cellsize);
+		}
+		if(withData.map){
 			this.onMap=withData.map;
 		}
 		if(withData.inventory){
@@ -406,18 +407,12 @@ PlayerCharacter = Character.extend({
 
 	clearExtraData:function(){
 		this.extraData=[];
-		sendMessageToServer({
-			"saveUserExtra":[],
-			"name":this.getName(),
-		});
+		sendToServer("saveExtrasMessage",{"extraData":[],"name":this.getName()});
 	},
 
 	setExtraData:function(scriptID,data){
 		this.extraData[scriptID]=data;
-		sendMessageToServer({
-			"saveUserExtra":this.extraData,
-			"name":this.getName(),
-		});
+		sendToServer("saveExtrasMessage",{"extraData":this.extraData,"name":this.getName()});
 	},
 
 	getExtraData:function(scriptID){
@@ -527,7 +522,7 @@ PlayerCharacter = Character.extend({
 					var string = settingsData["Item Pick Up"];
 					string = string.replace("<ITEM>",item["name"]);
 					GameChat.addMessage(string);
-					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+					sendToServer("pickupItemMessage",{"index":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 					return;
 				}
 			}
@@ -560,7 +555,7 @@ PlayerCharacter = Character.extend({
 			var string = settingsData["Item Pick Up"];
 			string = string.replace("<ITEM>",item["name"]);
 			GameChat.addMessage(string);
-			sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+			sendToServer("pickupItemMessage",{"index":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 		}
 		if(Inventory){
 			Inventory.updateTileGrid();
@@ -584,7 +579,7 @@ PlayerCharacter = Character.extend({
 					var string = settingsData["Item Pick Up"];
 					string = string.replace("<ITEM>",item["name"]);
 					GameChat.addMessage(string);
-					sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+					sendToServer("pickupItemMessage",{"index":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 					return;
 				}
 			}
@@ -600,7 +595,7 @@ PlayerCharacter = Character.extend({
 				var string = settingsData["Item Pick Up"];
 					string = string.replace("<ITEM>",item["name"]);
 					GameChat.addMessage(string);
-				sendMessageToServer({"pickupitem":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
+				sendToServer("pickupItemMessage",{"index":indexFromPos(gp.x,gp.y),"mapnumber":GameMap.getMapNumber()});
 				var added=true;
 				break;
 			}
@@ -624,8 +619,8 @@ PlayerCharacter = Character.extend({
 		if(this.items[itembox][itemnumber]){
 			var string = settingsData["Item Dropped"];
 			string= string.replace("<ITEM>",item["name"]);
-					GameChat.addMessage(string);
-			sendMessageToServer({"droppeditem":itemref["number"],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y),"amount":itemref["amount"]});
+			GameChat.addMessage(string);
+			sendToServer("dropItemMessage",{"item":itemref["number"],"mapnumber":GameMap.getMapNumber(),"index":indexFromPos(gp.x,gp.y),"amount":itemref["amount"]});
 			if(item["stackable"]==true && itemref["amount"]>1){
 				Inventory.setStackableLabel(itemnumber,0);
 			}
@@ -690,7 +685,7 @@ NonPlayerCharacter = Character.extend({
 
 	setPreparing:function(position,delay){
 		this.preparing=true;
-		this.scheduleOnce(function(){this.walkTo(position.x,position.y); this.preparing=false;},delay);
+		this.scheduleOnce(function(){this.walkToIndex(indexFromPos(position.x,position.y)); this.preparing=false;},delay);
 	},
 
 	isPreparing:function(){

@@ -16,6 +16,7 @@ var GameMap=cc.Layer.extend({
 	mapOffset:cc.p(0,0),
 	currentMap:1,
 	mapMusic:null,
+	mapNameLbl:null,
 	
 	isTileBlocked:function(tileid){
 		if(typeof tileid ==='string'){
@@ -179,7 +180,6 @@ var GameMap=cc.Layer.extend({
 		return outer;
 	},
 	
-	
 	musicStop:function(){
 		var musicPlaying=true;
 		for(var i in soundList){
@@ -191,7 +191,7 @@ var GameMap=cc.Layer.extend({
 			stopBackgroundMusic();
 			this.unschedule(this.musicStop);	
 			if(this.mapMusic!=null && this.mapMusic!=='undefined'){
-				playBackgroundMusic(soundList[this.mapMusic]);	
+				playBackgroundMusic(soundList[this.mapMusic],true);	
 			}	
 		}
 	},
@@ -223,7 +223,7 @@ var GameMap=cc.Layer.extend({
 						stopBackgroundMusic();
 						if(waitingforMusic==false){	
 							if(data["mapdata"]["mapMusic"]!=null && data["mapdata"]["mapMusic"]!=='undefined'){
-								playBackgroundMusic(soundList[data["mapdata"]["mapMusic"]]);	
+								playBackgroundMusic(soundList[data["mapdata"]["mapMusic"]],true);	
 							}
 						}
 					}
@@ -232,6 +232,8 @@ var GameMap=cc.Layer.extend({
 					this.mapMusic=null;
 					stopBackgroundMusic();
 				}
+				if(!data["mapdata"]["mapName"]){data["mapdata"]["mapName"]="";}
+				this.mapNameLbl.setString(data["mapdata"]["mapName"]);
 				this.mapUp = (data["mapdata"]["mapConnectors"]["up"]!="" && data["mapdata"]["mapConnectors"]["up"]!=null) ? data["mapdata"]["mapConnectors"]["up"] : null;
 				this.mapDown = (data["mapdata"]["mapConnectors"]["down"]!="" && data["mapdata"]["mapConnectors"]["down"]!=null) ? data["mapdata"]["mapConnectors"]["down"] : null;
 				this.mapLeft = (data["mapdata"]["mapConnectors"]["left"]!="" && data["mapdata"]["mapConnectors"]["left"]!=null) ? data["mapdata"]["mapConnectors"]["left"] : null;
@@ -285,6 +287,8 @@ var GameMap=cc.Layer.extend({
 				this.overPlayerRenderTexture = cc.RenderTexture.create(gameGridSize.width,gameGridSize.height);
 				this.overPlayerRenderTexture.setPosition(cc.p(Math.floor(gameGridSize.width/2),Math.floor(gameGridSize.height/2)));	
 				this.addChild(this.overPlayerRenderTexture);
+				this.mapNameLbl.removeFromParent();
+				MainScene.addChild(this.mapNameLbl);
 			}
 			this.tileData=data;
 			for(var i in data){
@@ -348,7 +352,7 @@ var GameMap=cc.Layer.extend({
 						stopBackgroundMusic();
 						if(waitingforMusic==false){	
 							if(data["mapdata"]["mapMusic"]!=null && data["mapdata"]["mapMusic"]!=='undefined'){
-								playBackgroundMusic(soundList[data["mapdata"]["mapMusic"]]);	
+								playBackgroundMusic(soundList[data["mapdata"]["mapMusic"]],true);	
 							}
 						}
 					}
@@ -357,6 +361,8 @@ var GameMap=cc.Layer.extend({
 					this.mapMusic=null;
 					stopBackgroundMusic();
 				}
+				if(!data["mapdata"]["mapName"]){data["mapdata"]["mapName"]="";}
+				this.mapNameLbl.setString(data["mapdata"]["mapName"]);
 				this.mapUp = (data["mapdata"]["mapConnectors"]["up"]!="" && data["mapdata"]["mapConnectors"]["up"]!=null) ? data["mapdata"]["mapConnectors"]["up"] : null;
 				this.mapDown = (data["mapdata"]["mapConnectors"]["down"]!="" && data["mapdata"]["mapConnectors"]["down"]!=null) ? data["mapdata"]["mapConnectors"]["down"] : null;
 				this.mapLeft = (data["mapdata"]["mapConnectors"]["left"]!="" && data["mapdata"]["mapConnectors"]["left"]!=null) ? data["mapdata"]["mapConnectors"]["left"] : null;
@@ -410,6 +416,8 @@ var GameMap=cc.Layer.extend({
 				this.overPlayerRenderTexture = cc.RenderTexture.create(gameGridSize.width,gameGridSize.height);
 				this.overPlayerRenderTexture.setPosition(cc.p(Math.floor(gameGridSize.width/2),Math.floor(gameGridSize.height/2)));	
 				this.addChild(this.overPlayerRenderTexture);
+				this.mapNameLbl.removeFromParent();
+				MainScene.addChild(this.mapNameLbl);
 			}
 			this.tileData=data;
 			for(var i in data){
@@ -483,8 +491,8 @@ var GameMap=cc.Layer.extend({
 	},
 	
 	onTouchBegan:function(touch){
-		if(this.interactionDelegate && (!Mapeditor || !Mapeditor._parent)){
-			Mapeditor=null;
+		if(this.interactionDelegate && (!Editor || !Editor._parent)){
+			Editor=null;
 			this.interactionDelegate=null;
 		}
 		if(this.interactionDelegate){
@@ -536,7 +544,8 @@ var GameMap=cc.Layer.extend({
 						}
 						else{
 							var gp = PlayersController.getYou().getGridPosition();
-							PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize)));
+							var path = this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize));
+							sendToServer('playerPathMessage',path);
 						}
 					}
 				}
@@ -590,7 +599,8 @@ var GameMap=cc.Layer.extend({
 		if(this.delegate.clickContext!=null){
 			var gp = PlayersController.getYou().getGridPosition();
 			if(list.length==1){
-				PlayersController.getYou().setWalkingPath(gameMapInstance.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),itemPosition));
+				var path = this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize));
+				sendToServer('playerPathMessage',path);
 				this.delegate.clickContext=null;
 				return;
 			}else{
@@ -911,7 +921,15 @@ GameMap.create=function(){
 		gameMapInstance.addChild(gameMapInstance.overPlayerRenderTexture);
 		gameMapInstance.overPlayerRenderTexture.setVisible(false);
 		gameMapInstance.setTouchPriority(-15);
+		
+		gameMapInstance.mapNameLbl = cc.LabelTTF.create("MAP NAME","Arial",16);
+		gameMapInstance.mapNameLbl.setPosition(cc.p(screenSize.width/2,(screenSize.height-sizeReducer)-50));
+		gameMapInstance.mapNameLbl.setAnchorPoint(cc.p(0.5,0));
+		gameMapInstance.mapNameLbl.setColor(cc.c3b(0,0,0));
+
+		MainScene.addChild(gameMapInstance.mapNameLbl);
 		gameMapInstance.init();
+
 	}
 	return gameMapInstance;
 };
@@ -949,7 +967,7 @@ GameMap.setLayer=function(id,texture,frame,type){
 
 GameMap.updateServer=function(){
 	PlayersController.destroyNPCs();
-	sendMessageToServer({"savemap":gameMapInstance.currentMap, "mapdata":gameMapInstance.tileData});
+	sendToServer("saveMapMessage",{"savemap":gameMapInstance.currentMap, "mapdata":gameMapInstance.tileData});
 };
 
 GameMap.destroyLayer=function(id,type){
@@ -992,6 +1010,14 @@ GameMap.setMapInfo=function(data){
 		gameMapInstance.mapMusic = null;
 		stopBackgroundMusic();
 	}
+
+	if(data["mapName"]!=null && data["mapName"]!=='undefined'){
+		gameMapInstance.tileData["mapdata"]["mapName"]=data["mapName"];
+		delete 	gameMapInstance.tileData["mapdata"]["mapConnectors"]["mapName"];
+	}else{
+		gameMapInstance.tileData["mapdata"]["mapName"]="";
+	}
+	gameMapInstance.mapNameLbl.setString(gameMapInstance.tileData["mapdata"]["mapName"]);
 
 	if(gameMapInstance.mapWidth!=data["width"] || gameMapInstance.mapHeight!=data["height"]){
 		gridWidth=data["width"];
@@ -1066,7 +1092,7 @@ GameMap.hasMapRight=function(){
 };
 
 GameMap.getMapNumber=function(){
-	return gameMapInstance.currentMap;
+	return gameMapInstance.currentMap?gameMapInstance.currentMap:null;
 };
 
 GameMap.getMapUp=function(){
@@ -1076,6 +1102,10 @@ GameMap.getMapUp=function(){
 GameMap.getMusicNumber=function(){
 	return gameMapInstance.mapMusic;
 };
+
+GameMap.getMapName=function(){
+	return gameMapInstance.tileData["mapdata"]["mapName"]?gameMapInstance.tileData["mapdata"]["mapName"]:"";
+}
 
 GameMap.getMapDown=function(){
 	return gameMapInstance.mapDown;
@@ -1098,9 +1128,6 @@ GameMap.getMapHeight=function(){
 };
 
 GameMap.goToMap=function(id,ignoreResetMaster){
-	if(!ignoreResetMaster){
-		MapMaster=false;
-	}
 	PlayersController.getInstance().setVisible(false);
 	PlayersController.destroyNPCs();
 	GameMap.destroy();

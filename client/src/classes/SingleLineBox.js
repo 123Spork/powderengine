@@ -259,6 +259,8 @@ SingleLineBox = cc.ControlButton.extend({
         this._editBoxInputFlag = inputFlag;
         if (inputFlag == cc.EDITBOX_INPUT_FLAG_PASSWORD)
             this._edTxt.type = "password";
+        else if (inputFlag==cc.EDITBOX_INPUT_FLAG_NUMBER)
+            this._edTxt.type = "number";
         else
             this._edTxt.type = "text";
     },

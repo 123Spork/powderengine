@@ -236,6 +236,10 @@ SkillBars.modifyHealth=function(name,value){
 	SkillBarsInstance.skillsData[name]["currenthealth"]+=value;
 	if(SkillBarsInstance.skillsData[name]["currenthealth"]<0){
 		SkillBarsInstance.skillsData[name]["currenthealth"]=0;
+		if(name=="Health"){
+			PlayersController.killPlayer();
+			SkillBarsInstance.skillsData[name]["currenthealth"]=SkillBarsInstance.skillsData[name]["maxhealth"];
+		}
 	}
 	if(SkillBarsInstance.skillsData[name]["currenthealth"]>SkillBarsInstance.skillsData[name]["maxhealth"]){
 		SkillBarsInstance.skillsData[name]["currenthealth"]=SkillBarsInstance.skillsData[name]["maxhealth"];

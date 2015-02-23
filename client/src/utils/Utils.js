@@ -4,6 +4,8 @@ var ccconfig=document["ccConfig"];
 var PLAYMODE = LIVE;
 var keyMap = {};
 var isGameInSync=false;
+document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+document.body.scroll = "no"; // ie only
 
 var tileTextureList = [], characterTextureList=[], soundList=[];
 cc.FileUtils.getInstance().setSearchPaths(["res/Graphics"]);
@@ -22,7 +24,7 @@ document.getElementById("gameCanvas").onkeydown = function (event) {
 };
 
 window.onbeforeunload = function(event){
-	sendMessageToServer({"disconnect":true});
+	sendToServer("disconnect",null);
 };
 
 window.onfocus = function () {
@@ -243,18 +245,17 @@ function updateLayoutNodes(nodes,request,current,parent){
 			var layerSize = data.size ? data.size : cc.size(100,100);
 			var node = cc.LayerColor.create(data.bg,layerSize.width,layerSize.height);
 		}else */
-
 		if(typeof(data.size)!='undefined'){
 			current.setContentSize(Math.floor(data.size.width),Math.floor(data.size.height));
 		}
 		if(typeof(data.position)!='undefined'){
-			current.setPosition(cc.p(Math.floor(data.position.x),Math.floor(data.position.y)));
+			current.setPosition(cc.p(Math.floor(data.position.x),data.position.y?Math.floor(data.position.y):0));
 		}
 		if(typeof(data.visible)!='undefined'){
 			current.setVisible(data.visible);
 		}
 		if(typeof(data.anchorPoint)!='undefined'){
-			current.setAnchorPoint(data.anchorPoint);
+			current.setAnchorPoint(cc.p(data.anchorPoint.x,data.anchorPoint.y));
 		}
 		if(typeof(data.opacity)!='undefined'){
 			current.setOpacity(data.opacity);
@@ -506,9 +507,9 @@ var runResponses =function(responses,type,context,ignoreList,scriptData,j){
 				switch(responses[k]["type"]){
 					case "Spawn NPC":
 						return function(newK){
-							if(responses[newK]["data"]["npc"]!=null && responses[newK]["data"]["npc"]!=='undefined'){
-								PlayersController.addNPC(ObjectLists.getNPCList()[responses[newK]["data"]["npc"]],cc.p(context.getPosition().x/cellsize,context.getPosition().y/cellsize),GameMap.getMapNumber());
-							}
+							//if(responses[newK]["data"]["npc"]!=null && responses[newK]["data"]["npc"]!=='undefined'){
+							//	PlayersController.addNPC(ObjectLists.getNPCList()[responses[newK]["data"]["npc"]],cc.p(context.getPosition().x/cellsize,context.getPosition().y/cellsize),GameMap.getMapNumber());
+							//}
 						};
 					case "Equip Item":
 						return function(newK){
@@ -545,7 +546,7 @@ var runResponses =function(responses,type,context,ignoreList,scriptData,j){
 						};
 					case "Spawn Item":
 						return function(newK){
-							context.addItem(responses[newK]["data"]["item"],responses[newK]["data"]["amount"]);
+					//		context.addItem(responses[newK]["data"]["item"],responses[newK]["data"]["amount"]);
 						};
 					case "Talk":
 						var newJ = (function(index) {return index;})(j);
@@ -589,6 +590,11 @@ var runResponses =function(responses,type,context,ignoreList,scriptData,j){
 								GameChat.addMessage("Your custom response script failed");
 							}
 						};
+				case "Aggro NPC":
+					return function(newK){
+						sendToServer('aggroNPCMessage',context.isNPC);
+					};
+				break;
 				case "Give /Take Item":
 					return function(newK){
 						var contextitem = ObjectLists.getItemList()[responses[newK]["data"]["item"]];
@@ -701,7 +707,7 @@ var runResponses =function(responses,type,context,ignoreList,scriptData,j){
 						var mapSize = GameMap.getMapSizeForIndex(responses[newK]["data"]["mapnum"]);
 						var x=responses[newK]["data"]["index"] % mapSize.width;
 						var y=Math.floor(responses[newK]["data"]["index"]/mapSize.width);
-						sendMessageToServer({"mapnumber":""+responses[newK]["data"]["mapnum"], "warpTo":responses[newK]["data"]["index"]});
+						sendToServer("warpPlayerMessage",{"mapnumber":""+responses[newK]["data"]["mapnum"], "warpTo":responses[newK]["data"]["index"]});
 						GameMap.goToMap(responses[newK]["data"]["mapnum"]);
 						PlayersController.getYou().setPosition(x*cellsize,y*cellsize);
 						PlayersController.getYou().isWalking=false;

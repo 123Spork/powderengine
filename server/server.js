@@ -1,115 +1,255 @@
-/* Powder Engine Server */
-process.chdir(__dirname);
+/*jshint curly: true, node: true, plusplus: false*/
+//"use strict";
 
-var xport 				= require('node-xport')(module)
-  , io 					= require('socket.io')
-  , fs 					= require('fs')
-  , bcrypt 				= require('bcryptjs')
-  , networkConfig 		= require('../config.json')
-  , config 				= require('./server.config.json')
-  , NetworkBootstrap 	= require('../common/networkbootstrap.js')
-  ;
+/*jslint nomen: true*/
+process.chdir(__dirname);
+/*jslint nomen: false*/
+
+var xport            = require('node-xport')(module),
+    io               = require('socket.io'),
+    fs               = require('fs'),
+    bcrypt           = require('bcryptjs'),
+    networkConfig    = require('../config.json'),
+    config           = require('./server.config.json'),
+    NetworkBootstrap = require('../common/networkBootstrap.js'),
+    utils            = require('./utils.js');
+    cereal            = require('./cycle.js');
 
 var formulas = {};
-formulas.xpTNL = function(currentLevel) {
-	return eval(config.game.formulae.xp || "100 * Math.pow(1.08, currentLevel)");
+/*jshint unused: false, evil: true*/
+formulas.xpTNL = function (currentLevel) {
+    return eval(String(config.game.formulae.xp || "100 * Math.pow(1.08, currentLevel)"));
 };
 
-formulas.baseHealth = function(currentLevel, previousHealth) {
-	return eval(config.game.formulae.hp || "100 + (currentLevel * 50)");
+formulas.baseHealth = function (currentLevel, previousHealth) {
+    return eval(String(config.game.formulae.hp || "100 + (currentLevel * 50)"));
 };
-  
-var positions = [];
-var mapplayers=[];
-var mapNPCS=[];
-var clients =[];
-var playersOnMapsCount=[];
-var mapMasters=[];
-var names=[];
-var maps=[];
-var last=[];
-var warps=[];
-var items=[];
-var skills=[];
-var signs=[];
-var npcs=[];
-var quests=[];
-var shops=[];
-var scripts=[];
-var settings=null;
-var updateMapIndex=0;
-var updateWarpIndex=1;
-var updateItemIndex=2;
-var updateSkillsIndex=3;
-var updateSignsIndex=4;
-var updateNPCIndex=5;
-var updateQuestIndex=6;
-var updateSettingsIndex=7;
-var updateScriptIndex=8;
-var updateShopIndex=9;
+/*jshint evil: false*/
 
+var clients = [];
+var maps = [];
+var mapsQ =[];
+var last = [];
+var items = [];
+var skills = [];
+var npcs = [];
+var quests = [];
+var shops = [];
+var scripts = [];
+var settings = null;
 
+var mapblocks = [];
 
-var droppedItems={};
+var updateMapIndex = 0, updateWarpIndex = 1, updateItemIndex = 2, updateSkillsIndex = 3, updateSignsIndex = 4,
+updateNPCIndex = 5, updateQuestIndex = 6, updateSettingsIndex = 7, updateScriptIndex = 8, updateShopIndex = 9;
 
-fs.readdirSync("./maps").forEach(function(file) {
-  maps[parseInt(file.split('.')[0])] =require("./maps/" + file);
-  playersOnMapsCount[parseInt(file.split('.')[0])]=0;
-  mapNPCS[parseInt(file.split('.')[0])]=[];
-});
-
-fs.readdirSync("./additionals").forEach(function(file) {
-  if(file=="warps.json"){
-	warps =require("./additionals/warps.json");
-  }  
-  if(file=="items.json"){
-	items =require("./additionals/items.json");
-  }
-  if(file=="skills.json"){
-	skills =require("./additionals/skills.json");
-  }
-  if(file=="signs.json"){
-	signs =require("./additionals/signs.json");
-  }
-  if(file=="npcs.json"){
-	npcs =require("./additionals/npcs.json");
-  }
-  if(file=="quests.json"){
-	quests =require("./additionals/quests.json");
-  }
-  if(file=="shops.json"){
-	shops =require("./additionals/shops.json");
-  }
-  if(file=="settings.json"){
-	settings =require("./additionals/settings.json");
-  }
-  if(file=="scripts.json"){
-  	scripts=[
-		{"data":[{"type":"Will Enter","responses":[{"type":"Block Entry","data":{}}],"requirements":[],"data":{}}],"name":"Block","specifier":"Default","implementsAs":"Tile","abbr":"BLK"},
-		{"data":[{"type":"On Game load","responses":[{"type":"Spawn NPC","data":{}}],"requirements":[],"data":{}}],"name":"Spawn NPC","specifier":"Default","implementsAs":"Tile","isTemplate":"1","abbr":"NPC"},
-		{"data":[{"type":"On Game load","responses":[{"type":"Spawn Item","data":{}}],"requirements":[],"data":{}}],"name":"Spawn Item","specifier":"Default","implementsAs":"Tile","isTemplate":"1","abbr":"ITM"},
-		{"data":[{"type":"On Enter","responses":[{"type":"Warp Player","data":{}}],"requirements":[],"data":{}}],"name":"Warp Player","specifier":"Default","implementsAs":"Tile","isTemplate":"1","abbr":"WRP"}
-  	];
-	var userscripts =require("./additionals/scripts.json");
-	for(var i in userscripts){
-		scripts.push(userscripts[i]);
-	}
-  }
+fs.readdirSync("./maps").forEach(function (file) {
+    var n = parseInt(file.split('.')[0], 10);
+    mapsQ[n]={};
+    mapsQ[n].items=[];
+    mapsQ[n].npcs=[];
 });
 
 
-if(fs.existsSync('./tools/updatedata.json')){
-	try{
-		last=require('./tools/updatedata.json');
-	}catch(e){
+fs.readdirSync("./maps").forEach(function (file) {
+    var n = parseInt(file.split('.')[0], 10);
+    maps[n] = require("./maps/" + file);
 
-	}
+});
+
+
+
+fs.readdirSync("./additionals").forEach(function (file) {
+    if (file === "warps.json") {
+        warps = require("./additionals/warps.json");
+    }
+
+    if (file === "items.json") {
+        items = require("./additionals/items.json");
+    }
+
+    if (file === "skills.json") {
+        skills = require("./additionals/skills.json");
+    }
+
+    if (file === "npcs.json") {
+        npcs = require("./additionals/npcs.json");
+    }
+
+    if (file === "quests.json") {
+        quests = require("./additionals/quests.json");
+    }
+
+    if (file === "shops.json") {
+        shops = require("./additionals/shops.json");
+    }
+
+    if (file === "settings.json") {
+        settings = require("./additionals/settings.json");
+    }
+
+    if (file === "scripts.json") {
+        scripts = [
+            { "data": [{ "type": "Will Enter", "responses": [{ "type": "Block Entry", "data": {} }], "requirements": [], "data": {} }], "name": "Block", "specifier": "Default", "implementsAs": "Tile", "abbr": "BLK" },
+            { "data": [{ "type": "On Game load", "responses": [{ "type": "Spawn NPC", "data": {} }], "requirements": [], "data": {} }], "name": "Spawn NPC", "specifier": "Default", "implementsAs": "Tile", "isTemplate": "1", "abbr": "NPC" },
+            { "data": [{ "type": "On Game load", "responses": [{ "type": "Spawn Item", "data": {} }], "requirements": [], "data": {} }], "name": "Spawn Item", "specifier": "Default", "implementsAs": "Tile", "isTemplate": "1", "abbr": "ITM" },
+            { "data": [{ "type": "On Enter", "responses": [{ "type": "Warp Player", "data": {} }], "requirements": [], "data": {} }], "name": "Warp Player", "specifier": "Default", "implementsAs": "Tile", "isTemplate": "1", "abbr": "WRP" }
+        ];
+
+        var userscripts = require("./additionals/scripts.json");
+        for (var i in userscripts) {
+            scripts.push(userscripts[i]);
+        }
+    }
+});
+
+
+if (fs.existsSync('./tools/updatedata.json')) {
+    try {
+        last = require('./tools/updatedata.json');
+    } catch(e) {
+
+    }
 }
 
-var requestHandler = function(req, res){ 
+var getBlockLevelsForMap=function(mapnum){
+    var map = maps[mapnum];
+    var blockers=[];
+    for(var k in map){
+        var i = parseInt(k.substring(4));
+        if(j=="mapdata"){
+            continue;
+        }
+        if(map["tile"+i] && map["tile"+i]["info"] && map["tile"+i]["info"]["script"]!=='undefined' && map["tile"+i]["info"]["script"]!=null){
+            var scriptID = map["tile"+i]["info"]["script"];
+            if(scriptID==0){
+                blockers[i]=true;
+                continue;
+            }
+            var sData = scripts[scriptID]["datas"]
+            for(var m in sData){
+                var responses = sData[m]["responses"];
+                for(var n in responses){
+                    if(responses[n]["type"]=="Block Entry"){
+                        blockers[i]=true;
+                        break; break; continue;
+                    }
+                }
+            }
+            blockers[i]=false;
+        }else{
+            blockers[i]=false;
+        }
+    }
+    return blockers;
+};
+
+
+for(var i in maps){
+    mapblocks[i]=getBlockLevelsForMap(i);
+}
+
+
+
+var spawns =utils.getSpawns(scripts,maps);
+var controlNPCFunc = function(self){
+    return self?function(){
+        if(self.isAggro){
+            if(!clients[self.isAggro] || clients[self.isAggro].map!=self.map){
+                delete self.isAggro;
+            }else{
+                var width = parseInt(maps[self.map].mapdata.mapConnectors.width);
+                var height = parseInt(maps[self.map].mapdata.mapConnectors.height);
+                var npcPos = {x:(self.index%width),y:(Math.floor(self.index/width))};
+                var playerPos = {x:(parseInt(clients[self.isAggro].position)%width),y:(Math.floor(parseInt(clients[self.isAggro].position)/width))};
+                var path = utils.findNPCPath(mapblocks[self.map],npcPos,playerPos,width,height);
+                if(path.length>2){
+                    self.index=utils.indexFromPos(path[1].x,(height-1)-path[1].y,width,height); 
+                    var newIndex=0+self.index;
+                }else{
+                    var damage=-10;
+                    clients[self.isAggro].emit('npcAttackMessage',damage);
+                }
+            }
+        }else{
+            var maxIndex = (parseInt(maps[self.map].mapdata.mapConnectors.width)*parseInt(maps[self.map].mapdata.mapConnectors.height));
+            var minIndex = 0;
+            var newIndex=-1;
+            switch(Math.floor(Math.random() * 4) + 1){
+                case 1: 
+                 newIndex = parseInt(self.index)+parseInt(maps[self.map].mapdata.mapConnectors.width)
+                 if(newIndex<maxIndex && !mapblocks[self.map][newIndex]){
+                     self.index=newIndex;
+                 }
+                break;
+                case 2:
+                 newIndex = parseInt(self.index)-parseInt(maps[self.map].mapdata.mapConnectors.width);
+                 if(newIndex>=minIndex && !mapblocks[self.map][newIndex]){
+                     self.index=newIndex;
+                 }
+                break;
+                case 3: 
+                 newIndex = parseInt(self.index)+1;
+                 if(newIndex<maxIndex && newIndex%parseInt(maps[self.map].mapdata.mapConnectors.width)!=0 && !mapblocks[self.map][newIndex]){
+                    self.index=newIndex;
+                 }
+                break;
+                case 4:
+                 newIndex = parseInt(self.index)-1;
+                 if(newIndex>=minIndex && newIndex%parseInt(maps[self.map].mapdata.mapConnectors.width)!=(parseInt(maps[self.map].mapdata.mapConnectors.width)-1) && !mapblocks[self.map][newIndex]){
+                    self.index=newIndex;
+                 };
+                break;
+            }
+        }
+        if(self.index==newIndex){
+            for(var k in clients){
+                var dataSend = {mapnumber:self.map,index:self.index,id:self.npcID};
+                if(self.map==5){
+            }
+                clients[k].broadcast.emit('moveNPCMessage',dataSend);
+                clients[k].emit('moveNPCMessage',dataSend)
+                break;
+            }   
+        }
+        if(self.walkable==true){
+            self.scheduleUpdate();
+        }
+    }:null;
+};
+
+var npcID=0;
+for(var i in spawns.npc){
+    for(var j in spawns.npc[i]){
+        var getIndex = function(index){
+            return function(){ return parseInt(index)};
+        };
+        mapsQ[i].npcs[npcID]=spawns.npc[i][j];
+        mapsQ[i].npcs[npcID].walkable = npcs[spawns.npc[i][j].number].walkable;
+        mapsQ[i].npcs[npcID].map=getIndex(i)();
+        mapsQ[i].npcs[npcID].npcID=getIndex(npcID)();
+        mapsQ[i].npcs[npcID].scheduleUpdate=function(){
+            var delay = this.isAggro ? 1 : Math.random()*20+1;
+            var self=this;
+            this.timeout = setTimeout(controlNPCFunc(self),delay*1000);
+        }
+        if(mapsQ[i].npcs[npcID].walkable==true){
+            mapsQ[i].npcs[npcID].scheduleUpdate();
+        }
+        npcID++;
+    }
+}
+
+for(var i in spawns.itm){
+    for(var j in spawns.itm[i]){
+        mapsQ[i].items.push(spawns.itm[i][j])
+    }
+}
+
+var requestHandler = function (req, res) {
     // Send HTML headers and message
-    res.writeHead(200,{ 'Content-Type': 'text/html' }); 
-    res.end('<h1>Hello Socket Lover!</h1>');
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(' < h1 < Hello Socket Lover! < /h1 < ');
 };
 
 var parsedPort = parseInt(networkConfig.server.port || 1337);
@@ -120,612 +260,590 @@ server.listen(parsedPort);
 
 // Create a Socket.IO instance, passing it our server
 var socket = io.listen(server, { origins: '*:*' });
+socket.set('log level', 2);
 
-socket.on('message',function(data) {
-  console.log('Received a message from the server!',data);
+socket.on('message', function (data) {
+   // console.log('Received a message from the server!',data);
 });
 
-saveNewPlayer = function(client,playerName,playerData){
-	var outputFilename = 'users/'+playerName+'.json';
-	fs.writeFile(outputFilename, JSON.stringify(playerData), function(err) {
-		client.send(JSON.stringify({"registrationsuccess":1}));
-	});
+var saveNewPlayer = function (client,playerName,playerData) {
+    var outputFilename = 'users/' + playerName + '.json';
+    fs.writeFile(outputFilename, JSON.stringify(playerData), function (err) {
+        client.emit("registrationSuccessMessage",null);
+    });
 };
 
-savePlayer = function(client,playerName,playerData){
-	var outputFilename = 'users/'+playerName+'.json';
-	fs.writeFile(outputFilename, JSON.stringify(playerData), function(err) {
-		client.send(JSON.stringify({"savesuccess":1}));
-	});
+var savePlayer = function (client,playerData) {
+    var outputFilename = 'users/' + client.name + '.json';
+    fs.writeFile(outputFilename, JSON.stringify(playerData), function (err) {
+        client.emit('saveSuccessMessage',null);
+    });
 };
 
-var setMapData = function(mapnumber,data){
-	var outputFilename = 'maps/'+mapnumber+'.json';
-	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+var setMapData = function (mapnumber,data) {
+    var outputFilename = 'maps/' + mapnumber + '.json';
+    fs.writeFile(outputFilename, JSON.stringify(data), function (err) {});
 };
 
-var setWarpData = function(data){
-	var outputFilename = './additionals/warps.json';
-	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+var setItemData = function (data) {
+    var outputFilename = './additionals/items.json';
+    fs.writeFile(outputFilename, JSON.stringify(data), function (err) {});
 };
 
-var setItemData = function(data){
-	var outputFilename = './additionals/items.json';
-	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+var setSkillsData = function (data) {
+    var outputFilename = './additionals/skills.json';
+    fs.writeFile(outputFilename, JSON.stringify(data), function (err) {});
 };
 
-var setSkillsData = function(data){
-	var outputFilename = './additionals/skills.json';
-	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+var setNPCData = function (data) {
+    var outputFilename = './additionals/npcs.json';
+    fs.writeFile(outputFilename, JSON.stringify(data), function (err) {});
 };
 
-var setSignsData = function(data){
-	var outputFilename = './additionals/signs.json';
-	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+var setQuestData = function (data) {
+    var outputFilename = './additionals/quests.json';
+    fs.writeFile(outputFilename, JSON.stringify(data), function (err) {});
 };
 
-var setNPCData = function(data){
-	var outputFilename = './additionals/npcs.json';
-	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+var setShopData = function (data) {
+    var outputFilename = './additionals/shops.json';
+    fs.writeFile(outputFilename, JSON.stringify(data), function (err) {});
 };
 
-var setQuestData = function(data){
-	var outputFilename = './additionals/quests.json';
-	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
-};
-
-var setShopData = function(data){
-	var outputFilename = './additionals/shops.json';
-	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
-};
-
-var setScriptData = function(data){
-	var outputFilename = './additionals/scripts.json';
-	var newData = [];
-	for(var i=4;i<data.length;i++){
-		newData.push(data[i]);
-	}
-	fs.writeFile(outputFilename, JSON.stringify(newData), function(err) {});
+var setScriptData = function (data) {
+    var outputFilename = './additionals/scripts.json';
+    var newData = [];
+    for (var i = 4; i < data.length; i++) {
+        newData.push(data[i]);
+    }
+    fs.writeFile(outputFilename, JSON.stringify(newData), function (err) {});
 };
 
 
-var setSettingsData = function(data){
-	var outputFilename = './additionals/settings.json';
-	fs.writeFile(outputFilename, JSON.stringify(data), function(err) {});
+var setSettingsData = function (data) {
+    var outputFilename = './additionals/settings.json';
+    fs.writeFile(outputFilename, JSON.stringify(data), function (err) {});
 };
 
-var saveLastAccessData = function(){
-	var outputFilename = 'tools/updatedata.json';
-	fs.writeFile(outputFilename, JSON.stringify(last), function(err) {});
+var saveLastAccessData = function () {
+    var outputFilename = 'tools/updatedata.json';
+    fs.writeFile(outputFilename, JSON.stringify(last), function (err) {});
 };
-
 
 // Add a connect listener
-socket.on('connection', function(client){ 
-    // Success!  Now listen to messages to be received
-    client.on('message',function(event){
-		event = JSON.parse(event);
-		if(event["newUser"]){
+socket.on('connection', function (client) {
+// Success!  Now listen to messages to be received
 
-			if(fs.existsSync("users/"+event["name"]+".json")){
-				client.send(JSON.stringify({"registrationfailed":"UserTaken"}));
-			}else{
-				var skillLevels = {};
-				for(var i in skills){
-					skillLevels[skills[i]["name"]]={"level":0,"experience":0,"currenthealth":100,"maxhealth":100, "modifier":0};
-				}
-
-
-				var newPlayerData = {
-					"pass": bcrypt.hashSync(event["password"], 10),
-					"email": event["email"],
-					"registrationdate": Date.now(),
-					"rank":3,
-					"location":{"mapnumber":1,"position":100},
-					"race":0,
-					"class":0,
-					"clan":"",
-					"guilds":[],
-					"quests":[],
-					"friends":[],
-					"skills":skillLevels,
-					"pets":[],
-					"pmessages":[],
-					"lastchats":[],
-					"inventory":[],
-					"bank":[],
-					"equipment":{},
-					"extraData":[],
-				}
-				saveNewPlayer(client,event["name"],newPlayerData);
-			}
-		}
-
-		if(event["saveUser"]){
-			if(fs.existsSync("users/"+event["name"]+".json")){
-				var playerData = require("./users/"+event["name"]+".json");
-				playerData["location"]=event["location"];
-				playerData["inventory"]=event["inventory"];
-				playerData["equipment"]=event["equipment"];
-				playerData["bank"]=event["bank"];
-				playerData["extraData"]=event["extraData"];
-				savePlayer(client,event["name"],playerData);
-			}
-		}
-
-		if(event["saveUserExtra"]){
-			if(fs.existsSync("users/"+event["name"]+".json")){
-				var playerData = require("./users/"+event["name"]+".json");
-				playerData["extraData"]=event["saveUserExtra"];
-				savePlayer(client,event["name"],playerData);
-			}
-		}
-
-		if(event["login"]){
-			for(var i in names){
-				if(names[i]==event["username"]){
-					client.send(JSON.stringify({"login_fail":"Login failed, user is already online."}));
-					return;
-				}
-			}
-			if(names.indexOf(event["username"])==-1){
-				if(!fs.existsSync("users/"+event["username"]+".json")){
-					client.send(JSON.stringify({"login_fail":"Login failed, Username doesn't exist."}));
-				}else{
-					var playerData = require("./users/"+event["username"]+".json");
-					if(!bcrypt.compareSync(event["password"], playerData["pass"])){
-						client.send(JSON.stringify({"login_fail":"Login failed, password is incorrect."}))
-					}else{
-
-						var skillLevels = {};
-						for(var i in skills){
-							if(!playerData["skills"][skills[i]["name"]]){
-								playerData["skills"][skills[i]["name"]]={"level":0,"experience":0,"currenthealth":100,"maxhealth":100,"modifier":0};
-							}
-						}
-
-						for(var i in playerData["skills"]){
-							playerData["skills"][i]["requirement"]=formulas.xpTNL(playerData["skills"][i]["level"]);
-						}
-
-						playerData={
-							"name":event["username"],
-							"rank":playerData["rank"],
-							"race":playerData["race"],
-							"class":playerData["class"],
-							"clan":playerData["clan"],
-							"guilds":playerData["guilds"],
-							"quests":playerData["quests"],
-							"friends":playerData["friends"],
-							"skills":playerData["skills"],
-							"pets":playerData["pets"],
-							"pmessages":playerData["pmessages"],
-							"lastchats":playerData["lastchats"],
-							"location":playerData["location"],
-							"inventory":playerData["inventory"],
-							"bank":playerData["bank"],
-							"equipment":playerData["equipment"],
-							"extraData":playerData["extraData"],
-						};
-						client.send(JSON.stringify({"login_success":playerData}));
-						names[client.id]=event["username"];
-						clients[client.id]=client;
-						mapplayers[event["username"]]=playerData["location"]["mapnumber"];
-						if(playersOnMapsCount[playerData["location"]["mapnumber"]]==0){
-							mapMasters[playerData["location"]["mapnumber"]]=names[client.id];
-							client.send(JSON.stringify({"mapmaster":true}));
-						}
-						playersOnMapsCount[playerData["location"]["mapnumber"]]++;
-						client.broadcast.send(JSON.stringify({"newPlayer":1,"id":event["username"],"position":playerData["location"]["position"],"mapnumber":playerData["location"]["mapnumber"]}));
-						for(var i in clients){
-							if(i!=client.id && clients[i]){
-								if(positions[i]){
-									client.send(JSON.stringify({"id":names[i],"mapnumber":mapplayers[names[i]], "position":positions[i], "setTo":1}));
-								}
-							}
-						}
-						for(var i in droppedItems[playerData["location"]["mapnumber"]]){
-							client.send(JSON.stringify(droppedItems[playerData["location"]["mapnumber"]][i]));
-						}
-						for(var i in mapNPCS[playerData["location"]["mapnumber"]]){
-							client.send(JSON.stringify({"changeNPCPosition":mapNPCS[playerData["location"]["mapnumber"]][i],"npcID":i}));
-						}
-					}
-				}
-			}
-		}
-		
-		if(event["sync"]){
-			var returner = {"sync":true};
-			if(!last[updateMapIndex] || event["mapupdate"]<last[updateMapIndex]){
-				if(!last[updateMapIndex]){
-					last[updateMapIndex]=Date.now();
-					saveLastAccessData();
-				}
-				returner["maptime"] = last[updateMapIndex];
-				returner["mapdata"] = maps;
-			}
-			if(!last[updateWarpIndex] || event["warpupdate"]<last[updateWarpIndex]){
-				if(!last[updateWarpIndex]){
-					last[updateWarpIndex]=Date.now();
-					saveLastAccessData();
-				}
-				returner["warptime"] = last[updateWarpIndex];
-				returner["warpdata"] = warps;
-			}
-			if(!last[updateScriptIndex] || event["scriptsupdate"]<last[updateScriptIndex]){
-				if(!last[updateScriptIndex]){
-					last[updateScriptIndex]=Date.now();
-					saveLastAccessData();
-				}
-				returner["scriptstime"] = last[updateScriptIndex];
-				returner["scriptsdata"] = scripts;
-			}
-			if(!last[updateItemIndex] || event["itemupdate"]<last[updateItemIndex]){
-				if(!last[updateItemIndex]){
-					last[updateItemIndex]=Date.now();
-					saveLastAccessData();
-				}
-				returner["itemtime"] = last[updateItemIndex];
-				returner["itemdata"] = items;
-			}
-			if(!last[updateSkillsIndex] || event["skillsupdate"]<last[updateSkillsIndex]){
-				if(!last[updateSkillsIndex]){
-					last[updateSkillsIndex]=Date.now();
-					saveLastAccessData();
-				}
-				returner["skillstime"] = last[updateSkillsIndex];
-				returner["skillsdata"] = skills;
-			}
-			if(!last[updateSignsIndex] || event["signsupdate"]<last[updateSignsIndex]){
-				if(!last[updateSignsIndex]){
-					last[updateSignsIndex]=Date.now();
-					saveLastAccessData();
-				}
-				returner["signstime"] = last[updateSignsIndex];
-				returner["signsdata"] = signs;
-			}
-			if(!last[updateNPCIndex] || event["npcsupdate"]<last[updateNPCIndex]){
-				if(!last[updateNPCIndex]){
-					last[updateNPCIndex]=Date.now();
-					saveLastAccessData();
-				}
-				returner["npcstime"] = last[updateNPCIndex];
-				returner["npcsdata"] = npcs;
-			}
-			if(!last[updateQuestIndex] || event["questsupdate"]<last[updateQuestIndex]){
-				if(!last[updateQuestIndex]){
-					last[updateQuestIndex]=Date.now();
-					saveLastAccessData();
-				}
-				returner["queststime"] = last[updateQuestIndex];
-				returner["questdata"] = quests;
-			}
-
-
-
-			if(!last[updateShopIndex] || event["shopsupdate"]<last[updateShopIndex]){
-				if(!last[updateShopIndex]){
-					last[updateShopIndex]=Date.now();
-					saveLastAccessData();
-				}
-				returner["shopstime"] = last[updateShopIndex];
-				returner["shopsdata"] = shops;
-			}
-			if(!last[updateSettingsIndex] || event["settingsupdate"]<last[updateSettingsIndex]){
-				if(!last[updateSettingsIndex]){
-					last[updateSettingsIndex]=Date.now();
-					saveLastAccessData();
-				}
-				returner["settingstime"] = last[updateSettingsIndex];
-				returner["settingsdata"] = settings;
-			}
-			client.send(JSON.stringify(returner));
-		}
-
-		
-		if(event["moveTo"]){
-			client.broadcast.send(JSON.stringify({"moveTo":1,"position":event["moveTo"],"mapnumber":mapplayers[names[client.id]],"id":names[client.id]}));
-			positions[client.id]= event["moveTo"];
-		}
-		if(event["droppeditem"]){
-			client.send(JSON.stringify({"droppeditem":event["droppeditem"], "mapnumber":event["mapnumber"], "index":event["index"],"amount":event["amount"]}));
-			client.broadcast.send(JSON.stringify({"droppeditem":event["droppeditem"],"mapnumber":event["mapnumber"],"index":event["index"],"amount":event["amount"]}));
-			if(!droppedItems[event["mapnumber"]]){
-				droppedItems[event["mapnumber"]]=[];
-			}
-			droppedItems[event["mapnumber"]].push({"droppeditem":event["droppeditem"],"mapnumber":event["mapnumber"],"index":event["index"],"amount":event["amount"]});
-		}
-		if(event["pickupitem"]){
-			client.send(JSON.stringify({"pickupitem":event["pickupitem"],"mapnumber":event["mapnumber"]}));
-			client.broadcast.send(JSON.stringify({"pickupitem":event["pickupitem"],"mapnumber":event["mapnumber"]}));
-			if(event["temp"]){
-				var droppedarr = droppedItems[event["mapnumber"]];
-				for(var i=droppedarr.length-1;i>=0;i--){
-					if(droppedarr[i]["index"]==event["pickupitem"]){
-						droppedItems[event["mapnumber"]].splice(i,1);
-						break;
-					}
-				}
-			}
-		}
-		if(event["savemap"]){
-			last[updateMapIndex]=Date.now();
-			saveLastAccessData();
-			setMapData(event["savemap"],event["mapdata"]);
-			maps[event["savemap"]]=event["mapdata"];
-			event["updatetime"]=last[updateMapIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["savewarps"]){
-			last[updateWarpIndex]=Date.now();
-			saveLastAccessData();
-			warps[parseInt(event["savewarps"])]=event["warpdata"];
-			setWarpData(warps);
-			event["updatetime"]=last[updateWarpIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["savewarpswhole"]){
-			last[updateWarpIndex]=Date.now();
-			saveLastAccessData();
-			warps=event["savewarpswhole"];
-			setWarpData(warps);
-			event["updatetime"]=last[updateWarpIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["savescripts"]){
-			last[updateScriptIndex]=Date.now();
-			saveLastAccessData();
-			scripts[parseInt(event["savescripts"])]=event["scriptsdata"];
-			setScriptData(scripts);
-			event["updatetime"]=last[updateScriptIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["savescriptswhole"]){
-			last[updateScriptIndex]=Date.now();
-			saveLastAccessData();
-			scripts=event["savescriptswhole"];
-			setScriptData(scripts);
-			event["updatetime"]=last[updateScriptIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["savesettings"]){
-			last[updateSettingsIndex]=Date.now();
-			saveLastAccessData();
-			settings = event["savesettings"];
-			setSettingsData(event["savesettings"]);
-			event["updatetime"]=last[updateSettingsIndex];
-			client.broadcast.send(JSON.stringify(event));
-		}
-        if(event["saveitems"]){
-			last[updateItemIndex]=Date.now();
-			saveLastAccessData();
-			items[parseInt(event["saveitems"])]=event["itemdata"];
-			setItemData(items);
-			event["updatetime"]=last[updateItemIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["saveitemswhole"]){
-			last[updateItemIndex]=Date.now();
-			saveLastAccessData();
-			items=event["saveitemswhole"];
-			setItemData(items);
-			event["updatetime"]=last[updateItemIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-        if(event["savenpcs"]){
-			last[updateNPCIndex]=Date.now();
-			saveLastAccessData();
-			npcs[parseInt(event["savenpcs"])]=event["npcsdata"];
-			setNPCData(npcs);
-			event["updatetime"]=last[updateNPCIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["savenpcswhole"]){
-			last[updateNPCIndex]=Date.now();
-			saveLastAccessData();
-			npcs=event["savenpcswhole"];
-			setNPCData(npcs);
-			event["updatetime"]=last[updateNPCIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
- 		 if(event["savequests"]){
-			last[updateQuestIndex]=Date.now();
-			saveLastAccessData();
-			quests[parseInt(event["savequests"])]=event["questdata"];
-			setQuestData(quests);
-			event["updatetime"]=last[updateQuestIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["savequestswhole"]){
-			last[updateQuestIndex]=Date.now();
-			saveLastAccessData();
-			quests=event["savequestswhole"];
-			setQuestData(quests);
-			event["updatetime"]=last[updateQuestIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["saveshops"]){
-			last[updateShopIndex]=Date.now();
-			saveLastAccessData();
-			shops[parseInt(event["saveshops"])]=event["shopsdata"];
-			setShopData(shops);
-			event["updatetime"]=last[updateShopIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["saveshopswhole"]){
-			last[updateShopIndex]=Date.now();
-			saveLastAccessData();
-			shops=event["saveshopswhole"];
-			setShopData(shops);
-			event["updatetime"]=last[updateShopIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["moveNPC"]){
-			client.broadcast.send(JSON.stringify(event));
-			mapNPCS[event["mapnumber"]][event["npcID"]]=event["moveNPC"];
-		}
-       if(event["saveskills"]){
-			last[updateSkillsIndex]=Date.now();
-			saveLastAccessData();
-			skills[parseInt(event["saveskills"])]=event["skillsdata"];
-			setSkillsData(skills);
-			event["updatetime"]=last[updateSkillsIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["saveskillswhole"]){
-			last[updateSkillsIndex]=Date.now();
-			saveLastAccessData();
-			skills=event["saveskillswhole"];
-			setSkillsData(skills);
-			event["updatetime"]=last[updateSkillsIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-       if(event["savesigns"]){
-			last[updateSignsIndex]=Date.now();
-			saveLastAccessData();
-			signs[parseInt(event["savesigns"])]=event["signsdata"];
-			setSignsData(signs);
-			event["updatetime"]=last[updateSignsIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["savesignswhole"]){
-			last[updateSignsIndex]=Date.now();
-			saveLastAccessData();
-			signs=event["savesignswhole"];
-			setSignsData(signs);
-			event["updatetime"]=last[updateSignsIndex];
-			client.broadcast.send(JSON.stringify(event));
-			client.send(JSON.stringify(event));
-		}
-		if(event["chatMessage"]){
-			client.broadcast.send(JSON.stringify({"chatMessage":names[client.id]+": "+event["chatMessage"]}));
-		}
-		if(event["logout"]){
-			client.broadcast.send(JSON.stringify({"playerLeft":names[client.id]}));
-			names[client.id]=undefined;
-			positions[client.id]=undefined;
-		}
-		if(event["disconnect"]){
-			client.broadcast.send(JSON.stringify({"playerLeft":names[client.id]}));
-			clients[client.id]=undefined;
-			names[client.id]=undefined;
-			positions[client.id]=undefined;
-		}
-		if(event["changemap"]){
-			client.broadcast.send(JSON.stringify({"id":names[client.id],"position":positions[client.id],"mapnumber":event["changemap"],"setTo":1}));
-			if(playersOnMapsCount[event["changemap"]]==0){
-				client.send(JSON.stringify({"mapmaster":true}));
-				mapMasters[event["changemap"]]=names[client.id];
-			}
-			playersOnMapsCount[event["changemap"]]++;
-			if(mapplayers[names[client.id]]){
-				var mapNumberFrom = mapplayers[names[client.id]];
-				playersOnMapsCount[mapplayers[names[client.id]]]--;
-				mapplayers[names[client.id]]=event["changemap"];
-				for(var i in clients){
-					if(mapplayers[names[i]]==mapNumberFrom){
-						console.log("New Master is " + i)
-						clients[i].send(JSON.stringify({"mapmaster":true}));
-						mapMasters[mapplayers[names[i]]]=mapplayers[names[i]];
-						break;
-					}
-				}
-			}
-			for(var i in droppedItems[event["changemap"]]){
-				client.send(JSON.stringify({"droppeditem":droppedItems[event["changemap"]][i]["droppeditem"],"mapnumber":event["changemap"],"index":droppedItems[event["changemap"]][i]["index"],"amount":event["amount"]}));
-			}
-			for(var i in mapNPCS[event["changemap"]]){
-				client.send(JSON.stringify({"changeNPCPosition":mapNPCS[event["changemap"]][i],"npcID":i}));
-			}
-		}
-		if(event["warpTo"]){
-			client.broadcast.send(JSON.stringify({"id":names[client.id],"position":event["warpTo"],"mapnumber":event["mapnumber"],"setTo":1}));
-			positions[client.id]= event["warpTo"];
-			if(playersOnMapsCount[event["changemap"]]==0){
-				client.send(JSON.stringify({"mapmaster":true}));
-				mapMasters[event["changemap"]]=names[client.id];
-			}
-			playersOnMapsCount[event["changemap"]]++;
-			if(mapplayers[names[client.id]]){
-				var mapNumberFrom = mapplayers[names[client.id]];
-				playersOnMapsCount[mapplayers[names[client.id]]]--;
-				mapplayers[names[client.id]]=event["changemap"];
-				for(var i in clients){
-					if(mapplayers[names[i]]==mapNumberFrom){
-						console.log("New Master is " + i)
-						clients[i].send(JSON.stringify({"mapmaster":true}));
-						mapMasters[mapplayers[names[i]]]=mapplayers[names[i]];
-						break;
-					}
-				}
-			}
-			for(var i in droppedItems[event["changemap"]]){
-				client.send(JSON.stringify({"droppeditem":droppedItems[event["changemap"]][i]["droppeditem"],"mapnumber":event["changemap"],"index":droppedItems[event["changemap"]][i]["index"],"amount":event["amount"]}));
-			}
-			for(var i in mapNPCS[event["changemap"]]){
-				client.send(JSON.stringify({"changeNPCPosition":mapNPCS[event["changemap"]][i],"npcID":i}));
-			}
-		}
-		if(event["diceroll"]){
-			client.broadcast.send(JSON.stringify({"diceroll":event["diceroll"]}));
-		}
-		if(event["coinflip"]){
-			client.broadcast.send(JSON.stringify({"coinflip":event["coinflip"]}));
-		}
-		if(event["dance"]){
-			client.broadcast.send(JSON.stringify({"dance":event["dance"]}));
-		}
-		if(event["afk"]){
-			var number = Math.floor( Math.random() * (6 - 1) + 1);
-			client.broadcast.send(JSON.stringify({"afk":names[client.id]}));
-		}
-    });
-
-    client.on('disconnect',function(){
-       if(names[client.id]){
-	       var mapNumberFrom = mapplayers[names[client.id]];
-	       client.broadcast.send(JSON.stringify({"playerLeft":names[client.id]}));
-		   client.send(JSON.stringify({"disconnect":true}));
-		   console.log(names[client.id]+" HAS DISCONNECTED");
-		   playersOnMapsCount[mapplayers[names[client.id]]]--;
-		   mapplayers[names[client.id]]=undefined;
-		   clients[client.id]=undefined;
-		   names[client.id]=undefined;
-		   positions[client.id]=undefined;
-			for(var i in clients){
-				if(clients[i]){
-					if(mapplayers[names[i]]==mapNumberFrom){
-						clients[i].send(JSON.stringify({"mapmaster":true}));
-						mapMasters[mapplayers[names[i]]]=mapplayers[names[i]];
-						break;
-					}
-				}
-			}
-		}
-    });
+client.on('registerMessage',function (data){
+    if (fs.existsSync("users/" + data.name + ".json")) {
+        client.emit("registrationFailMessage","UserTaken");
+    } else {
+        var skillLevels = {};
+        for (var i in skills) {
+            skillLevels[skills[i].name] = { "level": 0, "experience": 0, "currenthealth": 100, "maxhealth": 100, "modifier": 0 };
+        }
+        var newPlayerData = {
+            "pass": bcrypt.hashSync(data.password, 10),
+            "email": data.email,
+            "registrationdate": Date.now(),
+            "rank": 3,
+            "location": { "mapnumber": 1, "position": 100 },
+            "race": 0,
+            "class": 0,
+            "clan": "",
+            "guilds": [],
+            "quests": [],
+            "friends": [],
+            "skills": skillLevels,
+            "pets": [],
+            "pmessages": [],
+            "lastchats": [],
+            "inventory": [],
+            "bank": [],
+            "equipment": {},
+            "extraData": [],
+        };
+        saveNewPlayer(client, data.name, newPlayerData);
+    }
 });
 
-  
-  
-  
-  
-  
-  
+client.on('logoutMessage',function (data){
+    client.broadcast.send("playerExitMessage",client.name);
+    delete clients[client.name];
+});
+
+
+client.on('loginMessage', function (data) {
+    if (clients[data.username]) {
+        client.emit("loginFailMessage","Login failed, user is already online.");
+    }
+    else{
+        if (!fs.existsSync("users/" + data.username+ ".json")) {
+            client.emit("loginFailMessage","Login failed, Username doesn't exist.");
+        } else {
+            var playerData = require("./users/" + data.username+ ".json");
+            if (!bcrypt.compareSync(data.password, playerData.pass)) {
+                client.emit("loginFailMessage","Login failed, password is incorrect.");
+            } else {
+                var skillLevels = {};
+                for (var i in skills) {
+                    if (!playerData.skills[skills[i].name]) {
+                        playerData.skills[skills[i].name] = { "level":0, "experience":0, "currenthealth":100, "maxhealth":100, "modifier":0 };
+                    }
+                }
+
+                for (var i in playerData.skills) {
+                    playerData.skills[i].requirement =formulas.xpTNL(playerData.skills[i].level);
+                }
+
+                playerData = {
+                    "name":data.username,
+                    "rank":playerData.rank,
+                    "race":playerData.race,
+                    "class":playerData.class,
+                    "clan":playerData.clan,
+                    "guilds":playerData.guilds,
+                    "quests":playerData.quests,
+                    "friends":playerData.friends,
+                    "skills":playerData.skills,
+                    "pets":playerData.pets,
+                    "pmessages":playerData.pmessages,
+                    "lastchats":playerData.lastchats,
+                    "location":playerData.location,
+                    "inventory":playerData.inventory,
+                    "bank":playerData.bank,
+                    "equipment":playerData.equipment,
+                    "extraData":playerData.extraData,
+                };
+                client.emit("loginSuccessMessage",playerData);
+                client.name = data.username;
+                client.position = playerData.location.position;
+                client.map = playerData.location.mapnumber;
+                clients[data.username] = client;
+                client.broadcast.emit("playerJoinMessage",{"id":data.username, "position":playerData.location.position, "mapnumber":playerData.location["mapnumber"]});
+                for (var i in clients) {
+                    if (i != client.name) {
+                        client.emit("playerOnlineMessage",{ "id":clients[i].name, "mapnumber":clients[i].map, "position":clients[i].position});
+                    }
+                }
+                for (var i in mapsQ[client.map].items) {
+                    client.emit('dropItemMessage',{"droppeditem":mapsQ[client.map].items[i].number,"index":mapsQ[client.map].items[i].index,"mapnumber":client.map,"amount":mapsQ[client.map].items[i].amount});
+                }
+                for (var i in mapsQ[client.map].npcs) {
+                    client.emit('spawnNPCMessage',{"spawnednpc":mapsQ[client.map].npcs[i].number, "index":mapsQ[client.map].npcs[i].index,"mapnumber":client.map, "npcID":mapsQ[client.map].npcs[i].npcID});
+                }
+            }
+        }
+    }
+});
+
+client.on('saveGameMessage',function (data){
+    if (fs.existsSync("users/" + client.name+ ".json")) {
+        var playerData = require("./users/" + client.name + ".json");
+        playerData.location = {position: client.position, mapnumber:client.map};
+        playerData.inventory = data.inventory;
+        playerData.equipment = data.equipment;
+        playerData.bank = data.bank;
+        playerData.extraData = data.extraData;
+        savePlayer(client,playerData);
+    }
+});
+
+client.on('saveExtrasMessage',function (data){
+    if (fs.existsSync("users/" + client.name+ ".json")) {
+        var playerData = require("./users/" + client.name + ".json");
+        playerData.extraData = data.extraData;
+        savePlayer(client,playerData);
+    }
+});
+
+client.on('playerDiedMessage', function (data){
+    for(var i in mapsQ[client.map].npcs){
+        if(mapsQ[client.map].npcs[i].isAggro==client.name){
+            delete mapsQ[client.map].npcs[i].isAggro;
+        }
+    }
+});
+
+client.on('aggroNPCMessage', function (data){
+    mapsQ[client.map].npcs[data].isAggro=client.name;
+    clearTimeout(mapsQ[client.map].npcs[data].timeout);
+    mapsQ[client.map].npcs[data].scheduleUpdate=function(){
+        var delay = this.isAggro?1:Math.random()*20+1;
+        var self=this;
+        this.timeout = setTimeout(controlNPCFunc(self),delay*1000);     
+    };
+});
+
+client.on('movePlayerMessage',function (data){
+    client.broadcast.emit("movePlayerMessage",{"position":data, "mapnumber":client.map, "id":client.name});
+    client.emit("movePlayerMessage",{"position":data, "mapnumber":client.map, "id":client.name});
+    client.position = data;
+});
+
+client.on('playerPathMessage',function (data){
+    client.broadcast.emit("playerPathMessage",{"path":data, "mapnumber":client.map, "id":client.name});
+    client.emit("playerPathMessage",{"path":data, "mapnumber":client.map, "id":client.name});
+    client.position=data[0];
+});
+
+client.on('updateServerPosMessage',function (data){
+    client.position=data;
+});
+
+client.on('changePlayerMap', function (data){
+    client.broadcast.send(JSON.stringify({ "id":client.name, "position":client.position, "mapnumber":data.changemap, "setTo":1}));
+    client.map = data.changemap;
+    for (var i in mapsQ[client.map].items) {
+        client.emit('dropItemMessage',{"droppeditem":mapsQ[client.map].items[i].number,"index":mapsQ[client.map].items[i].index,"mapnumber":client.map,"amount":mapsQ[client.map].items[i].amount});
+    }
+    for (var i in mapsQ[client.map].npcs) {
+        client.emit('spawnNPCMessage',{"spawnednpc":mapsQ[client.map].npcs[i].number, "index":mapsQ[client.map].npcs[i].index,"mapnumber":client.map, "npcID":mapsQ[client.map].npcs[i].npcID});
+    }
+});
+
+client.on('warpPlayerMessage', function (data){
+    client.broadcast.send(JSON.stringify({ "id":client.name, "position":data.warpTo, "mapnumber":data.mapnumber, "setTo":1}));
+    client.position = data.warpTo;
+    client.map = data.mapnumber;
+    if(maps[client.map]){
+        for (var i in mapsQ[client.map].items) {
+            client.emit('dropItemMessage',{"droppeditem":mapsQ[client.map].items[i].number,"index":mapsQ[client.map].items[i].index,"mapnumber":client.map,"amount":mapsQ[client.map].items[i].amount});
+        }
+        for (var i in mapsQ[client.map].npcs) {
+            client.emit('spawnNPCMessage',{"spawnednpc":mapsQ[client.map].npcs[i].number, "index":mapsQ[client.map].npcs[i].index,"mapnumber":client.map, "npcID":mapsQ[client.map].npcs[i].npcID});
+        }
+    }
+});
+
+client.on('dropItemMessage',function (data){
+    client.emit('dropItemMessage',{ "droppeditem":data.item, "mapnumber":client.map, "index":data.index, "amount":data.amount});
+    client.broadcast.emit('dropItemMessage',{"number":data.item, "mapnumber":client.map,"index":data.index,"amount":data.amount});
+    mapsQ[client.map].items.push({"number":data.item, "index":data.index, "amount":data.amount});
+});
+
+client.on('pickupItemMessage',function (data){
+    client.emit('pickupItemMessage',{ "pickupitem":data.index, "mapnumber":client.map});
+    client.broadcast.emit('pickupItemMessage',{ "pickupitem":data.index, "mapnumber":client.map});
+    if(mapsQ[client.map].items.length>0){
+        mapsQ[client.map].items.pop();
+    }
+});
+
+client.on('chatMessage',function (data){
+   client.broadcast.emit('danceMessage',client.name+ ": " + data);
+});
+
+client.on('diceRollMessage',function (data){
+    client.broadcast.emit('diceRollMessage',data);
+});
+        
+client.on('coinFlipMessage',function (data){
+    client.broadcast.emit('coinFlipMessage',data);
+});
+        
+client.on('danceMessage',function (data){
+    client.broadcast.emit('danceMessage',data);
+});
+
+client.on('afkMessage',function (data){
+    client.broadcast.emit('afkMessage',client.name);
+});
+
+
+client.on('moveNPCMessage', function (data){
+    client.broadcast.send(JSON.stringify(data));
+    mapNPCS[data.mapnumber][event.npcID] = data.moveNPC;
+});
+
+
+client.on('syncMessage',function (data){
+    var returner ={};
+    if (!last[updateMapIndex] || data.mapupdate < last[updateMapIndex]) {
+        if (!last[updateMapIndex]) {
+            last[updateMapIndex] =Date.now();
+            saveLastAccessData();
+        }
+        returner.maptime = last[updateMapIndex];
+        returner.mapdata = maps;
+    }
+
+     if (!last[updateScriptIndex] || data.scriptsupdate < last[updateScriptIndex]) {
+        if (!last[updateScriptIndex]) {
+            last[updateScriptIndex] =Date.now();
+            saveLastAccessData();
+        }
+        returner.scriptstime = last[updateScriptIndex];
+        returner.scriptsdata = scripts;
+    }
+    if (!last[updateItemIndex] || data.itemupdate < last[updateItemIndex]) {
+        if (!last[updateItemIndex]) {
+            last[updateItemIndex] =Date.now();
+            saveLastAccessData();
+        }
+        returner.itemtime = last[updateItemIndex];
+        returner.itemdata = items;
+    }
+    if (!last[updateSkillsIndex] || data.skillsupdate < last[updateSkillsIndex]) {
+        if (!last[updateSkillsIndex]) {
+            last[updateSkillsIndex] =Date.now();
+            saveLastAccessData();
+        }
+        returner.skillstime = last[updateSkillsIndex];
+        returner.skillsdata = skills;
+    }
+    if (!last[updateNPCIndex] || data.npcsupdate < last[updateNPCIndex]) {
+        if (!last[updateNPCIndex]) {
+            last[updateNPCIndex] =Date.now();
+            saveLastAccessData();
+        }
+        returner.npcstime = last[updateNPCIndex];
+        returner.npcsdata = npcs;
+    }
+    if (!last[updateQuestIndex] || data.questsupdate < last[updateQuestIndex]) {
+        if (!last[updateQuestIndex]) {
+            last[updateQuestIndex] =Date.now();
+            saveLastAccessData();
+        }
+        returner.queststime = last[updateQuestIndex];
+        returner.questdata = quests;
+    }
+    if (!last[updateShopIndex] || data.shopsupdate < last[updateShopIndex]) {
+        if (!last[updateShopIndex]) {
+            last[updateShopIndex] =Date.now();
+            saveLastAccessData();
+        }
+        returner.shopstime = last[updateShopIndex];
+        returner.shopsdata = shops;
+    }
+    if (!last[updateSettingsIndex] || data.settingsupdate < last[updateSettingsIndex]) {
+        if (!last[updateSettingsIndex]) {
+            last[updateSettingsIndex] =Date.now();
+            saveLastAccessData();
+        }
+        returner.settingstime = last[updateSettingsIndex];
+        returner.settingsdata = settings;
+    }
+        console.log(JSON.stringify(maps));
+    client.emit("syncMessage",returner);
+});
+
+client.on("saveMapMessage",function (data){
+    last[updateMapIndex] =Date.now();
+    saveLastAccessData();
+    setMapData(data.savemap, data.mapdata);
+    maps[data.savemap] = data.mapdata;
+    mapsQ[data.savemap].npcs=[];
+    mapsQ[data.savemap].items=[];
+
+    for(var i in maps){
+        mapblocks[i]=getBlockLevelsForMap(i);
+    }
+    var spawns =utils.getSpawns(scripts,maps);
+    var npcID=0;
+    for(var j in spawns.npc[data.savemap]){
+        var getIndex = function(index){
+            return function(){ return parseInt(index)};
+        };
+        mapsQ[data.savemap].npcs[npcID]=spawns.npc[data.savemap][j];
+        mapsQ[data.savemap].npcs[npcID].position=spawns.npc[data.savemap][j].index;
+        mapsQ[data.savemap].npcs[npcID].walkable = npcs[spawns.npc[data.savemap][j].number].walkable;
+        mapsQ[data.savemap].npcs[npcID].map=data.savemap
+        mapsQ[data.savemap].npcs[npcID].npcID=getIndex(npcID)();
+        mapsQ[data.savemap].npcs[npcID].scheduleUpdate=function(){
+            var delay = this.isAggro?1:Math.random()*20+1;
+            var self=this;
+            this.timeout = setTimeout(controlNPCFunc(self),delay*1000);     
+        }
+        if(mapsQ[data.savemap].npcs[npcID].walkable){
+            mapsQ[data.savemap].npcs[npcID].scheduleUpdate();
+        }
+        npcID++;
+    }
+
+   
+
+    for(var j in spawns.itm[data.savemap]){
+        mapsQ[data.savemap].items.push(spawns.itm[data.savemap][j])
+    }
+    data.updatetime=last[updateMapIndex];
+    client.broadcast.emit('saveMapMessage',data);
+    client.emit('saveMapMessage',data);
+
+    for (var i in mapsQ[client.map].items) {
+        client.broadcast.emit('dropItemMessage',{"droppeditem":mapsQ[client.map].items[i].number,"index":mapsQ[client.map].items[i].index,"mapnumber":client.map,"amount":mapsQ[client.map].items[i].amount});
+        client.emit('dropItemMessage',{"droppeditem":mapsQ[client.map].items[i].number,"index":mapsQ[client.map].items[i].index,"mapnumber":client.map,"amount":mapsQ[client.map].items[i].amount});  
+    }
+    for (var i in mapsQ[client.map].npcs) {
+        client.broadcast.emit('spawnNPCMessage',{"spawnednpc":mapsQ[client.map].npcs[i].number, "index":mapsQ[client.map].npcs[i].index,"mapnumber":client.map, "npcID":mapsQ[client.map].npcs[i].npcID});
+        client.emit('spawnNPCMessage',{"spawnednpc":mapsQ[client.map].npcs[i].number, "index":mapsQ[client.map].npcs[i].index,"mapnumber":client.map, "npcID":mapsQ[client.map].npcs[i].npcID});
+    }
+
+});
+
+client.on("saveNewScriptMessage", function (data){
+    last[updateScriptIndex] =Date.now();
+    saveLastAccessData();
+    scripts[parseInt(data.savescripts)] = data.scriptsdata;
+    setScriptData(scripts);
+    data.updatetime=last[updateScriptIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+client.on("deleteScriptMessage", function (data){
+    last[updateScriptIndex] =Date.now();
+    saveLastAccessData();
+    scripts= data;
+    setScriptData(scripts);
+    data.updatetime=last[updateScriptIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+client.on("saveSettingsMessage", function (data){
+    last[updateSettingsIndex] =Date.now();
+    saveLastAccessData();
+    settings = data;
+    setSettingsData(settings);
+    data.updatetime=last[updateSettingsIndex];
+    client.broadcast.emit('saveSettingsMessage',data);
+});
+
+client.on("saveNewItemMessage", function (data){
+    last[updateItemIndex] =Date.now();
+    saveLastAccessData();
+    items[parseInt(data.saveitems)] = data.itemdata;
+    setItemData(items);
+    data.updatetime=last[updateItemIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+client.on("deleteItemMessage", function (data){
+    last[updateItemIndex] =Date.now();
+    saveLastAccessData();
+    items= data.saveitemswhole;
+    setItemData(items);
+    data.updatetime=last[updateItemIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+client.on("saveNewNPCMessage", function (data){
+    last[updateNPCIndex] =Date.now();
+    saveLastAccessData();
+    npcs[parseInt(data.savenpcs)] = data.npcsdata;
+    setNPCData(npcs);
+    data.updatetime=last[updateNPCIndex];
+    for(var i in maps){
+        for(var j in mapsQ[i].npcs){
+            if(mapsQ[i].npcs[j].number==data["savenpcs"]){
+                mapsQ[i].npcs[j].walkable = data["npcsdata"].walkable;
+                if( mapsQ[i].npcs[j].walkable==true){
+                    mapsQ[i].npcs[j].scheduleUpdate();
+                }
+            }
+        }
+    }
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+client.on("deleteNPCMessage", function (data){
+    last[updateNPCIndex] =Date.now();
+    saveLastAccessData();
+    npcs= data.savenpcswhole;
+    setNPCData(npcs);
+    data.updatetime=last[updateNPCIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data))
+});
+
+
+client.on("saveNewQuestMessage", function (data){
+    last[updateQuestIndex] =Date.now();
+    saveLastAccessData();
+    quests[parseInt(data.savequests)] = data.questdata;
+    setQuestData(quests);
+    data.updatetime=last[updateQuestIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+client.on("deleteQuestMessage", function (data){
+    last[updateQuestIndex] =Date.now();
+    saveLastAccessData();
+    quests= data.savequestswhole;
+    setQuestData(quests);
+    data.updatetime=last[updateQuestIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+
+client.on("saveNewShopMessage", function (data){
+    last[updateShopIndex] =Date.now();
+    saveLastAccessData();
+    shops[parseInt(data.saveshops)] = data.shopsdata;
+    setShopData(shops);
+    data.updatetime=last[updateShopIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+client.on("deleteShopMessage", function (data){
+    last[updateShopIndex] =Date.now();
+    saveLastAccessData();
+    shops= data.saveshopswhole;
+    setShopData(shops);
+    data.updatetime=last[updateShopIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+client.on("saveNewSkillMessage", function (data){
+    last[updateSkillsIndex] =Date.now();
+    saveLastAccessData();
+    skills[parseInt(data.saveskills)] = data.skillsdata;
+    setSkillsData(skills);
+    data.updatetime=last[updateSkillsIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+client.on("deleteSkillMessage", function (data){
+    last[updateSkillsIndex] =Date.now();
+    saveLastAccessData();
+    skills= data.saveskillswhole;
+    setSkillsData(skills);
+    data.updatetime=last[updateSkillsIndex];
+    client.broadcast.send(JSON.stringify(data));
+    client.send(JSON.stringify(data));
+});
+
+
+
+
+
+client.on('disconnect',function () {
+   if (client.name) {
+       client.broadcast.emit("playerExitMessage",client.name);
+       client.send(JSON.stringify({ "disconnect":true}));
+       delete clients[client.name];
+    }
+});
+
+
+
+
+
+});
+
+
+
+
+
+
+
 

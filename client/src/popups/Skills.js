@@ -204,22 +204,19 @@ var SkillBars=cc.Layer.extend({
 				j++;
 			}
 		}
-		this.setPosition(cc.p(0,screenSize.height-(32*j)));
+		this.setPosition(cc.p(2,(screenSize.height-sizeReducer)-((17*j))-2));
 	},
 
 	createSkillBar:function(name,color,i){
 		var newCol = hex2rgba(color);
-		var bar = cc.LayerColor.create(cc.c4b(newCol.r,newCol.g,newCol.b,newCol.a),this.skillsData[name]["currenthealth"]>0 ? 300*(this.skillsData[name]["currenthealth"]/this.skillsData[name]["maxhealth"]) : 1,23);
-		bar.bar = cc.Sprite.createWithTexture(cc.TextureCache.getInstance().addImage("GUI/healthbar.png"));
-		bar.setPosition(10,(i*32)-(i*-5)-10);
+		var bar = cc.Sprite.create()
+		bar.setTextureRect(cc.rect(0,0,this.skillsData[name]["currenthealth"]>0 ? 300*(this.skillsData[name]["currenthealth"]/this.skillsData[name]["maxhealth"]) : 1,15));
+		bar.setColor(cc.c3b(newCol.r,newCol.g,newCol.b));
+		//bar.setOpacity(newCol.a);
+		
+		bar.setPosition(0,((i-1)*-17));
 		bar.setAnchorPoint(cc.p(0,0));
-		bar.bar.setPosition(-5,-4);
-		bar.bar.setAnchorPoint(cc.p(0,0));
-		bar.addChild(bar.bar);
-		var textnode = cc.LabelTTF.create(name,"Arial",16);
-		textnode.setPosition(10,11.5);
-		textnode.setAnchorPoint(cc.p(0,0.5));
-		bar.addChild(textnode);
+		bar._setOutlineEnabled(true);
 		return bar;
 	},
 
@@ -239,6 +236,10 @@ SkillBars.modifyHealth=function(name,value){
 	SkillBarsInstance.skillsData[name]["currenthealth"]+=value;
 	if(SkillBarsInstance.skillsData[name]["currenthealth"]<0){
 		SkillBarsInstance.skillsData[name]["currenthealth"]=0;
+		if(name=="Health"){
+			PlayersController.killPlayer();
+			SkillBarsInstance.skillsData[name]["currenthealth"]=SkillBarsInstance.skillsData[name]["maxhealth"];
+		}
 	}
 	if(SkillBarsInstance.skillsData[name]["currenthealth"]>SkillBarsInstance.skillsData[name]["maxhealth"]){
 		SkillBarsInstance.skillsData[name]["currenthealth"]=SkillBarsInstance.skillsData[name]["maxhealth"];

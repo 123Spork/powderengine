@@ -44,7 +44,13 @@ reloadData:function(){
 		this.scrollBarBack.setPosition(cc.p(this.delegate.getContentSize().width+20,0))
 		this.scrollBar = cc.Sprite.create();
 		this.scrollBar.setAnchorPoint(cc.p(0,0));
-		this.scrollBar.setTextureRect(cc.rect(0,0,20,this.delegate.getContentSize().height/5));
+
+		var size = 60;
+		if(this.delegate.getContentSize().height<60){
+			size=20;
+		}
+
+		this.scrollBar.setTextureRect(cc.rect(0,0,20,size));
 		this.scrollBar.setColor(cc.c4b(90,90,255,255));
 		this.scrollBar.setPosition(cc.p(this.delegate.getContentSize().width+10,0));
 		this.delegate.addChild(this.scrollBarBack);
@@ -83,6 +89,13 @@ highlightNode:function(listelement){
 		this.delegate.getHighlightNode(i).setColor(cc.c4b(255,255,255,255));
 	}
 	this.delegate.getHighlightNode(listelement).setColor(cc.c4b(255,0,0,255));
+},
+
+removeFromParent:function(){
+	if(this.scrollBar){
+		this.scrollBar.removeFromParent();
+	}
+	this._super();
 },
 
 onTouchBegan:function(touch){

@@ -19,7 +19,7 @@ MultiLineBox = cc.ControlButton.extend({
     _maxLength: 50,
     _adjustHeight: 18,
     _edTxt: null,
-    _edFontSize: 14,
+    _edFontSize: 12,
     _edFontName: "Arial",
     _edittype:false,
 
@@ -57,13 +57,6 @@ MultiLineBox = cc.ControlButton.extend({
         this._edTxt.addEventListener("input", function () {
             if (selfPointer._delegate && selfPointer._delegate.editBoxTextChanged)
                 selfPointer._delegate.editBoxTextChanged(selfPointer, this.value);
-        });
-        this._edTxt.addEventListener("keyup", function (e) {
-            if ((e.keyCode === cc.KEY.enter) && (selfPointer._edittype==false)) {
-                e.stopPropagation();
-                e.preventDefault();
-                cc.canvas.focus();
-            }
         });
         this._edTxt.addEventListener("focus", function () {
             if (this.value == selfPointer._placeholderText) {
@@ -356,6 +349,10 @@ MultiLineBox = cc.ControlButton.extend({
 		var hex = rgbToHex(color.r,color.g,color.b);
 		this._edTxt.style.background=hex;
 	},
+
+    setBackgroundInvisible:function(){
+      this._edTxt.style.background="rgba(0,0,0,0)";
+    },
 
     //HTML5 Only
     initWithBackgroundColor: function (size, bgColor) {

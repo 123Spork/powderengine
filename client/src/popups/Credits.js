@@ -28,11 +28,11 @@ Credits = Popup.extend({
 	},
 
 	runSaveNewData:function(num){
-		sendMessageToServer({"savequests":num+"","questdata":this.data});
+		sendToServer("saveNewQuestMessage",{"savequests":num+"","questdata":this.data});
 	},
 	
 	deleteSave:function(num,list){
-		sendMessageToServer({"savequestswhole":list});
+		sendToServer("deleteQuestMessage",{"savequestswhole":list});
 	},
 
 	didBecomeActive:function(){

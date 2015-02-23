@@ -4,7 +4,7 @@
             "map": 0,
             "x": 0,
             "y": 0,
-            "dir": "north"
+            "dir": "south"
         },
         "limits": {
             "level": 10

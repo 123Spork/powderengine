@@ -101,12 +101,14 @@
                 <file name="../node_modules/powder-cocos2d/ccgui/lib/CCScrollView/CCTableView.js"></file>
                 <file name="../node_modules/powder-cocos2d/cceditbox/lib/CCdomNode.js"></file>
                 <file name="../node_modules/powder-cocos2d/cceditbox/lib/CCEditBox.js"></file>
+                <file name="../node_modules/powder-cocos2d/ccaudio/lib/SimpleAudioEngine.js"></file>
                 <file name="./src/lang/EN.js"></file>
                 <file name="./src/lang/CZ.js"></file>
                 <file name="./src/lang/LA.js"></file>
                 <file name="./src/classes/SingleLineBox.js"></file>
                 <file name="./src/classes/MultiLineBox.js"></file>
                 <file name="./src/utils/Utils.js"></file>
+                <file name="./src/utils/sound.js"></file>
                 <file name="./src/classes/LocalStorage.js"></file>
                 <file name="./src/classes/ListView.js"></file>
                 <file name="./src/classes/GameTile.js"></file>

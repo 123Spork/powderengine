@@ -1,24 +1,38 @@
-PopupList = Popup.extend({
+PopupList = Scene.extend({
 	childEditor:null,
 	editList:[],
-	listName:null,
-	showingEditor:false,
+	inEditor:false,
 	saveNewDataID:-1,
-	itemOffsets:0,
-	defaultPositions:null,
 	listPanel:null,
 	allowEdit:true,
 	allowDel:true,
 	allowAdd:true,
-	hasChosen:false,
 	
-	willTerminate:function(){
-		this._super();
-		if(this.delegate){
-			this.delegate.setTouchEnabled(true);
-			if(!this.hasChosen && this.delegate.setNoType){
-				this.delegate.setNoType(null,null);
-			}
+	getTabOptions:function(clicknum){
+		if(this.inEditor){
+			return this.childEditor.getTabOptions(clicknum);
+		}
+		return ["List"];
+	},
+
+	willExitEditor:function(clicknum){
+		if(this.inEditor){
+			this.childEditor.willExitEditor(clicknum);
+			return false;
+		}
+		return clicknum==1?true:false;
+	},
+
+	getCloseOptions:function(clicknum){
+		if(this.inEditor){
+			return this.childEditor.getCloseOptions(clicknum);
+		}
+		return ["Cancel","Exit"];
+	},
+
+	setTab:function(number){
+		if(this.inEditor){
+			this.childEditor.setTab(number);
 		}
 	},
 
@@ -40,16 +54,13 @@ PopupList = Popup.extend({
 				this.allowAdd=control.add;
 			}
 		}
-		this.listName=null;
-		this.showingEditor=false;
+		this.inEditor=false;
 		this.saveNewDataID=-1;
 		this.childEditor=withData.editor;
 		if(withData.list){
 			this.editList=withData.list;
 		}
-		this.listName=withData.name;
-		this.delegate=withData.delegate;
-	},
+	},	
 
 
 
@@ -68,7 +79,6 @@ PopupList = Popup.extend({
 		var listnodes = [];
 		var callBackList=[];
 		var tc = cc.TextureCache.getInstance();
-		this.defaultPositions={};
 		for(var i in this.editList){
 			listnodes[i]=cc.Node.create();
 			if(this.editList[i]["name"]){
@@ -77,54 +87,36 @@ PopupList = Popup.extend({
 					this.editList.splice(i,1);
 					continue;
 				}
-				if(this.delegate!=null){
-					var useElement=cc.Sprite.createWithTexture(tc.addImage("GUI/use.png"));
-					useElement.setPosition(cc.p(244,6));
-					useElement.setAnchorPoint(cc.p(0,0));
-				}
-				var element= cc.LayerColor.create(cc.c4b(0,0,0,127),316,1);
-				element.setPosition(cc.p(4,0));			
+				var element= cc.LayerColor.create(cc.c4b(0,0,0,127),showingEditor-20,1);
+				element.setPosition(cc.p(0,0));			
 
-				var text = cc.LabelTTF.create(this.editList[i].name,"Arial",20);
-				text.setAnchorPoint(cc.p(0,0.5));
-				text.setPosition(cc.p(0,16));
-
-				if(this.allowEdit){
-					var editElement=cc.Sprite.createWithTexture(tc.addImage("GUI/edit.png"));
-					editElement.setPosition(cc.p(272,6));
-					editElement.setAnchorPoint(cc.p(0,0));
-				}
+				var text = cc.LabelTTF.create(this.editList[i].name,"Arial",12);
+				text.setDimensions(cc.size(showingEditor-44,0));
+				text.setAnchorPoint(cc.p(0,0));
+				text.setPosition(cc.p(4,6));
 				
 				if(this.allowDel){
 					var delElement=cc.Sprite.createWithTexture(tc.addImage("GUI/trash.png"));
-					delElement.setPosition(cc.p(300,6));
+					delElement.setPosition(cc.p(showingEditor-48,4));
 					delElement.setAnchorPoint(cc.p(0,0));		
 				}
 				var touchableNodes =[];
 				if(this.allowEdit){
-					editElement.callBack = "Edit";
-					touchableNodes.push(editElement);
+					listnodes[i].callBack = "Edit";
+					touchableNodes.push(listnodes[i]);
 				}				
 				if(this.allowDel){
 					delElement.callBack = "Delete";
 					touchableNodes.push(delElement);
 				}
-				if(this.delegate!=null){
-					useElement.callBack="Use";
-					touchableNodes.push(useElement);
-				}
+				listnodes[i].setContentSize(cc.size(showingEditor-20,text.getContentSize().height+12));
 				callBackList.push(touchableNodes);
 
 				listnodes[i].addChild(element);
 				listnodes[i].addChild(text);
-				if(this.allowEdit){
-					listnodes[i].addChild(editElement);
-				}
+
 				if(this.allowDel){
 					listnodes[i].addChild(delElement);
-				}
-				if(this.delegate!=null){
-					listnodes[i].addChild(useElement);
 				}
 			}else{
 				listnodes[i].setContentSize(cc.size(0,0));
@@ -138,17 +130,17 @@ PopupList = Popup.extend({
 			var plus = cc.LabelTTF.create("+","Arial",20);
 			plus.setPosition(45,13);
 			plus.setAnchorPoint(cc.p(0.5,0.5));
-			addButton.setPosition(cc.p(120,0));
+			addButton.setPosition(cc.p(Math.floor((showingEditor-90)/2),0));
 			addButton.callBack="Add";
 			addButton.addChild(plus);
 			callBackList.push([addButton]);
 			listnodes.push(addButton);
 		}
 
-		this.listPanel = this.panels["main_panel"]["list"];
+		this.listPanel = this.panels["list"];
 		var self=this;
 		this.listPanel.getListSize = function(){
-			return cc.size(324,32*listnodes.length);
+			return cc.size(showingEditor-20,32*listnodes.length);
 		};
 		this.listPanel.getListElementAmount=function(){
 			return listnodes.length;
@@ -162,7 +154,7 @@ PopupList = Popup.extend({
 		this.listPanel.runListCallBack=function(name,listelement,touch){
 			var pos = touch._point;
 			var truePos = self.convertToNodeSpace(pos);
-			if(self.showingEditor==true){
+			if(self.inEditor==true){
 				return;
 			}
 			switch(name){
@@ -174,25 +166,26 @@ PopupList = Popup.extend({
 					if(self.childEditor._parent){
 						self.childEditor.removeFromParent();
 					}
-					self.showingEditor=true;
+					self.inEditor=true;
 					self.childEditor.init({delegate:self, data:self.editList[listelement]});
-					self._parent.addChild(self.childEditor);
+					self.panels["child"].addChild(self.childEditor);
+					self.panels["child"].setVisible(true);
 					self.setTouchEnabled(false);
 					self.childEditor.didBecomeActive();
 					self.saveNewDataID=listelement+"";
 				break;
 				case "Add":
 					self.addingNew=true;
-					self.showingEditor=true;
+					self.inEditor=true;
 					self.saveNewDataID=self.editList.length;
 					self.childEditor.init({delegate:self, data:null});
 					self.setTouchEnabled(false);
-					self._parent.addChild(self.childEditor);
+					self.panels["child"].addChild(self.childEditor);
+					self.panels["child"].setVisible(true);
 					self.childEditor.didBecomeActive();
 				break;
 				case "Use":
 					self.delegate.setTypeData(listelement,self.editList[listelement]);
-					self.hasChosen=true;
 				break;
 			}
 		};
@@ -203,46 +196,23 @@ PopupList = Popup.extend({
 
 	
 	getLayoutObject:function(){
-			return { 
-			"panels":{
-				position:cc.p(300,200),
-				children:{	
-					"background_image":{
-						texture:"GUI/list_panel.png",
-						anchorPoint:cc.p(0,0),
-					},
-					"main_panel":{
-						anchorPoint:cc.p(0,0),
-						size: cc.size(365,328),
-						children: {
-							"list":{
-								size:cc.size(324,328),
-								position:cc.p(0,0),
-								anchorPoint:cc.p(0,0),
-							},
-						},
-					},
-					"control_panel":{
-						anchorPoint:cc.p(0,0),
-						position: cc.p(0,328),
-						size: cc.size(365,32),
-						children:{	
-							"header":{
-								label:this.listName,
-								fontSize:20,
-								anchorPoint:cc.p(0,0.5),
-								position:cc.p(8,16),
-							},
-							"exitBtn":{
-								position: cc.p(337,6),
-								size: cc.size(20,20),
-								anchorPoint:cc.p(0,0),
-								texture: "GUI/close.png",	
-							}
-						}
-					},
-				}	
-			}
+		return { 
+		"panels":{
+			children:{	
+				"list":{
+					size:cc.size(showingEditor-20,screenSize.height-20),
+					position:cc.p(0,0),
+					anchorPoint:cc.p(0,0),
+				},
+				"child":{
+					visible:false,
+					position:cc.p(0,0),
+					size:cc.size(showingEditor-20,screenSize.height-20),
+					anchorPoint:cc.p(0,0),
+					color:cc.c3b(80,80,80),
+				}
+			},
+		}
 		};
 	},
 
@@ -269,11 +239,13 @@ PopupList = Popup.extend({
 		}
 		this.setTouchEnabled(true);
 		this.addingNew=false;
-		this.showingEditor=false;
+		this.inEditor=false;
 		var self=this;
 		this.scheduleOnce(function(){
 		self.childEditor.willTerminate(true);
 		self.childEditor.removeFromParent();
+		self.panels["child"].setVisible(false);
+		self.prepareList();
 		})
 	},
 	

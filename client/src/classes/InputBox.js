@@ -13,6 +13,10 @@ var InputBox = cc.Class.extend({
 		}
 	},
 	
+	setBackgroundInvisible:function(){
+		this.inputBox.setBackgroundInvisible();
+	},
+
 	isFocused:function(){
 		console.log("isfocused="+document.activeElement == this.inputBox._edTxt);
 		return document.activeElement == this.inputBox._edTxt;
@@ -28,6 +32,10 @@ var InputBox = cc.Class.extend({
 	
 	init:function(){
 		cc.log("Ovveride inputbox init call if necessary");
+	},
+
+	setInputFlag:function(_in){
+		this.inputBox.setInputFlag(_in);
 	},
 
 	removeFromParent:function(){

@@ -30,9 +30,8 @@ setupserver = function() {
 
 
 	socket.on('message',function(data) {
-		reactToSocketMessage(data);
+		//reactToSocketMessage(data);
 	});
-
 
 
 	socket.on('disconnect',function() {
@@ -44,32 +43,16 @@ setupserver = function() {
 			storedClientMessages.push(JSON.stringify({"disconnect":true}));
 		}
 	});
-}
 
-reactToSocketMessage=function(data){
-	data = JSON.parse(data);
-	var allow=false;
-	for(var prop in data){ allow=true; break;}
-	//Objects without data are useless.
-	if(allow==false)
-		return;
-	console.log('Received a message from the server!',data);
-	
-	if(data["sync"]){
+	socket.on('syncMessage', function (data){
 		if(data["mapdata"]){
 			LocalStorage.updateMapData(data["mapdata"],data["maptime"]);
-		}
-		if(data["warpdata"]){
-			LocalStorage.updateWarpData(data["warpdata"],data["warptime"]);
 		}
 		if(data["itemdata"]){
 			LocalStorage.updateItemData(data["itemdata"],data["itemtime"]);
 		}
 		if(data["skillsdata"]){
 			LocalStorage.updateSkillsData(data["skillsdata"],data["skillstime"]);
-		}
-		if(data["signsdata"]){
-			LocalStorage.updateSignsData(data["signsdata"],data["signstime"]);
 		}
 		if(data["npcsdata"]){
 			LocalStorage.updateNPCData(data["npcsdata"],data["npcstime"]);
@@ -88,8 +71,150 @@ reactToSocketMessage=function(data){
 			LocalStorage.updateScriptData(data["scriptsdata"],data["scriptstime"]);
 		}
 		isGameInSync=true;
+		console.log("SYNC DONE");
+	});
+
+	socket.on('saveSuccessMessage', function (data){
+		var screen = SceneManager.getInstance().currentScene;
+		screen.gameSaved();
+	});
+
+	socket.on('loginSuccessMessage', function (data){
+		var screen = SceneManager.getInstance().currentScene;
+		screen.onLoginSuccess(data);
+	});
+
+	socket.on('loginFailMessage',function (data){
+		var screen = SceneManager.getInstance().currentScene;
+		screen.onLoginFailed(data);
+	});
+
+	socket.on('registrationSuccessMessage',function (data){
+		var screen = SceneManager.getInstance().currentScene;
+		screen.completedRegistration();
+	});
+
+	socket.on('registrationFailMessage',function (data){
+		var screen = SceneManager.getInstance().currentScene;
+		screen.failedRegistration(data["registrationfailed"]);
+	});
+
+	socket.on('movePlayerMessage', function (data){
+		if(PlayersController.getPlayer(data["id"])){
+			PlayersController.getPlayer(data["id"]).resetIsWalking();
+			PlayersController.movePlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}});
+		}
+	});
+
+	socket.on('playerPathMessage', function (data){
+		if(PlayersController.getPlayer(data["id"])){
+			PlayersController.getPlayer(data["id"]).setWalkingPath(data["path"]);
+		}
+	});
+
+	socket.on('npcAttackMessage', function (data){
+		SkillBars.modifyHealth("Health",data);
+		GameChat.addMessage(Math.abs(data) + " damage has been delivered to you!");
+	});
+
+	socket.on("playerJoinMessage", function (data){
+		PlayersController.addPlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}});
+	});
+
+	socket.on("playerOnlineMessage", function (data){
+		console.log(data);
+		console.log("NEW PLAYA");
+		PlayersController.addPlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}},true);
+	});
+
+	socket.on("playerExitMessage", function (data){
+		PlayersController.destroyPlayer(data);
+	});
+
+	socket.on("saveMapMessage", function (data){
+		LocalStorage.changeMap(data["savemap"],data["mapdata"],data["updatetime"]);
+		GameMap.setupMap(data["mapdata"]);
+	});
+
+	socket.on("chatMessage", function (data){
+		GameChat.addMessage(data);
+	});
+
+	socket.on("coinFlipMessage", function (data){
+		GameChat.addMessage(data);
+	});
+
+	socket.on("diceRollMessage", function (data){
+		GameChat.addMessage(data);
+	});
+
+	socket.on("danceMessage", function (data){
+		GameChat.addMessage(data);
+	});
+
+	socket.on("afkMessage", function (data){
+		PlayersController.changePlayerStatus(data,"AFK");
+	});
+
+	socket.on("saveSettingsMessage", function (data){
+		LocalStorage.updateSettingsData(data["savesettings"],data["updatetime"]);
+		settingsData = mergeSettings(settingsData,data["savesettings"]);
+		if(Settingseditor){
+			Settingseditor.data = cloneObj(settingsData);
+			Settingseditor.prepareList();
+		}
+	});
+
+	socket.on("dropItemMessage", function (data){
+		if(data["mapnumber"] == GameMap.getMapNumber()){
+			GameMap.getTileNodeForIndex(data["index"]).addItem(data["droppeditem"],data["amount"]);
+			GameMap.updateMap();
+		}
+	});
+	
+	socket.on("spawnNPCMessage", function (data){
+		if(data["mapnumber"] == GameMap.getMapNumber()){
+			var npcData = ObjectLists.getNPCList()[data["spawnednpc"]];
+			npcData["npcID"]=data["npcID"];
+			PlayersController.addNPC(npcData,data["index"],data["mapnumber"]);
+		}
+	});
+
+	socket.on("setNPCPathMessage", function (data){
+		if(GameMap.getMapNumber() && data["mapnumber"] == GameMap.getMapNumber()){
+			PlayersController.pathNPC(data["id"],data["path"],data["mapnumber"]);
+		}
+	});
+
+	socket.on("moveNPCMessage", function (data){
+		if(GameMap.getMapNumber() && data["mapnumber"] == GameMap.getMapNumber()){
+			PlayersController.moveNPC(data["id"],data["index"],data["mapnumber"]);
+		}
+	});
+	
+
+	socket.on("pickupItemMessage", function (data){
+		if(data["mapnumber"] == GameMap.getMapNumber()){
+			var tile = GameMap.getTileNodeForIndex(data["pickupitem"]);
+			tile.removeItem();
+			GameMap.updateMap();
+		}
+	});
+
+}
+
+sendToServer=function(messageType,data){
+	socket.emit(messageType,data);
+},
+
+reactToSocketMessage=function(data){
+	data = JSON.parse(data);
+	var allow=false;
+	for(var prop in data){ allow=true; break;}
+	//Objects without data are useless.
+	if(allow==false)
 		return;
-	}
+	console.log('Received a message from the server!',data);
 	
 	var screen = SceneManager.getInstance().currentScene;
 	if(screen){
@@ -99,15 +224,8 @@ reactToSocketMessage=function(data){
 			screen.setServerConnected(false);
 		}
 		if(screen.getIdentifier()=="Game"){
-			if(data["newPlayer"]){
-				PlayersController.addPlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}});
-			}else if(data["playerLeft"]){
-				if(PlayersController.getPlayer(data["playerLeft"]).getMap()==PlayersController.getYou().getMap()) {
-					MapMaster=false;
-				}
-				PlayersController.destroyPlayer(data["playerLeft"]);
-			} 
-			else if(data["setTo"]){
+		
+			if(data["setTo"]){
 				if(PlayersController.getPlayer(data["id"])){
 					PlayersController.getPlayer(data["id"]).resetIsWalking();
 				}
@@ -120,57 +238,10 @@ reactToSocketMessage=function(data){
 						}
 					}
 					PlayersController.positionPlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}});
-					if(PlayersController.getPlayer(data["id"]).getMap()==PlayersController.getYou().getMap()) {
-						MapMaster=false;
-					}
 					PlayersController.changePlayerMap(data["id"],data["mapnumber"]);
 				}else{
 					storedClientMessages.push(JSON.stringify(data));
 				}
-			}
-			else if(data["moveTo"]){
-				if(PlayersController.getPlayer(data["id"])){
-					PlayersController.getPlayer(data["id"]).resetIsWalking();
-				}
-				if(!PlayersController.getPlayer(data["id"]) || (PlayersController.getPlayer(data["id"]) && PlayersController.getPlayer(data["id"]).isWalking ==false)){
-					PlayersController.movePlayer({"id":data["id"],"location":{"position":data["position"],"mapnumber":data["mapnumber"]}});
-				}else{
-					storedClientMessages.push(JSON.stringify(data));
-				}
-			}
-			else if(data["chatMessage"]){
-				GameChat.addMessage(data["chatMessage"]);
-			}
-			else if(data["coinflip"]){
-				GameChat.addMessage(data["coinflip"]);
-			} 
-			else if(data["diceroll"]){
-				GameChat.addMessage(data["diceroll"]);
-			} 
-			else if(data["dance"]){
-				GameChat.addMessage(data["dance"]);
-			} 
-			else if(data["afk"]){
-				PlayersController.changePlayerStatus(data["afk"],"AFK");
-			} 
-			else if(data["savemap"]){
-				LocalStorage.changeMap(data["savemap"],data["mapdata"],data["updatetime"]);
-				GameMap.setupMap(data["mapdata"]);
-			}
-			else if(data["mapmaster"]){
-				MapMaster=true;
-			}
-			else if(data["savewarps"]){
-				LocalStorage.changeWarp(parseInt(data["savewarps"]),data["warpdata"],data["updatetime"]);
-				ObjectLists.getWarpList()[parseInt(data["savewarps"])]=data["warpdata"];
-				if(Warpeditor){
-					Warpeditor.editList = ObjectLists.getWarpList();
-					Warpeditor.didBecomeActive();	
-				}	
-			}
-			else if(data["savewarpswhole"]){
-				LocalStorage.refreshWarp(data["savewarpswhole"],data["updatetime"]);
-				ObjectLists.setWarpList(data["savewarpswhole"]);
 			}
 			else if(data["savescripts"]){
 				LocalStorage.changeScript(parseInt(data["savescripts"]),data["scriptsdata"],data["updatetime"]);
@@ -184,21 +255,10 @@ reactToSocketMessage=function(data){
 				LocalStorage.refreshScript(data["savescriptswhole"],data["updatetime"]);
 				ObjectLists.setScriptList(data["savescriptswhole"]);
 			}
-			else if(data["savesettings"]){
-				LocalStorage.updateSettingsData(data["savesettings"],data["updatetime"]);
-				settingsData = mergeSettings(settingsData,data["savesettings"]);
-				if(Settingseditor){
-					Settingseditor.data = cloneObj(settingsData);
-					Settingseditor.prepareList();
-				}
-			}
+			
 			else if(data["savequests"]){
 				LocalStorage.changeQuest(parseInt(data["savequests"]),data["questdata"],data["updatetime"]);
 				ObjectLists.getQuestList()[parseInt(data["savequests"])]=data["questdata"];
-				if(Questeditor){
-					Questeditor.editList = ObjectLists.getQuestList();
-					Questeditor.didBecomeActive();	
-				}	
 			}
 			else if(data["savequestswhole"]){n
 				LocalStorage.refreshQuest(data["savequestswhole"],data["updatetime"]);
@@ -236,14 +296,6 @@ reactToSocketMessage=function(data){
 					Skills.updateTileGrid();
 				}
 			}
-			else if(data["savesigns"]){
-				LocalStorage.changeSigns(parseInt(data["savesigns"]),data["signsdata"],data["updatetime"]);
-				ObjectLists.getSignsList()[parseInt(data["savesigns"])]=data["signsdata"];
-				if(Signeditor){
-					Signeditor.editList = ObjectLists.getSignsList();
-					Signeditor.didBecomeActive();	
-				}	
-			}
 			else if(data["moveNPC"]){
 				data["npcID"]=parseInt(data["npcID"]);
 				if(!PlayersController.getNPC(data["npcID"]) || (PlayersController.getNPC(data["npcID"]) && PlayersController.getNPC(data["npcID"]).isWalking ==false)){
@@ -260,11 +312,6 @@ reactToSocketMessage=function(data){
 						storedClientMessages.push(JSON.stringify(data));
 					}
 				}
-			}
-
-			else if(data["savesignswhole"]){
-				LocalStorage.refreshSigns(data["savesignswhole"],data["updatetime"]);
-				ObjectLists.setSignsList(data["savesignswhole"]);
 			}
 			else if(data["savenpcs"]){
 				LocalStorage.changeNPC(parseInt(data["savenpcs"]),data["npcsdata"],data["updatetime"]);
@@ -289,60 +336,24 @@ reactToSocketMessage=function(data){
 				var oldItemName = ObjectLists.getItemList()[parseInt(data["saveitems"])]["name"];
 				ObjectLists.getItemList()[parseInt(data["saveitems"])]=data["itemdata"];
 				GameMap.goToMap(GameMap.getMapNumber());
-				if(Itemeditor){
-					Itemeditor.editList = ObjectLists.getItemList();
-					Itemeditor.didBecomeActive();	
-				}			
+		
 				if(Inventory){
 					Inventory.updateTileGrid();
 				}
 				PlayersController.getYou().updateItemData(oldItemName,data["itemdata"])
 			}
-			else if(data["droppeditem"]){
-				if(data["mapnumber"] == GameMap.getMapNumber() && GameMap.getInstance().isMapDirty==false){
-					var tile = GameMap.getTileNodeForIndex(data["index"]);
-					tile.addItem(data["droppeditem"],data["amount"]);
-					GameMap.updateMap();
-				} else{
-					storedClientMessages.push(JSON.stringify(data));
-				}
-			}
-			else if(data["pickupitem"]){
-				if(data["mapnumber"] == GameMap.getMapNumber()){
-					var tile = GameMap.getTileNodeForIndex(data["pickupitem"]);
-					tile.removeItem();
-					GameMap.updateMap();
-				}
-			}
+
 			else if(data["saveitemswhole"]){
 				LocalStorage.refreshItems(data["saveitemswhole"],data["updatetime"]);
 				ObjectLists.setItemList(data["saveitemswhole"]);
 			}
-			else if(data["savesuccess"]){
-				screen.gameSaved();
-			}
-		} else if(screen.getIdentifier()=="Login"){
-			if(data["login_success"]){
-				screen.onLoginSuccess(data["login_success"]);
-			} else if(data["login_fail"]){
-				screen.onLoginFailed(data["login_fail"]);
-			}else if(data["registrationsuccess"]){
-				screen.completedRegistration();
-			}else if(data["registrationfailed"]){
-				screen.failedRegistration(data["registrationfailed"]);
-			}
-		}
+
+		} 
 	} else{
 		storedClientMessages.push(JSON.stringify(data));
 	}
 };
 
-
-
-// Sends a message to the server via sockets
-function sendMessageToServer(message) {
-  socket.send(JSON.stringify(message));
-};
 
 var script = document.createElement("SCRIPT");
 script.type = "text/javascript";

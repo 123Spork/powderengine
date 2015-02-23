@@ -15,6 +15,8 @@ var GameMap=cc.Layer.extend({
 	mapHeight:null,
 	mapOffset:cc.p(0,0),
 	currentMap:1,
+	mapMusic:null,
+	mapNameLbl:null,
 	
 	isTileBlocked:function(tileid){
 		if(typeof tileid ==='string'){
@@ -178,105 +180,31 @@ var GameMap=cc.Layer.extend({
 		return outer;
 	},
 	
-	
-	
-	setupFromServer:function(data){
-		this.tileData={}
-		this.tileData["mapdata"]={};
-		for(var i in this.tileNodes){
-			if(i.substring(0,4)=="tile"){
-				this.tileNodes[i].destroy();
-				this.tileData[i]={};
+	musicStop:function(){
+		var musicPlaying=true;
+		for(var i in soundList){
+			if(isAudioLoading(soundList[i])){
+				musicPlaying=false;
 			}
 		}
-		
-		if(data){
-			if(data["mapdata"]){
-				this.mapUp = (data["mapdata"]["mapConnectors"]["up"]!="" && data["mapdata"]["mapConnectors"]["up"]!=null) ? data["mapdata"]["mapConnectors"]["up"] : null;
-				this.mapDown = (data["mapdata"]["mapConnectors"]["down"]!="" && data["mapdata"]["mapConnectors"]["down"]!=null) ? data["mapdata"]["mapConnectors"]["down"] : null;
-				this.mapLeft = (data["mapdata"]["mapConnectors"]["left"]!="" && data["mapdata"]["mapConnectors"]["left"]!=null) ? data["mapdata"]["mapConnectors"]["left"] : null;
-				this.mapRight = (data["mapdata"]["mapConnectors"]["right"]!="" && data["mapdata"]["mapConnectors"]["right"]!=null) ? data["mapdata"]["mapConnectors"]["right"] : null;
-				if(gameMapInstance.mapWidth!=data["mapdata"]["mapConnectors"]["width"] || gameMapInstance.mapHeight!=data["mapdata"]["mapConnectors"]["height"]){
-					gridWidth=data["mapdata"]["mapConnectors"]["width"];
-					gridHeight=data["mapdata"]["mapConnectors"]["height"];
-					updateScreenSize();
-					gameMapInstance.tileNodes.removeFromParent();
-					var amount=0;
-					for(var i in gameMapInstance.tileData){
-						if(i!="mapdata"){
-							amount++;
-						}
-					}
-					if(amount>gridWidth*gridHeight){
-						for(var i=gridWidth*gridHeight;i<amount;i++){
-							delete gameMapInstance.tileData["tile"+i];
-						}
-					}
-					for(var i=0;i<gridWidth*gridHeight;i++){
-						if(!gameMapInstance.tileData["tile"+i]){
-							gameMapInstance.tileData["tile"+i]={};
-						}
-					} 
-				}
-				this.mapWidth = (data["mapdata"]["mapConnectors"]["width"]!="" && data["mapdata"]["mapConnectors"]["width"]!=null) ? data["mapdata"]["mapConnectors"]["width"] : 36;
-				this.mapHeight = (data["mapdata"]["mapConnectors"]["height"]!="" && data["mapdata"]["mapConnectors"]["height"]!=null) ? data["mapdata"]["mapConnectors"]["height"] : 36;
-				if(PlayersController && PlayersController.getYou()){
-					var gp = PlayersController.getYou().getGridPosition()
-					if(gp.y>this.mapHeight){
-						PlayersController.getYou().setPositionY(cellsize*(this.mapHeight))
-						PlayersController.getYou().isWalking=false;
-					}
-					if(gp.x>this.mapWidth-1){
-						PlayersController.getYou().setPositionX(cellsize*(this.mapWidth-1))
-						PlayersController.getYou().isWalking=false;
-					}
-				}
-				this.tileNodes.removeFromParent();
-				this.underPlayerRenderTexture.removeFromParent();
-				this.overPlayerRenderTexture.removeFromParent();
-				this.playerLayer.removeFromParent();
-				this.tileNodes = requestLayout(this);
-				this.addChild(this.tileNodes);
-				this.underPlayerRenderTexture = cc.RenderTexture.create(gameGridSize.width,gameGridSize.height);
-				this.underPlayerRenderTexture.setPosition(cc.p(Math.floor(gameGridSize.width/2),Math.floor(gameGridSize.height/2)));	
-				this.addChild(this.underPlayerRenderTexture);
-				this.addChild(this.playerLayer);
-				this.overPlayerRenderTexture = cc.RenderTexture.create(gameGridSize.width,gameGridSize.height);
-				this.overPlayerRenderTexture.setPosition(cc.p(Math.floor(gameGridSize.width/2),Math.floor(gameGridSize.height/2)));	
-				this.addChild(this.overPlayerRenderTexture);
-			}
-			this.tileData=data;
-			for(var i in data){
-				if(i.substring(0,4)=="tile"){
-					for(var j in data[i]){
-						if(j!="info"){
-							if(data[i][j]!=null){
-								if(this.tileNodes[i]){
-									this.tileNodes[i].setLayer(data[i][j]["texture"],data[i][j]["frame"],j);
-								}
-							}
-						} else{
-							//this.tileNodes[i].setType(data[i][j]["type"]);
-							if(data[i][j]["script"]!=null && data[i][j]["script"]!=='undefined'){
-								if(this.tileNodes[i]){
-									this.tileNodes[i].setScript(data[i][j]["script"]);
-									handleScript("On Game load",this.tileNodes[i],"Tile");
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		if(PlayersController && PlayersController.getYou()){
-			var pos = PlayersController.getYou().getGridPosition();
-			GameMap.goToOffsetFromPosition(pos.x*cellsize,pos.y*cellsize);
-			this.schedule(this.refreshRenderTexture);
+		if(musicPlaying){
+			stopBackgroundMusic();
+			this.unschedule(this.musicStop);	
+			if(this.mapMusic!=null && this.mapMusic!=='undefined'){
+				playBackgroundMusic(soundList[this.mapMusic],true);	
+			}	
 		}
 	},
-	
-	setup:function(mapnumber){
-		var data = LocalStorage.getMapData(mapnumber);
+
+	setupFromServer:function(data){
+		var waitingforMusic=false;
+		for(var i in soundList){
+			if(isAudioLoading(soundList[i])){
+				this.schedule(this.musicStop);
+				waitingforMusic=true;
+				break;		
+			}
+		}
 		this.tileData={}
 		this.tileData["mapdata"]={};
 		for(var i in this.tileNodes){
@@ -288,6 +216,24 @@ var GameMap=cc.Layer.extend({
 		
 		if(data){
 			if(data["mapdata"]){
+				if(data["mapdata"]["mapMusic"]!=null && data["mapdata"]["mapMusic"]!=='undefined'){
+					if(this.mapMusic==data["mapdata"]["mapMusic"]){
+						this.unschedule(this.musicStop);
+					}else{
+						stopBackgroundMusic();
+						if(waitingforMusic==false){	
+							if(data["mapdata"]["mapMusic"]!=null && data["mapdata"]["mapMusic"]!=='undefined'){
+								playBackgroundMusic(soundList[data["mapdata"]["mapMusic"]],true);	
+							}
+						}
+					}
+					this.mapMusic=data["mapdata"]["mapMusic"];	
+				}else{
+					this.mapMusic=null;
+					stopBackgroundMusic();
+				}
+				if(!data["mapdata"]["mapName"]){data["mapdata"]["mapName"]="";}
+				this.mapNameLbl.setString(data["mapdata"]["mapName"]);
 				this.mapUp = (data["mapdata"]["mapConnectors"]["up"]!="" && data["mapdata"]["mapConnectors"]["up"]!=null) ? data["mapdata"]["mapConnectors"]["up"] : null;
 				this.mapDown = (data["mapdata"]["mapConnectors"]["down"]!="" && data["mapdata"]["mapConnectors"]["down"]!=null) ? data["mapdata"]["mapConnectors"]["down"] : null;
 				this.mapLeft = (data["mapdata"]["mapConnectors"]["left"]!="" && data["mapdata"]["mapConnectors"]["left"]!=null) ? data["mapdata"]["mapConnectors"]["left"] : null;
@@ -341,6 +287,137 @@ var GameMap=cc.Layer.extend({
 				this.overPlayerRenderTexture = cc.RenderTexture.create(gameGridSize.width,gameGridSize.height);
 				this.overPlayerRenderTexture.setPosition(cc.p(Math.floor(gameGridSize.width/2),Math.floor(gameGridSize.height/2)));	
 				this.addChild(this.overPlayerRenderTexture);
+				this.mapNameLbl.removeFromParent();
+				MainScene.addChild(this.mapNameLbl);
+			}
+			this.tileData=data;
+			for(var i in data){
+				if(i.substring(0,4)=="tile"){
+					for(var j in data[i]){
+						if(j!="info"){
+							if(data[i][j]!=null){
+								if(this.tileNodes[i]){
+									this.tileNodes[i].setLayer(data[i][j]["texture"],data[i][j]["frame"],j);
+								}
+							}
+						} else{
+							//this.tileNodes[i].setType(data[i][j]["type"]);
+							if(data[i][j]["script"]!=null && data[i][j]["script"]!=='undefined'){
+								if(this.tileNodes[i]){
+									this.tileNodes[i].setScript(data[i][j]["script"]);
+									handleScript("On Game load",this.tileNodes[i],"Tile");
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		if(PlayersController && PlayersController.getYou()){
+			var pos = PlayersController.getYou().getGridPosition();
+			GameMap.goToOffsetFromPosition(pos.x*cellsize,pos.y*cellsize);
+			this.schedule(this.refreshRenderTexture);
+			MainScene.updateEditorMap();
+			SkillBars.update();
+		}
+	},
+	
+	setup:function(mapnumber){
+
+		var waitingforMusic=false;
+		for(var i in soundList){
+			if(isAudioLoading(soundList[i])){
+				this.schedule(this.musicStop);
+				waitingforMusic=true;
+				break;		
+			}
+		}
+
+		var data = LocalStorage.getMapData(mapnumber);
+		this.tileData={}
+		this.tileData["mapdata"]={};
+		for(var i in this.tileNodes){
+			if(i.substring(0,4)=="tile"){
+				this.tileNodes[i].destroy();
+				this.tileData[i]={};
+			}
+		}
+		
+		if(data){
+			if(data["mapdata"]){
+				if(data["mapdata"]["mapMusic"]!=null && data["mapdata"]["mapMusic"]!=='undefined'){
+					if(this.mapMusic==data["mapdata"]["mapMusic"]){
+						this.unschedule(this.musicStop);
+					}else{
+						stopBackgroundMusic();
+						if(waitingforMusic==false){	
+							if(data["mapdata"]["mapMusic"]!=null && data["mapdata"]["mapMusic"]!=='undefined'){
+								playBackgroundMusic(soundList[data["mapdata"]["mapMusic"]],true);	
+							}
+						}
+					}
+					this.mapMusic=data["mapdata"]["mapMusic"];	
+				}else{
+					this.mapMusic=null;
+					stopBackgroundMusic();
+				}
+				if(!data["mapdata"]["mapName"]){data["mapdata"]["mapName"]="";}
+				this.mapNameLbl.setString(data["mapdata"]["mapName"]);
+				this.mapUp = (data["mapdata"]["mapConnectors"]["up"]!="" && data["mapdata"]["mapConnectors"]["up"]!=null) ? data["mapdata"]["mapConnectors"]["up"] : null;
+				this.mapDown = (data["mapdata"]["mapConnectors"]["down"]!="" && data["mapdata"]["mapConnectors"]["down"]!=null) ? data["mapdata"]["mapConnectors"]["down"] : null;
+				this.mapLeft = (data["mapdata"]["mapConnectors"]["left"]!="" && data["mapdata"]["mapConnectors"]["left"]!=null) ? data["mapdata"]["mapConnectors"]["left"] : null;
+				this.mapRight = (data["mapdata"]["mapConnectors"]["right"]!="" && data["mapdata"]["mapConnectors"]["right"]!=null) ? data["mapdata"]["mapConnectors"]["right"] : null;
+				
+				if(gameMapInstance.mapWidth!=data["mapdata"]["mapConnectors"]["width"] || gameMapInstance.mapHeight!=data["mapdata"]["mapConnectors"]["height"]){
+					gridWidth=data["mapdata"]["mapConnectors"]["width"];
+					gridHeight=data["mapdata"]["mapConnectors"]["height"];
+					updateScreenSize();
+					gameMapInstance.tileNodes.removeFromParent();
+					var amount=0;
+					for(var i in gameMapInstance.tileData){
+						if(i!="mapdata"){
+							amount++;
+						}
+					}
+					if(amount>gridWidth*gridHeight){
+						for(var i=gridWidth*gridHeight;i<amount;i++){
+							delete gameMapInstance.tileData["tile"+i];
+						}
+					}
+					for(var i=0;i<gridWidth*gridHeight;i++){
+						if(!gameMapInstance.tileData["tile"+i]){
+							gameMapInstance.tileData["tile"+i]={};
+						}
+					} 
+				}
+				this.mapWidth = (data["mapdata"]["mapConnectors"]["width"]!="" && data["mapdata"]["mapConnectors"]["width"]!=null) ? data["mapdata"]["mapConnectors"]["width"] : 36;
+				this.mapHeight = (data["mapdata"]["mapConnectors"]["height"]!="" && data["mapdata"]["mapConnectors"]["height"]!=null) ? data["mapdata"]["mapConnectors"]["height"] : 36;
+				if(PlayersController && PlayersController.getYou()){
+					var gp = PlayersController.getYou().getGridPosition()
+					if(gp.y>this.mapHeight){
+						PlayersController.getYou().setPositionY(cellsize*(this.mapHeight))
+						PlayersController.getYou().isWalking=false;
+					}
+					if(gp.x>this.mapWidth-1){
+						PlayersController.getYou().setPositionX(cellsize*(this.mapWidth-1))
+						PlayersController.getYou().isWalking=false;
+					}
+				}
+				this.tileNodes.removeFromParent();
+				this.underPlayerRenderTexture.removeFromParent();
+				this.overPlayerRenderTexture.removeFromParent();
+				this.playerLayer.removeFromParent();
+				this.tileNodes = requestLayout(this);
+				this.addChild(this.tileNodes);
+				this.underPlayerRenderTexture = cc.RenderTexture.create(gameGridSize.width,gameGridSize.height);
+				this.underPlayerRenderTexture.setPosition(cc.p(Math.floor(gameGridSize.width/2),Math.floor(gameGridSize.height/2)));	
+				this.addChild(this.underPlayerRenderTexture);
+				this.addChild(this.playerLayer);
+				this.overPlayerRenderTexture = cc.RenderTexture.create(gameGridSize.width,gameGridSize.height);
+				this.overPlayerRenderTexture.setPosition(cc.p(Math.floor(gameGridSize.width/2),Math.floor(gameGridSize.height/2)));	
+				this.addChild(this.overPlayerRenderTexture);
+				this.mapNameLbl.removeFromParent();
+				MainScene.addChild(this.mapNameLbl);
 			}
 			this.tileData=data;
 			for(var i in data){
@@ -369,6 +446,8 @@ var GameMap=cc.Layer.extend({
 			var pos = PlayersController.getYou().getGridPosition();
 			GameMap.goToOffsetFromPosition(pos.x*cellsize,(pos.y-mapSize.height)*cellsize);
 			this.schedule(this.refreshRenderTexture);
+			MainScene.updateEditorMap();
+			SkillBars.update();
 		}
 	},
 	
@@ -412,8 +491,8 @@ var GameMap=cc.Layer.extend({
 	},
 	
 	onTouchBegan:function(touch){
-		if(this.interactionDelegate && (!Mapeditor || !Mapeditor._parent)){
-			Mapeditor=null;
+		if(this.interactionDelegate && (!Editor || !Editor._parent)){
+			Editor=null;
 			this.interactionDelegate=null;
 		}
 		if(this.interactionDelegate){
@@ -465,7 +544,8 @@ var GameMap=cc.Layer.extend({
 						}
 						else{
 							var gp = PlayersController.getYou().getGridPosition();
-							PlayersController.getYou().setWalkingPath(this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize)));
+							var path = this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize));
+							sendToServer('playerPathMessage',path);
 						}
 					}
 				}
@@ -519,7 +599,8 @@ var GameMap=cc.Layer.extend({
 		if(this.delegate.clickContext!=null){
 			var gp = PlayersController.getYou().getGridPosition();
 			if(list.length==1){
-				PlayersController.getYou().setWalkingPath(gameMapInstance.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),itemPosition));
+				var path = this.findPath(cc.p(Math.floor(gp.x),Math.ceil(gp.y)),cc.p(this.tileNodes[i].getPosition().x/cellsize,this.tileNodes[i].getPosition().y/cellsize));
+				sendToServer('playerPathMessage',path);
 				this.delegate.clickContext=null;
 				return;
 			}else{
@@ -689,18 +770,18 @@ var GameMap=cc.Layer.extend({
 //blitz@uprpg.com;
 
 GameMap.updateOffset=function(x,y){
-	if((gameMapInstance.mapOffset.x+(gameGridSize.width-(screenSize.width/2))+x>=0&&PlayersController.getYou().getPosition().x<(gameGridSize.width-(screenSize.width/2))) && (gameMapInstance.mapOffset.x+x<=0 && PlayersController.getYou().getPosition().x>screenSize.width/2)) {
+	if((gameMapInstance.mapOffset.x+(gameGridSize.width-((screenSize.width-showingEditor)/2))+x>=0&&PlayersController.getYou().getPosition().x<(gameGridSize.width-((screenSize.width-showingEditor)/2))) && (gameMapInstance.mapOffset.x+x<=0 && PlayersController.getYou().getPosition().x>(screenSize.width-showingEditor)/2)) {
 		gameMapInstance.mapOffset.x+=x;
 	}
-	if((gameMapInstance.mapOffset.y+(gameGridSize.height-(screenSize.height/2))+y>=0&&PlayersController.getYou().getPosition().y<(gameGridSize.height-(screenSize.height/2))) && (gameMapInstance.mapOffset.y+y<=0 && PlayersController.getYou().getPosition().y>screenSize.height/2)) {
+	if((gameMapInstance.mapOffset.y+(gameGridSize.height-((screenSize.height-sizeReducer)/2))+y>=0&&PlayersController.getYou().getPosition().y<(gameGridSize.height-((screenSize.height-sizeReducer)/2))) && (gameMapInstance.mapOffset.y+y<=0 && PlayersController.getYou().getPosition().y>(screenSize.height-sizeReducer)/2)) {
 		gameMapInstance.mapOffset.y+=y;
 	}
 
-	if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+	if(gameGridSize.height<(screenSize.height-sizeReducer)){
+		gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 	}
-	if(gameGridSize.width<screenSize.width){
-		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
+	if(gameGridSize.width<(screenSize.width-showingEditor)){
+		gameMapInstance.mapOffset.x=(((screenSize.width-showingEditor)-gameGridSize.width)/2)
 	}
 	gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
 };
@@ -715,29 +796,29 @@ GameMap.goToOffsetFromPosition=function(x,y){
 		}
 		return;
 	} else{
-		if(x>gameGridSize.width-(screenSize.width/2)){
-			gameMapInstance.mapOffset.x = -(gameGridSize.width-screenSize.width);
-		} else if(x<screenSize.width/2){
+		if(x>gameGridSize.width-((screenSize.width-showingEditor)/2)){
+			gameMapInstance.mapOffset.x = -(gameGridSize.width-(screenSize.width-showingEditor));
+		} else if(x<(screenSize.width-showingEditor)/2){
 			gameMapInstance.mapOffset.x = 0;
 		} else{
-			gameMapInstance.mapOffset.x = -(x-(screenSize.width/2));
+			gameMapInstance.mapOffset.x = -(x-((screenSize.width-showingEditor)/2));
 		}
-		if(y>gameGridSize.height-(screenSize.height/2)){
-			gameMapInstance.mapOffset.y = -(gameGridSize.height-screenSize.height);
-		} else if(y<screenSize.height/2){
+		if(y>gameGridSize.height-((screenSize.height-sizeReducer)/2)){
+			gameMapInstance.mapOffset.y = -(gameGridSize.height-(screenSize.height-sizeReducer));
+		} else if(y<(screenSize.height-sizeReducer)/2){
 			gameMapInstance.mapOffset.y = 0;
 		} else{
-			gameMapInstance.mapOffset.y = -(y-(screenSize.height/2));
+			gameMapInstance.mapOffset.y = -(y-((screenSize.height-sizeReducer)/2));
 		}
 		offsetFromPositionScheduledX=0;
 		offsetFromPositionScheduledY=0;
 		gameMapInstance.unschedule(GameMap.scheduledOffsetFromPosition);
 
-	    if(gameGridSize.height<screenSize.height){
-			gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+	    if(gameGridSize.height<(screenSize.height-sizeReducer)){
+			gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 		}
-		if(gameGridSize.width<screenSize.width){
-			gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
+		if(gameGridSize.width<(screenSize.width-showingEditor)){
+			gameMapInstance.mapOffset.x=(((screenSize.width-showingEditor)-gameGridSize.width)/2)
 		}
 		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
 	}
@@ -754,12 +835,12 @@ GameMap.goToOffsetRight=function(){
 		return;
 	} else{
 		gameMapInstance.unschedule(GameMap.goToOffsetRight);
-		gameMapInstance.mapOffset.x = -(gameGridSize.width-screenSize.width);
-		if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+		gameMapInstance.mapOffset.x = -(gameGridSize.width-(screenSize.width-showingEditor));
+		if(gameGridSize.height<(screenSize.height-sizeReducer)){
+		gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 	}
-	if(gameGridSize.width<screenSize.width){
-		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
+	if(gameGridSize.width<(screenSize.width-showingEditor)){
+		gameMapInstance.mapOffset.x=(((screenSize.width-showingEditor)-gameGridSize.width)/2)
 	}
 		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
 	}
@@ -772,11 +853,11 @@ GameMap.goToOffsetLeft=function(){
 	} else{
 		gameMapInstance.unschedule(GameMap.goToOffsetLeft);
 		gameMapInstance.mapOffset.x = 0;
-		if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+		if(gameGridSize.height<(screenSize.height-sizeReducer)){
+		gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 	}
-	if(gameGridSize.width<screenSize.width){
-		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
+	if(gameGridSize.width<(screenSize.width-showingEditor)){
+		gameMapInstance.mapOffset.x=(((screenSize.width-showingEditor)-gameGridSize.width)/2)
 	}
 		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
 	}
@@ -789,12 +870,12 @@ GameMap.goToOffsetDown=function(){
 		return;
 	} else{
 		gameMapInstance.unschedule(GameMap.goToOffsetDown);
-		gameMapInstance.mapOffset.y = -(gameGridSize.height-screenSize.height);
-		if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+		gameMapInstance.mapOffset.y = -(gameGridSize.height-(screenSize.height-sizeReducer));
+		if(gameGridSize.height<(screenSize.height-sizeReducer)){
+		gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 	}
-	if(gameGridSize.width<screenSize.width){
-		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
+	if(gameGridSize.width<(screenSize.width-showingEditor)){
+		gameMapInstance.mapOffset.x=(((screenSize.width-showingEditor)-gameGridSize.width)/2)
 	}
 
 		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
@@ -809,11 +890,11 @@ GameMap.goToOffsetUp=function(){
 	} else{
 		gameMapInstance.unschedule(GameMap.goToOffsetUp);
 		gameMapInstance.mapOffset.y = 0;
-		if(gameGridSize.height<screenSize.height){
-		gameMapInstance.mapOffset.y=((screenSize.height-gameGridSize.height)/2)
+		if(gameGridSize.height<(screenSize.height-sizeReducer)){
+		gameMapInstance.mapOffset.y=(((screenSize.height-sizeReducer)-gameGridSize.height)/2)
 	}
-	if(gameGridSize.width<screenSize.width){
-		gameMapInstance.mapOffset.x=((screenSize.width-gameGridSize.width)/2)
+	if(gameGridSize.width<(screenSize.width-showingEditor)){
+		gameMapInstance.mapOffset.x=(((screenSize.width-showingEditor)-gameGridSize.width)/2)
 	}
 
 		gameMapInstance.setPosition(gameMapInstance.mapOffset.x,gameMapInstance.mapOffset.y)
@@ -840,7 +921,15 @@ GameMap.create=function(){
 		gameMapInstance.addChild(gameMapInstance.overPlayerRenderTexture);
 		gameMapInstance.overPlayerRenderTexture.setVisible(false);
 		gameMapInstance.setTouchPriority(-15);
+		
+		gameMapInstance.mapNameLbl = cc.LabelTTF.create("MAP NAME","Arial",16);
+		gameMapInstance.mapNameLbl.setPosition(cc.p(screenSize.width/2,(screenSize.height-sizeReducer)-50));
+		gameMapInstance.mapNameLbl.setAnchorPoint(cc.p(0.5,0));
+		gameMapInstance.mapNameLbl.setColor(cc.c3b(0,0,0));
+
+		MainScene.addChild(gameMapInstance.mapNameLbl);
 		gameMapInstance.init();
+
 	}
 	return gameMapInstance;
 };
@@ -878,7 +967,7 @@ GameMap.setLayer=function(id,texture,frame,type){
 
 GameMap.updateServer=function(){
 	PlayersController.destroyNPCs();
-	sendMessageToServer({"savemap":gameMapInstance.currentMap, "mapdata":gameMapInstance.tileData});
+	sendToServer("saveMapMessage",{"savemap":gameMapInstance.currentMap, "mapdata":gameMapInstance.tileData});
 };
 
 GameMap.destroyLayer=function(id,type){
@@ -910,6 +999,25 @@ GameMap.setMapInfo=function(data){
 	gameMapInstance.mapDown = data["down"];
 	gameMapInstance.mapLeft = data["left"];
 	gameMapInstance.mapRight = data["right"];
+	if(data["mapMusic"]!=null && data["mapMusic"]!=='undefined'){
+		gameMapInstance.mapMusic = data["mapMusic"];
+		gameMapInstance.tileData["mapdata"]["mapMusic"]=data["mapMusic"];
+		delete 	gameMapInstance.tileData["mapdata"]["mapConnectors"]["mapMusic"];
+	}else{
+		if(gameMapInstance.tileData["mapdata"]["mapMusic"]!=null && gameMapInstance.tileData["mapdata"]["mapMusic"]!=='undefined'){
+			delete gameMapInstance.tileData["mapdata"]["mapMusic"];
+		}
+		gameMapInstance.mapMusic = null;
+		stopBackgroundMusic();
+	}
+
+	if(data["mapName"]!=null && data["mapName"]!=='undefined'){
+		gameMapInstance.tileData["mapdata"]["mapName"]=data["mapName"];
+		delete 	gameMapInstance.tileData["mapdata"]["mapConnectors"]["mapName"];
+	}else{
+		gameMapInstance.tileData["mapdata"]["mapName"]="";
+	}
+	gameMapInstance.mapNameLbl.setString(gameMapInstance.tileData["mapdata"]["mapName"]);
 
 	if(gameMapInstance.mapWidth!=data["width"] || gameMapInstance.mapHeight!=data["height"]){
 		gridWidth=data["width"];
@@ -984,12 +1092,20 @@ GameMap.hasMapRight=function(){
 };
 
 GameMap.getMapNumber=function(){
-	return gameMapInstance.currentMap;
+	return gameMapInstance.currentMap?gameMapInstance.currentMap:null;
 };
 
 GameMap.getMapUp=function(){
 	return gameMapInstance.mapUp;
 };
+
+GameMap.getMusicNumber=function(){
+	return gameMapInstance.mapMusic;
+};
+
+GameMap.getMapName=function(){
+	return gameMapInstance.tileData["mapdata"]["mapName"]?gameMapInstance.tileData["mapdata"]["mapName"]:"";
+}
 
 GameMap.getMapDown=function(){
 	return gameMapInstance.mapDown;
@@ -1012,9 +1128,6 @@ GameMap.getMapHeight=function(){
 };
 
 GameMap.goToMap=function(id,ignoreResetMaster){
-	if(!ignoreResetMaster){
-		MapMaster=false;
-	}
 	PlayersController.getInstance().setVisible(false);
 	PlayersController.destroyNPCs();
 	GameMap.destroy();

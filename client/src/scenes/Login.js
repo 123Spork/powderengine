@@ -5,9 +5,34 @@ waitingOnServer:false,
 onOrientationChanged:function(){
 	resetLayoutsFromObject(this.getLayoutObject(),this.panels);
 },
-
+	
+musicStop:function(){
+	var musicPlaying=true;
+	for(var i in soundList){
+		if(isAudioLoading(soundList[i])){
+			musicPlaying=false;
+		}
+	}
+	if(musicPlaying){
+		stopBackgroundMusic();
+		this.unschedule(this.musicStop);	
+		playBackgroundMusic("menu",true);		
+	}
+},
 
 init:function(withData){
+	var waitingforMusic=false;
+	for(var i in soundList){
+		if(isAudioLoading(soundList[i])){
+			this.schedule(this.musicStop);
+			waitingforMusic=true;
+			break;		
+		}
+	}
+	if(waitingforMusic==false && soundList.indexOf("menu")>-1){
+		stopBackgroundMusic();
+		playBackgroundMusic("menu");
+	}
 	settingsData = mergeSettings(settingsData,LocalStorage.getSettingsData());
 	this._super();
 	SceneManager.setActiveScene(this);
@@ -25,7 +50,7 @@ init:function(withData){
 	if(withData){
 		if(withData.logout){
 			storedClientMessages=[];
-			sendMessageToServer({"logout":true});
+			sendToServer("logoutMessage",null);
 		}else{
 			this.autoLogin=true;
 		}
@@ -67,7 +92,8 @@ onKeyUp:function(key){
 						if(logName!="" && logName!=null && logPass!="" && logPass!=null){
 							this.waitingOnServer=true;
 							this.setInfoMessage(settingsData["Logging In Message"]);
-							sendMessageToServer({"login":true,"username":this.namebox.getText(),"password":this.passbox.getText()});
+							
+							sendToServer("loginMessage",{"username":this.namebox.getText(),"password":this.passbox.getText()});
 						}else{
 							this.setInfoMessage(settingsData["User Pass Empty"]);
 						}
@@ -102,7 +128,7 @@ checkAuto:function(){
 		if(this.waitingOnServer==false && this.serverActive){
 			this.waitingOnServer=true;
 			this.setInfoMessage("Logging In");
-			sendMessageToServer({"login":true,"username":this.namebox.getText(),"password":this.passbox.getText()});
+			sendToServer("loginMessage",{"username":this.namebox.getText(),"password":this.passbox.getText()});
 		} else{
 			this.onLoginFailed(settingsData["Offline Server Message"]);
 		}
@@ -351,7 +377,7 @@ onTouchBegan:function(touch){
 				if(logName!="" && logName!=null && logPass!="" && logPass!=null){
 					this.waitingOnServer=true;
 					this.setInfoMessage(settingsData["Logging In Message"]);
-					sendMessageToServer({"login":true,"username":this.namebox.getText(),"password":this.passbox.getText()});
+					sendToServer("loginMessage",{"username":this.namebox.getText(),"password":this.passbox.getText()});
 				}else{
 					this.setInfoMessage(settingsData["User Pass Empty"]);
 				}
@@ -410,8 +436,7 @@ onTouchBegan:function(touch){
 },
 
 registerPlayer:function(playerDetails){
-	playerDetails["newUser"]=1;
-	sendMessageToServer(playerDetails);
+	sendToServer("registerMessage",playerDetails);
 },
 
 completedRegistration:function(){

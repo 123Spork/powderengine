@@ -11,8 +11,9 @@ var config = {
     "language":"EN",
     "characterSheets":["sprites1.png"],
     "tileSheets":["tiles0.png","tiles1.png","items1.png","building1.png","40x40Tiles.png"],
+    "sounds":["menu","maps"],
     "server": {
-        "host": "localhost",
+        "host": "82.1.137.1",
         "port": 1337
     },
     "getHost": function() {

@@ -19,7 +19,7 @@ SingleLineBox = cc.ControlButton.extend({
     _maxLength: 50,
     _adjustHeight: 18,
     _edTxt: null,
-    _edFontSize: 14,
+    _edFontSize: 12,
     _edFontName: "Arial",
     _edittype:false,
 
@@ -259,6 +259,8 @@ SingleLineBox = cc.ControlButton.extend({
         this._editBoxInputFlag = inputFlag;
         if (inputFlag == cc.EDITBOX_INPUT_FLAG_PASSWORD)
             this._edTxt.type = "password";
+        else if (inputFlag==cc.EDITBOX_INPUT_FLAG_NUMBER)
+            this._edTxt.type = "number";
         else
             this._edTxt.type = "text";
     },
@@ -356,6 +358,10 @@ SingleLineBox = cc.ControlButton.extend({
 		var hex = rgbToHex(color.r,color.g,color.b);
 		this._edTxt.style.background=hex;
 	},
+
+    setBackgroundInvisible:function(){
+      this._edTxt.style.background="rgba(0,0,0,0)";
+    },
 
     //HTML5 Only
     initWithBackgroundColor: function (size, bgColor) {

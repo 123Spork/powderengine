@@ -53,8 +53,10 @@ var GameTile = cc.Node.extend({
 			var pos = data["sprite"]["position"];
 			this.setLayer(texture,pos,"item");
 		}else{
-			this.item.removeFromParent();
-			this.item=null;
+			if(this.item){
+				this.item.removeFromParent();
+				this.item=null;
+			}
 		}
 	},
 

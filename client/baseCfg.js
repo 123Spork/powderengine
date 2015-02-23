@@ -11,7 +11,8 @@ var baseCfg = {
         "ccshapenode" : "../node_modules/powder-cocos2d/ccshapenode/",
         "ccrendertexture" : "../node_modules/powder-cocos2d/ccrendertexture/",
         "ccactions" : "../node_modules/powder-cocos2d/ccactions/",
-        "ccprogress" : "../node_modules/powder-cocos2d/ccprogress/"
+        "ccprogress" : "../node_modules/powder-cocos2d/ccprogress/",
+        "ccaudio" : "../node_modules/powder-cocos2d/ccaudio/"
     },
     baseJsList : [
         "../node_modules/powder-cocos2d/cocos2d-html5/cfg/jsRes.js",
@@ -107,6 +108,7 @@ var baseCfg = {
         "../node_modules/powder-cocos2d/cceditbox/cfg/resCfg.js",
         "../node_modules/powder-cocos2d/cceditbox/lib/CCdomNode.js",
         "../node_modules/powder-cocos2d/cceditbox/lib/CCEditBox.js",
+        "../node_modules/powder-cocos2d/ccaudio/lib/SimpleAudioEngine.js",
         "cfg/jsRes.js",
         "cfg/resCfg.js"
     ]
